@@ -215,6 +215,7 @@ textarea[disabled] {
 }
 
 .myrpg.item-sheet .sheet-title input {
+  margin: 0px !important;
   width: 100%;
   font-size: 1.4rem;
   font-weight: 600;
