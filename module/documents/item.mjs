@@ -74,14 +74,6 @@ export class MyRPGItem extends Item {
     return this.type === 'implant';
   }
 
-  get isAbility() {
-    return this.isCartridge;
-  }
-
-  get isMod() {
-    return this.isImplant;
-  }
-
   get isArmor() {
     return this.type === 'armor';
   }
@@ -102,10 +94,6 @@ export class MyRPGItem extends Item {
     return Number(this.system.quantity ?? 1);
   }
 
-  get isEquipped() {
-    return Boolean(this.system.equipped);
-  }
-
   get cartridgeData() {
     if (!this.isCartridge) return undefined;
     const { rank = '', runeType = 'Spell', skill = '', skillBonus = 0 } = this.system;
@@ -122,35 +110,6 @@ export class MyRPGItem extends Item {
     const { rank = '', skill = '', skillBonus = 0 } = this.system;
     return {
       rank: String(rank ?? ''),
-      skill: String(skill ?? ''),
-      skillBonus: Number(skillBonus ?? 0) || 0
-    };
-  }
-
-  get abilityData() {
-    return this.cartridgeData;
-  }
-
-  get modData() {
-    return this.implantData;
-  }
-
-  get armorBonuses() {
-    if (!this.isArmor) return undefined;
-    const { itemPhys = 0, itemAzure = 0, itemMental = 0, itemShield = 0, itemSpeed = 0 } = this.system;
-    return {
-      physical: Number(itemPhys ?? 0) || 0,
-      azure: Number(itemAzure ?? 0) || 0,
-      mental: Number(itemMental ?? 0) || 0,
-      shield: Number(itemShield ?? 0) || 0,
-      speed: Number(itemSpeed ?? 0) || 0
-    };
-  }
-
-  get weaponProfile() {
-    if (!this.isWeapon) return undefined;
-    const { skill = '', skillBonus = 0 } = this.system;
-    return {
       skill: String(skill ?? ''),
       skillBonus: Number(skillBonus ?? 0) || 0
     };
