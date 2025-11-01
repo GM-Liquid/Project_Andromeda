@@ -87,10 +87,6 @@ export class myrpgActor extends Actor {
     );
   }
 
-  _BonusBase(attrVal) {
-    return attrVal + 1;
-  }
-
   _calcSpeed(s, itemTotals = {}) {
     const armorSpeed = Number(itemTotals?.armor?.speed) || 0;
     return (
