@@ -1099,6 +1099,7 @@ input.rank5 {
   gap: 0.5rem;
   font-size: 1.1rem;
   margin: 0;
+  font-weight: bold;
 }
 
 .myrpg .item-group__capacity {
