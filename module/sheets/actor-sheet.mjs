@@ -182,6 +182,7 @@ export class myrpgActorSheet extends ActorSheet {
     $html.on('click', '.item-edit', this._onItemEdit.bind(this));
     $html.on('click', '.item-delete', this._onItemDelete.bind(this));
     $html.on('click', '.item-chat', this._onItemChat.bind(this));
+    $html.on('click', '.item-roll', this._onItemRoll.bind(this));
     $html.on('click', '.item-quantity-step', this._onItemQuantityStep.bind(this));
     $html.on('change', '.item-equip-checkbox', this._onItemEquipChange.bind(this));
 
@@ -471,6 +472,7 @@ export class myrpgActorSheet extends ActorSheet {
       edit: game.i18n.localize('MY_RPG.ItemControls.Edit'),
       delete: game.i18n.localize('MY_RPG.ItemControls.Delete'),
       chat: game.i18n.localize('MY_RPG.ItemControls.Chat'),
+      roll: game.i18n.localize('MY_RPG.ItemControls.Roll'),
       equip: game.i18n.localize('MY_RPG.ItemControls.Equip'),
       equipAria: game.i18n.localize('MY_RPG.ItemControls.EquipAria'),
       quantity: game.i18n.localize('MY_RPG.ItemControls.Quantity'),
@@ -520,7 +522,8 @@ export class myrpgActorSheet extends ActorSheet {
       badges,
       summary,
       hasBadges: badges.length > 0,
-      hasSummary: Boolean(summary)
+      hasSummary: Boolean(summary),
+      canRoll: config.key === 'cartridges' || config.key === 'implants'
     };
   }
 
@@ -719,6 +722,54 @@ export class myrpgActorSheet extends ActorSheet {
       },
       {}
     );
+  }
+
+  async _onItemRoll(event) {
+    event.preventDefault();
+    const { item, itemId } = this._getItemContextFromEvent(event);
+    if (!item) {
+      // DEBUG-LOG
+      debugLog('Actor sheet item roll failed - missing item', {
+        actor: this.actor.uuid,
+        itemId: itemId ?? null
+      });
+      return;
+    }
+
+    if (item.type !== 'cartridge' && item.type !== 'implant') {
+      return;
+    }
+
+    const system = item.system ?? {};
+    const skillKey = system.skill || '';
+    const skillValue = Number(this.actor.system?.skills?.[skillKey]?.value) || 0;
+    const itemBonus = Number(system.skillBonus) || 0;
+
+    const roll = await new Roll('1d10 + @skill + @itemBonus', {
+      skill: skillValue,
+      itemBonus
+    }).roll({ async: true });
+
+    const flavor = game.i18n.format('MY_RPG.ItemRoll.Flavor', {
+      item: item.name || game.i18n.localize(`TYPES.Item.${item.type}`),
+      skill: this._skillLabel(skillKey)
+    });
+
+    roll.toMessage({
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      flavor,
+      rollMode: game.settings.get('core', 'rollMode')
+    });
+
+    // DEBUG-LOG
+    debugLog('Actor sheet item roll', {
+      actor: this.actor.uuid,
+      itemId: item.id,
+      type: item.type,
+      skill: skillKey,
+      skillValue,
+      itemBonus
+    });
   }
 
   _buildItemChatContent(item, config) {

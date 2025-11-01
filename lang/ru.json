@@ -311,12 +311,16 @@
       "Edit": "Изменить",
       "Delete": "Удалить",
       "Chat": "Отправить в чат",
+      "Roll": "Бросок",
       "Equip": "Снаряжено",
       "EquipAria": "Переключить статус экипировки",
       "Quantity": "Количество",
       "QuantityIncrease": "Увеличить количество",
       "QuantityDecrease": "Уменьшить количество",
       "NewItemFallback": "Новый {type}"
+    },
+    "ItemRoll": {
+      "Flavor": "Бросок {item} ({skill})"
     },
     "ItemDialogs": {
       "DeleteTitle": "Удалить {type}",
