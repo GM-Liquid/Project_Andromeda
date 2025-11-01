@@ -474,6 +474,18 @@
                               />
                             </label>
                           {{/if}}
+                          {{#if item.canRoll}}
+                            <button
+                              type='button'
+                              class='item-roll item-control'
+                              data-item-id='{{item.id}}'
+                              data-group-key='{{item.groupKey}}'
+                              title='{{../../itemControls.roll}}'
+                            >
+                              <i class='fa-solid fa-dice-d10'></i>
+                              <span class='sr-only'>{{../../itemControls.roll}}</span>
+                            </button>
+                          {{/if}}
                           <button
                             type='button'
                             class='item-chat item-control'

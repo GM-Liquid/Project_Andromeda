@@ -304,12 +304,16 @@
       "Edit": "Edit",
       "Delete": "Delete",
       "Chat": "Send to chat",
+      "Roll": "Roll",
       "Equip": "Equipped",
       "EquipAria": "Toggle equipped state",
       "Quantity": "Quantity",
       "QuantityIncrease": "Increase quantity",
       "QuantityDecrease": "Decrease quantity",
       "NewItemFallback": "New {type}"
+    },
+    "ItemRoll": {
+      "Flavor": "Rolling {item} ({skill})"
     },
     "ItemDialogs": {
       "DeleteTitle": "Delete {type}",
