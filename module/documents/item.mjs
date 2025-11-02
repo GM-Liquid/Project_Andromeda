@@ -43,7 +43,7 @@ function cloneDefaults(data) {
   return foundry.utils.deepClone(data);
 }
 
-export class MyRPGItem extends Item {
+export class ProjectAndromedaItem extends Item {
   prepareBaseData() {
     super.prepareBaseData();
     this._applyTypeDefaults();
@@ -115,7 +115,7 @@ export class MyRPGItem extends Item {
     };
   }
 
-  logDebugState(context = 'MyRPGItem state') {
+  logDebugState(context = 'ProjectAndromedaItem state') {
     // DEBUG-LOG
     debugLog(context, {
       id: this.id,

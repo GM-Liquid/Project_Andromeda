@@ -33,7 +33,7 @@ function buildRuneTypeOptions(selected) {
 }
 
 function buildSkillOptions(selected) {
-  const skills = CONFIG.MY_RPG?.skills ?? {};
+  const skills = CONFIG.ProjectAndromeda?.skills ?? {};
   const options = [
     {
       value: '',
@@ -53,10 +53,10 @@ function buildSkillOptions(selected) {
   return options;
 }
 
-export class MyRPGItemSheet extends ItemSheet {
+export class ProjectAndromedaItemSheet extends ItemSheet {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
-      classes: ['myrpg', 'sheet', 'item'],
+      classes: ['project-andromeda', 'sheet', 'item'],
       width: 620,
       height: 600
     });
@@ -108,7 +108,7 @@ export class MyRPGItemSheet extends ItemSheet {
     const sheetData = await super.getData(options);
     const itemData = sheetData.item ?? sheetData.document ?? this.item;
     sheetData.system = sheetData.system ?? itemData?.system ?? {};
-    sheetData.config = CONFIG.MY_RPG ?? {};
+    sheetData.config = CONFIG.ProjectAndromeda ?? {};
     sheetData.worldType = game.settings.get(MODULE_ID, 'worldType');
 
     if (game.settings.get(MODULE_ID, 'debugMode')) {
@@ -124,9 +124,9 @@ export class MyRPGItemSheet extends ItemSheet {
   }
 }
 
-export class MyRPGCartridgeSheet extends MyRPGItemSheet {
+export class ProjectAndromedaCartridgeSheet extends ProjectAndromedaItemSheet {
   get template() {
-    return 'systems/myrpg/templates/item/cartridge-sheet.hbs';
+    return 'systems/project-andromeda/templates/item/cartridge-sheet.hbs';
   }
 
   async getData(options) {
@@ -139,9 +139,9 @@ export class MyRPGCartridgeSheet extends MyRPGItemSheet {
   }
 }
 
-export class MyRPGImplantSheet extends MyRPGItemSheet {
+export class ProjectAndromedaImplantSheet extends ProjectAndromedaItemSheet {
   get template() {
-    return 'systems/myrpg/templates/item/implant-sheet.hbs';
+    return 'systems/project-andromeda/templates/item/implant-sheet.hbs';
   }
 
   async getData(options) {
@@ -152,9 +152,9 @@ export class MyRPGImplantSheet extends MyRPGItemSheet {
   }
 }
 
-export class MyRPGArmorSheet extends MyRPGItemSheet {
+export class ProjectAndromedaArmorSheet extends ProjectAndromedaItemSheet {
   get template() {
-    return 'systems/myrpg/templates/item/armor-sheet.hbs';
+    return 'systems/project-andromeda/templates/item/armor-sheet.hbs';
   }
 
   async getData(options) {
@@ -164,9 +164,9 @@ export class MyRPGArmorSheet extends MyRPGItemSheet {
   }
 }
 
-export class MyRPGWeaponSheet extends MyRPGItemSheet {
+export class ProjectAndromedaWeaponSheet extends ProjectAndromedaItemSheet {
   get template() {
-    return 'systems/myrpg/templates/item/weapon-sheet.hbs';
+    return 'systems/project-andromeda/templates/item/weapon-sheet.hbs';
   }
 
   async getData(options) {
@@ -177,9 +177,9 @@ export class MyRPGWeaponSheet extends MyRPGItemSheet {
   }
 }
 
-export class MyRPGGearSheet extends MyRPGItemSheet {
+export class ProjectAndromedaGearSheet extends ProjectAndromedaItemSheet {
   get template() {
-    return 'systems/myrpg/templates/item/gear-sheet.hbs';
+    return 'systems/project-andromeda/templates/item/gear-sheet.hbs';
   }
 
   async getData(options) {

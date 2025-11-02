@@ -1,4 +1,4 @@
-// Utility functions for the myrpg system
+// Utility functions for the Project Andromeda system
 
 /**
  * Determine a simplified rank (1-5) based on a value in steps of two.

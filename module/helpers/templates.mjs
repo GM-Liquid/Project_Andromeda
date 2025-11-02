@@ -5,13 +5,13 @@
  */
 export const preloadHandlebarsTemplates = async function () {
   const paths = [
-    'systems/myrpg/templates/actor/actor-character-sheet.hbs',
-    'systems/myrpg/templates/actor/actor-npc-sheet.hbs',
-    'systems/myrpg/templates/item/cartridge-sheet.hbs',
-    'systems/myrpg/templates/item/implant-sheet.hbs',
-    'systems/myrpg/templates/item/armor-sheet.hbs',
-    'systems/myrpg/templates/item/weapon-sheet.hbs',
-    'systems/myrpg/templates/item/gear-sheet.hbs'
+    'systems/project-andromeda/templates/actor/actor-character-sheet.hbs',
+    'systems/project-andromeda/templates/actor/actor-npc-sheet.hbs',
+    'systems/project-andromeda/templates/item/cartridge-sheet.hbs',
+    'systems/project-andromeda/templates/item/implant-sheet.hbs',
+    'systems/project-andromeda/templates/item/armor-sheet.hbs',
+    'systems/project-andromeda/templates/item/weapon-sheet.hbs',
+    'systems/project-andromeda/templates/item/gear-sheet.hbs'
   ];
   return loadTemplates(paths);
 };
