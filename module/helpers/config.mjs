@@ -40,12 +40,10 @@ PROJECT_ANDROMEDA.skills = {
   // Intellect-based
   analiz: 'MY_RPG.Skill.Analiz',
   tekhnika: 'MY_RPG.Skill.Tekhnika',
-  priroda: 'MY_RPG.Skill.Priroda',
   kultura: 'MY_RPG.Skill.Kultura',
   vnimanie: 'MY_RPG.Skill.Vnimanie',
   meditsina: 'MY_RPG.Skill.Meditsina',
   oruzheynoe_delo: 'MY_RPG.Skill.Oruzheynoe_delo',
-  znanie_azura: 'MY_RPG.Skill.Znanie_azura',
   artefaktorika: 'MY_RPG.Skill.Artefaktorika',
   manipulatsiya: 'MY_RPG.Skill.Manipulatsiya'
 };
