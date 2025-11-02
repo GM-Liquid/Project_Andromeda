@@ -285,12 +285,10 @@ export class myrpgActorSheet extends ActorSheet {
       'blizhniy_boy',
       'analiz',
       'tekhnika',
-      'priroda',
       'kultura',
       'vnimanie',
       'meditsina',
       'oruzheynoe_delo',
-      'znanie_azura',
       'artefaktorika',
       'manipulatsiya'
     ];

@@ -120,10 +120,6 @@
             "value": 0,
             "ability": "int"
           },
-          "priroda": {
-            "value": 0,
-            "ability": "int"
-          },
           "kultura": {
             "value": 0,
             "ability": "int"
@@ -137,10 +133,6 @@
             "ability": "int"
           },
           "oruzheynoe_delo": {
-            "value": 0,
-            "ability": "int"
-          },
-          "znanie_azura": {
             "value": 0,
             "ability": "int"
           },
