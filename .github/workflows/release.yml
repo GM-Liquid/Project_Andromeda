@@ -24,7 +24,7 @@ jobs:
       # 3. ZIP (фиксированное имя для Foundry)
       - name: Zip package
         run: |
-          cd dist && zip -r ../myrpg.zip .
+          cd dist && zip -r ../project-andromeda.zip .
 
       # 4. Формируем уникальный тег — выводим как output
       - name: Generate release tag
@@ -39,10 +39,10 @@ jobs:
           name: "Build ${{ steps.tag.outputs.tag_name }}"  # ← и здесь
           body: |
             🛠️ Автоматическая сборка с коммита ${{ github.sha }}.
-            * `myrpg.zip` — пакет системы
+            * `project-andromeda.zip` — пакет системы
             * `system.json` — манифест
           files: |
-            myrpg.zip
+            project-andromeda.zip
             system.json
           draft: false
           prerelease: false
@@ -50,4 +50,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # 6. Уборка за собой
-      - run: rm -rf dist myrpg.zip
+      - run: rm -rf dist project-andromeda.zip

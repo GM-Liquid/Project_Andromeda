@@ -4,7 +4,7 @@ import { debugLog } from '../config.mjs';
  * Extend the base Actor document by defining a custom roll data structure which is ideal for the Simple system.
  * @extends {Actor}
  */
-export class myrpgActor extends Actor {
+export class ProjectAndromedaActor extends Actor {
   prepareDerivedData() {
     super.prepareDerivedData();
     if (this.type === 'character' || this.type === 'npc') this._prepareCharacterData();

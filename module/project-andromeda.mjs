@@ -1,18 +1,18 @@
 // Import document classes.
-import { myrpgActor } from './documents/actor.mjs';
-import { MyRPGItem } from './documents/item.mjs';
+import { ProjectAndromedaActor } from './documents/actor.mjs';
+import { ProjectAndromedaItem } from './documents/item.mjs';
 // Import sheet classes.
-import { myrpgActorSheet } from './sheets/actor-sheet.mjs';
+import { ProjectAndromedaActorSheet } from './sheets/actor-sheet.mjs';
 import {
-  MyRPGCartridgeSheet,
-  MyRPGArmorSheet,
-  MyRPGGearSheet,
-  MyRPGImplantSheet,
-  MyRPGWeaponSheet
+  ProjectAndromedaCartridgeSheet,
+  ProjectAndromedaArmorSheet,
+  ProjectAndromedaGearSheet,
+  ProjectAndromedaImplantSheet,
+  ProjectAndromedaWeaponSheet
 } from './sheets/item-sheet.mjs';
 // Import helper/utility classes and constants.
 import { preloadHandlebarsTemplates } from './helpers/templates.mjs';
-import { MY_RPG, debugLog, registerSystemSettings } from './config.mjs';
+import { MODULE_ID, PROJECT_ANDROMEDA, debugLog, registerSystemSettings } from './config.mjs';
 import './helpers/handlebars-helpers.mjs';
 
 /* -------------------------------------------- */
@@ -22,22 +22,22 @@ import './helpers/handlebars-helpers.mjs';
 Hooks.once('init', function () {
   // Add utility classes to the global game object so that they're more easily
   // accessible in global contexts.
-  game.myrpg = {
-    myrpgActor,
-    MyRPGItem,
+  game.projectAndromeda = {
+    ProjectAndromedaActor,
+    ProjectAndromedaItem,
     debugLog
   };
 
   // Add custom constants for configuration.
-  CONFIG.MY_RPG = MY_RPG;
+  CONFIG.ProjectAndromeda = PROJECT_ANDROMEDA;
 
   registerSystemSettings();
 
   // Define custom Document classes
-  CONFIG.Actor.documentClass = myrpgActor;
-  CONFIG.Item.documentClass = MyRPGItem;
+  CONFIG.Actor.documentClass = ProjectAndromedaActor;
+  CONFIG.Item.documentClass = ProjectAndromedaItem;
 
-  // systems/myrpg/myrpg.mjs  — в хуке init
+  // systems/project-andromeda/project-andromeda.mjs — в хуке init
   CONFIG.Combat.initiative = {
     // Initiative rolls use d10 plus Body value
     formula: '1d10 + @abilities.con.value',
@@ -46,32 +46,32 @@ Hooks.once('init', function () {
 
   // Register sheet application classes
   Actors.unregisterSheet('core', ActorSheet);
-  Actors.registerSheet('myrpg', myrpgActorSheet, {
+  Actors.registerSheet(MODULE_ID, ProjectAndromedaActorSheet, {
     makeDefault: true,
     label: 'MY_RPG.SheetLabels.Actor'
   });
   Items.unregisterSheet('core', ItemSheet);
-  Items.registerSheet('myrpg', MyRPGCartridgeSheet, {
+  Items.registerSheet(MODULE_ID, ProjectAndromedaCartridgeSheet, {
     types: ['cartridge'],
     makeDefault: true,
     label: 'MY_RPG.SheetLabels.ItemAbility'
   });
-  Items.registerSheet('myrpg', MyRPGImplantSheet, {
+  Items.registerSheet(MODULE_ID, ProjectAndromedaImplantSheet, {
     types: ['implant'],
     makeDefault: true,
     label: 'MY_RPG.SheetLabels.ItemMod'
   });
-  Items.registerSheet('myrpg', MyRPGArmorSheet, {
+  Items.registerSheet(MODULE_ID, ProjectAndromedaArmorSheet, {
     types: ['armor'],
     makeDefault: true,
     label: 'MY_RPG.SheetLabels.ItemArmor'
   });
-  Items.registerSheet('myrpg', MyRPGWeaponSheet, {
+  Items.registerSheet(MODULE_ID, ProjectAndromedaWeaponSheet, {
     types: ['weapon'],
     makeDefault: true,
     label: 'MY_RPG.SheetLabels.ItemWeapon'
   });
-  Items.registerSheet('myrpg', MyRPGGearSheet, {
+  Items.registerSheet(MODULE_ID, ProjectAndromedaGearSheet, {
     types: ['gear'],
     makeDefault: true,
     label: 'MY_RPG.SheetLabels.ItemGear'
@@ -83,14 +83,14 @@ Hooks.once('init', function () {
 
 Hooks.once('ready', function () {
   // DEBUG-LOG
-  debugLog('MyRPG system ready', {
+  debugLog('Project Andromeda system ready', {
     version: game.system.version,
     userId: game.user?.id,
     isGM: game.user?.isGM ?? false
   });
 
   if (!game.user.isGM) return;
-  if (game.settings.get('myrpg', 'worldTypeChosen')) return;
+  if (game.settings.get(MODULE_ID, 'worldTypeChosen')) return;
 
   const content = `<p>${game.i18n.localize('MY_RPG.WorldMode.DialogContent')}</p>`;
   new Dialog({
@@ -100,15 +100,15 @@ Hooks.once('ready', function () {
       unity: {
         label: game.i18n.localize('MY_RPG.WorldMode.Unity'),
         callback: () => {
-          game.settings.set('myrpg', 'worldType', 'unity');
-          game.settings.set('myrpg', 'worldTypeChosen', true);
+          game.settings.set(MODULE_ID, 'worldType', 'unity');
+          game.settings.set(MODULE_ID, 'worldTypeChosen', true);
         }
       },
       stellar: {
         label: game.i18n.localize('MY_RPG.WorldMode.Stellar'),
         callback: () => {
-          game.settings.set('myrpg', 'worldType', 'stellar');
-          game.settings.set('myrpg', 'worldTypeChosen', true);
+          game.settings.set(MODULE_ID, 'worldType', 'stellar');
+          game.settings.set(MODULE_ID, 'worldTypeChosen', true);
         }
       }
     },

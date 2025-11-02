@@ -3,7 +3,7 @@
  * @extends {ActorSheet}
  */
 
-import { debugLog } from '../config.mjs';
+import { MODULE_ID, debugLog } from '../config.mjs';
 import { getColorRank } from '../helpers/utils.mjs';
 
 
@@ -80,12 +80,12 @@ const ITEM_GROUP_CONFIG_BY_KEY = ITEM_GROUP_CONFIG.reduce((acc, config) => {
   return acc;
 }, {});
 function getRankLabel(rank) {
-  const mode = game.settings.get('myrpg', 'worldType');
+  const mode = game.settings.get(MODULE_ID, 'worldType');
   const base = mode === 'stellar' ? 'MY_RPG.RankNumeric' : 'MY_RPG.RankGradient';
   return game.i18n.localize(`${base}.Rank${rank}`);
 }
 
-export class myrpgActorSheet extends ActorSheet {
+export class ProjectAndromedaActorSheet extends ActorSheet {
   /** @override */
   async _render(force = false, options = {}) {
     const scrollContainer = this.element.find('.sheet-scrollable');
@@ -200,7 +200,7 @@ export class myrpgActorSheet extends ActorSheet {
 
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
-      classes: ['myrpg', 'sheet', 'actor', 'myrpg-hex-tabs'],
+      classes: ['project-andromeda', 'sheet', 'actor', 'project-andromeda-hex-tabs'],
       width: 800,
       height: 1000,
       resizable: false,
@@ -218,9 +218,9 @@ export class myrpgActorSheet extends ActorSheet {
   /** @override */
   get template() {
     if (this.actor.type === 'npc') {
-      return `systems/myrpg/templates/actor/actor-character-sheet.hbs`;
+      return `systems/project-andromeda/templates/actor/actor-character-sheet.hbs`;
     }
-    return `systems/myrpg/templates/actor/actor-${this.actor.type}-sheet.hbs`;
+    return `systems/project-andromeda/templates/actor/actor-${this.actor.type}-sheet.hbs`;
   }
 
   /** @override */
@@ -236,7 +236,7 @@ export class myrpgActorSheet extends ActorSheet {
       this._prepareCharacterData(context);
     }
 
-    const worldType = game.settings.get('myrpg', 'worldType');
+    const worldType = game.settings.get(MODULE_ID, 'worldType');
     if (worldType === 'unity') {
       context.runeMax = (Number(context.system.abilities.int?.value || 0) * 2) + 5;
     }
@@ -268,7 +268,7 @@ export class myrpgActorSheet extends ActorSheet {
     const isCharacter = Boolean(context.isCharacter);
     const isNpc = Boolean(context.isNpc);
     for (let [k, v] of Object.entries(context.system.abilities)) {
-      v.label = game.i18n.localize(CONFIG.MY_RPG.abilities[k]) ?? k;
+      v.label = game.i18n.localize(CONFIG.ProjectAndromeda.abilities[k]) ?? k;
       v.rankClass = 'rank' + getColorRank(v.value);
     }
     const order = [
@@ -303,7 +303,7 @@ export class myrpgActorSheet extends ActorSheet {
     for (let key of order) {
       if (context.system.skills[key]) {
         const c = context.system.skills[key];
-        c.label = game.i18n.localize(CONFIG.MY_RPG.skills[key]) ?? key;
+        c.label = game.i18n.localize(CONFIG.ProjectAndromeda.skills[key]) ?? key;
         c.rankClass = 'rank' + getColorRank(c.value);
         sorted[key] = c;
       }
@@ -537,7 +537,7 @@ export class myrpgActorSheet extends ActorSheet {
         if (rank) {
           badges.push(`${t.localize('MY_RPG.AbilitiesTable.Rank')}: ${getRankLabel(rank)}`);
         }
-        if (game.settings.get('myrpg', 'worldType') === 'unity' && system.runeType) {
+        if (game.settings.get(MODULE_ID, 'worldType') === 'unity' && system.runeType) {
           const runeKey = `MY_RPG.RuneTypes.${system.runeType}`;
           badges.push(`${t.localize('MY_RPG.RunesTable.RuneType')}: ${t.localize(runeKey)}`);
         }
@@ -870,7 +870,7 @@ export class myrpgActorSheet extends ActorSheet {
 
   _skillLabel(skillKey) {
     if (!skillKey) return game.i18n.localize('MY_RPG.WeaponsTable.SkillNone');
-    const configKey = CONFIG.MY_RPG.skills?.[skillKey];
+    const configKey = CONFIG.ProjectAndromeda.skills?.[skillKey];
     return configKey ? game.i18n.localize(configKey) : skillKey;
   }
 

@@ -1,22 +1,22 @@
-export const MY_RPG = {};
+export const PROJECT_ANDROMEDA = {};
 
 /**
  * The set of Ability Scores used within the system.
  * @type {Object}
  */
-MY_RPG.abilities = {
+PROJECT_ANDROMEDA.abilities = {
   spi: 'MY_RPG.Ability.Spi.long', // �����/ Spirit�
   con: 'MY_RPG.Ability.Con.long',
   int: 'MY_RPG.Ability.Int.long'
 };
 
-MY_RPG.abilityAbbreviations = {
+PROJECT_ANDROMEDA.abilityAbbreviations = {
   spi: 'MY_RPG.Ability.Spi.abbr', // �����/ Spi�
   con: 'MY_RPG.Ability.Con.abbr',
   int: 'MY_RPG.Ability.Int.abbr'
 };
 
-MY_RPG.skills = {
+PROJECT_ANDROMEDA.skills = {
   // Spirit-based
   liderstvo: 'MY_RPG.Skill.Liderstvo',
   obman: 'MY_RPG.Skill.Obman',
@@ -50,4 +50,4 @@ MY_RPG.skills = {
   manipulatsiya: 'MY_RPG.Skill.Manipulatsiya'
 };
 
-MY_RPG.skillAbbreviations = {};
+PROJECT_ANDROMEDA.skillAbbreviations = {};

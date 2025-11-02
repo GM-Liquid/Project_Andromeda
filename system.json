@@ -1,31 +1,31 @@
 {
-  "id": "myrpg",
-  "title": "My",
-  "description": "The My system for FoundryVTT",
+  "id": "project-andromeda",
+  "title": "Project Andromeda",
+  "description": "The Project Andromeda system for Foundry VTT",
   "authors": [
     {
       "name": "Matvei",
       "discord": "sushko_matvei"
     }
   ],
-  "url": "https://github.com/GM-Liquid/myrpg",
+  "url": "https://github.com/GM-Liquid/Project_Andromeda",
   "media": [
     {
       "type": "setup",
-      "url": "systems/myrpg/assets/anvil-impact.png",
-      "thumbnail": "systems/myrpg/assets/anvil-impact.png"
+      "url": "systems/project-andromeda/assets/Art_core_1.jpg",
+      "thumbnail": "systems/project-andromeda/assets/Art_core_1.jpg"
     }
   ],
-  "version": "2.313",
+  "version": "2.316",
   "compatibility": {
     "minimum": "12",
     "verified": "12"
   },
   "esmodules": [
-    "module/myrpg.mjs"
+    "module/project-andromeda.mjs"
   ],
   "styles": [
-    "css/myrpg.css"
+    "css/project-andromeda.css"
   ],
   "languages": [
     {
@@ -42,9 +42,9 @@
   "packs": [],
   "packFolders": [],
   "socket": false,
-  "manifest": "https://github.com/GM-Liquid/myrpg/releases/latest/download/system.json",
-  "download": "https://github.com/GM-Liquid/myrpg/releases/latest/download/myrpg.zip",
-  "background": "systems/myrpg/assets/anvil-impact.png",
+  "manifest": "https://github.com/GM-Liquid/Project_Andromeda/releases/latest/download/system.json",
+  "download": "https://github.com/GM-Liquid/Project_Andromeda/releases/latest/download/project-andromeda.zip",
+  "background": "systems/project-andromeda/assets/Art_core_1.jpg",
   "grid": {
     "distance": 2,
     "units": "\u043c"
@@ -58,6 +58,6 @@
     "attribute": "system.flux.value"
   },
   "license": "CC BY-NC-SA 4.0",
-  "bugs": "https://github.com/GM-Liquid/myrpg/issues",
-  "readme": "https://github.com/GM-Liquid/myrpg#"
+  "bugs": "https://github.com/GM-Liquid/Project_Andromeda/issues",
+  "readme": "https://github.com/GM-Liquid/Project_Andromeda#"
 }

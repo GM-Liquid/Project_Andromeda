@@ -1,6 +1,6 @@
-import { MY_RPG } from './helpers/config.mjs';
+import { PROJECT_ANDROMEDA } from './helpers/config.mjs';
 
-export const MODULE_ID = 'myrpg';
+export const MODULE_ID = 'project-andromeda';
 export const RUNE_TYPE_KEYS = ['Spell', 'Creature', 'Item', 'Portal', 'Domain', 'Saga'];
 
 export function registerSystemSettings() {
@@ -42,7 +42,7 @@ export function debugLog(message, ...args) {
     return;
   }
 
-  const prefix = '[MyRPG]';
+  const prefix = '[Project Andromeda]';
   if (args.length) {
     console.debug(prefix, message, ...args);
   } else {
@@ -50,4 +50,4 @@ export function debugLog(message, ...args) {
   }
 }
 
-export { MY_RPG };
+export { PROJECT_ANDROMEDA };
