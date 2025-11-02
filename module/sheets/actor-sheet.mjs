@@ -94,11 +94,6 @@ export class myrpgActorSheet extends ActorSheet {
 
     this.element.find('.sheet-scrollable').scrollTop(scrollPos);
   }
-
-  async close(options = {}) {
-    return super.close(options);
-  }
-
   validateNumericInput(input) {
     let val = parseInt(input.value, 10);
     const isAbility = input.name.includes('system.abilities.');
