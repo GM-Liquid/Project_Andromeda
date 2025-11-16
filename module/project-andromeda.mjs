@@ -53,12 +53,12 @@ Hooks.once('init', function () {
   });
   Items.unregisterSheet('core', ItemSheet);
   Items.registerSheet(MODULE_ID, ProjectAndromedaCartridgeSheet, {
-    types: ['cartridge'],
+    types: ['cartridge', 'ability'],
     makeDefault: true,
     label: 'MY_RPG.SheetLabels.ItemAbility'
   });
   Items.registerSheet(MODULE_ID, ProjectAndromedaImplantSheet, {
-    types: ['implant'],
+    types: ['implant', 'mod'],
     makeDefault: true,
     label: 'MY_RPG.SheetLabels.ItemMod'
   });

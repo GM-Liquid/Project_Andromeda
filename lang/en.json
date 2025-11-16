@@ -321,6 +321,7 @@
       "LegacyItems": {
         "Start": "Updating legacy equipment data to Foundry items…",
         "Complete": "Legacy equipment migrated for {count} actor(s).",
+        "CompleteDetailed": "Legacy equipment migration updated {actorCount} actor(s) and {itemCount} standalone item(s).",
         "CompleteNoChanges": "Legacy equipment migration finished — no updates were required.",
         "Error": "Legacy equipment migration failed: {message}"
       }
@@ -335,7 +336,9 @@
       "item": "Item",
       "feature": "Feature",
       "cartridge": "Cartridge",
+      "ability": "Legacy Cartridge",
       "implant": "Implant",
+      "mod": "Legacy Implant",
       "armor": "Armor",
       "weapon": "Weapon",
       "gear": "Gear"

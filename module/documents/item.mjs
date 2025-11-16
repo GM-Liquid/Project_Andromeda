@@ -13,7 +13,18 @@ const TYPE_DEFAULTS = {
     skill: '',
     skillBonus: 0
   },
+  ability: {
+    rank: '',
+    runeType: 'Spell',
+    skill: '',
+    skillBonus: 0
+  },
   implant: {
+    rank: '',
+    skill: '',
+    skillBonus: 0
+  },
+  mod: {
     rank: '',
     skill: '',
     skillBonus: 0

@@ -83,20 +83,27 @@ const LEGACY_ITEM_CONFIGS = [
   }
 ];
 
+const ITEM_CONFIG_BY_TYPE = LEGACY_ITEM_CONFIGS.reduce((acc, config) => {
+  acc[config.itemType] = config;
+  return acc;
+}, {});
+
+const LEGACY_ITEM_TYPE_MAPPINGS = {
+  ability: 'cartridge',
+  mod: 'implant'
+};
+
 export async function runLegacyItemMigration() {
   if (!game?.user?.isGM) return;
   const alreadyMigrated = game.settings.get(MODULE_ID, 'legacyItemMigrationComplete');
   if (alreadyMigrated) return;
 
   const actors = game.actors?.contents ?? [];
-  if (!actors.length) {
-    await game.settings.set(MODULE_ID, 'legacyItemMigrationComplete', true);
-    return;
-  }
 
   ui.notifications?.info(game.i18n.localize('MY_RPG.Migrations.LegacyItems.Start'));
 
   let migratedActors = 0;
+  let convertedWorldItems = 0;
 
   try {
     for (const actor of actors) {
@@ -106,10 +113,15 @@ export async function runLegacyItemMigration() {
       }
     }
 
+    convertedWorldItems = await migrateWorldItems();
+
     await game.settings.set(MODULE_ID, 'legacyItemMigrationComplete', true);
 
-    const message = migratedActors
-      ? game.i18n.format('MY_RPG.Migrations.LegacyItems.Complete', { count: migratedActors })
+    const message = migratedActors || convertedWorldItems
+      ? game.i18n.format('MY_RPG.Migrations.LegacyItems.CompleteDetailed', {
+          actorCount: migratedActors,
+          itemCount: convertedWorldItems
+        })
       : game.i18n.localize('MY_RPG.Migrations.LegacyItems.CompleteNoChanges');
 
     ui.notifications?.info(message);
@@ -143,7 +155,9 @@ async function migrateActorItems(actor) {
   }
 
   const hasUpdates = !isEmptyObject(updates);
-  if (!itemsToCreate.length && !hasUpdates) return false;
+  const legacyItemUpdates = buildLegacyItemTypeUpdates(actor.items ?? []);
+  const hasLegacyTypeFixes = legacyItemUpdates.length > 0;
+  if (!itemsToCreate.length && !hasUpdates && !hasLegacyTypeFixes) return false;
 
   if (itemsToCreate.length) {
     await actor.createEmbeddedDocuments('Item', itemsToCreate);
@@ -157,7 +171,15 @@ async function migrateActorItems(actor) {
     await actor.update(updates);
   }
 
-  return itemsToCreate.length > 0 || hasUpdates;
+  if (hasLegacyTypeFixes) {
+    await actor.updateEmbeddedDocuments('Item', legacyItemUpdates);
+    debugLog('Legacy embedded item types updated', {
+      actorId: actor.id,
+      updated: legacyItemUpdates.length
+    });
+  }
+
+  return itemsToCreate.length > 0 || hasUpdates || hasLegacyTypeFixes;
 }
 
 function buildItemData(entry, config, index) {
@@ -170,6 +192,22 @@ function buildItemData(entry, config, index) {
   const img = normalizeImage(
     getLegacyField(normalizedEntry, ['img', 'image', 'icon', 'picture', 'avatar'], '')
   );
+  const system = buildSystemData(normalizedEntry, config);
+
+  const itemData = {
+    name,
+    type: config.itemType,
+    system
+  };
+
+  if (img) {
+    itemData.img = img;
+  }
+
+  return itemData;
+}
+
+function buildSystemData(normalizedEntry, config) {
   const baseSystem = {
     description: normalizeDescription(
       getLegacyField(
@@ -194,23 +232,70 @@ function buildItemData(entry, config, index) {
     )
   };
 
-  const extraSystem = config.buildSystem(normalizedEntry) ?? {};
-  const system = cleanObject({
+  const extraSystem = config?.buildSystem?.(normalizedEntry) ?? {};
+  return cleanObject({
     ...baseSystem,
     ...extraSystem
   });
+}
 
-  const itemData = {
+function buildLegacyItemTypeUpdates(items) {
+  const updates = [];
+  for (const item of items) {
+    const targetType = LEGACY_ITEM_TYPE_MAPPINGS[item?.type];
+    if (!targetType) continue;
+    const update = buildLegacyItemTypeUpdate(item, targetType);
+    if (update) {
+      updates.push(update);
+    }
+  }
+  return updates;
+}
+
+function buildLegacyItemTypeUpdate(item, targetType) {
+  const config = ITEM_CONFIG_BY_TYPE[targetType];
+  if (!config) return null;
+  const source = item?.toObject?.() ?? item;
+  const normalizedEntry = normalizeLegacyEntry(source);
+  const fallbackBase = item?.name ?? buildFallbackName(config, 0);
+  const name = normalizeName(
+    getLegacyField(normalizedEntry, ['name', 'title', 'label'], fallbackBase),
+    fallbackBase
+  );
+  const img =
+    normalizeImage(
+      getLegacyField(normalizedEntry, ['img', 'image', 'icon', 'picture', 'avatar'], item?.img ?? '')
+    ) || item?.img;
+  const system = buildSystemData(normalizedEntry, config);
+  const update = {
+    _id: item?.id ?? source?._id,
+    type: targetType,
     name,
-    type: config.itemType,
     system
   };
-
   if (img) {
-    itemData.img = img;
+    update.img = img;
   }
+  return update;
+}
 
-  return itemData;
+async function migrateWorldItems() {
+  const items = game.items?.contents ?? [];
+  if (!items.length) return 0;
+  let updated = 0;
+  for (const item of items) {
+    const targetType = LEGACY_ITEM_TYPE_MAPPINGS[item?.type];
+    if (!targetType) continue;
+    const update = buildLegacyItemTypeUpdate(item, targetType);
+    if (!update) continue;
+    const { _id: _ignored, ...data } = update;
+    await item.update(data);
+    updated += 1;
+  }
+  if (updated) {
+    debugLog('Legacy world item types updated', { updated });
+  }
+  return updated;
 }
 
 function buildFallbackName(config, index) {
