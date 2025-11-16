@@ -6,9 +6,15 @@ const LEGACY_ITEM_CONFIGS = [
     itemType: 'cartridge',
     defaultNameKey: 'MY_RPG.ItemGroups.NewCartridge',
     buildSystem: (entry) => ({
-      runeType: normalizeRuneType(entry?.runeType ?? entry?.rune ?? entry?.type ?? ''),
-      skill: normalizeSkill(entry?.skill ?? entry?.skillKey ?? entry?.skillId ?? ''),
-      skillBonus: normalizeNumber(entry?.skillBonus ?? entry?.bonus ?? entry?.mod ?? 0)
+      runeType: normalizeRuneType(
+        getLegacyField(entry, ['runeType', 'rune', 'type', 'category', 'kind'], 'Spell')
+      ),
+      skill: normalizeSkill(
+        getLegacyField(entry, ['skill', 'skillKey', 'skillId', 'skillSlug', 'skillName', 'ability'], '')
+      ),
+      skillBonus: normalizeNumber(
+        getLegacyField(entry, ['skillBonus', 'bonus', 'bonusValue', 'mod', 'modifier', 'skillMod'], 0)
+      )
     })
   },
   {
@@ -16,8 +22,12 @@ const LEGACY_ITEM_CONFIGS = [
     itemType: 'implant',
     defaultNameKey: 'MY_RPG.ItemGroups.NewImplant',
     buildSystem: (entry) => ({
-      skill: normalizeSkill(entry?.skill ?? entry?.skillKey ?? entry?.skillId ?? ''),
-      skillBonus: normalizeNumber(entry?.skillBonus ?? entry?.bonus ?? entry?.mod ?? 0)
+      skill: normalizeSkill(
+        getLegacyField(entry, ['skill', 'skillKey', 'skillId', 'skillSlug', 'skillName', 'ability'], '')
+      ),
+      skillBonus: normalizeNumber(
+        getLegacyField(entry, ['skillBonus', 'bonus', 'bonusValue', 'mod', 'modifier', 'skillMod'], 0)
+      )
     })
   },
   {
@@ -25,9 +35,15 @@ const LEGACY_ITEM_CONFIGS = [
     itemType: 'weapon',
     defaultNameKey: 'MY_RPG.ItemGroups.NewWeapon',
     buildSystem: (entry) => ({
-      skill: normalizeSkill(entry?.skill ?? entry?.skillKey ?? entry?.skillId ?? ''),
-      skillBonus: normalizeNumber(entry?.skillBonus ?? entry?.bonus ?? entry?.mod ?? 0),
-      quantity: normalizeQuantity(entry?.quantity ?? entry?.count ?? entry?.amount ?? 1)
+      skill: normalizeSkill(
+        getLegacyField(entry, ['skill', 'skillKey', 'skillId', 'skillSlug', 'skillName', 'ability'], '')
+      ),
+      skillBonus: normalizeNumber(
+        getLegacyField(entry, ['skillBonus', 'bonus', 'bonusValue', 'mod', 'modifier', 'skillMod'], 0)
+      ),
+      quantity: normalizeQuantity(
+        getLegacyField(entry, ['quantity', 'qty', 'count', 'amount', 'stack', 'charges', 'uses'], 1)
+      )
     })
   },
   {
@@ -35,12 +51,24 @@ const LEGACY_ITEM_CONFIGS = [
     itemType: 'armor',
     defaultNameKey: 'MY_RPG.ItemGroups.NewArmor',
     buildSystem: (entry) => ({
-      itemPhys: normalizeNumber(entry?.itemPhys ?? entry?.phys ?? entry?.physical ?? entry?.bonusPhysical ?? 0),
-      itemAzure: normalizeNumber(entry?.itemAzure ?? entry?.azure ?? entry?.magical ?? entry?.bonusMagical ?? 0),
-      itemMental: normalizeNumber(entry?.itemMental ?? entry?.mental ?? entry?.psychic ?? entry?.bonusPsychic ?? 0),
-      itemShield: normalizeNumber(entry?.itemShield ?? entry?.shield ?? entry?.forceShield ?? entry?.shieldBonus ?? 0),
-      itemSpeed: normalizeNumber(entry?.itemSpeed ?? entry?.speed ?? entry?.speedBonus ?? 0),
-      quantity: normalizeQuantity(entry?.quantity ?? entry?.count ?? 1)
+      itemPhys: normalizeNumber(
+        getLegacyField(entry, ['itemPhys', 'phys', 'physical', 'bonusPhysical', 'armorPhys'], 0)
+      ),
+      itemAzure: normalizeNumber(
+        getLegacyField(entry, ['itemAzure', 'azure', 'magical', 'bonusMagical', 'armorAzure'], 0)
+      ),
+      itemMental: normalizeNumber(
+        getLegacyField(entry, ['itemMental', 'mental', 'psychic', 'bonusPsychic', 'armorMental'], 0)
+      ),
+      itemShield: normalizeNumber(
+        getLegacyField(entry, ['itemShield', 'shield', 'forceShield', 'shieldBonus', 'armorShield'], 0)
+      ),
+      itemSpeed: normalizeNumber(
+        getLegacyField(entry, ['itemSpeed', 'speed', 'speedBonus', 'armorSpeed'], 0)
+      ),
+      quantity: normalizeQuantity(
+        getLegacyField(entry, ['quantity', 'qty', 'count', 'amount', 'stack', 'charges', 'uses'], 1)
+      )
     })
   },
   {
@@ -48,7 +76,9 @@ const LEGACY_ITEM_CONFIGS = [
     itemType: 'gear',
     defaultNameKey: 'MY_RPG.ItemGroups.NewGear',
     buildSystem: (entry) => ({
-      quantity: normalizeQuantity(entry?.quantity ?? entry?.count ?? entry?.amount ?? 1)
+      quantity: normalizeQuantity(
+        getLegacyField(entry, ['quantity', 'qty', 'count', 'amount', 'stack', 'charges', 'uses'], 1)
+      )
     })
   }
 ];
@@ -131,27 +161,36 @@ async function migrateActorItems(actor) {
 }
 
 function buildItemData(entry, config, index) {
-  const normalizedEntry = entry && typeof entry === 'object' ? entry : {};
+  const normalizedEntry = normalizeLegacyEntry(entry);
   const fallbackName = buildFallbackName(config, index);
   const name = normalizeName(
-    normalizedEntry.name ?? normalizedEntry.title ?? normalizedEntry.label ?? '',
+    getLegacyField(normalizedEntry, ['name', 'title', 'label'], ''),
     fallbackName
   );
-  const img = normalizeImage(normalizedEntry.img ?? normalizedEntry.icon ?? normalizedEntry.image ?? '');
+  const img = normalizeImage(
+    getLegacyField(normalizedEntry, ['img', 'image', 'icon', 'picture', 'avatar'], '')
+  );
   const baseSystem = {
     description: normalizeDescription(
-      normalizedEntry.description ?? normalizedEntry.notes ?? normalizedEntry.effect ?? ''
+      getLegacyField(
+        normalizedEntry,
+        ['description', 'desc', 'details', 'text', 'effect', 'effects', 'notes', 'summary'],
+        ''
+      )
     ),
     rank: normalizeRank(
-      normalizedEntry.rank ?? normalizedEntry.rankValue ?? normalizedEntry.currentRank ?? normalizedEntry.level ?? ''
+      getLegacyField(
+        normalizedEntry,
+        ['rank', 'rankValue', 'rankLabel', 'currentRank', 'level', 'tier', 'rarity', 'quality'],
+        ''
+      )
     ),
     equipped: normalizeBoolean(
-      normalizedEntry.equipped ??
-        normalizedEntry.isEquipped ??
-        normalizedEntry.active ??
-        normalizedEntry.enabled ??
-        normalizedEntry.isActive ??
+      getLegacyField(
+        normalizedEntry,
+        ['equipped', 'isEquipped', 'active', 'isActive', 'enabled', 'isEnabled', 'worn', 'wielded'],
         false
+      )
     )
   };
 
@@ -188,7 +227,8 @@ function normalizeName(value, fallback) {
 
 function normalizeDescription(value) {
   if (value == null) return '';
-  return String(value).trim();
+  const extracted = extractRichText(value);
+  return coerceString(extracted, '').trim();
 }
 
 function normalizeRank(value) {
@@ -244,6 +284,22 @@ function normalizeImage(value) {
   return text;
 }
 
+function extractRichText(value) {
+  if (value == null) return '';
+  if (typeof value === 'string') return value;
+  if (Array.isArray(value)) {
+    return value.map((part) => coerceString(extractRichText(part), '')).join('\n');
+  }
+  if (typeof value === 'object') {
+    if ('value' in value) return extractRichText(value.value);
+    if ('text' in value) return extractRichText(value.text);
+    if ('content' in value) return extractRichText(value.content);
+    if ('html' in value) return extractRichText(value.html);
+    if ('markdown' in value) return extractRichText(value.markdown);
+  }
+  return value;
+}
+
 function coerceString(value, fallback = '') {
   if (value == null) return fallback;
   return String(value);
@@ -266,4 +322,40 @@ function isEmptyObject(value) {
     }
   }
   return true;
+}
+
+function normalizeLegacyEntry(entry) {
+  if (!entry || typeof entry !== 'object') return {};
+  const normalized = {};
+  const sources = [entry.system, entry.data, entry];
+  for (const source of sources) {
+    if (!source || typeof source !== 'object') continue;
+    for (const [key, value] of Object.entries(source)) {
+      if (key === 'system' || key === 'data') continue;
+      normalized[key] = unwrapLegacyValue(value);
+    }
+  }
+  return normalized;
+}
+
+function unwrapLegacyValue(value) {
+  if (value == null) return value;
+  if (typeof value !== 'object' || Array.isArray(value)) return value;
+  if ('value' in value) return unwrapLegacyValue(value.value);
+  if ('text' in value) return unwrapLegacyValue(value.text);
+  if ('content' in value) return unwrapLegacyValue(value.content);
+  return value;
+}
+
+function getLegacyField(entry, keys, fallback) {
+  for (const key of keys) {
+    if (entry == null) continue;
+    if (Object.prototype.hasOwnProperty.call(entry, key)) {
+      const value = unwrapLegacyValue(entry[key]);
+      if (value !== undefined) {
+        return value;
+      }
+    }
+  }
+  return fallback;
 }
