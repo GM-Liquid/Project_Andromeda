@@ -316,6 +316,14 @@
     "ItemDialogs": {
       "DeleteTitle": "Delete {type}",
       "DeleteContent": "Are you sure you want to delete {name}? This action cannot be undone."
+    },
+    "Migrations": {
+      "LegacyItems": {
+        "Start": "Updating legacy equipment data to Foundry items…",
+        "Complete": "Legacy equipment migrated for {count} actor(s).",
+        "CompleteNoChanges": "Legacy equipment migration finished — no updates were required.",
+        "Error": "Legacy equipment migration failed: {message}"
+      }
     }
   },
   "TYPES": {
