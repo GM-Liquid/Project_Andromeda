@@ -13,6 +13,7 @@ import {
 // Import helper/utility classes and constants.
 import { preloadHandlebarsTemplates } from './helpers/templates.mjs';
 import { MODULE_ID, PROJECT_ANDROMEDA, debugLog, registerSystemSettings } from './config.mjs';
+import { runLegacyItemMigration } from './helpers/migrations.mjs';
 import './helpers/handlebars-helpers.mjs';
 
 /* -------------------------------------------- */
@@ -52,12 +53,12 @@ Hooks.once('init', function () {
   });
   Items.unregisterSheet('core', ItemSheet);
   Items.registerSheet(MODULE_ID, ProjectAndromedaCartridgeSheet, {
-    types: ['cartridge'],
+    types: ['cartridge', 'ability'],
     makeDefault: true,
     label: 'MY_RPG.SheetLabels.ItemAbility'
   });
   Items.registerSheet(MODULE_ID, ProjectAndromedaImplantSheet, {
-    types: ['implant'],
+    types: ['implant', 'mod'],
     makeDefault: true,
     label: 'MY_RPG.SheetLabels.ItemMod'
   });
@@ -81,7 +82,7 @@ Hooks.once('init', function () {
   return preloadHandlebarsTemplates();
 });
 
-Hooks.once('ready', function () {
+Hooks.once('ready', async function () {
   // DEBUG-LOG
   debugLog('Project Andromeda system ready', {
     version: game.system.version,
@@ -90,6 +91,7 @@ Hooks.once('ready', function () {
   });
 
   if (!game.user.isGM) return;
+  await runLegacyItemMigration();
   if (game.settings.get(MODULE_ID, 'worldTypeChosen')) return;
 
   const content = `<p>${game.i18n.localize('MY_RPG.WorldMode.DialogContent')}</p>`;

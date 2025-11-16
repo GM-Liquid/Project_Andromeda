@@ -179,7 +179,7 @@
     }
   },
   "Item": {
-    "types": ["cartridge", "implant", "armor", "weapon", "gear"],
+    "types": ["cartridge", "implant", "armor", "weapon", "gear", "ability", "mod"],
     "templates": {
       "base": {
         "description": "",
@@ -196,7 +196,14 @@
       "templates": ["base", "rune"],
       "runeType": "Spell"
     },
+    "ability": {
+      "templates": ["base", "rune"],
+      "runeType": "Spell"
+    },
     "implant": {
+      "templates": ["base", "rune"]
+    },
+    "mod": {
       "templates": ["base", "rune"]
     },
     "armor": {
