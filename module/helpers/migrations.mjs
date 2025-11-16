@@ -112,7 +112,8 @@ async function migrateActorItems(actor) {
     updates[`system.${config.listKey}`] = [];
   }
 
-  if (!itemsToCreate.length && foundry.utils.isObjectEmpty(updates)) return false;
+  const hasUpdates = !isEmptyObject(updates);
+  if (!itemsToCreate.length && !hasUpdates) return false;
 
   if (itemsToCreate.length) {
     await actor.createEmbeddedDocuments('Item', itemsToCreate);
@@ -122,11 +123,11 @@ async function migrateActorItems(actor) {
     });
   }
 
-  if (!foundry.utils.isObjectEmpty(updates)) {
+  if (hasUpdates) {
     await actor.update(updates);
   }
 
-  return itemsToCreate.length > 0 || !foundry.utils.isObjectEmpty(updates);
+  return itemsToCreate.length > 0 || hasUpdates;
 }
 
 function buildItemData(entry, config, index) {
@@ -255,4 +256,14 @@ function cleanObject(obj) {
     result[key] = value;
   }
   return result;
+}
+
+function isEmptyObject(value) {
+  if (!value) return true;
+  for (const key in value) {
+    if (Object.prototype.hasOwnProperty.call(value, key)) {
+      return false;
+    }
+  }
+  return true;
 }
