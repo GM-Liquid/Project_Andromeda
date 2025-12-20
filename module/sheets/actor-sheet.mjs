@@ -271,30 +271,19 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       v.dieLabel = `d${v.value}`;
     }
     const order = [
-      'liderstvo',
-      'obman',
-      'diplomatiya',
-      'stitiyannost',
-      'psionika',
-      'predvidenie',
-      'biomantia',
-      'kinetica',
-      'atletika',
-      'zapugivanie',
-      'akrobatika',
-      'skrytost',
+      'moshch',
+      'lovkost',
+      'sokrytie',
       'strelba',
-      'upravlenie_transportom',
-      'lovkost_ruk',
       'blizhniy_boy',
+      'nablyudatelnost',
       'analiz',
-      'tekhnika',
-      'kultura',
-      'vnimanie',
-      'meditsina',
-      'oruzheynoe_delo',
-      'artefaktorika',
-      'manipulatsiya'
+      'programmirovanie',
+      'inzheneriya',
+      'dominirovanie',
+      'rezonans',
+      'bionika',
+      'obayanie'
     ];
     const sorted = {};
     for (let key of order) {

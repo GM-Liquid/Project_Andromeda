@@ -46,64 +46,19 @@
         "tempspeed": 0,
         "biography": "",
         "skills": {
-          "liderstvo": {
-            "value": 0,
-            "ability": "spi"
-          },
-          "obman": {
-            "value": 0,
-            "ability": "spi"
-          },
-          "diplomatiya": {
-            "value": 0,
-            "ability": "spi"
-          },
-          "stitiyannost": {
-            "value": 0,
-            "ability": "spi"
-          },
-          "psionika": {
-            "value": 0,
-            "ability": "spi"
-          },
-          "predvidenie": {
-            "value": 0,
-            "ability": "spi"
-          },
-          "biomantia": {
-            "value": 0,
-            "ability": "spi"
-          },
-          "kinetica": {
-            "value": 0,
-            "ability": "spi"
-          },
-
-          "atletika": {
+          "moshch": {
             "value": 0,
             "ability": "con"
           },
-          "zapugivanie": {
+          "lovkost": {
             "value": 0,
             "ability": "con"
           },
-          "akrobatika": {
-            "value": 0,
-            "ability": "con"
-          },
-          "skrytost": {
+          "sokrytie": {
             "value": 0,
             "ability": "con"
           },
           "strelba": {
-            "value": 0,
-            "ability": "con"
-          },
-          "upravlenie_transportom": {
-            "value": 0,
-            "ability": "con"
-          },
-          "lovkost_ruk": {
             "value": 0,
             "ability": "con"
           },
@@ -112,37 +67,38 @@
             "ability": "con"
           },
 
+          "nablyudatelnost": {
+            "value": 0,
+            "ability": "int"
+          },
           "analiz": {
             "value": 0,
             "ability": "int"
           },
-          "tekhnika": {
+          "programmirovanie": {
             "value": 0,
             "ability": "int"
           },
-          "kultura": {
+          "inzheneriya": {
             "value": 0,
             "ability": "int"
           },
-          "vnimanie": {
+
+          "dominirovanie": {
             "value": 0,
-            "ability": "int"
+            "ability": "spi"
           },
-          "meditsina": {
+          "rezonans": {
             "value": 0,
-            "ability": "int"
+            "ability": "spi"
           },
-          "oruzheynoe_delo": {
+          "bionika": {
             "value": 0,
-            "ability": "int"
+            "ability": "spi"
           },
-          "artefaktorika": {
+          "obayanie": {
             "value": 0,
-            "ability": "int"
-          },
-          "manipulatsiya": {
-            "value": 0,
-            "ability": "int"
+            "ability": "spi"
           }
         }
       }
