@@ -17,35 +17,24 @@ PROJECT_ANDROMEDA.abilityAbbreviations = {
 };
 
 PROJECT_ANDROMEDA.skills = {
-  // Spirit-based
-  liderstvo: 'MY_RPG.Skill.Liderstvo',
-  obman: 'MY_RPG.Skill.Obman',
-  diplomatiya: 'MY_RPG.Skill.Diplomatiya',
-  stitiyannost: 'MY_RPG.Skill.Stitiyannost',
-  psionika: 'MY_RPG.Skill.Psionika',
-  predvidenie: 'MY_RPG.Skill.Predvidenie',
-  biomantia: 'MY_RPG.Skill.Biomantia',
-  kinetica: 'MY_RPG.Skill.Kinetica',
-
   // Body-based
-  atletika: 'MY_RPG.Skill.Atletika',
-  zapugivanie: 'MY_RPG.Skill.Zapugivanie',
-  akrobatika: 'MY_RPG.Skill.Akrobatika',
-  skrytost: 'MY_RPG.Skill.Skrytost',
+  moshch: 'MY_RPG.Skill.Moshch',
+  lovkost: 'MY_RPG.Skill.Lovkost',
+  sokrytie: 'MY_RPG.Skill.Sokrytie',
   strelba: 'MY_RPG.Skill.Strelba',
-  upravlenie_transportom: 'MY_RPG.Skill.Upravlenie_transportom',
-  lovkost_ruk: 'MY_RPG.Skill.Lovkost_ruk',
   blizhniy_boy: 'MY_RPG.Skill.Blizhniy_boy',
 
-  // Intellect-based
+  // Mind-based
+  nablyudatelnost: 'MY_RPG.Skill.Nablyudatelnost',
   analiz: 'MY_RPG.Skill.Analiz',
-  tekhnika: 'MY_RPG.Skill.Tekhnika',
-  kultura: 'MY_RPG.Skill.Kultura',
-  vnimanie: 'MY_RPG.Skill.Vnimanie',
-  meditsina: 'MY_RPG.Skill.Meditsina',
-  oruzheynoe_delo: 'MY_RPG.Skill.Oruzheynoe_delo',
-  artefaktorika: 'MY_RPG.Skill.Artefaktorika',
-  manipulatsiya: 'MY_RPG.Skill.Manipulatsiya'
+  programmirovanie: 'MY_RPG.Skill.Programmirovanie',
+  inzheneriya: 'MY_RPG.Skill.Inzheneriya',
+
+  // Spirit-based
+  dominirovanie: 'MY_RPG.Skill.Dominirovanie',
+  rezonans: 'MY_RPG.Skill.Rezonans',
+  bionika: 'MY_RPG.Skill.Bionika',
+  obayanie: 'MY_RPG.Skill.Obayanie'
 };
 
 PROJECT_ANDROMEDA.skillAbbreviations = {};
