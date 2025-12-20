@@ -4,7 +4,7 @@
  */
 
 import { MODULE_ID, debugLog } from '../config.mjs';
-import { getColorRank } from '../helpers/utils.mjs';
+import { ABILITY_DIE_STEPS, getColorRank, normalizeAbilityDie } from '../helpers/utils.mjs';
 
 
 const ITEM_GROUP_CONFIG = [
@@ -182,7 +182,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     $html.on('change', '.item-equip-checkbox', this._onItemEquipChange.bind(this));
 
     $html
-      .find('input[name^="system.abilities."], input[name^="system.skills."]')
+      .find('input[name^="system.skills."]')
       .on('change', (ev) => {
         const input = ev.currentTarget;
         const validatedValue = this.validateNumericInput(input);
@@ -190,6 +190,8 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
           this.render(false);
         });
       });
+
+    $html.on('click', '.ability-step', this._onAbilityStep.bind(this));
   }
 
 
@@ -263,8 +265,10 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const isCharacter = Boolean(context.isCharacter);
     const isNpc = Boolean(context.isNpc);
     for (let [k, v] of Object.entries(context.system.abilities)) {
+      v.value = normalizeAbilityDie(v.value);
       v.label = game.i18n.localize(CONFIG.ProjectAndromeda.abilities[k]) ?? k;
       v.rankClass = 'rank' + getColorRank(v.value);
+      v.dieLabel = `d${v.value}`;
     }
     const order = [
       'liderstvo',
@@ -376,33 +380,98 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     return penalty;
   }
 
+  _stepAbilityDie(current, step) {
+    const normalized = normalizeAbilityDie(current);
+    const index = ABILITY_DIE_STEPS.indexOf(normalized);
+    const clampedIndex = Math.max(
+      0,
+      Math.min(
+        (index === -1 ? 0 : index) + Math.sign(step || 0),
+        ABILITY_DIE_STEPS.length - 1
+      )
+    );
+    return ABILITY_DIE_STEPS[clampedIndex];
+  }
+
+  _getAbilityDieValue(abilityKey) {
+    if (!abilityKey) return ABILITY_DIE_STEPS[0];
+    const ability = this.actor.system?.abilities?.[abilityKey];
+    return normalizeAbilityDie(ability?.value);
+  }
+
+  async _onAbilityStep(event) {
+    event.preventDefault();
+    const button = event.currentTarget;
+    const step = Number(button.dataset.step) || 0;
+    if (!step) return;
+    const container = button.closest('[data-ability-key]');
+    const abilityKey = container?.dataset?.abilityKey;
+    if (!abilityKey) return;
+
+    const current = this.actor.system?.abilities?.[abilityKey]?.value;
+    const next = this._stepAbilityDie(current, step);
+    if (next === normalizeAbilityDie(current)) return;
+
+    await this.actor.update({ [`system.abilities.${abilityKey}.value`]: next }, { render: false });
+    this.actor.prepareData();
+    this._updateAbilityDisplays(this.element, abilityKey);
+    this._refreshDerived(this.element);
+  }
+
+  _updateAbilityDisplays(root, abilityKey) {
+    const $root = root instanceof jQuery ? root : $(root ?? this.element);
+    const abilityKeys = abilityKey ? [abilityKey] : Object.keys(this.actor.system?.abilities ?? {});
+    const rankClasses = ['rank1', 'rank2', 'rank3', 'rank4', 'rank5'];
+
+    for (const key of abilityKeys) {
+      const dieValue = this._getAbilityDieValue(key);
+      const rankClass = 'rank' + getColorRank(dieValue);
+      const $container = $root.find(`[data-ability-key="${key}"]`);
+
+      $container.find('.ability-die-value')
+        .text(`d${dieValue}`)
+        .removeClass(rankClasses.join(' '))
+        .addClass(rankClass);
+
+      $container
+        .find(`input[name="system.abilities.${key}.value"]`)
+        .val(dieValue);
+
+      const $header = $root.find(`th[data-ability="${key}"]`);
+      $header.removeClass(rankClasses.join(' ')).addClass(rankClass);
+    }
+  }
+
   async _onRoll(event) {
     event.preventDefault();
     const el = event.currentTarget;
     const { skill, ability, label } = el.dataset;
 
-    let bonus = 0;
-    let abVal = 0;
-    let minimal = false;
+    let modifier = 0;
+    let dieValue = ability ? this._getAbilityDieValue(ability) : null;
+
+    if (!dieValue && !ability) {
+      dieValue = ABILITY_DIE_STEPS[0];
+    }
 
     if (skill) {
       const skillData = this.actor.system.skills?.[skill] || {};
-      bonus = parseInt(skillData.value) || 0;
+      modifier = parseInt(skillData.value) || 0;
       const abKey = skillData.ability;
       if (abKey) {
-        abVal = parseInt(this.actor.system.abilities[abKey]?.value) || 0;
+        dieValue = this._getAbilityDieValue(abKey);
       }
-      bonus += this._getTotalSkillBonus(skill);
-
-      // Minimum skill bonus from ability removed
+      modifier += this._getTotalSkillBonus(skill);
     } else if (ability) {
-      abVal = parseInt(this.actor.system.abilities[ability]?.value) || 0;
-      bonus = abVal; // ��� ������ ����� ��������������
+      dieValue = dieValue ?? this._getAbilityDieValue(ability);
     }
 
     const woundPenalty = this._getWoundPenalty();
-    if (woundPenalty) bonus -= woundPenalty;
-    const roll = await new Roll('1d10 + @mod', { mod: bonus }).roll({ async: true });
+    if (woundPenalty) modifier -= woundPenalty;
+
+    const roll = await new Roll(`1d${dieValue ?? ABILITY_DIE_STEPS[0]} + @mod`, { mod: modifier }).roll({
+      async: true
+    });
     let flavor = label;
     roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),

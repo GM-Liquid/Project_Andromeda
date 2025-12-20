@@ -114,15 +114,28 @@
                   <tr>
                     {{#each system.abilities as |ability key|}}
                       <td>
-                        <input
-                          class='{{ability.rankClass}}'
-                          type='number'
-                          name='system.abilities.{{key}}.value'
-                          value='{{ability.value}}'
-                          step='1'
-                          inputmode='numeric'
-                          pattern='\d+'
-                        />
+                        <div class='ability-die-control' data-ability-key='{{key}}'>
+                          <button
+                            type='button'
+                            class='ability-step'
+                            data-step='-1'
+                            aria-label='{{localize "MY_RPG.AbilityDice.Decrease"}}'
+                          >
+                            <span aria-hidden='true'>-</span>
+                          </button>
+                          <div class='ability-die-value {{ability.rankClass}}'>
+                            {{ability.dieLabel}}
+                          </div>
+                          <button
+                            type='button'
+                            class='ability-step'
+                            data-step='1'
+                            aria-label='{{localize "MY_RPG.AbilityDice.Increase"}}'
+                          >
+                            <span aria-hidden='true'>+</span>
+                          </button>
+                          <input type='hidden' name='system.abilities.{{key}}.value' value='{{ability.value}}' />
+                        </div>
                       </td>
                     {{/each}}
                   </tr>

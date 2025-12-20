@@ -196,6 +196,10 @@
     },
     "SendToChat": "Отправить в чат",
     "MinimalBonus": "минимальный бонус",
+    "AbilityDice": {
+      "Increase": "Увеличить куб характеристики",
+      "Decrease": "Уменьшить куб характеристики"
+    },
     "abilityAbbreviations": {
       "spi": "Дух",
       "con": "Тело",

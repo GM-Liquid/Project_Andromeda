@@ -149,6 +149,41 @@ textarea[disabled] {
   text-align: center;
   padding: 5px !important;
 }
+
+.ability-die-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.ability-die-value {
+  min-width: 52px;
+  padding: 6px 10px;
+  border: 2px solid #1b1210;
+  border-radius: 8px;
+  font-weight: 700;
+  background: #f5f0e8;
+  text-transform: uppercase;
+}
+
+.ability-step {
+  width: 26px;
+  height: 26px;
+  border: 1px solid #1b1210;
+  background: #ffffff;
+  border-radius: 6px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.ability-step:hover,
+.ability-step:focus {
+  background-color: #d2d2c9;
+}
 .attributes-table thead th {
   background-color: #673e37;
   color: #d2d2c9;

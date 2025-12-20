@@ -189,6 +189,10 @@
     },
     "SendToChat": "Send to Chat",
     "MinimalBonus": "minimal bonus",
+    "AbilityDice": {
+      "Increase": "Increase characteristic die",
+      "Decrease": "Decrease characteristic die"
+    },
     "abilityAbbreviations": {
       "spi": "Spi",
       "con": "Body",
