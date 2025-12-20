@@ -1,4 +1,5 @@
 import { debugLog } from '../config.mjs';
+import { normalizeAbilityDie } from '../helpers/utils.mjs';
 
 /**
  * Extend the base Actor document by defining a custom roll data structure which is ideal for the Simple system.
@@ -20,6 +21,7 @@ export class ProjectAndromedaActor extends Actor {
 
     /* 1. Способности ---------------------------------------------- */
     for (const a of Object.values(s.abilities ?? {})) {
+      a.value = normalizeAbilityDie(a.value);
       a.mod = a.value; // «бонус» = само значение
     }
 

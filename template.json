@@ -10,13 +10,13 @@
         "momentOfGlory": 0,
         "abilities": {
           "spi": {
-            "value": 0
+            "value": 4
           },
           "con": {
-            "value": 0
+            "value": 4
           },
           "int": {
-            "value": 0
+            "value": 4
           }
         },
         "cartridgesList": [],
