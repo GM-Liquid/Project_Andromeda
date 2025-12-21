@@ -44,7 +44,7 @@ const ITEM_GROUP_CONFIG = [
     createKey: 'MY_RPG.ItemGroups.CreateWeapon',
     newNameKey: 'MY_RPG.ItemGroups.NewWeapon',
     showQuantity: false,
-    allowEquip: true,
+    allowEquip: false,
     exclusive: false
   },
   {
@@ -612,7 +612,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       quantity,
       showEquip: Boolean(config.allowEquip),
       exclusive: Boolean(config.exclusive),
-      equipped: Boolean(system.equipped),
+      equipped: config.allowEquip ? Boolean(system.equipped) : false,
       badges,
       summary,
       hasBadges: badges.length > 0,
