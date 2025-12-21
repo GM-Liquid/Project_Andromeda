@@ -308,6 +308,18 @@
       "QuantityDecrease": "Уменьшить количество",
       "NewItemFallback": "Новый {type}"
     },
+    "RollFlavor": {
+      "Modifiers": "Модификаторы",
+      "SkillValue": "Навык ({skill})",
+      "WoundPenalty": "Штраф за ранения",
+      "EquipmentBonus": "Бонус экипировки",
+      "SourceWeapon": "Оружие: {name}",
+      "SourceCartridge": "Картридж: {name}",
+      "SourceImplant": "Имплант: {name}",
+      "SourceItem": "Предмет: {name}",
+      "SourceWithQuantity": "{name} ×{quantity}",
+      "UnknownSource": "Неизвестный источник"
+    },
     "ItemRoll": {
       "Flavor": "Бросок {item} ({skill})"
     },

@@ -453,6 +453,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
 
     let modifier = 0;
     let dieValue = ability ? this._getAbilityDieValue(ability) : null;
+    const parts = [];
 
     if (!dieValue && !ability) {
       dieValue = ABILITY_DIE_STEPS[0];
@@ -460,23 +461,50 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
 
     if (skill) {
       const skillData = this.actor.system.skills?.[skill] || {};
-      modifier = parseInt(skillData.value) || 0;
+      const skillValue = parseInt(skillData.value) || 0;
+      modifier = skillValue;
+      parts.push({
+        label: game.i18n.format('MY_RPG.RollFlavor.SkillValue', { skill: this._skillLabel(skill) }),
+        value: skillValue
+      });
       const abKey = skillData.ability;
       if (abKey) {
         dieValue = this._getAbilityDieValue(abKey);
       }
-      modifier += this._getTotalSkillBonus(skill);
+      const bonusDetails = this._getSkillBonusDetails(skill);
+      modifier += bonusDetails.total;
+      if (bonusDetails.total) {
+        if (bonusDetails.sources?.length) {
+          for (const source of bonusDetails.sources) {
+            parts.push({
+              label: this._formatBonusSourceLabel(source),
+              value: source.bonus
+            });
+          }
+        } else {
+          parts.push({
+            label: game.i18n.localize('MY_RPG.RollFlavor.EquipmentBonus'),
+            value: bonusDetails.total
+          });
+        }
+      }
     } else if (ability) {
       dieValue = dieValue ?? this._getAbilityDieValue(ability);
     }
 
     const woundPenalty = this._getWoundPenalty();
-    if (woundPenalty) modifier -= woundPenalty;
+    if (woundPenalty) {
+      modifier -= woundPenalty;
+      parts.push({
+        label: game.i18n.localize('MY_RPG.RollFlavor.WoundPenalty'),
+        value: -woundPenalty
+      });
+    }
 
     const roll = await new Roll(`1d${dieValue ?? ABILITY_DIE_STEPS[0]} + @mod`, { mod: modifier }).roll({
       async: true
     });
-    let flavor = label;
+    const flavor = this._buildRollFlavor(label, parts);
     roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
       flavor,
@@ -810,16 +838,33 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const skillKey = system.skill || '';
     const skillValue = Number(this.actor.system?.skills?.[skillKey]?.value) || 0;
     const itemBonus = Number(system.skillBonus) || 0;
+    const parts = [];
+
+    parts.push({
+      label: game.i18n.format('MY_RPG.RollFlavor.SkillValue', { skill: this._skillLabel(skillKey) }),
+      value: skillValue
+    });
+    if (itemBonus) {
+      parts.push({
+        label: this._formatBonusSourceLabel({
+          type: item.type,
+          name: item.name || game.i18n.localize(`TYPES.Item.${item.type}`),
+          quantity: Number(system.quantity) || 0
+        }),
+        value: itemBonus
+      });
+    }
 
     const roll = await new Roll('1d10 + @skill + @itemBonus', {
       skill: skillValue,
       itemBonus
     }).roll({ async: true });
 
-    const flavor = game.i18n.format('MY_RPG.ItemRoll.Flavor', {
+    const flavorLabel = game.i18n.format('MY_RPG.ItemRoll.Flavor', {
       item: item.name || game.i18n.localize(`TYPES.Item.${item.type}`),
       skill: this._skillLabel(skillKey)
     });
+    const flavor = this._buildRollFlavor(flavorLabel, parts);
 
     roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
@@ -927,11 +972,69 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     return `${bonus}`;
   }
 
-  _getTotalSkillBonus(skillKey) {
-    if (!skillKey) return 0;
+  _getSkillBonusDetails(skillKey) {
+    if (!skillKey) return { total: 0, sources: [] };
     const bonuses = this.actor.system?.cache?.itemTotals?.skillBonuses ?? {};
-    const total = bonuses?.[skillKey];
-    return this._normalizeSkillBonus(total);
+    const entry = bonuses?.[skillKey];
+    if (!entry) return { total: 0, sources: [] };
+    if (typeof entry === 'number') {
+      return { total: this._normalizeSkillBonus(entry), sources: [] };
+    }
+
+    const total = this._normalizeSkillBonus(entry?.total);
+    const sources = Array.isArray(entry?.sources)
+      ? entry.sources
+          .map((source) => ({
+            type: source?.type,
+            name: source?.name,
+            quantity: source?.quantity,
+            bonus: this._normalizeSkillBonus(source?.bonus)
+          }))
+          .filter((source) => source.bonus)
+      : [];
+
+    return { total, sources };
+  }
+
+  _formatBonusSourceLabel(source) {
+    const typeKeyMap = {
+      weapon: 'MY_RPG.RollFlavor.SourceWeapon',
+      cartridge: 'MY_RPG.RollFlavor.SourceCartridge',
+      implant: 'MY_RPG.RollFlavor.SourceImplant'
+    };
+
+    const quantity = Number(source?.quantity) || 0;
+    const baseName = source?.name || game.i18n.localize('MY_RPG.RollFlavor.UnknownSource');
+    const nameWithQuantity =
+      quantity > 1
+        ? game.i18n.format('MY_RPG.RollFlavor.SourceWithQuantity', { name: baseName, quantity })
+        : baseName;
+    const key = typeKeyMap[source?.type] ?? 'MY_RPG.RollFlavor.SourceItem';
+    return game.i18n.format(key, { name: nameWithQuantity });
+  }
+
+  _buildRollFlavor(label, parts = []) {
+    const safeLabel = this._escapeHTML(label ?? '');
+    const rollParts = (parts ?? []).filter(
+      (part) => part && part.label && part.value !== undefined && part.value !== null
+    );
+    if (!rollParts.length) return safeLabel;
+
+    const modifiersTitle = this._escapeHTML(game.i18n.localize('MY_RPG.RollFlavor.Modifiers'));
+    const rows = rollParts
+      .map((part) => {
+        const partLabel = this._escapeHTML(part.label);
+        const value = this._formatSkillBonus(part.value);
+        return `<div class="myrpg-roll-part"><span class="myrpg-roll-part__label">${partLabel}</span><span class="myrpg-roll-part__value">${value}</span></div>`;
+      })
+      .join('');
+
+    return `<div class="myrpg-roll-flavor"><div class="myrpg-roll-flavor__header">${safeLabel}</div><div class="myrpg-roll-flavor__modifiers"><div class="myrpg-roll-flavor__title">${modifiersTitle}</div>${rows}</div></div>`;
+  }
+
+  _getTotalSkillBonus(skillKey) {
+    const details = this._getSkillBonusDetails(skillKey);
+    return details.total;
   }
 
   _skillLabel(skillKey) {
