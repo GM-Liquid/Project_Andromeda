@@ -188,22 +188,6 @@ export class ProjectAndromedaActor extends Actor {
       totals.armor.speed += (Number(system.itemSpeed) || 0) * quantity;
     }
 
-    const weaponItems = this.itemTypes?.weapon ?? [];
-    for (const weapon of weaponItems) {
-      const system = weapon.system ?? {};
-      if (!system.equipped) continue;
-      const skill = String(system.skill || '');
-      if (!skill) continue;
-      const quantity = Math.max(Number(system.quantity) || 1, 0);
-      const bonus = (Number(system.skillBonus) || 0) * quantity;
-      if (!bonus) continue;
-      addSkillBonus(skill, bonus, {
-        type: 'weapon',
-        name: itemName(weapon, 'weapon'),
-        quantity
-      });
-    }
-
     const cartridgeItems = this.itemTypes?.cartridge ?? [];
     for (const cartridge of cartridgeItems) {
       const system = cartridge.system ?? {};

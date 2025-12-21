@@ -617,7 +617,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       summary,
       hasBadges: badges.length > 0,
       hasSummary: Boolean(summary),
-      canRoll: config.key === 'cartridges' || config.key === 'implants'
+      canRoll: config.key === 'cartridges' || config.key === 'implants' || config.key === 'weapons'
     };
   }
 
@@ -650,7 +650,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       }
       case 'weapons': {
         badges.push(`${t.localize('MY_RPG.WeaponsTable.SkillLabel')}: ${this._skillLabel(system.skill)}`);
-        badges.push(`${t.localize('MY_RPG.WeaponsTable.BonusLabel')}: ${this._formatSkillBonus(system.skillBonus)}`);
+        badges.push(`${t.localize('MY_RPG.WeaponsTable.DamageLabel')}: ${this._formatDamage(system.skillBonus)}`);
         break;
       }
       case 'armor': {
@@ -829,58 +829,111 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       });
       return;
     }
-
-    if (item.type !== 'cartridge' && item.type !== 'implant') {
-      return;
-    }
-
     const system = item.system ?? {};
     const skillKey = system.skill || '';
     const skillValue = Number(this.actor.system?.skills?.[skillKey]?.value) || 0;
-    const itemBonus = Number(system.skillBonus) || 0;
     const parts = [];
 
     parts.push({
       label: game.i18n.format('MY_RPG.RollFlavor.SkillValue', { skill: this._skillLabel(skillKey) }),
       value: skillValue
     });
-    if (itemBonus) {
-      parts.push({
-        label: this._formatBonusSourceLabel({
-          type: item.type,
-          name: item.name || game.i18n.localize(`TYPES.Item.${item.type}`),
-          quantity: Number(system.quantity) || 0
-        }),
-        value: itemBonus
+
+    if (item.type === 'cartridge' || item.type === 'implant') {
+      const itemBonus = Number(system.skillBonus) || 0;
+      if (itemBonus) {
+        parts.push({
+          label: this._formatBonusSourceLabel({
+            type: item.type,
+            name: item.name || game.i18n.localize(`TYPES.Item.${item.type}`),
+            quantity: Number(system.quantity) || 0
+          }),
+          value: itemBonus
+        });
+      }
+
+      const roll = await new Roll('1d10 + @skill + @itemBonus', {
+        skill: skillValue,
+        itemBonus
+      }).roll({ async: true });
+
+      const flavorLabel = game.i18n.format('MY_RPG.ItemRoll.Flavor', {
+        item: item.name || game.i18n.localize(`TYPES.Item.${item.type}`),
+        skill: this._skillLabel(skillKey)
       });
+      const flavor = this._buildRollFlavor(flavorLabel, parts);
+
+      roll.toMessage({
+        speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+        flavor,
+        rollMode: game.settings.get('core', 'rollMode')
+      });
+
+      // DEBUG-LOG
+      debugLog('Actor sheet item roll', {
+        actor: this.actor.uuid,
+        itemId: item.id,
+        type: item.type,
+        skill: skillKey,
+        skillValue,
+        itemBonus
+      });
+      return;
     }
 
-    const roll = await new Roll('1d10 + @skill + @itemBonus', {
-      skill: skillValue,
-      itemBonus
-    }).roll({ async: true });
+    if (item.type === 'weapon') {
+      const bonusDetails = this._getSkillBonusDetails(skillKey);
+      let modifier = skillValue + (bonusDetails.total || 0);
+      if (bonusDetails.total) {
+        if (bonusDetails.sources?.length) {
+          for (const source of bonusDetails.sources) {
+            parts.push({
+              label: this._formatBonusSourceLabel(source),
+              value: source.bonus
+            });
+          }
+        } else {
+          parts.push({
+            label: game.i18n.localize('MY_RPG.RollFlavor.EquipmentBonus'),
+            value: bonusDetails.total
+          });
+        }
+      }
 
-    const flavorLabel = game.i18n.format('MY_RPG.ItemRoll.Flavor', {
-      item: item.name || game.i18n.localize(`TYPES.Item.${item.type}`),
-      skill: this._skillLabel(skillKey)
-    });
-    const flavor = this._buildRollFlavor(flavorLabel, parts);
+      const roll = await new Roll('1d10 + @mod', { mod: modifier }).roll({ async: true });
 
-    roll.toMessage({
-      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-      flavor,
-      rollMode: game.settings.get('core', 'rollMode')
-    });
+      const flavorLabel = game.i18n.format('MY_RPG.ItemRoll.Flavor', {
+        item: item.name || game.i18n.localize(`TYPES.Item.${item.type}`),
+        skill: this._skillLabel(skillKey)
+      });
 
-    // DEBUG-LOG
-    debugLog('Actor sheet item roll', {
-      actor: this.actor.uuid,
-      itemId: item.id,
-      type: item.type,
-      skill: skillKey,
-      skillValue,
-      itemBonus
-    });
+      let flavor = this._buildRollFlavor(flavorLabel, parts);
+      const damageValue = this._formatDamage(system.skillBonus);
+      const damageNumber = Number(damageValue);
+      if (damageNumber) {
+        const damageText = this._escapeHTML(
+          game.i18n.format('MY_RPG.RollFlavor.Damage', { value: damageValue })
+        );
+        flavor += `<div class="myrpg-roll-note">${damageText}</div>`;
+      }
+
+      roll.toMessage({
+        speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+        flavor,
+        rollMode: game.settings.get('core', 'rollMode')
+      });
+
+      // DEBUG-LOG
+      debugLog('Actor sheet weapon roll', {
+        actor: this.actor.uuid,
+        itemId: item.id,
+        type: item.type,
+        skill: skillKey,
+        skillValue,
+        modifier,
+        damage: damageValue
+      });
+    }
   }
 
   _buildItemChatContent(item, config) {
@@ -972,6 +1025,12 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     return `${bonus}`;
   }
 
+  _formatDamage(value) {
+    const damage = Number(value);
+    if (!Number.isFinite(damage)) return '0';
+    return `${damage}`;
+  }
+
   _getSkillBonusDetails(skillKey) {
     if (!skillKey) return { total: 0, sources: [] };
     const bonuses = this.actor.system?.cache?.itemTotals?.skillBonuses ?? {};
@@ -1050,9 +1109,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       `${game.i18n.localize('MY_RPG.WeaponsTable.SkillLabel')}: ${this._skillLabel(
         system.skill
       )}`,
-      `${game.i18n.localize('MY_RPG.WeaponsTable.BonusLabel')}: ${this._formatSkillBonus(
-        system.skillBonus
-      )}`
+      `${game.i18n.localize('MY_RPG.WeaponsTable.DamageLabel')}: ${this._formatDamage(system.skillBonus)}`
     ];
     if (system.equipped) {
       lines.push(game.i18n.localize('MY_RPG.WeaponsTable.EquippedLabel'));

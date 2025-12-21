@@ -74,7 +74,7 @@
       "SkillLabel": "Навык",
       "SkillNone": "Навык не выбран",
       "SkillNoneOption": "Навык не выбран",
-      "BonusLabel": "Бонус к навыку",
+      "DamageLabel": "Урон",
       "DescriptionLabel": "Описание",
       "EquippedLabel": "Экипировано"
     },
@@ -313,6 +313,7 @@
       "SkillValue": "Навык ({skill})",
       "WoundPenalty": "Штраф за ранения",
       "EquipmentBonus": "Бонус экипировки",
+      "Damage": "Урон {value}",
       "SourceWeapon": "Оружие: {name}",
       "SourceCartridge": "Картридж: {name}",
       "SourceImplant": "Имплант: {name}",

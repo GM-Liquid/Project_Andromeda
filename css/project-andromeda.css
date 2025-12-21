@@ -1332,3 +1332,8 @@ input.rank4 {
 .myrpg-roll-part__value {
   font-weight: 600;
 }
+
+.myrpg-roll-note {
+  font-size: 0.95em;
+  font-weight: 600;
+}
