@@ -460,14 +460,29 @@ form input[type='number'] {
   margin-bottom: 5px;
 }
 
-/* layout skills into two columns */
+/* layout skills into three characteristic columns */
 .skills-grid {
-  column-count: 2;
-  column-gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
 }
 
-.skills-grid .skill-row {
-  break-inside: avoid;
+.skills-column {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skills-column-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  padding: 0 4px;
+}
+
+.skills-column-title {
+  font-size: 1rem;
 }
 
 /*         resizable   textarea */
