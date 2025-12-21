@@ -150,6 +150,32 @@ export class ProjectAndromedaActor extends Actor {
       skillBonuses: {}
     };
 
+    const ensureSkillBonusEntry = (skillKey) => {
+      const existing = totals.skillBonuses[skillKey];
+      if (existing && typeof existing === 'object') return existing;
+      const entry = { total: 0, sources: [] };
+      totals.skillBonuses[skillKey] = entry;
+      return entry;
+    };
+
+    const addSkillBonus = (skill, bonus, source) => {
+      const skillKey = String(skill || '');
+      const numericBonus = Number(bonus) || 0;
+      if (!skillKey || !numericBonus) return;
+      const entry = ensureSkillBonusEntry(skillKey);
+      entry.total += numericBonus;
+      if (source) {
+        entry.sources.push({
+          type: source.type,
+          name: source.name,
+          quantity: source.quantity,
+          bonus: numericBonus
+        });
+      }
+    };
+
+    const itemName = (item, type) => item?.name || game.i18n.localize(`TYPES.Item.${type}`);
+
     const armorItems = this.itemTypes?.armor ?? [];
     for (const armor of armorItems) {
       const system = armor.system ?? {};
@@ -171,8 +197,11 @@ export class ProjectAndromedaActor extends Actor {
       const quantity = Math.max(Number(system.quantity) || 1, 0);
       const bonus = (Number(system.skillBonus) || 0) * quantity;
       if (!bonus) continue;
-      const current = totals.skillBonuses[skill] || 0;
-      totals.skillBonuses[skill] = current + bonus;
+      addSkillBonus(skill, bonus, {
+        type: 'weapon',
+        name: itemName(weapon, 'weapon'),
+        quantity
+      });
     }
 
     const cartridgeItems = this.itemTypes?.cartridge ?? [];
@@ -183,8 +212,11 @@ export class ProjectAndromedaActor extends Actor {
       if (!skill) continue;
       const bonus = Number(system.skillBonus) || 0;
       if (!bonus) continue;
-      const current = totals.skillBonuses[skill] || 0;
-      totals.skillBonuses[skill] = current + bonus;
+      addSkillBonus(skill, bonus, {
+        type: 'cartridge',
+        name: itemName(cartridge, 'cartridge'),
+        quantity: 1
+      });
     }
 
     const implantItems = this.itemTypes?.implant ?? [];
@@ -195,8 +227,11 @@ export class ProjectAndromedaActor extends Actor {
       if (!skill) continue;
       const bonus = Number(system.skillBonus) || 0;
       if (!bonus) continue;
-      const current = totals.skillBonuses[skill] || 0;
-      totals.skillBonuses[skill] = current + bonus;
+      addSkillBonus(skill, bonus, {
+        type: 'implant',
+        name: itemName(implant, 'implant'),
+        quantity: 1
+      });
     }
 
     return totals;

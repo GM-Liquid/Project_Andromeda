@@ -301,6 +301,18 @@
       "QuantityDecrease": "Decrease quantity",
       "NewItemFallback": "New {type}"
     },
+    "RollFlavor": {
+      "Modifiers": "Modifiers",
+      "SkillValue": "Skill ({skill})",
+      "WoundPenalty": "Wound penalty",
+      "EquipmentBonus": "Equipment bonus",
+      "SourceWeapon": "Weapon: {name}",
+      "SourceCartridge": "Cartridge: {name}",
+      "SourceImplant": "Implant: {name}",
+      "SourceItem": "Item: {name}",
+      "SourceWithQuantity": "{name} ×{quantity}",
+      "UnknownSource": "Unknown source"
+    },
     "ItemRoll": {
       "Flavor": "Rolling {item} ({skill})"
     },

@@ -1293,3 +1293,42 @@ input.rank4 {
   white-space: nowrap;
   border: 0;
 }
+
+.myrpg-roll-flavor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.myrpg-roll-flavor__header {
+  font-weight: 600;
+}
+
+.myrpg-roll-flavor__modifiers {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.myrpg-roll-flavor__title {
+  font-size: 0.9em;
+  color: var(--color-text-dark-5);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.myrpg-roll-part {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.95em;
+}
+
+.myrpg-roll-part__label {
+  color: var(--color-text-dark-3);
+}
+
+.myrpg-roll-part__value {
+  font-weight: 600;
+}
