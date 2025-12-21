@@ -6,19 +6,15 @@
 
 /* Rank colors -------------------------------------------------- */
 :root {
-  /* фоны не меняем */
   --rank1-bg: #c7e6b3;
-  --rank2-bg: #f5a75a;
-  --rank3-bg: #a5a9b4;
-  --rank4-bg: #fcd75f;
-  --rank5-bg: #87d0fb;
+  --rank2-bg: #a5a9b4;
+  --rank3-bg: #fcd75f;
+  --rank4-bg: #87d0fb;
 
-  /* новые рамки с контрастом ≈ 1.9 : 1 */
   --rank1-border: #6ab23b; /* контраст 1.91 */
-  --rank2-border: #c96a0c; /* 1.90 */
-  --rank3-border: #717788; /* 1.90 */
-  --rank4-border: #c69804; /* 1.90 */
-  --rank5-border: #0896e9; /* 1.90 */
+  --rank2-border: #717788; /* 1.90 */
+  --rank3-border: #c69804; /* 1.90 */
+  --rank4-border: #0896e9; /* 1.90 */
 }
 
 .small-input {
@@ -1050,17 +1046,11 @@ section.abilities-section {
   --rank-border: var(--rank4-border);
   color: var(--rank4-border);
 }
-.rank5 {
-  --rank-bg: var(--rank5-bg);
-  --rank-border: var(--rank5-border);
-  color: var(--rank5-border);
-}
 
 input.rank1,
 input.rank2,
 input.rank3,
-input.rank4,
-input.rank5 {
+input.rank4 {
   background-color: var(--rank-bg) !important;
   border-color: var(--rank-border) !important;
   color: #000;
@@ -1069,8 +1059,7 @@ input.rank5 {
 .skill-name.rank1,
 .skill-name.rank2,
 .skill-name.rank3,
-.skill-name.rank4,
-.skill-name.rank5 {
+.skill-name.rank4 {
   background-color: var(--rank-bg);
   border-color: var(--rank-border);
   color: #000;
@@ -1079,8 +1068,7 @@ input.rank5 {
 .rank-hint-table td.rank1,
 .rank-hint-table td.rank2,
 .rank-hint-table td.rank3,
-.rank-hint-table td.rank4,
-.rank-hint-table td.rank5 {
+.rank-hint-table td.rank4 {
   background-color: var(--rank-bg);
   color: #1b1210;
 }

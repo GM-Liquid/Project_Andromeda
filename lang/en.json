@@ -32,17 +32,15 @@
     "RankGradient": {
       "Title": "Rank Gradient",
       "Rank1": "Wood",
-      "Rank2": "Bronze",
-      "Rank3": "Silver",
-      "Rank4": "Gold",
-      "Rank5": "Sky"
+      "Rank2": "Silver",
+      "Rank3": "Gold",
+      "Rank4": "Sky"
     },
     "RankNumeric": {
       "Rank1": "Rank 1",
       "Rank2": "Rank 2",
       "Rank3": "Rank 3",
-      "Rank4": "Rank 4",
-      "Rank5": "Rank 5"
+      "Rank4": "Rank 4"
     },
     "KeyInfo": {
       "Calling": "Calling",

@@ -1,17 +1,25 @@
 // Utility functions for the Project Andromeda system
 
 /**
- * Determine a simplified rank (1-5) based on a value in steps of two.
- * Used purely for coloring cells in the UI.
+ * Determine a simplified rank (1-4) used purely for coloring cells in the UI.
  * @param {number} [val=0] The value to rank.
- * @returns {number} Rank between 1 and 5
+ * @param {'ability' | 'skill'} [type='skill'] Determines which thresholds to use.
+ * @returns {number} Rank between 1 and 4
  */
-export function getColorRank(val = 0) {
-  if (val <= 2) return 1;
-  if (val <= 4) return 2;
-  if (val <= 6) return 3;
-  if (val <= 8) return 4;
-  return 5;
+export function getColorRank(val = 0, type = 'skill') {
+  const numeric = Number(val) || 0;
+
+  if (type === 'ability') {
+    if (numeric <= 6) return 1;
+    if (numeric <= 8) return 2;
+    if (numeric <= 10) return 3;
+    return 4;
+  }
+
+  if (numeric <= 1) return 1;
+  if (numeric <= 3) return 2;
+  if (numeric <= 6) return 3;
+  return 4;
 }
 
 export const ABILITY_DIE_STEPS = [4, 6, 8, 10, 12];
