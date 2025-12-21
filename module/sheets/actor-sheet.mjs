@@ -267,7 +267,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     for (let [k, v] of Object.entries(context.system.abilities)) {
       v.value = normalizeAbilityDie(v.value);
       v.label = game.i18n.localize(CONFIG.ProjectAndromeda.abilities[k]) ?? k;
-      v.rankClass = 'rank' + getColorRank(v.value);
+      v.rankClass = 'rank' + getColorRank(v.value, 'ability');
       v.dieLabel = `d${v.value}`;
     }
     const order = [
@@ -290,7 +290,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       if (context.system.skills[key]) {
         const c = context.system.skills[key];
         c.label = game.i18n.localize(CONFIG.ProjectAndromeda.skills[key]) ?? key;
-        c.rankClass = 'rank' + getColorRank(c.value);
+        c.rankClass = 'rank' + getColorRank(c.value, 'skill');
         sorted[key] = c;
       }
     }
@@ -410,11 +410,11 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
   _updateAbilityDisplays(root, abilityKey) {
     const $root = root instanceof jQuery ? root : $(root ?? this.element);
     const abilityKeys = abilityKey ? [abilityKey] : Object.keys(this.actor.system?.abilities ?? {});
-    const rankClasses = ['rank1', 'rank2', 'rank3', 'rank4', 'rank5'];
+    const rankClasses = ['rank1', 'rank2', 'rank3', 'rank4'];
 
     for (const key of abilityKeys) {
       const dieValue = this._getAbilityDieValue(key);
-      const rankClass = 'rank' + getColorRank(dieValue);
+      const rankClass = 'rank' + getColorRank(dieValue, 'ability');
       const $container = $root.find(`[data-ability-key="${key}"]`);
 
       $container.find('.ability-die-value')

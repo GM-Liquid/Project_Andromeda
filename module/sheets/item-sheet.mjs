@@ -12,7 +12,7 @@ function buildRankOptions(selected) {
     }
   ];
 
-  for (let rank = 1; rank <= 5; rank += 1) {
+  for (let rank = 1; rank <= 4; rank += 1) {
     options.push({
       value: String(rank),
       label: game.i18n.localize(`${baseKey}.Rank${rank}`),
