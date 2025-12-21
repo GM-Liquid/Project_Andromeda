@@ -71,7 +71,7 @@ export class ProjectAndromedaActor extends Actor {
     const tempHealth = Math.max(Number(s.temphealth) || 0, 0);
     const shield = Number(itemTotals?.armor?.shield) || 0;
     const forceShield = Math.max(shield, 0);
-    return Math.max(0, rank + 4 + tempHealth + forceShield);
+    return Math.max(0, rank * 2 + 4 + tempHealth + forceShield);
   }
 
   _calcNpcStressMax(s, itemTotals = {}) {
@@ -79,7 +79,7 @@ export class ProjectAndromedaActor extends Actor {
     const tempHealth = Math.max(Number(s.temphealth) || 0, 0);
     const shield = Number(itemTotals?.armor?.shield) || 0;
     const forceShield = Math.max(shield, 0);
-    return Math.max(0, 6 + rank + tempHealth + forceShield);
+    return Math.max(0, rank * 2 + 4 + tempHealth + forceShield);
   }
 
   _calcFlux(s) {
@@ -91,9 +91,10 @@ export class ProjectAndromedaActor extends Actor {
 
   _calcSpeed(s, itemTotals = {}) {
     const armorSpeed = Number(itemTotals?.armor?.speed) || 0;
+    const rank = Math.max(Number(s.currentRank) || 0, 0);
     return (
-      5 +
-      (s.abilities?.con?.value ?? 0) +
+      rank * 3 +
+      3 +
       armorSpeed +
       (Number(s.tempspeed) || 0)
     );
@@ -102,8 +103,7 @@ export class ProjectAndromedaActor extends Actor {
   _calcDefPhys(s, itemTotals = {}) {
     const phys = Number(itemTotals?.armor?.physical) || 0;
     return (
-      2 +
-      (s.abilities?.con?.value ?? 0) +
+      this._getAbilityDefense(s.abilities?.con?.value) +
       phys +
       (Number(s.tempphys) || 0)
     );
@@ -111,8 +111,7 @@ export class ProjectAndromedaActor extends Actor {
   _calcDefAzure(s, itemTotals = {}) {
     const azure = Number(itemTotals?.armor?.azure) || 0;
     return (
-      2 +
-      (s.abilities?.spi?.value ?? 0) +
+      this._getAbilityDefense(s.abilities?.spi?.value) +
       azure +
       (Number(s.tempazure) || 0)
     );
@@ -120,11 +119,23 @@ export class ProjectAndromedaActor extends Actor {
   _calcDefMent(s, itemTotals = {}) {
     const mental = Number(itemTotals?.armor?.mental) || 0;
     return (
-      2 +
-      (s.abilities?.int?.value ?? 0) +
+      this._getAbilityDefense(s.abilities?.int?.value) +
       mental +
       (Number(s.tempmental) || 0)
     );
+  }
+
+  _getAbilityDefense(abilityValue) {
+    const defensesByDie = {
+      4: 2,
+      6: 3,
+      8: 4,
+      10: 6,
+      12: 8
+    };
+
+    const dieValue = normalizeAbilityDie(abilityValue);
+    return defensesByDie[dieValue] ?? 0;
   }
 
   _computeItemTotals() {
