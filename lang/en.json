@@ -158,7 +158,7 @@
       "SkillLabel": "Skill",
       "SkillNone": "No skill selected",
       "SkillNoneOption": "No skill selected",
-      "BonusLabel": "Skill Bonus",
+      "DamageLabel": "Damage",
       "DescriptionLabel": "Description",
       "EquippedLabel": "Equipped"
     },
@@ -306,6 +306,7 @@
       "SkillValue": "Skill ({skill})",
       "WoundPenalty": "Wound penalty",
       "EquipmentBonus": "Equipment bonus",
+      "Damage": "Damage {value}",
       "SourceWeapon": "Weapon: {name}",
       "SourceCartridge": "Cartridge: {name}",
       "SourceImplant": "Implant: {name}",
