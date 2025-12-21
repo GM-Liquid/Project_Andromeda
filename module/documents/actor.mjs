@@ -111,7 +111,7 @@ export class ProjectAndromedaActor extends Actor {
   _calcDefAzure(s, itemTotals = {}) {
     const azure = Number(itemTotals?.armor?.azure) || 0;
     return (
-      this._getAbilityDefense(s.abilities?.spi?.value) +
+      this._getAbilityDefense(s.abilities?.int?.value) +
       azure +
       (Number(s.tempazure) || 0)
     );
@@ -119,7 +119,7 @@ export class ProjectAndromedaActor extends Actor {
   _calcDefMent(s, itemTotals = {}) {
     const mental = Number(itemTotals?.armor?.mental) || 0;
     return (
-      this._getAbilityDefense(s.abilities?.int?.value) +
+      this._getAbilityDefense(s.abilities?.spi?.value) +
       mental +
       (Number(s.tempmental) || 0)
     );
