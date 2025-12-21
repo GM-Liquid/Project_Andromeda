@@ -318,33 +318,36 @@
           <div class='sheet-box'>
             <h2>{{localize 'MY_RPG.SheetLabels.Skills'}}</h2>
             <div class='skills-grid'>
-              {{#each system.skills as |skill key|}}
-                <div class='skill skill-row'>
-                  <!--                                 -->
-                  <div class='skill-col skill-ability-abbr'>
-                    {{localize (concat 'MY_RPG.abilityAbbreviations.' skill.ability)}}
+              {{#each skillColumns as |column|}}
+                <div class='skills-column'>
+                  <div class='skills-column-header'>
+                    <span class='skill-col skill-ability-abbr'>{{column.abbreviation}}</span>
+                    <span class='skills-column-title'>{{column.label}}</span>
                   </div>
+                  {{#each column.skills as |skill|}}
+                    <div class='skill skill-row'>
+                      <div
+                        class='skill-col skill-name rollable'
+                        data-skill='{{skill.key}}'
+                        data-label='{{skill.label}}'
+                      >
+                        {{skill.label}}
+                      </div>
 
-                  <div
-                    class='skill-col skill-name rollable'
-                    data-skill='{{key}}'
-                    data-label='{{localize (concat "MY_RPG.Skill." (toPascalCase key))}}'
-                  >
-                    {{localize (concat 'MY_RPG.Skill.' (toPascalCase key))}}
-                  </div>
-
-                  <div class='skill-col skill-value'>
-                    <input
-                      class='{{skill.rankClass}}'
-                      type='number'
-                      name='system.skills.{{key}}.value'
-                      value='{{skill.value}}'
-                      step='1'
-                      inputmode='numeric'
-                      pattern='\d+'
-                      min='0'
-                    />
-                  </div>
+                      <div class='skill-col skill-value'>
+                        <input
+                          class='{{skill.rankClass}}'
+                          type='number'
+                          name='system.skills.{{skill.key}}.value'
+                          value='{{skill.value}}'
+                          step='1'
+                          inputmode='numeric'
+                          pattern='\d+'
+                          min='0'
+                        />
+                      </div>
+                    </div>
+                  {{/each}}
                 </div>
               {{/each}}
             </div>

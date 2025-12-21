@@ -264,37 +264,52 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
   _prepareCharacterData(context) {
     const isCharacter = Boolean(context.isCharacter);
     const isNpc = Boolean(context.isNpc);
-    for (let [k, v] of Object.entries(context.system.abilities)) {
-      v.value = normalizeAbilityDie(v.value);
-      v.label = game.i18n.localize(CONFIG.ProjectAndromeda.abilities[k]) ?? k;
-      v.rankClass = 'rank' + getColorRank(v.value, 'ability');
-      v.dieLabel = `d${v.value}`;
+    const abilityOrder = ['con', 'int', 'spi'];
+    context.system.skills ??= {};
+
+    const sortedAbilities = {};
+    for (const abilityKey of abilityOrder) {
+      const ability = context.system.abilities?.[abilityKey];
+      if (!ability) continue;
+      ability.value = normalizeAbilityDie(ability.value);
+      ability.label = game.i18n.localize(CONFIG.ProjectAndromeda.abilities[abilityKey]) ?? abilityKey;
+      ability.rankClass = 'rank' + getColorRank(ability.value, 'ability');
+      ability.dieLabel = `d${ability.value}`;
+      sortedAbilities[abilityKey] = ability;
     }
-    const order = [
-      'moshch',
-      'lovkost',
-      'sokrytie',
-      'strelba',
-      'blizhniy_boy',
-      'nablyudatelnost',
-      'analiz',
-      'programmirovanie',
-      'inzheneriya',
-      'dominirovanie',
-      'rezonans',
-      'bionika',
-      'obayanie'
-    ];
-    const sorted = {};
-    for (let key of order) {
-      if (context.system.skills[key]) {
-        const c = context.system.skills[key];
-        c.label = game.i18n.localize(CONFIG.ProjectAndromeda.skills[key]) ?? key;
-        c.rankClass = 'rank' + getColorRank(c.value, 'skill');
-        sorted[key] = c;
+    context.system.abilities = sortedAbilities;
+
+    const skillOrderByAbility = {
+      con: ['moshch', 'lovkost', 'sokrytie', 'strelba', 'blizhniy_boy'],
+      int: ['nablyudatelnost', 'analiz', 'programmirovanie', 'inzheneriya'],
+      spi: ['dominirovanie', 'rezonans', 'bionika', 'obayanie']
+    };
+
+    const sortedSkills = {};
+    const skillColumns = [];
+    for (const abilityKey of abilityOrder) {
+      const columnSkills = [];
+      const abilityLabel = game.i18n.localize(CONFIG.ProjectAndromeda.abilities[abilityKey]) ?? abilityKey;
+      const abilityAbbreviation =
+        game.i18n.localize(CONFIG.ProjectAndromeda.abilityAbbreviations[abilityKey]) ?? abilityKey;
+      for (const key of skillOrderByAbility[abilityKey] ?? []) {
+        const skill = context.system.skills[key];
+        if (!skill) continue;
+        skill.label = game.i18n.localize(CONFIG.ProjectAndromeda.skills[key]) ?? key;
+        skill.rankClass = 'rank' + getColorRank(skill.value, 'skill');
+        skill.key = key;
+        sortedSkills[key] = skill;
+        columnSkills.push(skill);
       }
+      skillColumns.push({
+        key: abilityKey,
+        label: abilityLabel,
+        abbreviation: abilityAbbreviation,
+        skills: columnSkills
+      });
     }
-    context.system.skills = sorted;
+    context.system.skills = sortedSkills;
+    context.skillColumns = skillColumns;
 
     const stress = context.system.stress ?? { value: 0, max: 0 };
     const stressValue = Number(stress.value) || 0;

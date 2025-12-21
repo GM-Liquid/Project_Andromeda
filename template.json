@@ -9,13 +9,13 @@
         "currentRank": "",
         "momentOfGlory": 0,
         "abilities": {
-          "spi": {
-            "value": 4
-          },
           "con": {
             "value": 4
           },
           "int": {
+            "value": 4
+          },
+          "spi": {
             "value": 4
           }
         },
