@@ -222,15 +222,18 @@ function buildSystemData(normalizedEntry, config) {
         ['rank', 'rankValue', 'rankLabel', 'currentRank', 'level', 'tier', 'rarity', 'quality'],
         ''
       )
-    ),
-    equipped: normalizeBoolean(
+    )
+  };
+
+  if (config?.itemType !== 'weapon') {
+    baseSystem.equipped = normalizeBoolean(
       getLegacyField(
         normalizedEntry,
         ['equipped', 'isEquipped', 'active', 'isActive', 'enabled', 'isEnabled', 'worn', 'wielded'],
         false
       )
-    )
-  };
+    );
+  }
 
   const extraSystem = config?.buildSystem?.(normalizedEntry) ?? {};
   return cleanObject({

@@ -75,6 +75,10 @@ export class ProjectAndromedaItem extends Item {
       overwrite: false,
       inplace: true
     });
+
+    if (this.type === 'weapon') {
+      delete systemData.equipped;
+    }
   }
 
   get isCartridge() {
