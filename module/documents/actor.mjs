@@ -21,9 +21,9 @@ export class ProjectAndromedaActor extends Actor {
 
     /* 1. Способности ---------------------------------------------- */
     for (const a of Object.values(s.abilities ?? {})) {
-      a.value = normalizeAbilityDie(a.value);
-      a.mod = a.value; // «бонус» = само значение
-      a.roll = getAbilityDieRoll(a.value);
+      const normalized = normalizeAbilityDie(a.value);
+      a.mod = normalized; // «бонус» = само значение
+      a.roll = getAbilityDieRoll(normalized);
     }
 
     /* 2. Навыки ---------------------------------------------------- */

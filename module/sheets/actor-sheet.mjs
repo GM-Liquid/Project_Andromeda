@@ -189,12 +189,13 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
 
     $html
       .find('input[name^="system.skills."]')
-      .on('change', (ev) => {
+      .on('change', async (ev) => {
         const input = ev.currentTarget;
         const validatedValue = this.validateNumericInput(input);
-        this.actor.update({ [input.name]: validatedValue }).then(() => {
-          this.render(false);
-        });
+        await this.actor.update({ [input.name]: validatedValue }, { render: false });
+        const rankClass = 'rank' + getColorRank(validatedValue, 'skill');
+        input.classList.remove('rank1', 'rank2', 'rank3', 'rank4');
+        input.classList.add(rankClass);
       });
 
     $html.on('click', '.ability-step', this._onAbilityStep.bind(this));
@@ -230,7 +231,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
   getData() {
     const context = super.getData();
     const actorData = context.data;
-    context.system = actorData.system;
+    context.system = foundry.utils.duplicate(actorData.system ?? {});
     context.flags = actorData.flags;
     context.isCharacter = actorData.type === 'character';
     context.isNpc = actorData.type === 'npc';
@@ -277,11 +278,14 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     for (const abilityKey of abilityOrder) {
       const ability = context.system.abilities?.[abilityKey];
       if (!ability) continue;
-      ability.value = normalizeAbilityDie(ability.value);
-      ability.label = game.i18n.localize(CONFIG.ProjectAndromeda.abilities[abilityKey]) ?? abilityKey;
-      ability.rankClass = 'rank' + getColorRank(ability.value, 'ability');
-      ability.dieLabel = getAbilityDieLabel(ability.value);
-      sortedAbilities[abilityKey] = ability;
+      const normalizedValue = normalizeAbilityDie(ability.value);
+      sortedAbilities[abilityKey] = {
+        ...foundry.utils.duplicate(ability),
+        value: normalizedValue,
+        label: game.i18n.localize(CONFIG.ProjectAndromeda.abilities[abilityKey]) ?? abilityKey,
+        rankClass: 'rank' + getColorRank(normalizedValue, 'ability'),
+        dieLabel: getAbilityDieLabel(normalizedValue)
+      };
     }
     context.system.abilities = sortedAbilities;
 
