@@ -1,5 +1,5 @@
 import { debugLog } from '../config.mjs';
-import { normalizeAbilityDie } from '../helpers/utils.mjs';
+import { getAbilityDieRoll, getAbilityDieNumeric, normalizeAbilityDie } from '../helpers/utils.mjs';
 
 /**
  * Extend the base Actor document by defining a custom roll data structure which is ideal for the Simple system.
@@ -23,6 +23,7 @@ export class ProjectAndromedaActor extends Actor {
     for (const a of Object.values(s.abilities ?? {})) {
       a.value = normalizeAbilityDie(a.value);
       a.mod = a.value; // «бонус» = само значение
+      a.roll = getAbilityDieRoll(a.value);
     }
 
     /* 2. Навыки ---------------------------------------------------- */
@@ -126,16 +127,12 @@ export class ProjectAndromedaActor extends Actor {
   }
 
   _getAbilityDefense(abilityValue) {
-    const defensesByDie = {
-      4: 2,
-      6: 3,
-      8: 4,
-      10: 6,
-      12: 8
-    };
-
-    const dieValue = normalizeAbilityDie(abilityValue);
-    return defensesByDie[dieValue] ?? 0;
+    const numeric = getAbilityDieNumeric(abilityValue);
+    if (numeric <= 4) return 2;
+    if (numeric <= 6) return 3;
+    if (numeric <= 8) return 4;
+    if (numeric <= 10) return 6;
+    return 8;
   }
 
   _computeItemTotals() {
