@@ -4,13 +4,7 @@
  */
 
 import { MODULE_ID, debugLog } from '../config.mjs';
-import {
-  ABILITY_DIE_STEPS,
-  getAbilityDieLabel,
-  getAbilityDieRoll,
-  getColorRank,
-  normalizeAbilityDie
-} from '../helpers/utils.mjs';
+import { ABILITY_DIE_STEPS, getColorRank, normalizeAbilityDie } from '../helpers/utils.mjs';
 
 
 const ITEM_GROUP_CONFIG = [
@@ -280,7 +274,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       ability.value = normalizeAbilityDie(ability.value);
       ability.label = game.i18n.localize(CONFIG.ProjectAndromeda.abilities[abilityKey]) ?? abilityKey;
       ability.rankClass = 'rank' + getColorRank(ability.value, 'ability');
-      ability.dieLabel = getAbilityDieLabel(ability.value);
+      ability.dieLabel = `d${ability.value}`;
       sortedAbilities[abilityKey] = ability;
     }
     context.system.abilities = sortedAbilities;
@@ -392,20 +386,19 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
 
   _stepAbilityDie(current, step) {
     const normalized = normalizeAbilityDie(current);
-    const dieValues = ABILITY_DIE_STEPS.map((abilityStep) => abilityStep.value);
-    const index = dieValues.indexOf(normalized);
+    const index = ABILITY_DIE_STEPS.indexOf(normalized);
     const clampedIndex = Math.max(
       0,
       Math.min(
         (index === -1 ? 0 : index) + Math.sign(step || 0),
-        dieValues.length - 1
+        ABILITY_DIE_STEPS.length - 1
       )
     );
-    return dieValues[clampedIndex];
+    return ABILITY_DIE_STEPS[clampedIndex];
   }
 
   _getAbilityDieValue(abilityKey) {
-    if (!abilityKey) return ABILITY_DIE_STEPS[0].value;
+    if (!abilityKey) return ABILITY_DIE_STEPS[0];
     const ability = this.actor.system?.abilities?.[abilityKey];
     return normalizeAbilityDie(ability?.value);
   }
@@ -440,7 +433,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       const $container = $root.find(`[data-ability-key="${key}"]`);
 
       $container.find('.ability-die-value')
-        .text(getAbilityDieLabel(dieValue))
+        .text(`d${dieValue}`)
         .removeClass(rankClasses.join(' '))
         .addClass(rankClass);
 
@@ -463,7 +456,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const parts = [];
 
     if (!dieValue && !ability) {
-      dieValue = ABILITY_DIE_STEPS[0].value;
+      dieValue = ABILITY_DIE_STEPS[0];
     }
 
     if (skill) {
@@ -508,8 +501,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       });
     }
 
-    const rollFormula = dieValue ? getAbilityDieRoll(dieValue) : getAbilityDieRoll(ABILITY_DIE_STEPS[0].value);
-    const roll = await new Roll(`${rollFormula} + @mod`, { mod: modifier }).roll({
+    const roll = await new Roll(`1d${dieValue ?? ABILITY_DIE_STEPS[0]} + @mod`, { mod: modifier }).roll({
       async: true
     });
     const flavor = this._buildRollFlavor(label, parts);
@@ -916,9 +908,13 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       });
 
       let flavor = this._buildRollFlavor(flavorLabel, parts);
-      const weaponDetails = this._weaponEffectHtml(item);
-      if (weaponDetails) {
-        flavor += `<div class="myrpg-roll-note">${weaponDetails}</div>`;
+      const damageValue = this._formatDamage(system.skillBonus);
+      const damageNumber = Number(damageValue);
+      if (damageNumber) {
+        const damageText = this._escapeHTML(
+          game.i18n.format('MY_RPG.RollFlavor.Damage', { value: damageValue })
+        );
+        flavor += `<div class="myrpg-roll-note">${damageText}</div>`;
       }
 
       roll.toMessage({
