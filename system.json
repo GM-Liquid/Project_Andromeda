@@ -16,17 +16,13 @@
       "thumbnail": "systems/Project_Andromeda/assets/Art_core_1.jpg"
     }
   ],
-  "version": "2.331",
+  "version": "2.332",
   "compatibility": {
     "minimum": "12",
     "verified": "12"
   },
-  "esmodules": [
-    "module/project-andromeda.mjs"
-  ],
-  "styles": [
-    "css/project-andromeda.css"
-  ],
+  "esmodules": ["module/project-andromeda.mjs"],
+  "styles": ["css/project-andromeda.css"],
   "languages": [
     {
       "lang": "ru",
