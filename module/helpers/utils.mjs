@@ -38,6 +38,9 @@ const ABILITY_DIE_NUMERICS = ABILITY_DIE_STEPS.map((step) => step.numeric);
 export function getAbilityDieStep(value) {
   if (value === undefined || value === null) return ABILITY_DIE_STEPS[0];
   const normalized = typeof value === 'string' ? value.trim().toLowerCase() : value;
+  const normalizedNumeric = typeof normalized === 'string' && normalized.length
+    ? Number(normalized)
+    : null;
   const byValue = ABILITY_DIE_STEPS.find((step) => {
     if (typeof normalized === 'number') return step.value === normalized;
     if (typeof step.value === 'string' && typeof normalized === 'string') {
@@ -50,6 +53,18 @@ export function getAbilityDieStep(value) {
     return false;
   });
   if (byValue) return byValue;
+  if (typeof normalizedNumeric === 'number' && Number.isFinite(normalizedNumeric)) {
+    const min = Math.min(...ABILITY_DIE_NUMERICS);
+    const max = Math.max(...ABILITY_DIE_NUMERICS);
+    const clamped = Math.max(Math.min(normalizedNumeric, max), min);
+    let closest = ABILITY_DIE_STEPS[0];
+    for (const step of ABILITY_DIE_STEPS) {
+      if (Math.abs(step.numeric - clamped) < Math.abs(closest.numeric - clamped)) {
+        closest = step;
+      }
+    }
+    return closest;
+  }
   if (typeof normalized === 'number') {
     const min = Math.min(...ABILITY_DIE_NUMERICS);
     const max = Math.max(...ABILITY_DIE_NUMERICS);
