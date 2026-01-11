@@ -12,8 +12,8 @@
   "media": [
     {
       "type": "setup",
-      "url": "systems/Project_Andromeda/assets/Art_core_1.jpg",
-      "thumbnail": "systems/Project_Andromeda/assets/Art_core_1.jpg"
+      "url": "systems/Project_Andromeda/assets/Art_core_1.webp",
+      "thumbnail": "systems/Project_Andromeda/assets/Art_core_1.webp"
     }
   ],
   "version": "2.333",
@@ -40,7 +40,7 @@
   "socket": false,
   "manifest": "https://github.com/GM-Liquid/Project_Andromeda/releases/latest/download/system.json",
   "download": "https://github.com/GM-Liquid/Project_Andromeda/releases/latest/download/project-andromeda.zip",
-  "background": "systems/project-andromeda/assets/Art_core_1.jpg",
+  "background": "systems/project-andromeda/assets/Art_core_1.webp",
   "grid": {
     "distance": 2,
     "units": "\u043c"
