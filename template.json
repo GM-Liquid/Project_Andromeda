@@ -152,7 +152,9 @@
       "trait-combat",
       "trait-magical",
       "trait-professional",
-      "trait-technological"
+      "trait-technological",
+      "trait-genome",
+      "trait-source-ability"
     ],
     "templates": {
       "base": {
@@ -243,6 +245,12 @@
       "templates": ["base"]
     },
     "trait-technological": {
+      "templates": ["base"]
+    },
+    "trait-genome": {
+      "templates": ["base"]
+    },
+    "trait-source-ability": {
       "templates": ["base"]
     }
   }
