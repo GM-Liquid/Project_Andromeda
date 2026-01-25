@@ -20,28 +20,7 @@ export const ITEM_TYPE_CONFIGS = [
     }
   },
   {
-    type: 'ability',
-    supertype: 'equipment',
-    groupKey: 'cartridges',
-    sheet: 'cartridge',
-    defaults: {
-      runeType: 'Spell',
-      skill: '',
-      skillBonus: 0
-    }
-  },
-  {
     type: 'implant',
-    supertype: 'equipment',
-    groupKey: 'implants',
-    sheet: 'implant',
-    defaults: {
-      skill: '',
-      skillBonus: 0
-    }
-  },
-  {
-    type: 'mod',
     supertype: 'equipment',
     groupKey: 'implants',
     sheet: 'implant',
@@ -73,15 +52,6 @@ export const ITEM_TYPE_CONFIGS = [
       itemMental: 0,
       itemShield: 0,
       itemSpeed: 0
-    }
-  },
-  {
-    type: 'gear',
-    supertype: 'equipment',
-    groupKey: 'equipment',
-    sheet: 'gear',
-    defaults: {
-      quantity: 1
     }
   },
   {
@@ -239,7 +209,7 @@ export const ITEM_TYPE_CONFIGS = [
 export const ITEM_GROUP_CONFIGS = [
   {
     key: 'cartridges',
-    types: ['cartridge', 'ability'],
+    types: ['cartridge'],
     tab: 'abilities',
     icon: 'fas fa-magic',
     labelKey: 'MY_RPG.ItemGroups.Cartridges',
@@ -253,7 +223,7 @@ export const ITEM_GROUP_CONFIGS = [
   },
   {
     key: 'implants',
-    types: ['implant', 'mod'],
+    types: ['implant'],
     tab: 'abilities',
     icon: 'fas fa-cogs',
     labelKey: 'MY_RPG.ItemGroups.Implants',
@@ -309,7 +279,7 @@ export const ITEM_GROUP_CONFIGS = [
   },
   {
     key: 'equipment',
-    types: ['equipment', 'gear'],
+    types: ['equipment'],
     tab: 'inventory',
     icon: 'fas fa-toolbox',
     labelKey: 'MY_RPG.ItemGroups.Equipment',
