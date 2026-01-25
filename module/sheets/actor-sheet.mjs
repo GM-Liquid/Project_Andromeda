@@ -176,9 +176,6 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     }
 
     const worldType = game.settings.get(MODULE_ID, 'worldType');
-    if (worldType === 'unity') {
-      context.runeMax = (Number(context.system.abilities.int?.value || 0) * 2) + 5;
-    }
 
     context.rollData = context.actor.getRollData();
     context.itemTabs = ITEM_TABS.map((tab) => ({
@@ -187,16 +184,6 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     }));
 
     const itemGroups = this._buildItemGroups();
-    const cartridgeGroup = itemGroups.find((group) => group.key === 'cartridges');
-    if (cartridgeGroup) {
-      cartridgeGroup.capacity = worldType === 'unity'
-        ? { value: cartridgeGroup.count, max: context.runeMax ?? 0 }
-        : null;
-      context.cartridgeCount = cartridgeGroup.count;
-    } else {
-      context.cartridgeCount = 0;
-    }
-
     context.itemGroups = itemGroups.reduce((acc, group) => {
       (acc[group.tab] ??= []).push(group);
       return acc;

@@ -215,20 +215,6 @@ export const ITEM_TYPE_CONFIGS = [
 
 export const ITEM_GROUP_CONFIGS = [
   {
-    key: 'cartridges',
-    types: ['cartridge'],
-    tab: 'abilities',
-    icon: 'fas fa-magic',
-    labelKey: 'MY_RPG.ItemGroups.Cartridges',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyCartridges',
-    createKey: 'MY_RPG.ItemGroups.CreateCartridge',
-    newNameKey: 'MY_RPG.ItemGroups.NewCartridge',
-    showQuantity: false,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: true
-  },
-  {
     key: 'implants',
     types: ['implant'],
     tab: 'abilities',
@@ -557,24 +543,6 @@ export function getItemTabLabel(tabKey, worldType) {
 }
 
 export const ITEM_BADGE_BUILDERS = {
-  cartridges: (item, helpers) => {
-    const system = item.system ?? {};
-    const badges = [];
-    const t = helpers.t;
-    const rank = Number(system.rank) || 0;
-    if (rank) {
-      badges.push(`${t.localize('MY_RPG.AbilitiesTable.Rank')}: ${helpers.getRankLabel(rank)}`);
-    }
-    if (helpers.worldType === 'unity' && system.runeType) {
-      const runeKey = `MY_RPG.RuneTypes.${system.runeType}`;
-      badges.push(`${t.localize('MY_RPG.RunesTable.RuneType')}: ${t.localize(runeKey)}`);
-    }
-    badges.push(`${t.localize('MY_RPG.AbilitiesTable.Skill')}: ${helpers.skillLabel(system.skill)}`);
-    badges.push(
-      `${t.localize('MY_RPG.AbilitiesTable.Bonus')}: ${helpers.formatSkillBonus(system.skillBonus)}`
-    );
-    return badges;
-  },
   implants: (item, helpers) => {
     const system = item.system ?? {};
     const badges = [];
