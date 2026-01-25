@@ -7,9 +7,51 @@ import { ITEM_SHEET_CLASSES } from './sheets/item-sheet.mjs';
 // Import helper/utility classes and constants.
 import { preloadHandlebarsTemplates } from './helpers/templates.mjs';
 import { MODULE_ID, PROJECT_ANDROMEDA, debugLog, registerSystemSettings } from './config.mjs';
-import { ITEM_TYPE_CONFIGS } from './helpers/item-config.mjs';
+import { ITEM_SUPERTYPE_LABELS, ITEM_TYPE_CONFIGS } from './helpers/item-config.mjs';
 import { runLegacyItemMigration } from './helpers/migrations.mjs';
 import './helpers/handlebars-helpers.mjs';
+
+const ITEM_SUPERTYPE_ORDER = ['equipment', 'environment', 'traits', 'other'];
+
+function buildItemTypeOptions({ select, allowedTypes }) {
+  const currentValue = select.val();
+  const grouped = new Map();
+  const unknownTypes = new Set(allowedTypes);
+
+  for (const config of ITEM_TYPE_CONFIGS) {
+    if (!allowedTypes.has(config.type)) continue;
+    unknownTypes.delete(config.type);
+    const groupKey = config.supertype ?? 'other';
+    const list = grouped.get(groupKey) ?? [];
+    list.push(config.type);
+    grouped.set(groupKey, list);
+  }
+
+  if (unknownTypes.size) {
+    grouped.set('other', [...(grouped.get('other') ?? []), ...unknownTypes]);
+  }
+
+  select.empty();
+
+  for (const groupKey of ITEM_SUPERTYPE_ORDER) {
+    const types = grouped.get(groupKey);
+    if (!types?.length) continue;
+    const labelKey = ITEM_SUPERTYPE_LABELS[groupKey];
+    const label = labelKey ? game.i18n.localize(labelKey) : groupKey;
+    const $group = $(`<optgroup label="${label}"></optgroup>`);
+    for (const type of types) {
+      const typeLabel = game.i18n.localize(`TYPES.Item.${type}`);
+      $group.append(`<option value="${type}">${typeLabel}</option>`);
+    }
+    select.append($group);
+  }
+
+  if (currentValue && allowedTypes.has(currentValue)) {
+    select.val(currentValue);
+  } else {
+    select.prop('selectedIndex', 0);
+  }
+}
 
 /* -------------------------------------------- */
 /*  Init Hook                                   */
@@ -71,6 +113,14 @@ Hooks.once('init', function () {
       label: entry.label
     });
   }
+
+  Hooks.on('renderItemCreateDialog', (app, html) => {
+    const select = html.find('select[name="type"]');
+    if (!select?.length) return;
+    const allowedTypes = new Set(game.system.documentTypes?.Item ?? []);
+    if (!allowedTypes.size) return;
+    buildItemTypeOptions({ select, allowedTypes });
+  });
 
   // Preload Handlebars templates.
   return preloadHandlebarsTemplates();
