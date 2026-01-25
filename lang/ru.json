@@ -97,10 +97,10 @@
       "MomentOfGlory": "Миг Славы"
     },
     "SheetLabels": {
-      "AbilitiesAndMods": "Картриджи и импланты",
+      "AbilitiesAndMods": "Способности и геномы",
       "Tablet": "Скрижаль",
       "Features": "Основной лист",
-      "Abilities": "Картриджи",
+      "Abilities": "Геномы",
       "Parameters": "Параметры",
       "Attributes": "Характеристики",
       "Skills": "Навыки",
@@ -109,7 +109,7 @@
       "Inventory": "Инвентарь",
       "Environment": "Окружение",
       "Traits": "Черты",
-      "ItemAbility": "Лист картриджа",
+      "ItemAbility": "Лист генома",
       "ItemMod": "Лист импланта",
       "ItemArmor": "Лист доспеха",
       "ItemWeapon": "Лист оружия",
