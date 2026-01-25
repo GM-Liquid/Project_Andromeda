@@ -358,6 +358,12 @@
       "NewTraitTechnological": "Новая технологическая черта",
       "Unnamed": "Безымянный предмет"
     },
+    "ItemTypeGroups": {
+      "Equipment": "Экипировка",
+      "Environment": "Окружение",
+      "Traits": "Черты",
+      "Other": "Другое"
+    },
     "ItemControls": {
       "Edit": "Изменить",
       "Delete": "Удалить",

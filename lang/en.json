@@ -351,6 +351,12 @@
       "NewTraitTechnological": "New Technological Trait",
       "Unnamed": "Unnamed item"
     },
+    "ItemTypeGroups": {
+      "Equipment": "Equipment",
+      "Environment": "Environment",
+      "Traits": "Traits",
+      "Other": "Other"
+    },
     "ItemControls": {
       "Edit": "Edit",
       "Delete": "Delete",
