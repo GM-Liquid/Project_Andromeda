@@ -114,7 +114,8 @@ Hooks.once('init', function () {
     });
   }
 
-  Hooks.on('renderItemCreateDialog', (app, html) => {
+  Hooks.on('renderDocumentCreateDialog', (app, html) => {
+    if (app?.documentName !== 'Item') return;
     const select = html.find('select[name="type"]');
     if (!select?.length) return;
     const allowedTypes = new Set(game.system.documentTypes?.Item ?? []);
