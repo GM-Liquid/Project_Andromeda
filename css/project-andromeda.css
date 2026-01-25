@@ -187,6 +187,12 @@ textarea[disabled] {
   font-weight: 700;
 }
 
+/* Item type selection ---------------------------------------------------- */
+.document-create-dialog select option.item-type-supertype {
+  font-weight: 700;
+  color: #1b1210;
+}
+
 /* Item sheets ---------------------------------------------------- */
 .project-andromeda.item-sheet {
   --item-sheet-border: #d4cbc0;
