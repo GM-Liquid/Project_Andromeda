@@ -385,16 +385,6 @@
 
       {{#each itemTabs as |tab|}}
         <div class='tab {{tab.key}}' data-group='primary' data-tab='{{tab.key}}'>
-          {{#isTab tab.key 'abilities'}}
-            {{#ifUnity}}
-            <div class='rune-size'>
-              <label>{{localize 'MY_RPG.RunesTable.SizeLabel'}}</label>
-              <input type='number' value='{{../cartridgeCount}}' disabled />
-              <span class='divider'>/</span>
-              <input type='number' value='{{../runeMax}}' disabled />
-            </div>
-            {{/ifUnity}}
-          {{/isTab}}
           <section class='item-groups' data-groups='{{tab.key}}'>
             {{#each (lookup ../itemGroups tab.key) as |group|}}
               <section class='item-group' data-item-group='{{group.key}}'>
