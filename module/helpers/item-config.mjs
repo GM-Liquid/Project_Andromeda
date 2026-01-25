@@ -383,6 +383,29 @@ export const ITEM_GROUP_CONFIGS = [
     canRoll: false
   },
   {
+    key: 'traits',
+    types: [
+      'trait-flaw',
+      'trait-general',
+      'trait-backstory',
+      'trait-social',
+      'trait-combat',
+      'trait-magical',
+      'trait-professional',
+      'trait-technological'
+    ],
+    tab: 'abilities',
+    icon: 'fas fa-tags',
+    labelKey: 'MY_RPG.ItemGroups.Traits',
+    emptyKey: 'MY_RPG.ItemGroups.EmptyTraits',
+    createKey: 'MY_RPG.ItemGroups.CreateTrait',
+    newNameKey: 'MY_RPG.ItemGroups.NewTrait',
+    showQuantity: false,
+    allowEquip: false,
+    exclusive: false,
+    canRoll: false
+  },
+  {
     key: 'traitFlaws',
     types: ['trait-flaw'],
     tab: 'traits',
@@ -519,10 +542,6 @@ export const ITEM_TABS = [
   {
     key: 'environment',
     labelKey: 'MY_RPG.SheetLabels.Environment'
-  },
-  {
-    key: 'traits',
-    labelKey: 'MY_RPG.SheetLabels.Traits'
   }
 ];
 
