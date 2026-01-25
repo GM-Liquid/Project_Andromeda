@@ -97,10 +97,10 @@
       "MomentOfGlory": "Миг Славы"
     },
     "SheetLabels": {
-      "AbilitiesAndMods": "Картриджи и импланты",
+      "AbilitiesAndMods": "Способности и геномы",
       "Tablet": "Скрижаль",
       "Features": "Основной лист",
-      "Abilities": "Картриджи",
+      "Abilities": "Геномы",
       "Parameters": "Параметры",
       "Attributes": "Характеристики",
       "Skills": "Навыки",
@@ -108,7 +108,7 @@
       "Biography": "Биография и заметки",
       "Inventory": "Инвентарь",
       "Traits": "Черты",
-      "ItemAbility": "Лист картриджа",
+      "ItemAbility": "Лист генома",
       "ItemMod": "Лист импланта",
       "ItemArmor": "Лист доспеха",
       "ItemWeapon": "Лист оружия",
@@ -274,6 +274,14 @@
       "EmptyImplants": "Пока нет имплантов.",
       "CreateImplant": "Добавить имплант",
       "NewImplant": "Новый имплант",
+      "Genomes": "Геномы",
+      "EmptyGenomes": "Пока нет геномов.",
+      "CreateGenome": "Добавить геном",
+      "NewGenome": "Новый геном",
+      "SourceAbilities": "Способности источника",
+      "EmptySourceAbilities": "Пока нет способностей источника.",
+      "CreateSourceAbility": "Добавить способность источника",
+      "NewSourceAbility": "Новая способность источника",
       "Weapons": "Оружие",
       "EmptyWeapons": "Пока нет оружия.",
       "CreateWeapon": "Добавить оружие",
@@ -314,6 +322,10 @@
       "EmptyEnvironmentDanger": "Пока нет опасных зон.",
       "CreateEnvironmentDanger": "Добавить опасную зону",
       "NewEnvironmentDanger": "Новая опасная зона",
+      "Traits": "Черты",
+      "EmptyTraits": "Пока нет черт.",
+      "CreateTrait": "Добавить черту",
+      "NewTrait": "Новая черта",
       "TraitFlaws": "Недостатки",
       "EmptyTraitFlaws": "Пока нет недостатков.",
       "CreateTraitFlaw": "Добавить недостаток",
@@ -426,7 +438,9 @@
       "trait-combat": "Боевая черта",
       "trait-magical": "Магическая черта",
       "trait-professional": "Профессиональная черта",
-      "trait-technological": "Технологическая черта"
+      "trait-technological": "Технологическая черта",
+      "trait-genome": "Геном",
+      "trait-source-ability": "Способность источника"
     }
   }
 }

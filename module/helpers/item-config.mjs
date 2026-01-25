@@ -210,6 +210,18 @@ export const ITEM_TYPE_CONFIGS = [
     supertype: 'traits',
     groupKey: 'traitTechnological',
     sheet: 'generic'
+  },
+  {
+    type: 'trait-genome',
+    supertype: 'traits',
+    groupKey: 'genomes',
+    sheet: 'generic'
+  },
+  {
+    type: 'trait-source-ability',
+    supertype: 'traits',
+    groupKey: 'sourceAbilities',
+    sheet: 'generic'
   }
 ];
 
@@ -241,6 +253,34 @@ export const ITEM_GROUP_CONFIGS = [
     allowEquip: false,
     exclusive: false,
     canRoll: true
+  },
+  {
+    key: 'genomes',
+    types: ['trait-genome'],
+    tab: 'abilities',
+    icon: 'fas fa-dna',
+    labelKey: 'MY_RPG.ItemGroups.Genomes',
+    emptyKey: 'MY_RPG.ItemGroups.EmptyGenomes',
+    createKey: 'MY_RPG.ItemGroups.CreateGenome',
+    newNameKey: 'MY_RPG.ItemGroups.NewGenome',
+    showQuantity: false,
+    allowEquip: false,
+    exclusive: false,
+    canRoll: false
+  },
+  {
+    key: 'sourceAbilities',
+    types: ['trait-source-ability'],
+    tab: 'abilities',
+    icon: 'fas fa-bolt',
+    labelKey: 'MY_RPG.ItemGroups.SourceAbilities',
+    emptyKey: 'MY_RPG.ItemGroups.EmptySourceAbilities',
+    createKey: 'MY_RPG.ItemGroups.CreateSourceAbility',
+    newNameKey: 'MY_RPG.ItemGroups.NewSourceAbility',
+    showQuantity: false,
+    allowEquip: false,
+    exclusive: false,
+    canRoll: false
   },
   {
     key: 'weapons',
@@ -294,6 +334,113 @@ export const ITEM_GROUP_CONFIGS = [
     createKey: 'MY_RPG.ItemGroups.CreateEquipment',
     newNameKey: 'MY_RPG.ItemGroups.NewEquipment',
     showQuantity: true,
+    allowEquip: false,
+    exclusive: false,
+    canRoll: false
+  },
+  {
+    key: 'environmentConsumables',
+    types: ['environment-consumable'],
+    tab: 'environment',
+    icon: 'fas fa-flask',
+    labelKey: 'MY_RPG.ItemGroups.EnvironmentConsumables',
+    emptyKey: 'MY_RPG.ItemGroups.EmptyEnvironmentConsumables',
+    createKey: 'MY_RPG.ItemGroups.CreateEnvironmentConsumable',
+    newNameKey: 'MY_RPG.ItemGroups.NewEnvironmentConsumable',
+    showQuantity: true,
+    allowEquip: false,
+    exclusive: false,
+    canRoll: false
+  },
+  {
+    key: 'environmentInteractive',
+    types: ['environment-interactive'],
+    tab: 'environment',
+    icon: 'fas fa-hand-pointer',
+    labelKey: 'MY_RPG.ItemGroups.EnvironmentInteractive',
+    emptyKey: 'MY_RPG.ItemGroups.EmptyEnvironmentInteractive',
+    createKey: 'MY_RPG.ItemGroups.CreateEnvironmentInteractive',
+    newNameKey: 'MY_RPG.ItemGroups.NewEnvironmentInteractive',
+    showQuantity: false,
+    allowEquip: false,
+    exclusive: false,
+    canRoll: false
+  },
+  {
+    key: 'environmentNarrative',
+    types: ['environment-narrative'],
+    tab: 'environment',
+    icon: 'fas fa-book',
+    labelKey: 'MY_RPG.ItemGroups.EnvironmentNarrative',
+    emptyKey: 'MY_RPG.ItemGroups.EmptyEnvironmentNarrative',
+    createKey: 'MY_RPG.ItemGroups.CreateEnvironmentNarrative',
+    newNameKey: 'MY_RPG.ItemGroups.NewEnvironmentNarrative',
+    showQuantity: false,
+    allowEquip: false,
+    exclusive: false,
+    canRoll: false
+  },
+  {
+    key: 'environmentResources',
+    types: ['environment-resource'],
+    tab: 'environment',
+    icon: 'fas fa-leaf',
+    labelKey: 'MY_RPG.ItemGroups.EnvironmentResources',
+    emptyKey: 'MY_RPG.ItemGroups.EmptyEnvironmentResources',
+    createKey: 'MY_RPG.ItemGroups.CreateEnvironmentResource',
+    newNameKey: 'MY_RPG.ItemGroups.NewEnvironmentResource',
+    showQuantity: true,
+    allowEquip: false,
+    exclusive: false,
+    canRoll: false
+  },
+  {
+    key: 'environmentTriggers',
+    types: ['environment-trigger'],
+    tab: 'environment',
+    icon: 'fas fa-bell',
+    labelKey: 'MY_RPG.ItemGroups.EnvironmentTriggers',
+    emptyKey: 'MY_RPG.ItemGroups.EmptyEnvironmentTriggers',
+    createKey: 'MY_RPG.ItemGroups.CreateEnvironmentTrigger',
+    newNameKey: 'MY_RPG.ItemGroups.NewEnvironmentTrigger',
+    showQuantity: false,
+    allowEquip: false,
+    exclusive: false,
+    canRoll: false
+  },
+  {
+    key: 'environmentDanger',
+    types: ['environment-danger'],
+    tab: 'environment',
+    icon: 'fas fa-skull',
+    labelKey: 'MY_RPG.ItemGroups.EnvironmentDanger',
+    emptyKey: 'MY_RPG.ItemGroups.EmptyEnvironmentDanger',
+    createKey: 'MY_RPG.ItemGroups.CreateEnvironmentDanger',
+    newNameKey: 'MY_RPG.ItemGroups.NewEnvironmentDanger',
+    showQuantity: false,
+    allowEquip: false,
+    exclusive: false,
+    canRoll: false
+  },
+  {
+    key: 'traits',
+    types: [
+      'trait-flaw',
+      'trait-general',
+      'trait-backstory',
+      'trait-social',
+      'trait-combat',
+      'trait-magical',
+      'trait-professional',
+      'trait-technological'
+    ],
+    tab: 'abilities',
+    icon: 'fas fa-tags',
+    labelKey: 'MY_RPG.ItemGroups.Traits',
+    emptyKey: 'MY_RPG.ItemGroups.EmptyTraits',
+    createKey: 'MY_RPG.ItemGroups.CreateTrait',
+    newNameKey: 'MY_RPG.ItemGroups.NewTrait',
+    showQuantity: false,
     allowEquip: false,
     exclusive: false,
     canRoll: false
@@ -433,8 +580,8 @@ export const ITEM_TABS = [
     labelKey: 'MY_RPG.SheetLabels.Inventory'
   },
   {
-    key: 'traits',
-    labelKey: 'MY_RPG.SheetLabels.Traits'
+    key: 'environment',
+    labelKey: 'MY_RPG.SheetLabels.Environment'
   }
 ];
 
