@@ -49,7 +49,12 @@ function buildItemTypeOptions({ select, allowedTypes }) {
   if (currentValue && allowedTypes.has(currentValue)) {
     select.val(currentValue);
   } else {
-    select.prop('selectedIndex', 0);
+    const firstSelectable = select.find('option').first();
+    if (firstSelectable.length) {
+      select.val(firstSelectable.val());
+    } else {
+      select.prop('selectedIndex', 0);
+    }
   }
 }
 
