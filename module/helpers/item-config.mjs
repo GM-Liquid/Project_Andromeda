@@ -210,6 +210,18 @@ export const ITEM_TYPE_CONFIGS = [
     supertype: 'traits',
     groupKey: 'traitTechnological',
     sheet: 'generic'
+  },
+  {
+    type: 'trait-genome',
+    supertype: 'traits',
+    groupKey: 'genomes',
+    sheet: 'generic'
+  },
+  {
+    type: 'trait-source-ability',
+    supertype: 'traits',
+    groupKey: 'sourceAbilities',
+    sheet: 'generic'
   }
 ];
 
@@ -241,6 +253,34 @@ export const ITEM_GROUP_CONFIGS = [
     allowEquip: false,
     exclusive: false,
     canRoll: true
+  },
+  {
+    key: 'genomes',
+    types: ['trait-genome'],
+    tab: 'abilities',
+    icon: 'fas fa-dna',
+    labelKey: 'MY_RPG.ItemGroups.Genomes',
+    emptyKey: 'MY_RPG.ItemGroups.EmptyGenomes',
+    createKey: 'MY_RPG.ItemGroups.CreateGenome',
+    newNameKey: 'MY_RPG.ItemGroups.NewGenome',
+    showQuantity: false,
+    allowEquip: false,
+    exclusive: false,
+    canRoll: false
+  },
+  {
+    key: 'sourceAbilities',
+    types: ['trait-source-ability'],
+    tab: 'abilities',
+    icon: 'fas fa-bolt',
+    labelKey: 'MY_RPG.ItemGroups.SourceAbilities',
+    emptyKey: 'MY_RPG.ItemGroups.EmptySourceAbilities',
+    createKey: 'MY_RPG.ItemGroups.CreateSourceAbility',
+    newNameKey: 'MY_RPG.ItemGroups.NewSourceAbility',
+    showQuantity: false,
+    allowEquip: false,
+    exclusive: false,
+    canRoll: false
   },
   {
     key: 'weapons',
