@@ -42,14 +42,10 @@ export class ProjectAndromedaActor extends Actor {
     stress.value = Math.clamp
       ? Math.clamp(currentStress, 0, stress.max)
       : Math.min(Math.max(currentStress, 0), stress.max);
-
-    if (isCharacter) {
-      const wounds = s.wounds ?? (s.wounds = {});
-      wounds.minor = Boolean(wounds.minor);
-      wounds.severe = Boolean(wounds.severe);
-    } else if (isNpc && s.wounds !== undefined) {
-      delete s.wounds;
-    }
+    const marked = Array.isArray(stress.marked) ? stress.marked : [];
+    stress.marked = [...new Set(marked)]
+      .map((value) => Number(value))
+      .filter((value) => Number.isInteger(value) && value >= 0 && value < stress.max);
 
     s.flux ??= {};
     s.flux.value = this._calcFlux(s);

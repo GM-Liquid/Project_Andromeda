@@ -166,7 +166,7 @@
                   {{#each system.stressTrack as |cell|}}
                     <button
                       type='button'
-                      class='stress-cell {{#if cell.filled}}filled{{/if}}'
+                      class='stress-cell {{#if cell.filled}}filled{{/if}} {{#if cell.marked}}marked{{/if}}'
                       data-index='{{cell.index}}'
                       aria-label='{{cell.ariaLabel}}'
                       aria-pressed='{{#if cell.filled}}true{{else}}false{{/if}}'
@@ -175,27 +175,6 @@
                 </div>
               </div>
             </div>
-            {{#if system.woundTrack.length}}
-              <div class='resource flex-group-center'>
-                <label class='resource-label'>{{localize 'MY_RPG.Wounds.Label'}}</label>
-                <div class='resource-content flexcol'>
-                  <div class='wound-track'>
-                    {{#each system.woundTrack as |cell|}}
-                      <button
-                        type='button'
-                        class='wound-cell {{cell.type}} {{#if cell.filled}}filled{{/if}}'
-                        data-type='{{cell.type}}'
-                        aria-label='{{cell.ariaLabel}}'
-                        title='{{localize cell.labelKey}}'
-                        aria-pressed='{{#if cell.filled}}true{{else}}false{{/if}}'
-                      >
-                        {{cell.abbr}}
-                      </button>
-                    {{/each}}
-                  </div>
-                </div>
-              </div>
-            {{/if}}
           </section>
 
 
