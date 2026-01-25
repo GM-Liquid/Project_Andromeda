@@ -11,7 +11,6 @@ export const preloadHandlebarsTemplates = async function () {
     'systems/project-andromeda/templates/item/implant-sheet.hbs',
     'systems/project-andromeda/templates/item/armor-sheet.hbs',
     'systems/project-andromeda/templates/item/weapon-sheet.hbs',
-    'systems/project-andromeda/templates/item/gear-sheet.hbs',
     'systems/project-andromeda/templates/item/generic-sheet.hbs'
   ];
   return loadTemplates(paths);

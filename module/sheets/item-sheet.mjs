@@ -179,18 +179,6 @@ export class ProjectAndromedaWeaponSheet extends ProjectAndromedaItemSheet {
   }
 }
 
-export class ProjectAndromedaGearSheet extends ProjectAndromedaItemSheet {
-  get template() {
-    return 'systems/project-andromeda/templates/item/gear-sheet.hbs';
-  }
-
-  async getData(options) {
-    const data = await super.getData(options);
-    data.rankOptions = buildRankOptions(data.system.rank);
-    return data;
-  }
-}
-
 export class ProjectAndromedaGenericItemSheet extends ProjectAndromedaItemSheet {
   get template() {
     return 'systems/project-andromeda/templates/item/generic-sheet.hbs';
@@ -218,6 +206,5 @@ export const ITEM_SHEET_CLASSES = {
   implant: ProjectAndromedaImplantSheet,
   armor: ProjectAndromedaArmorSheet,
   weapon: ProjectAndromedaWeaponSheet,
-  gear: ProjectAndromedaGearSheet,
   generic: ProjectAndromedaGenericItemSheet
 };

@@ -140,9 +140,6 @@
       "implant",
       "armor",
       "weapon",
-      "gear",
-      "ability",
-      "mod",
       "equipment",
       "equipment-consumable",
       "environment-consumable",
@@ -179,14 +176,7 @@
       "templates": ["base", "rune"],
       "runeType": "Spell"
     },
-    "ability": {
-      "templates": ["base", "rune"],
-      "runeType": "Spell"
-    },
     "implant": {
-      "templates": ["base", "rune"]
-    },
-    "mod": {
       "templates": ["base", "rune"]
     },
     "armor": {
@@ -205,11 +195,6 @@
       "rank": "",
       "skill": "",
       "skillBonus": 0
-    },
-    "gear": {
-      "templates": ["base"],
-      "quantity": 1,
-      "rank": ""
     },
     "equipment": {
       "templates": ["base"],

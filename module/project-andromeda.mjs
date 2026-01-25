@@ -52,7 +52,6 @@ Hooks.once('init', function () {
     implant: 'MY_RPG.SheetLabels.ItemMod',
     armor: 'MY_RPG.SheetLabels.ItemArmor',
     weapon: 'MY_RPG.SheetLabels.ItemWeapon',
-    gear: 'MY_RPG.SheetLabels.ItemGear',
     generic: 'MY_RPG.SheetLabels.ItemGeneric'
   };
   const sheetMap = ITEM_TYPE_CONFIGS.reduce((acc, config) => {

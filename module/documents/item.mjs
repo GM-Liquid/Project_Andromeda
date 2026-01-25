@@ -48,10 +48,6 @@ export class ProjectAndromedaItem extends Item {
     return this.type === 'weapon';
   }
 
-  get isGear() {
-    return this.type === 'gear';
-  }
-
   get supertype() {
     return getItemTypeConfig(this.type)?.supertype ?? 'equipment';
   }

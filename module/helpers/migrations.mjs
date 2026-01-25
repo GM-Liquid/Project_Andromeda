@@ -73,8 +73,8 @@ const LEGACY_ITEM_CONFIGS = [
   },
   {
     listKey: 'inventoryList',
-    itemType: 'gear',
-    defaultNameKey: 'MY_RPG.ItemGroups.NewGear',
+    itemType: 'equipment',
+    defaultNameKey: 'MY_RPG.ItemGroups.NewEquipment',
     buildSystem: (entry) => ({
       quantity: normalizeQuantity(
         getLegacyField(entry, ['quantity', 'qty', 'count', 'amount', 'stack', 'charges', 'uses'], 1)
@@ -90,7 +90,8 @@ const ITEM_CONFIG_BY_TYPE = LEGACY_ITEM_CONFIGS.reduce((acc, config) => {
 
 const LEGACY_ITEM_TYPE_MAPPINGS = {
   ability: 'cartridge',
-  mod: 'implant'
+  mod: 'implant',
+  gear: 'equipment'
 };
 
 export async function runLegacyItemMigration() {
