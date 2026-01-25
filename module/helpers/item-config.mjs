@@ -564,10 +564,6 @@ export const ITEM_TABS = [
   {
     key: 'inventory',
     labelKey: 'MY_RPG.SheetLabels.Inventory'
-  },
-  {
-    key: 'environment',
-    labelKey: 'MY_RPG.SheetLabels.Environment'
   }
 ];
 
