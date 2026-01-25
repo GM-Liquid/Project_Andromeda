@@ -885,7 +885,8 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const checked = Boolean(checkbox.checked);
     const updates = [{ _id: item.id, 'system.equipped': checked }];
     if (config.exclusive && checked) {
-      const others = this.actor.itemTypes?.[config.type] ?? [];
+      const groupType = config.types?.[0] ?? item.type;
+      const others = this.actor.itemTypes?.[groupType] ?? [];
       for (const other of others) {
         if (other.id === item.id) continue;
         if (other.system?.equipped) {

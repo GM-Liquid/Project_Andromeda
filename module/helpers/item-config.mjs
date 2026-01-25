@@ -245,8 +245,8 @@ export const ITEM_GROUP_CONFIGS = [
     createKey: 'MY_RPG.ItemGroups.CreateWeapon',
     newNameKey: 'MY_RPG.ItemGroups.NewWeapon',
     showQuantity: false,
-    allowEquip: false,
-    exclusive: false,
+    allowEquip: true,
+    exclusive: true,
     canRoll: true
   },
   {
