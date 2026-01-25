@@ -7,6 +7,13 @@ export const ITEM_BASE_DEFAULTS = {
   details: {}
 };
 
+export const ITEM_SUPERTYPE_LABELS = {
+  equipment: 'MY_RPG.ItemTypeGroups.Equipment',
+  environment: 'MY_RPG.ItemTypeGroups.Environment',
+  traits: 'MY_RPG.ItemTypeGroups.Traits',
+  other: 'MY_RPG.ItemTypeGroups.Other'
+};
+
 export const ITEM_TYPE_CONFIGS = [
   {
     type: 'cartridge',
