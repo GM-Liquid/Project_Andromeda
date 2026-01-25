@@ -284,18 +284,13 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       index < current
         ? index
         : Math.min(index + 1, max);
-    const marked = this._normalizeStressMarked(stress.marked, max);
-    if (!marked.includes(index)) {
-      marked.push(index);
-    }
     await this.actor.update(
       {
-        'system.stress.value': next,
-        'system.stress.marked': marked
+        'system.stress.value': next
       },
       { render: false }
     );
-    this._updateStressTrack(this.element, { value: next, marked: marked });
+    this._updateStressTrack(this.element, { value: next });
   }
 
   async _onStressCellRightClick(event) {
@@ -303,9 +298,10 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const index = Number(event.currentTarget.dataset.index) || 0;
     const stress = this.actor.system.stress || { value: 0, max: 0 };
     const max = Number(stress.max) || 0;
-    const marked = this._normalizeStressMarked(stress.marked, max).filter(
-      (cellIndex) => cellIndex !== index
-    );
+    const normalizedMarked = this._normalizeStressMarked(stress.marked, max);
+    const marked = normalizedMarked.includes(index)
+      ? normalizedMarked.filter((cellIndex) => cellIndex < index)
+      : Array.from({ length: index + 1 }, (_, cellIndex) => cellIndex);
     await this.actor.update({ 'system.stress.marked': marked }, { render: false });
     this._updateStressTrack(this.element, { marked: marked });
   }
