@@ -31,3 +31,10 @@ Handlebars.registerHelper('worldChoice', function (unityKey, stellarKey) {
   const mode = game.settings.get(MODULE_ID, 'worldType');
   return mode === 'unity' ? unityKey : stellarKey;
 });
+
+Handlebars.registerHelper('isTab', function (value, expected, options) {
+  if (value === expected) {
+    return options.fn(this);
+  }
+  return options.inverse(this);
+});

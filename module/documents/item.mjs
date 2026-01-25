@@ -1,54 +1,5 @@
 import { debugLog } from '../config.mjs';
-
-const BASE_DEFAULTS = {
-  description: '',
-  rank: '',
-  equipped: false
-};
-
-const TYPE_DEFAULTS = {
-  cartridge: {
-    rank: '',
-    runeType: 'Spell',
-    skill: '',
-    skillBonus: 0
-  },
-  ability: {
-    rank: '',
-    runeType: 'Spell',
-    skill: '',
-    skillBonus: 0
-  },
-  implant: {
-    rank: '',
-    skill: '',
-    skillBonus: 0
-  },
-  mod: {
-    rank: '',
-    skill: '',
-    skillBonus: 0
-  },
-  armor: {
-    quantity: 1,
-    rank: '',
-    itemPhys: 0,
-    itemAzure: 0,
-    itemMental: 0,
-    itemShield: 0,
-    itemSpeed: 0
-  },
-  weapon: {
-    quantity: 1,
-    rank: '',
-    skill: '',
-    skillBonus: 0
-  },
-  gear: {
-    quantity: 1,
-    rank: ''
-  }
-};
+import { ITEM_BASE_DEFAULTS, getItemTypeConfig, getItemTypeDefaults } from '../helpers/item-config.mjs';
 
 function cloneDefaults(data) {
   return foundry.utils.deepClone(data);
@@ -62,13 +13,13 @@ export class ProjectAndromedaItem extends Item {
 
   _applyTypeDefaults() {
     const systemData = this.system ?? (this.system = {});
-    foundry.utils.mergeObject(systemData, cloneDefaults(BASE_DEFAULTS), {
+    foundry.utils.mergeObject(systemData, cloneDefaults(ITEM_BASE_DEFAULTS), {
       insertKeys: true,
       overwrite: false,
       inplace: true
     });
 
-    const typeDefaults = TYPE_DEFAULTS[this.type];
+    const typeDefaults = getItemTypeDefaults(this.type);
     if (!typeDefaults) return;
     foundry.utils.mergeObject(systemData, cloneDefaults(typeDefaults), {
       insertKeys: true,
@@ -99,6 +50,10 @@ export class ProjectAndromedaItem extends Item {
 
   get isGear() {
     return this.type === 'gear';
+  }
+
+  get supertype() {
+    return getItemTypeConfig(this.type)?.supertype ?? 'equipment';
   }
 
   get description() {

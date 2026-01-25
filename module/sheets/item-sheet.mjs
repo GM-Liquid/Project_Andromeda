@@ -1,4 +1,5 @@
 import { MODULE_ID, RUNE_TYPE_KEYS, debugLog } from '../config.mjs';
+import { getItemTypeConfig } from '../helpers/item-config.mjs';
 
 function buildRankOptions(selected) {
   const worldType = game.settings.get(MODULE_ID, 'worldType');
@@ -110,6 +111,7 @@ export class ProjectAndromedaItemSheet extends ItemSheet {
     sheetData.system = sheetData.system ?? itemData?.system ?? {};
     sheetData.config = CONFIG.ProjectAndromeda ?? {};
     sheetData.worldType = game.settings.get(MODULE_ID, 'worldType');
+    sheetData.itemConfig = getItemTypeConfig(this.item?.type);
 
     if (game.settings.get(MODULE_ID, 'debugMode')) {
       // DEBUG-LOG
@@ -188,3 +190,34 @@ export class ProjectAndromedaGearSheet extends ProjectAndromedaItemSheet {
     return data;
   }
 }
+
+export class ProjectAndromedaGenericItemSheet extends ProjectAndromedaItemSheet {
+  get template() {
+    return 'systems/project-andromeda/templates/item/generic-sheet.hbs';
+  }
+
+  async getData(options) {
+    const data = await super.getData(options);
+    const fields = Array.isArray(data.itemConfig?.fields) ? data.itemConfig.fields : [];
+    data.rankOptions = buildRankOptions(data.system.rank);
+    data.itemFields = fields.map((field) => {
+      const value = foundry.utils.getProperty(data.system, field.path) ?? '';
+      return {
+        ...field,
+        value,
+        inputType: field.type === 'number' ? 'number' : 'text',
+        isRank: field.type === 'rank'
+      };
+    });
+    return data;
+  }
+}
+
+export const ITEM_SHEET_CLASSES = {
+  cartridge: ProjectAndromedaCartridgeSheet,
+  implant: ProjectAndromedaImplantSheet,
+  armor: ProjectAndromedaArmorSheet,
+  weapon: ProjectAndromedaWeaponSheet,
+  gear: ProjectAndromedaGearSheet,
+  generic: ProjectAndromedaGenericItemSheet
+};

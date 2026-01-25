@@ -4,8 +4,9 @@
   <div class='sheet-tabs-hex-container'>
     <nav class='sheet-tabs-hex' data-group='primary'>
       <a class='hex-button' data-tab='features'>{{localize 'MY_RPG.SheetLabels.Features'}}</a>
-      <a class='hex-button' data-tab='abilities'>{{localize (worldChoice 'MY_RPG.SheetLabels.Tablet' 'MY_RPG.SheetLabels.AbilitiesAndMods')}}</a>
-      <a class='hex-button' data-tab='inventory'>{{localize 'MY_RPG.SheetLabels.Inventory'}}</a>
+      {{#each itemTabs as |tab|}}
+        <a class='hex-button' data-tab='{{tab.key}}'>{{tab.label}}</a>
+      {{/each}}
       {{#if isCharacter}}
         <a class='hex-button' data-tab='biography'>{{localize 'MY_RPG.SheetLabels.Biography'}}</a>
       {{/if}}
@@ -403,308 +404,181 @@
       </div>
       <!--               Features -->
 
-      <div class='tab abilities' data-group='primary' data-tab='abilities'>
-        {{#ifUnity}}
-        <div class='rune-size'>
-          <label>{{localize 'MY_RPG.RunesTable.SizeLabel'}}</label>
-          <input type='number' value='{{cartridgeCount}}' disabled />
-          <span class='divider'>/</span>
-          <input type='number' value='{{runeMax}}' disabled />
-        </div>
-        {{/ifUnity}}
-        <section class='item-groups' data-groups='abilities'>
-          {{#each (lookup itemGroups 'abilities') as |group|}}
-            <section class='item-group' data-item-group='{{group.key}}'>
-              <header class='item-group__header'>
-                <h3>
-                  {{#if group.icon}}<i class='{{group.icon}}'></i>{{/if}}
-                  <span class='item-group__title'>{{group.label}}</span>
-                  {{#if group.capacity}}
-                    <span class='item-group__capacity'>{{group.capacity.value}} / {{group.capacity.max}}</span>
-                  {{/if}}
-                </h3>
-                <button
-                  type='button'
-                  class='item-create item-control'
-                  data-type='{{group.type}}'
-                  data-group-key='{{group.key}}'
-                  title='{{group.createLabel}}'
-                >
-                  <i class='fa-solid fa-plus'></i>
-                  <span class='sr-only'>{{group.createLabel}}</span>
-                </button>
-              </header>
-              {{#if group.items.length}}
-                <ol class='item-list'>
-                  {{#each group.items as |item|}}
-                    <li
-                      class='item-row {{#if item.equipped}}item-row--equipped{{/if}}'
-                      data-item-id='{{item.id}}'
-                      data-group-key='{{item.groupKey}}'
-                    >
-                      <div class='item-row__header'>
-                        <div class='item-row__name'>
-                          <img src='{{item.img}}' alt='' />
-                          <span class='item-row__label'>{{item.name}}</span>
-                        </div>
-                        {{#if item.hasBadges}}
-                          <ul class='item-row__badges'>
-                            {{#each item.badges as |badge|}}
-                              <li class='item-badge'>{{badge}}</li>
-                            {{/each}}
-                          </ul>
-                        {{/if}}
-                        <div class='item-row__actions' data-item-id='{{item.id}}' data-group-key='{{item.groupKey}}'>
-                          {{#if item.showQuantity}}
-                            <div class='item-quantity-control' aria-label='{{../../itemControls.quantity}}'>
+      {{#each itemTabs as |tab|}}
+        <div class='tab {{tab.key}}' data-group='primary' data-tab='{{tab.key}}'>
+          {{#isTab tab.key 'abilities'}}
+            {{#ifUnity}}
+            <div class='rune-size'>
+              <label>{{localize 'MY_RPG.RunesTable.SizeLabel'}}</label>
+              <input type='number' value='{{../cartridgeCount}}' disabled />
+              <span class='divider'>/</span>
+              <input type='number' value='{{../runeMax}}' disabled />
+            </div>
+            {{/ifUnity}}
+          {{/isTab}}
+          <section class='item-groups' data-groups='{{tab.key}}'>
+            {{#each (lookup ../itemGroups tab.key) as |group|}}
+              <section class='item-group' data-item-group='{{group.key}}'>
+                <header class='item-group__header'>
+                  <h3>
+                    {{#if group.icon}}<i class='{{group.icon}}'></i>{{/if}}
+                    <span class='item-group__title'>{{group.label}}</span>
+                    {{#if group.capacity}}
+                      <span class='item-group__capacity'>{{group.capacity.value}} / {{group.capacity.max}}</span>
+                    {{/if}}
+                  </h3>
+                  <button
+                    type='button'
+                    class='item-create item-control'
+                    data-type='{{group.type}}'
+                    data-group-key='{{group.key}}'
+                    title='{{group.createLabel}}'
+                  >
+                    <i class='fa-solid fa-plus'></i>
+                    <span class='sr-only'>{{group.createLabel}}</span>
+                  </button>
+                </header>
+                {{#if group.items.length}}
+                  <ol class='item-list'>
+                    {{#each group.items as |item|}}
+                      <li
+                        class='item-row {{#if item.equipped}}item-row--equipped{{/if}}'
+                        data-item-id='{{item.id}}'
+                        data-group-key='{{item.groupKey}}'
+                      >
+                        <div class='item-row__header'>
+                          <div class='item-row__name'>
+                            <img src='{{item.img}}' alt='' />
+                            <span class='item-row__label'>{{item.name}}</span>
+                          </div>
+                          {{#if item.hasBadges}}
+                            <ul class='item-row__badges'>
+                              {{#each item.badges as |badge|}}
+                                <li class='item-badge'>{{badge}}</li>
+                              {{/each}}
+                            </ul>
+                          {{/if}}
+                          <div class='item-row__actions' data-item-id='{{item.id}}' data-group-key='{{item.groupKey}}'>
+                            {{#if item.showQuantity}}
+                              <div class='item-quantity-control' aria-label='{{../../itemControls.quantity}}'>
+                                <button
+                                  type='button'
+                                  class='item-quantity-step'
+                                  data-step='-1'
+                                  title='{{../../itemControls.quantityDecrease}}'
+                                >
+                                  <i class='fa-solid fa-minus'></i>
+                                  <span class='sr-only'>{{../../itemControls.quantityDecrease}}</span>
+                                </button>
+                                <span class='item-quantity-value'>{{item.quantity}}</span>
+                                <button
+                                  type='button'
+                                  class='item-quantity-step'
+                                  data-step='1'
+                                  title='{{../../itemControls.quantityIncrease}}'
+                                >
+                                  <i class='fa-solid fa-plus'></i>
+                                  <span class='sr-only'>{{../../itemControls.quantityIncrease}}</span>
+                                </button>
+                              </div>
+                            {{/if}}
+                            {{#if item.showEquip}}
+                              <label class='item-equip-toggle' title='{{../../itemControls.equip}}'>
+                                <input
+                                  type='checkbox'
+                                  class='item-equip-checkbox'
+                                  {{#if item.equipped}}checked{{/if}}
+                                  aria-label='{{../../itemControls.equipAria}}'
+                                />
+                              </label>
+                            {{/if}}
+                            {{#if item.canRoll}}
                               <button
                                 type='button'
-                                class='item-quantity-step'
-                                data-step='-1'
-                                title='{{../../itemControls.quantityDecrease}}'
+                                class='item-roll item-control'
+                                data-item-id='{{item.id}}'
+                                data-group-key='{{item.groupKey}}'
+                                title='{{../../itemControls.roll}}'
                               >
-                                <i class='fa-solid fa-minus'></i>
-                                <span class='sr-only'>{{../../itemControls.quantityDecrease}}</span>
+                                <i class='fa-solid fa-dice-d10'></i>
+                                <span class='sr-only'>{{../../itemControls.roll}}</span>
                               </button>
-                              <span class='item-quantity-value'>{{item.quantity}}</span>
-                              <button
-                                type='button'
-                                class='item-quantity-step'
-                                data-step='1'
-                                title='{{../../itemControls.quantityIncrease}}'
-                              >
-                                <i class='fa-solid fa-plus'></i>
-                                <span class='sr-only'>{{../../itemControls.quantityIncrease}}</span>
-                              </button>
-                            </div>
-                          {{/if}}
-                          {{#if item.showEquip}}
-                            <label class='item-equip-toggle' title='{{../../itemControls.equip}}'>
-                              <input
-                                type='checkbox'
-                                class='item-equip-checkbox'
-                                {{#if item.equipped}}checked{{/if}}
-                                aria-label='{{../../itemControls.equipAria}}'
-                              />
-                            </label>
-                          {{/if}}
-                          {{#if item.canRoll}}
+                            {{/if}}
                             <button
                               type='button'
-                              class='item-roll item-control'
+                              class='item-chat item-control'
                               data-item-id='{{item.id}}'
                               data-group-key='{{item.groupKey}}'
-                              title='{{../../itemControls.roll}}'
+                              title='{{../../itemControls.chat}}'
                             >
-                              <i class='fa-solid fa-dice-d10'></i>
-                              <span class='sr-only'>{{../../itemControls.roll}}</span>
+                              <i class='fa-solid fa-comment-dots'></i>
+                              <span class='sr-only'>{{../../itemControls.chat}}</span>
                             </button>
-                          {{/if}}
-                          <button
-                            type='button'
-                            class='item-chat item-control'
-                            data-item-id='{{item.id}}'
-                            data-group-key='{{item.groupKey}}'
-                            title='{{../../itemControls.chat}}'
-                          >
-                            <i class='fa-solid fa-comment-dots'></i>
-                            <span class='sr-only'>{{../../itemControls.chat}}</span>
-                          </button>
-                          <button
-                            type='button'
-                            class='item-edit item-control'
-                            data-item-id='{{item.id}}'
-                            data-group-key='{{item.groupKey}}'
-                            title='{{../../itemControls.edit}}'
-                          >
-                            <i class='fa-solid fa-pen'></i>
-                            <span class='sr-only'>{{../../itemControls.edit}}</span>
-                          </button>
-                          <button
-                            type='button'
-                            class='item-delete item-control'
-                            data-item-id='{{item.id}}'
-                            data-group-key='{{item.groupKey}}'
-                            title='{{../../itemControls.delete}}'
-                          >
-                            <i class='fa-solid fa-trash'></i>
-                            <span class='sr-only'>{{../../itemControls.delete}}</span>
-                          </button>
-                        </div>
-                      </div>
-                      {{#if item.hasSummary}}
-                        <div class='item-row__summary'>
-                          {{{item.summary}}}
-                        </div>
-                      {{/if}}
-                    </li>
-                  {{/each}}
-                </ol>
-              {{else}}
-                <p class='item-group__empty'>{{group.empty}}</p>
-              {{/if}}
-            </section>
-          {{/each}}
-        </section>
-      </div>
-      <div class='tab inventory' data-group='primary' data-tab='inventory'>
-        <section class='item-groups' data-groups='inventory'>
-          {{#each (lookup itemGroups 'inventory') as |group|}}
-            <section class='item-group' data-item-group='{{group.key}}'>
-              <header class='item-group__header'>
-                <h3>
-                  {{#if group.icon}}<i class='{{group.icon}}'></i>{{/if}}
-                  <span class='item-group__title'>{{group.label}}</span>
-                </h3>
-                <button
-                  type='button'
-                  class='item-create item-control'
-                  data-type='{{group.type}}'
-                  data-group-key='{{group.key}}'
-                  title='{{group.createLabel}}'
-                >
-                  <i class='fa-solid fa-plus'></i>
-                  <span class='sr-only'>{{group.createLabel}}</span>
-                </button>
-              </header>
-              {{#if group.items.length}}
-                <ol class='item-list'>
-                  {{#each group.items as |item|}}
-                    <li
-                      class='item-row {{#if item.equipped}}item-row--equipped{{/if}}'
-                      data-item-id='{{item.id}}'
-                      data-group-key='{{item.groupKey}}'
-                    >
-                      <div class='item-row__header'>
-                        <div class='item-row__name'>
-                          <img src='{{item.img}}' alt='' />
-                          <span class='item-row__label'>{{item.name}}</span>
-                        </div>
-                        {{#if item.hasBadges}}
-                          <ul class='item-row__badges'>
-                            {{#each item.badges as |badge|}}
-                              <li class='item-badge'>{{badge}}</li>
-                            {{/each}}
-                          </ul>
-                        {{/if}}
-                        <div class='item-row__actions' data-item-id='{{item.id}}' data-group-key='{{item.groupKey}}'>
-                          {{#if item.showQuantity}}
-                            <div class='item-quantity-control' aria-label='{{../../itemControls.quantity}}'>
-                              <button
-                                type='button'
-                                class='item-quantity-step'
-                                data-step='-1'
-                                title='{{../../itemControls.quantityDecrease}}'
-                              >
-                                <i class='fa-solid fa-minus'></i>
-                                <span class='sr-only'>{{../../itemControls.quantityDecrease}}</span>
-                              </button>
-                              <span class='item-quantity-value'>{{item.quantity}}</span>
-                              <button
-                                type='button'
-                                class='item-quantity-step'
-                                data-step='1'
-                                title='{{../../itemControls.quantityIncrease}}'
-                              >
-                                <i class='fa-solid fa-plus'></i>
-                                <span class='sr-only'>{{../../itemControls.quantityIncrease}}</span>
-                              </button>
-                            </div>
-                          {{/if}}
-                          {{#if item.showEquip}}
-                            <label class='item-equip-toggle' title='{{../../itemControls.equip}}'>
-                              <input
-                                type='checkbox'
-                                class='item-equip-checkbox'
-                                {{#if item.equipped}}checked{{/if}}
-                                aria-label='{{../../itemControls.equipAria}}'
-                              />
-                            </label>
-                          {{/if}}
-                          {{#if item.canRoll}}
                             <button
                               type='button'
-                              class='item-roll item-control'
+                              class='item-edit item-control'
                               data-item-id='{{item.id}}'
                               data-group-key='{{item.groupKey}}'
-                              title='{{../../itemControls.roll}}'
+                              title='{{../../itemControls.edit}}'
                             >
-                              <i class='fa-solid fa-dice-d10'></i>
-                              <span class='sr-only'>{{../../itemControls.roll}}</span>
+                              <i class='fa-solid fa-pen'></i>
+                              <span class='sr-only'>{{../../itemControls.edit}}</span>
                             </button>
-                          {{/if}}
-                          <button
-                            type='button'
-                            class='item-chat item-control'
-                            data-item-id='{{item.id}}'
-                            data-group-key='{{item.groupKey}}'
-                            title='{{../../itemControls.chat}}'
-                          >
-                            <i class='fa-solid fa-comment-dots'></i>
-                            <span class='sr-only'>{{../../itemControls.chat}}</span>
-                          </button>
-                          <button
-                            type='button'
-                            class='item-edit item-control'
-                            data-item-id='{{item.id}}'
-                            data-group-key='{{item.groupKey}}'
-                            title='{{../../itemControls.edit}}'
-                          >
-                            <i class='fa-solid fa-pen'></i>
-                            <span class='sr-only'>{{../../itemControls.edit}}</span>
-                          </button>
-                          <button
-                            type='button'
-                            class='item-delete item-control'
-                            data-item-id='{{item.id}}'
-                            data-group-key='{{item.groupKey}}'
-                            title='{{../../itemControls.delete}}'
-                          >
-                            <i class='fa-solid fa-trash'></i>
-                            <span class='sr-only'>{{../../itemControls.delete}}</span>
-                          </button>
+                            <button
+                              type='button'
+                              class='item-delete item-control'
+                              data-item-id='{{item.id}}'
+                              data-group-key='{{item.groupKey}}'
+                              title='{{../../itemControls.delete}}'
+                            >
+                              <i class='fa-solid fa-trash'></i>
+                              <span class='sr-only'>{{../../itemControls.delete}}</span>
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                      {{#if item.hasSummary}}
-                        <div class='item-row__summary'>
-                          {{{item.summary}}}
-                        </div>
-                      {{/if}}
-                    </li>
-                  {{/each}}
-                </ol>
-              {{else}}
-                <p class='item-group__empty'>{{group.empty}}</p>
-              {{/if}}
-            </section>
-          {{/each}}
-        </section>
-        <div class='sheet-box'>
-          <h2>{{localize 'MY_RPG.Resources.Title'}}</h2>
-          <section class='resources grid grid-2col'>
-            <div class='resource flex-group-center'>
-              <label class='resource-label'>{{localize 'MY_RPG.Resources.SuppliesLabel'}}</label>
-              <input
-                type='number'
-                name='system.supplies'
-                value='{{system.supplies}}'
-                step='1'
-                inputmode='numeric'
-              />
-            </div>
-            <div class='resource flex-group-center'>
-              <label class='resource-label'>{{localize 'MY_RPG.Resources.MoneyLabel'}}</label>
-              <input
-                type='number'
-                name='system.money'
-                value='{{system.money}}'
-                step='1'
-                inputmode='numeric'
-              />
-            </div>
+                        {{#if item.hasSummary}}
+                          <div class='item-row__summary'>
+                            {{{item.summary}}}
+                          </div>
+                        {{/if}}
+                      </li>
+                    {{/each}}
+                  </ol>
+                {{else}}
+                  <p class='item-group__empty'>{{group.empty}}</p>
+                {{/if}}
+              </section>
+            {{/each}}
           </section>
+          {{#isTab tab.key 'inventory'}}
+            <div class='sheet-box'>
+              <h2>{{localize 'MY_RPG.Resources.Title'}}</h2>
+              <section class='resources grid grid-2col'>
+                <div class='resource flex-group-center'>
+                  <label class='resource-label'>{{localize 'MY_RPG.Resources.SuppliesLabel'}}</label>
+                  <input
+                    type='number'
+                    name='system.supplies'
+                    value='{{../system.supplies}}'
+                    step='1'
+                    inputmode='numeric'
+                  />
+                </div>
+                <div class='resource flex-group-center'>
+                  <label class='resource-label'>{{localize 'MY_RPG.Resources.MoneyLabel'}}</label>
+                  <input
+                    type='number'
+                    name='system.money'
+                    value='{{../system.money}}'
+                    step='1'
+                    inputmode='numeric'
+                  />
+                </div>
+              </section>
+            </div>
+          {{/isTab}}
         </div>
-      </div>
+      {{/each}}
 
     </section>
   </div>

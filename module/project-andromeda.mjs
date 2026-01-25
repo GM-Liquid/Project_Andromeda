@@ -3,16 +3,11 @@ import { ProjectAndromedaActor } from './documents/actor.mjs';
 import { ProjectAndromedaItem } from './documents/item.mjs';
 // Import sheet classes.
 import { ProjectAndromedaActorSheet } from './sheets/actor-sheet.mjs';
-import {
-  ProjectAndromedaCartridgeSheet,
-  ProjectAndromedaArmorSheet,
-  ProjectAndromedaGearSheet,
-  ProjectAndromedaImplantSheet,
-  ProjectAndromedaWeaponSheet
-} from './sheets/item-sheet.mjs';
+import { ITEM_SHEET_CLASSES } from './sheets/item-sheet.mjs';
 // Import helper/utility classes and constants.
 import { preloadHandlebarsTemplates } from './helpers/templates.mjs';
 import { MODULE_ID, PROJECT_ANDROMEDA, debugLog, registerSystemSettings } from './config.mjs';
+import { ITEM_TYPE_CONFIGS } from './helpers/item-config.mjs';
 import { runLegacyItemMigration } from './helpers/migrations.mjs';
 import './helpers/handlebars-helpers.mjs';
 
@@ -52,31 +47,31 @@ Hooks.once('init', function () {
     label: 'MY_RPG.SheetLabels.Actor'
   });
   Items.unregisterSheet('core', ItemSheet);
-  Items.registerSheet(MODULE_ID, ProjectAndromedaCartridgeSheet, {
-    types: ['cartridge', 'ability'],
-    makeDefault: true,
-    label: 'MY_RPG.SheetLabels.ItemAbility'
-  });
-  Items.registerSheet(MODULE_ID, ProjectAndromedaImplantSheet, {
-    types: ['implant', 'mod'],
-    makeDefault: true,
-    label: 'MY_RPG.SheetLabels.ItemMod'
-  });
-  Items.registerSheet(MODULE_ID, ProjectAndromedaArmorSheet, {
-    types: ['armor'],
-    makeDefault: true,
-    label: 'MY_RPG.SheetLabels.ItemArmor'
-  });
-  Items.registerSheet(MODULE_ID, ProjectAndromedaWeaponSheet, {
-    types: ['weapon'],
-    makeDefault: true,
-    label: 'MY_RPG.SheetLabels.ItemWeapon'
-  });
-  Items.registerSheet(MODULE_ID, ProjectAndromedaGearSheet, {
-    types: ['gear'],
-    makeDefault: true,
-    label: 'MY_RPG.SheetLabels.ItemGear'
-  });
+  const sheetLabels = {
+    cartridge: 'MY_RPG.SheetLabels.ItemAbility',
+    implant: 'MY_RPG.SheetLabels.ItemMod',
+    armor: 'MY_RPG.SheetLabels.ItemArmor',
+    weapon: 'MY_RPG.SheetLabels.ItemWeapon',
+    gear: 'MY_RPG.SheetLabels.ItemGear',
+    generic: 'MY_RPG.SheetLabels.ItemGeneric'
+  };
+  const sheetMap = ITEM_TYPE_CONFIGS.reduce((acc, config) => {
+    const sheetKey = config.sheet ?? 'generic';
+    const entry = acc.get(sheetKey) ?? { types: [], label: sheetLabels[sheetKey] };
+    entry.types.push(config.type);
+    acc.set(sheetKey, entry);
+    return acc;
+  }, new Map());
+
+  for (const [sheetKey, entry] of sheetMap.entries()) {
+    const SheetClass = ITEM_SHEET_CLASSES[sheetKey];
+    if (!SheetClass) continue;
+    Items.registerSheet(MODULE_ID, SheetClass, {
+      types: entry.types,
+      makeDefault: true,
+      label: entry.label
+    });
+  }
 
   // Preload Handlebars templates.
   return preloadHandlebarsTemplates();
