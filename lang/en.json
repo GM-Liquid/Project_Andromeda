@@ -72,10 +72,10 @@
       "PsychicLabel": "Mental Protection"
     },
     "SheetLabels": {
-      "AbilitiesAndMods": "Cartridges and Implants",
+      "AbilitiesAndMods": "Abilities and Genomes",
       "Tablet": "Tablet",
       "Features": "Main Sheet",
-      "Abilities": "Cartridges",
+      "Abilities": "Genomes",
       "Parameters": "Parameters",
       "Attributes": "Attributes",
       "Skills": "Skills",
@@ -84,7 +84,7 @@
       "Inventory": "Inventory",
       "Environment": "Environment",
       "Traits": "Traits",
-      "ItemAbility": "Cartridge Sheet",
+      "ItemAbility": "Genome Sheet",
       "ItemMod": "Implant Sheet",
       "ItemArmor": "Armor Sheet",
       "ItemWeapon": "Weapon Sheet",
