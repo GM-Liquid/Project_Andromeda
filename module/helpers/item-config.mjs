@@ -231,7 +231,7 @@ export const ITEM_GROUP_CONFIGS = [
   {
     key: 'implants',
     types: ['implant'],
-    tab: 'abilities',
+    tab: 'inventory',
     icon: 'fas fa-cogs',
     labelKey: 'MY_RPG.ItemGroups.Implants',
     emptyKey: 'MY_RPG.ItemGroups.EmptyImplants',
