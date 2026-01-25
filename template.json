@@ -135,12 +135,39 @@
     }
   },
   "Item": {
-    "types": ["cartridge", "implant", "armor", "weapon", "gear", "ability", "mod"],
+    "types": [
+      "cartridge",
+      "implant",
+      "armor",
+      "weapon",
+      "gear",
+      "ability",
+      "mod",
+      "equipment",
+      "equipment-consumable",
+      "environment-consumable",
+      "environment-interactive",
+      "environment-narrative",
+      "environment-resource",
+      "environment-trigger",
+      "environment-danger",
+      "trait-flaw",
+      "trait-general",
+      "trait-backstory",
+      "trait-social",
+      "trait-combat",
+      "trait-magical",
+      "trait-professional",
+      "trait-technological"
+    ],
     "templates": {
       "base": {
         "description": "",
         "equipped": false,
-        "rank": ""
+        "rank": "",
+        "rules": [],
+        "traits": [],
+        "details": {}
       },
       "rune": {
         "rank": "",
@@ -183,6 +210,58 @@
       "templates": ["base"],
       "quantity": 1,
       "rank": ""
+    },
+    "equipment": {
+      "templates": ["base"],
+      "quantity": 1
+    },
+    "equipment-consumable": {
+      "templates": ["base"],
+      "quantity": 1
+    },
+    "environment-consumable": {
+      "templates": ["base"],
+      "quantity": 1
+    },
+    "environment-interactive": {
+      "templates": ["base"]
+    },
+    "environment-narrative": {
+      "templates": ["base"]
+    },
+    "environment-resource": {
+      "templates": ["base"],
+      "quantity": 1
+    },
+    "environment-trigger": {
+      "templates": ["base"]
+    },
+    "environment-danger": {
+      "templates": ["base"]
+    },
+    "trait-flaw": {
+      "templates": ["base"]
+    },
+    "trait-general": {
+      "templates": ["base"]
+    },
+    "trait-backstory": {
+      "templates": ["base"]
+    },
+    "trait-social": {
+      "templates": ["base"]
+    },
+    "trait-combat": {
+      "templates": ["base"]
+    },
+    "trait-magical": {
+      "templates": ["base"]
+    },
+    "trait-professional": {
+      "templates": ["base"]
+    },
+    "trait-technological": {
+      "templates": ["base"]
     }
   }
 }

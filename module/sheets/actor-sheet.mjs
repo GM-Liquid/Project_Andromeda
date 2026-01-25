@@ -11,80 +11,13 @@ import {
   getColorRank,
   normalizeAbilityDie
 } from '../helpers/utils.mjs';
-
-
-const ITEM_GROUP_CONFIG = [
-  {
-    key: 'cartridges',
-    type: 'cartridge',
-    tab: 'abilities',
-    icon: 'fas fa-magic',
-    labelKey: 'MY_RPG.ItemGroups.Cartridges',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyCartridges',
-    createKey: 'MY_RPG.ItemGroups.CreateCartridge',
-    newNameKey: 'MY_RPG.ItemGroups.NewCartridge',
-    showQuantity: false,
-    allowEquip: false,
-    exclusive: false
-  },
-  {
-    key: 'implants',
-    type: 'implant',
-    tab: 'abilities',
-    icon: 'fas fa-cogs',
-    labelKey: 'MY_RPG.ItemGroups.Implants',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyImplants',
-    createKey: 'MY_RPG.ItemGroups.CreateImplant',
-    newNameKey: 'MY_RPG.ItemGroups.NewImplant',
-    showQuantity: false,
-    allowEquip: false,
-    exclusive: false
-  },
-  {
-    key: 'weapons',
-    type: 'weapon',
-    tab: 'inventory',
-    icon: 'fas fa-crosshairs',
-    labelKey: 'MY_RPG.ItemGroups.Weapons',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyWeapons',
-    createKey: 'MY_RPG.ItemGroups.CreateWeapon',
-    newNameKey: 'MY_RPG.ItemGroups.NewWeapon',
-    showQuantity: false,
-    allowEquip: false,
-    exclusive: false
-  },
-  {
-    key: 'armor',
-    type: 'armor',
-    tab: 'inventory',
-    icon: 'fas fa-shield-alt',
-    labelKey: 'MY_RPG.ItemGroups.Armor',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyArmor',
-    createKey: 'MY_RPG.ItemGroups.CreateArmor',
-    newNameKey: 'MY_RPG.ItemGroups.NewArmor',
-    showQuantity: false,
-    allowEquip: true,
-    exclusive: true
-  },
-  {
-    key: 'gear',
-    type: 'gear',
-    tab: 'inventory',
-    icon: 'fas fa-toolbox',
-    labelKey: 'MY_RPG.ItemGroups.Gear',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyGear',
-    createKey: 'MY_RPG.ItemGroups.CreateGear',
-    newNameKey: 'MY_RPG.ItemGroups.NewGear',
-    showQuantity: true,
-    allowEquip: false,
-    exclusive: false
-  }
-];
-
-const ITEM_GROUP_CONFIG_BY_KEY = ITEM_GROUP_CONFIG.reduce((acc, config) => {
-  acc[config.key] = config;
-  return acc;
-}, {});
+import {
+  ITEM_TABS,
+  ITEM_BADGE_BUILDERS,
+  getItemGroupConfigByKey,
+  getItemGroupConfigs,
+  getItemTabLabel
+} from '../helpers/item-config.mjs';
 function getRankLabel(rank) {
   const mode = game.settings.get(MODULE_ID, 'worldType');
   const base = mode === 'stellar' ? 'MY_RPG.RankNumeric' : 'MY_RPG.RankGradient';
@@ -246,6 +179,10 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     }
 
     context.rollData = context.actor.getRollData();
+    context.itemTabs = ITEM_TABS.map((tab) => ({
+      key: tab.key,
+      label: game.i18n.localize(getItemTabLabel(tab.key, worldType))
+    }));
 
     const itemGroups = this._buildItemGroups();
     const cartridgeGroup = itemGroups.find((group) => group.key === 'cartridges');
@@ -588,12 +525,14 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
   }
 
   _buildItemGroups() {
-    return ITEM_GROUP_CONFIG.map((config) => {
-      const items = this.actor.itemTypes?.[config.type] ?? [];
+    const groupConfigs = getItemGroupConfigs();
+    return groupConfigs.map((config) => {
+      const items = config.types.flatMap((type) => this.actor.itemTypes?.[type] ?? []);
       const preparedItems = items.map((item) => this._prepareItemForDisplay(item, config));
       return {
         key: config.key,
-        type: config.type,
+        type: config.types[0],
+        types: config.types,
         tab: config.tab,
         icon: config.icon,
         label: game.i18n.localize(config.labelKey),
@@ -629,79 +568,26 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       summary,
       hasBadges: badges.length > 0,
       hasSummary: Boolean(summary),
-      canRoll: config.key === 'cartridges' || config.key === 'implants' || config.key === 'weapons'
+      canRoll: Boolean(config.canRoll)
     };
   }
 
   _getItemBadges(item, config) {
-    const system = item.system ?? {};
-    const badges = [];
-    const t = game.i18n;
-    switch (config.key) {
-      case 'cartridges': {
-        const rank = Number(system.rank) || 0;
-        if (rank) {
-          badges.push(`${t.localize('MY_RPG.AbilitiesTable.Rank')}: ${getRankLabel(rank)}`);
-        }
-        if (game.settings.get(MODULE_ID, 'worldType') === 'unity' && system.runeType) {
-          const runeKey = `MY_RPG.RuneTypes.${system.runeType}`;
-          badges.push(`${t.localize('MY_RPG.RunesTable.RuneType')}: ${t.localize(runeKey)}`);
-        }
-        badges.push(`${t.localize('MY_RPG.AbilitiesTable.Skill')}: ${this._skillLabel(system.skill)}`);
-        badges.push(`${t.localize('MY_RPG.AbilitiesTable.Bonus')}: ${this._formatSkillBonus(system.skillBonus)}`);
-        break;
-      }
-      case 'implants': {
-        const rank = Number(system.rank) || 0;
-        if (rank) {
-          badges.push(`${t.localize('MY_RPG.ModsTable.Rank')}: ${getRankLabel(rank)}`);
-        }
-        badges.push(`${t.localize('MY_RPG.ModsTable.Skill')}: ${this._skillLabel(system.skill)}`);
-        badges.push(`${t.localize('MY_RPG.ModsTable.Bonus')}: ${this._formatSkillBonus(system.skillBonus)}`);
-        break;
-      }
-      case 'weapons': {
-        badges.push(`${t.localize('MY_RPG.WeaponsTable.SkillLabel')}: ${this._skillLabel(system.skill)}`);
-        badges.push(`${t.localize('MY_RPG.WeaponsTable.DamageLabel')}: ${this._formatDamage(system.skillBonus)}`);
-        break;
-      }
-      case 'armor': {
-        const phys = Number(system.itemPhys) || 0;
-        const azure = Number(system.itemAzure) || 0;
-        const mental = Number(system.itemMental) || 0;
-        const shield = Number(system.itemShield) || 0;
-        const speed = Number(system.itemSpeed) || 0;
-        if (phys) badges.push(`${t.localize('MY_RPG.ArmorItem.BonusPhysicalLabel')}: ${phys}`);
-        if (azure) badges.push(`${t.localize('MY_RPG.ArmorItem.BonusMagicalLabel')}: ${azure}`);
-        if (mental) badges.push(`${t.localize('MY_RPG.ArmorItem.BonusPsychicLabel')}: ${mental}`);
-        if (shield) badges.push(`${t.localize('MY_RPG.ArmorItem.ShieldLabel')}: ${shield}`);
-        if (speed) badges.push(`${t.localize('MY_RPG.ArmorItem.BonusSpeedLabel')}: ${speed}`);
-        break;
-      }
-      case 'gear':
-        break;
-      default:
-        break;
-    }
-    return badges;
+    const builder = ITEM_BADGE_BUILDERS[config.key];
+    if (!builder) return [];
+    return builder(item, {
+      t: game.i18n,
+      getRankLabel,
+      worldType: game.settings.get(MODULE_ID, 'worldType'),
+      skillLabel: this._skillLabel.bind(this),
+      formatSkillBonus: this._formatSkillBonus.bind(this),
+      formatDamage: this._formatDamage.bind(this)
+    });
   }
 
   _getItemSummary(item, config) {
     const system = item.system ?? {};
-    switch (config.key) {
-      case 'cartridges':
-        return system.description || '';
-      case 'implants':
-        return system.description || '';
-      case 'weapons':
-        return system.description || '';
-      case 'armor':
-        return system.description || '';
-      case 'gear':
-        return system.description || '';
-      default:
-        return system.description || '';
-    }
+    return system.description || '';
   }
 
   _escapeHTML(value) {
@@ -721,13 +607,16 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     if (config?.newNameKey) {
       return game.i18n.localize(config.newNameKey);
     }
-    const typeLabel = config ? game.i18n.localize(`TYPES.Item.${config.type}`) : game.i18n.localize('MY_RPG.Inventory.Name');
+    const typeKey = config?.type ?? config?.types?.[0];
+    const typeLabel = typeKey
+      ? game.i18n.localize(`TYPES.Item.${typeKey}`)
+      : game.i18n.localize('MY_RPG.Inventory.Name');
     return game.i18n.format('MY_RPG.ItemControls.NewItemFallback', { type: typeLabel });
   }
 
   _getGroupConfig(groupKey) {
     if (!groupKey) return null;
-    return ITEM_GROUP_CONFIG_BY_KEY[groupKey] ?? null;
+    return getItemGroupConfigByKey(groupKey);
   }
 
   _getItemContextFromEvent(event) {
@@ -756,14 +645,16 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const $target = $(event.currentTarget);
     const groupKey = $target.data('groupKey') || $target.closest('[data-item-group]').data('itemGroup');
     const type = $target.data('type');
-    let config = type ? ITEM_GROUP_CONFIG.find((c) => c.type === type) : null;
+    let config = type
+      ? getItemGroupConfigs().find((entry) => entry.types.includes(type))
+      : null;
     if (!config) config = this._getGroupConfig(groupKey);
     if (!config) return;
     const name = this._getDefaultItemName(config);
     // DEBUG-LOG
-    debugLog('Actor sheet item create', { actor: this.actor.uuid, type: config.type });
+    debugLog('Actor sheet item create', { actor: this.actor.uuid, type: config.types[0] });
     await this.actor.createEmbeddedDocuments('Item', [
-      { name, type: config.type, system: {} }
+      { name, type: config.types[0], system: {} }
     ]);
   }
 
