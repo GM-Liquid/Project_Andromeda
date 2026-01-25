@@ -299,90 +299,6 @@ export const ITEM_GROUP_CONFIGS = [
     canRoll: false
   },
   {
-    key: 'environmentConsumables',
-    types: ['environment-consumable'],
-    tab: 'environment',
-    icon: 'fas fa-flask',
-    labelKey: 'MY_RPG.ItemGroups.EnvironmentConsumables',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyEnvironmentConsumables',
-    createKey: 'MY_RPG.ItemGroups.CreateEnvironmentConsumable',
-    newNameKey: 'MY_RPG.ItemGroups.NewEnvironmentConsumable',
-    showQuantity: true,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: false
-  },
-  {
-    key: 'environmentInteractive',
-    types: ['environment-interactive'],
-    tab: 'environment',
-    icon: 'fas fa-hand-pointer',
-    labelKey: 'MY_RPG.ItemGroups.EnvironmentInteractive',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyEnvironmentInteractive',
-    createKey: 'MY_RPG.ItemGroups.CreateEnvironmentInteractive',
-    newNameKey: 'MY_RPG.ItemGroups.NewEnvironmentInteractive',
-    showQuantity: false,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: false
-  },
-  {
-    key: 'environmentNarrative',
-    types: ['environment-narrative'],
-    tab: 'environment',
-    icon: 'fas fa-book',
-    labelKey: 'MY_RPG.ItemGroups.EnvironmentNarrative',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyEnvironmentNarrative',
-    createKey: 'MY_RPG.ItemGroups.CreateEnvironmentNarrative',
-    newNameKey: 'MY_RPG.ItemGroups.NewEnvironmentNarrative',
-    showQuantity: false,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: false
-  },
-  {
-    key: 'environmentResources',
-    types: ['environment-resource'],
-    tab: 'environment',
-    icon: 'fas fa-leaf',
-    labelKey: 'MY_RPG.ItemGroups.EnvironmentResources',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyEnvironmentResources',
-    createKey: 'MY_RPG.ItemGroups.CreateEnvironmentResource',
-    newNameKey: 'MY_RPG.ItemGroups.NewEnvironmentResource',
-    showQuantity: true,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: false
-  },
-  {
-    key: 'environmentTriggers',
-    types: ['environment-trigger'],
-    tab: 'environment',
-    icon: 'fas fa-bell',
-    labelKey: 'MY_RPG.ItemGroups.EnvironmentTriggers',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyEnvironmentTriggers',
-    createKey: 'MY_RPG.ItemGroups.CreateEnvironmentTrigger',
-    newNameKey: 'MY_RPG.ItemGroups.NewEnvironmentTrigger',
-    showQuantity: false,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: false
-  },
-  {
-    key: 'environmentDanger',
-    types: ['environment-danger'],
-    tab: 'environment',
-    icon: 'fas fa-skull',
-    labelKey: 'MY_RPG.ItemGroups.EnvironmentDanger',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyEnvironmentDanger',
-    createKey: 'MY_RPG.ItemGroups.CreateEnvironmentDanger',
-    newNameKey: 'MY_RPG.ItemGroups.NewEnvironmentDanger',
-    showQuantity: false,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: false
-  },
-  {
     key: 'traitFlaws',
     types: ['trait-flaw'],
     tab: 'traits',
@@ -515,10 +431,6 @@ export const ITEM_TABS = [
   {
     key: 'inventory',
     labelKey: 'MY_RPG.SheetLabels.Inventory'
-  },
-  {
-    key: 'environment',
-    labelKey: 'MY_RPG.SheetLabels.Environment'
   },
   {
     key: 'traits',
