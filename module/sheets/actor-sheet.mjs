@@ -263,12 +263,15 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const stressMax = Number(stress.max) || 0;
     const marked = this._normalizeStressMarked(stress.marked, stressMax);
     context.system.stress.marked = marked;
-    context.system.stressTrack = Array.from({ length: Math.max(stressMax, 0) }, (_, index) => ({
-      index,
-      filled: index < stressValue,
-      marked: marked.includes(index),
-      ariaLabel: game.i18n.format('MY_RPG.Stress.CellAria', { index: index + 1 })
-    }));
+    context.system.stressTrack = Array.from({ length: Math.max(stressMax, 0) }, (_, index) => {
+      const isMarked = marked.includes(index);
+      return {
+        index,
+        filled: index < stressValue && !isMarked,
+        marked: isMarked,
+        ariaLabel: game.i18n.format('MY_RPG.Stress.CellAria', { index: index + 1 })
+      };
+    });
   }
 
   /**
@@ -302,8 +305,14 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const marked = normalizedMarked.includes(index)
       ? normalizedMarked.filter((cellIndex) => cellIndex < index)
       : Array.from({ length: index + 1 }, (_, cellIndex) => cellIndex);
-    await this.actor.update({ 'system.stress.marked': marked }, { render: false });
-    this._updateStressTrack(this.element, { marked: marked });
+    await this.actor.update(
+      {
+        'system.stress.marked': marked,
+        'system.stress.value': 0
+      },
+      { render: false }
+    );
+    this._updateStressTrack(this.element, { marked: marked, value: 0 });
   }
 
   _stepAbilityDie(current, step) {
@@ -463,8 +472,8 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const $track = $root.find('.stress-track');
     if (!$track.length) return;
     $track.find('.stress-cell').each((i, el) => {
-      const filled = i < value;
       const isMarked = marked.includes(i);
+      const filled = i < value && !isMarked;
       el.classList.toggle('filled', filled);
       el.classList.toggle('marked', isMarked);
       el.setAttribute('aria-pressed', filled ? 'true' : 'false');
