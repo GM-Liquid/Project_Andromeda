@@ -43,16 +43,14 @@
   gap: 8px;
 }
 
-.stress-track,
-.wound-track {
+.stress-track {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   justify-content: center;
 }
 
-.stress-cell,
-.wound-cell {
+.stress-cell {
   width: 26px;
   height: 26px;
   border-radius: 50%;
@@ -71,19 +69,17 @@
     color 0.15s ease;
 }
 
-.wound-cell {
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.stress-cell.filled,
-.wound-cell.filled {
+.stress-cell.filled {
   background-color: #673e37;
   color: #d2d2c9;
 }
 
-.stress-cell:focus-visible,
-.wound-cell:focus-visible {
+.stress-cell.marked {
+  background-color: #87d0fb;
+  color: #1b1210;
+}
+
+.stress-cell:focus-visible {
   outline: 2px solid #0896e9;
   outline-offset: 2px;
 }
@@ -189,6 +185,12 @@ textarea[disabled] {
 .sheet-box h2 {
   text-align: center;
   font-weight: 700;
+}
+
+/* Item type selection ---------------------------------------------------- */
+.document-create-dialog select option.item-type-supertype {
+  font-weight: 700;
+  color: #1b1210;
 }
 
 /* Item sheets ---------------------------------------------------- */

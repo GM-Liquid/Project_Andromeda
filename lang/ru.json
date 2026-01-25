@@ -173,15 +173,6 @@
       "Label": "Стресс",
       "CellAria": "Клетка стресса {index}"
     },
-    "Wounds": {
-      "Label": "Раны",
-      "Minor": "Легкая рана",
-      "MinorAbbrev": "Л",
-      "MinorAria": "Переключить легкую рану",
-      "Severe": "Тяжелая рана",
-      "SevereAbbrev": "Т",
-      "SevereAria": "Переключить тяжелую рану"
-    },
     "Speed": {
       "Label": "Скорость передвижения"
     },
@@ -383,7 +374,6 @@
     "RollFlavor": {
       "Modifiers": "Модификаторы",
       "SkillValue": "Навык ({skill})",
-      "WoundPenalty": "Штраф за ранения",
       "EquipmentBonus": "Бонус экипировки",
       "Damage": "Урон {value}",
       "SourceWeapon": "Оружие: {name}",

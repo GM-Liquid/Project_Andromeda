@@ -38,18 +38,18 @@ function buildItemTypeOptions({ select, allowedTypes }) {
     if (!types?.length) continue;
     const labelKey = ITEM_SUPERTYPE_LABELS[groupKey];
     const label = labelKey ? game.i18n.localize(labelKey) : groupKey;
-    const $group = $(`<optgroup label="${label}"></optgroup>`);
+    const $heading = $(`<option class="item-type-supertype" disabled>${label}</option>`);
+    select.append($heading);
     for (const type of types) {
       const typeLabel = game.i18n.localize(`TYPES.Item.${type}`);
-      $group.append(`<option value="${type}">${typeLabel}</option>`);
+      select.append(`<option value="${type}">${typeLabel}</option>`);
     }
-    select.append($group);
   }
 
   if (currentValue && allowedTypes.has(currentValue)) {
     select.val(currentValue);
   } else {
-    const firstSelectable = select.find('option').first();
+    const firstSelectable = select.find('option:not(:disabled)').first();
     if (firstSelectable.length) {
       select.val(firstSelectable.val());
     } else {

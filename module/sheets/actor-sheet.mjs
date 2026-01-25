@@ -108,8 +108,10 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     super.activateListeners(html);
     const $html = html instanceof jQuery ? html : $(html);
     $html.find('textarea.rich-editor').each((i, el) => this.initializeRichEditor(el));
-    $html.find('.stress-cell').on('click', this._onStressCellClick.bind(this));
-    $html.find('.wound-cell').on('click', this._onWoundCellClick.bind(this));
+    $html
+      .find('.stress-cell')
+      .on('click', this._onStressCellClick.bind(this))
+      .on('contextmenu', this._onStressCellRightClick.bind(this));
     $html.find('.rollable').on('click', this._onRoll.bind(this));
 
     $html.on('click', '.item-create', this._onItemCreate.bind(this));
@@ -206,8 +208,6 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
 
 
   _prepareCharacterData(context) {
-    const isCharacter = Boolean(context.isCharacter);
-    const isNpc = Boolean(context.isNpc);
     const abilityOrder = ['con', 'int', 'spi'];
     context.system.skills ??= {};
 
@@ -261,42 +261,18 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const stress = context.system.stress ?? { value: 0, max: 0 };
     const stressValue = Number(stress.value) || 0;
     const stressMax = Number(stress.max) || 0;
+    const marked = this._normalizeStressMarked(stress.marked, stressMax);
+    context.system.stress.marked = marked;
     context.system.stressTrack = Array.from({ length: Math.max(stressMax, 0) }, (_, index) => ({
       index,
       filled: index < stressValue,
+      marked: marked.includes(index),
       ariaLabel: game.i18n.format('MY_RPG.Stress.CellAria', { index: index + 1 })
     }));
-
-    if (isCharacter) {
-      const woundState = context.system.wounds ?? { minor: false, severe: false };
-      const woundDefs = [
-        {
-          type: 'minor',
-          labelKey: 'MY_RPG.Wounds.Minor',
-          abbrKey: 'MY_RPG.Wounds.MinorAbbrev',
-          ariaKey: 'MY_RPG.Wounds.MinorAria'
-        },
-        {
-          type: 'severe',
-          labelKey: 'MY_RPG.Wounds.Severe',
-          abbrKey: 'MY_RPG.Wounds.SevereAbbrev',
-          ariaKey: 'MY_RPG.Wounds.SevereAria'
-        }
-      ];
-      context.system.woundTrack = woundDefs.map((def) => ({
-        type: def.type,
-        labelKey: def.labelKey,
-        abbr: game.i18n.localize(def.abbrKey),
-        ariaLabel: game.i18n.localize(def.ariaKey),
-        filled: Boolean(woundState?.[def.type])
-      }));
-    } else if (isNpc) {
-      context.system.woundTrack = [];
-    }
   }
 
   /**
-   * Toggle stress and wound cells without forcing a full sheet re-render.
+   * Toggle stress cells without forcing a full sheet re-render.
    */
   async _onStressCellClick(event) {
     event.preventDefault();
@@ -308,27 +284,26 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       index < current
         ? index
         : Math.min(index + 1, max);
-    await this.actor.update({ 'system.stress.value': next }, { render: false });
-    this._updateStressTrack(this.element, next);
+    await this.actor.update(
+      {
+        'system.stress.value': next
+      },
+      { render: false }
+    );
+    this._updateStressTrack(this.element, { value: next });
   }
 
-  async _onWoundCellClick(event) {
+  async _onStressCellRightClick(event) {
     event.preventDefault();
-    const type = event.currentTarget.dataset.type;
-    if (!type) return;
-    const current = Boolean(this.actor.system.wounds?.[type]);
-    const update = {};
-    update['system.wounds.' + type] = !current;
-    await this.actor.update(update, { render: false });
-    this._updateWoundTrack(this.element);
-  }
-
-  _getWoundPenalty() {
-    const wounds = this.actor.system.wounds || {};
-    let penalty = 0;
-    if (wounds.minor) penalty += 1;
-    if (wounds.severe) penalty += 2;
-    return penalty;
+    const index = Number(event.currentTarget.dataset.index) || 0;
+    const stress = this.actor.system.stress || { value: 0, max: 0 };
+    const max = Number(stress.max) || 0;
+    const normalizedMarked = this._normalizeStressMarked(stress.marked, max);
+    const marked = normalizedMarked.includes(index)
+      ? normalizedMarked.filter((cellIndex) => cellIndex < index)
+      : Array.from({ length: index + 1 }, (_, cellIndex) => cellIndex);
+    await this.actor.update({ 'system.stress.marked': marked }, { render: false });
+    this._updateStressTrack(this.element, { marked: marked });
   }
 
   _stepAbilityDie(current, step) {
@@ -440,15 +415,6 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       dieValue = dieValue ?? this._getAbilityDieValue(ability);
     }
 
-    const woundPenalty = this._getWoundPenalty();
-    if (woundPenalty) {
-      modifier -= woundPenalty;
-      parts.push({
-        label: game.i18n.localize('MY_RPG.RollFlavor.WoundPenalty'),
-        value: -woundPenalty
-      });
-    }
-
     const rollFormula = dieValue ? getAbilityDieRoll(dieValue) : getAbilityDieRoll(ABILITY_DIE_STEPS[0].value);
     const roll = await new Roll(`${rollFormula} + @mod`, { mod: modifier }).roll({
       async: true
@@ -462,7 +428,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
   }
 
   /**
-   * Update derived fields on the sheet (speed, defenses, stress and wounds)
+   * Update derived fields on the sheet (speed, defenses, stress)
    * after an in-place change without re-rendering the sheet.
    */
   _refreshDerived(html) {
@@ -480,34 +446,39 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     setVal('system.defenses.mental', s?.defenses?.mental);
 
     this._updateStressTrack($root);
-    this._updateWoundTrack($root);
   }
 
-  _updateStressTrack(root, explicitValue) {
+  _updateStressTrack(root, options = {}) {
     const $root = root instanceof jQuery ? root : $(root ?? this.element);
     const stress = this.actor.system.stress || { value: 0, max: 0 };
     const value =
-      typeof explicitValue === 'number' ? explicitValue : Number(stress.value) || 0;
+      typeof options === 'number'
+        ? options
+        : typeof options?.value === 'number'
+          ? options.value
+          : Number(stress.value) || 0;
+    const marked = Array.isArray(options?.marked)
+      ? this._normalizeStressMarked(options.marked, Number(stress.max) || 0)
+      : this._normalizeStressMarked(stress.marked, Number(stress.max) || 0);
     const $track = $root.find('.stress-track');
     if (!$track.length) return;
     $track.find('.stress-cell').each((i, el) => {
       const filled = i < value;
+      const isMarked = marked.includes(i);
       el.classList.toggle('filled', filled);
+      el.classList.toggle('marked', isMarked);
       el.setAttribute('aria-pressed', filled ? 'true' : 'false');
     });
   }
 
-  _updateWoundTrack(root) {
-    const $root = root instanceof jQuery ? root : $(root ?? this.element);
-    const wounds = this.actor.system.wounds || { minor: false, severe: false };
-    const $track = $root.find('.wound-track');
-    if (!$track.length) return;
-    $track.find('.wound-cell').each((_, el) => {
-      const type = el.dataset.type;
-      const filled = Boolean(wounds?.[type]);
-      el.classList.toggle('filled', filled);
-      el.setAttribute('aria-pressed', filled ? 'true' : 'false');
-    });
+  _normalizeStressMarked(marked, max) {
+    const limit = Number.isFinite(max) ? max : null;
+    const source = Array.isArray(marked) ? marked : [];
+    const normalized = source
+      .map((value) => Number(value))
+      .filter((value) =>
+        Number.isInteger(value) && value >= 0 && (limit === null || value < limit));
+    return [...new Set(normalized)];
   }
 
   _getItemControlLabels() {

@@ -24,7 +24,8 @@
         "inventoryList": [],
         "stress": {
           "value": 0,
-          "max": 4
+          "max": 4,
+          "marked": []
         },
         "flux": {
           "value": 0
@@ -105,10 +106,6 @@
     },
     "character": {
       "templates": ["base"],
-      "wounds": {
-        "minor": false,
-        "severe": false
-      },
       "biography": {
         "weight": "",
         "height": "",
