@@ -275,6 +275,14 @@
       "EmptyImplants": "Пока нет имплантов.",
       "CreateImplant": "Добавить имплант",
       "NewImplant": "Новый имплант",
+      "Genomes": "Геномы",
+      "EmptyGenomes": "Пока нет геномов.",
+      "CreateGenome": "Добавить геном",
+      "NewGenome": "Новый геном",
+      "SourceAbilities": "Способности источника",
+      "EmptySourceAbilities": "Пока нет способностей источника.",
+      "CreateSourceAbility": "Добавить способность источника",
+      "NewSourceAbility": "Новая способность источника",
       "Weapons": "Оружие",
       "EmptyWeapons": "Пока нет оружия.",
       "CreateWeapon": "Добавить оружие",
@@ -431,7 +439,9 @@
       "trait-combat": "Боевая черта",
       "trait-magical": "Магическая черта",
       "trait-professional": "Профессиональная черта",
-      "trait-technological": "Технологическая черта"
+      "trait-technological": "Технологическая черта",
+      "trait-genome": "Геном",
+      "trait-source-ability": "Способность источника"
     }
   }
 }

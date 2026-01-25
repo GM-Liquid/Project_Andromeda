@@ -268,6 +268,14 @@
       "EmptyImplants": "No implants yet.",
       "CreateImplant": "Add implant",
       "NewImplant": "New Implant",
+      "Genomes": "Genomes",
+      "EmptyGenomes": "No genomes yet.",
+      "CreateGenome": "Add genome",
+      "NewGenome": "New Genome",
+      "SourceAbilities": "Source Abilities",
+      "EmptySourceAbilities": "No source abilities yet.",
+      "CreateSourceAbility": "Add source ability",
+      "NewSourceAbility": "New Source Ability",
       "Weapons": "Weapons",
       "EmptyWeapons": "No weapons yet.",
       "CreateWeapon": "Add weapon",
@@ -424,7 +432,9 @@
       "trait-combat": "Combat Trait",
       "trait-magical": "Magical Trait",
       "trait-professional": "Professional Trait",
-      "trait-technological": "Technological Trait"
+      "trait-technological": "Technological Trait",
+      "trait-genome": "Genome",
+      "trait-source-ability": "Source Ability"
     }
   }
 }
