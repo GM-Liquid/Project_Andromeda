@@ -188,7 +188,7 @@ textarea[disabled] {
 }
 
 /* Item type selection ---------------------------------------------------- */
-.document-create-dialog select option.item-type-supertype {
+.document-create-dialog select optgroup {
   font-weight: 700;
   color: #1b1210;
 }
