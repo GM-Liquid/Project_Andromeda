@@ -14,6 +14,8 @@ import './helpers/handlebars-helpers.mjs';
 const ITEM_SUPERTYPE_ORDER = ['equipment', 'environment', 'traits', 'other'];
 
 function buildItemTypeOptions({ select, allowedTypes }) {
+  const selectElement = select.get(0);
+  if (!selectElement) return;
   const currentValue = select.val();
   const grouped = new Map();
   const unknownTypes = new Set(allowedTypes);
@@ -31,29 +33,35 @@ function buildItemTypeOptions({ select, allowedTypes }) {
     grouped.set('other', [...(grouped.get('other') ?? []), ...unknownTypes]);
   }
 
-  select.empty();
+  const fragment = document.createDocumentFragment();
 
   for (const groupKey of ITEM_SUPERTYPE_ORDER) {
     const types = grouped.get(groupKey);
     if (!types?.length) continue;
     const labelKey = ITEM_SUPERTYPE_LABELS[groupKey];
     const label = labelKey ? game.i18n.localize(labelKey) : groupKey;
-    const $group = $(`<optgroup label="${label}"></optgroup>`);
+    const groupElement = document.createElement('optgroup');
+    groupElement.label = label;
     for (const type of types) {
       const typeLabel = game.i18n.localize(`TYPES.Item.${type}`);
-      $group.append(`<option value="${type}">${typeLabel}</option>`);
+      const option = document.createElement('option');
+      option.value = type;
+      option.textContent = typeLabel;
+      groupElement.append(option);
     }
-    select.append($group);
+    fragment.append(groupElement);
   }
 
+  selectElement.replaceChildren(fragment);
+
   if (currentValue && allowedTypes.has(currentValue)) {
-    select.val(currentValue);
+    selectElement.value = currentValue;
   } else {
-    const firstSelectable = select.find('option:not(:disabled)').first();
-    if (firstSelectable.length) {
-      select.val(firstSelectable.val());
+    const firstSelectable = selectElement.querySelector('option:not(:disabled)');
+    if (firstSelectable) {
+      selectElement.value = firstSelectable.value;
     } else {
-      select.prop('selectedIndex', 0);
+      selectElement.selectedIndex = 0;
     }
   }
 }
