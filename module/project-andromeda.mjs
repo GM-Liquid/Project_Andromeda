@@ -131,7 +131,7 @@ Hooks.once('init', function () {
     if (app?.documentName !== 'Item') return;
     const select = html.find('select[name="type"]');
     if (!select?.length) return;
-    const allowedTypes = new Set(game.system.documentTypes?.Item ?? []);
+    const allowedTypes = new Set(app?.documentTypes?.Item ?? game.documentTypes?.Item ?? []);
     if (!allowedTypes.size) return;
     buildItemTypeOptions({ select, allowedTypes });
   });
