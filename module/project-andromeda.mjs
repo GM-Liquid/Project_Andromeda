@@ -169,18 +169,20 @@ Hooks.once('init', function () {
 Hooks.on('renderDocumentCreateDialog', (app, html) => {
   if (app?.documentName !== 'Item') return;
   
-  const select = html[0]?.querySelector('select[name="type"]');  // ← Get vanilla DOM element
-  if (!select) return;
-  
   const allowedTypes = new Set(app?.documentTypes?.Item ?? game.documentTypes?.Item ?? []);
   if (!allowedTypes.size) return;
 
-  const buildOptgroups = () => {
-    buildItemTypeOptions({ select: $(select), allowedTypes });  // ← Wrap in jQuery for your function
+  const originalActivateListeners = app.activateListeners.bind(app);
+  app.activateListeners = function(html) {
+    originalActivateListeners(html);
+    
+    const select = html.find('select[name="type"]')[0];
+    if (select) {
+      buildItemTypeOptions({ select: html.find('select[name="type"]'), allowedTypes });
+    }
+    
+    return this;
   };
-
-  buildOptgroups();
-  setTimeout(buildOptgroups, 100);
 });
 
 
