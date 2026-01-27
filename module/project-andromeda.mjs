@@ -175,12 +175,21 @@ Hooks.on('renderDocumentCreateDialog', (app, html) => {
   const allowedTypes = new Set(app?.documentTypes?.Item ?? game.documentTypes?.Item ?? []);
   if (!allowedTypes.size) return;
 
-  // Wait for Foundry's form field processing to complete
-  // Then rebuild the optgroups
-  setTimeout(() => {
-    buildItemTypeOptions({ select, allowedTypes });
-  }, 200);  // Increased delay to account for Foundry's async rendering
+  // Rebuild optgroups multiple times to catch re-renders
+  const buildOptgroups = () => {
+    setTimeout(() => {
+      buildItemTypeOptions({ select, allowedTypes });
+      console.log('[PA] Optgroups rebuilt. Count:', select.find('optgroup').length);
+    }, 150);
+  };
+
+  buildOptgroups();
+  
+  // If Foundry re-renders, catch it
+  setTimeout(buildOptgroups, 300);
+  setTimeout(buildOptgroups, 600);
 });
+
 
 
   // Preload Handlebars templates.
