@@ -80,28 +80,31 @@ function buildItemTypeOptions({ select, allowedTypes }) {
   }
 
   selectElement.replaceChildren(fragment);
-  
-// Instead of: selectElement.value = currentValue;
 
+selectElement.replaceChildren(fragment);
 
-if (currentValue && allowedTypes.has(currentValue)) {
-  const option = selectElement.querySelector(`option[value="${currentValue}"]`);
-  if (option) {
-    option.selected = true;
+// Add this instead of the current final code block
+setTimeout(() => {
+  if (currentValue && allowedTypes.has(currentValue)) {
+    const option = selectElement.querySelector(`option[value="${currentValue}"]`);
+    if (option) {
+      option.selected = true;
+    } else {
+      const firstSelectable = selectElement.querySelector('option:not(:disabled)');
+      if (firstSelectable) {
+        firstSelectable.selected = true;
+      }
+    }
   } else {
     const firstSelectable = selectElement.querySelector('option:not(:disabled)');
     if (firstSelectable) {
       firstSelectable.selected = true;
+    } else {
+      selectElement.selectedIndex = 0;
     }
   }
-} else {
-  const firstSelectable = selectElement.querySelector('option:not(:disabled)');
-  if (firstSelectable) {
-    firstSelectable.selected = true;
-  } else {
-    selectElement.selectedIndex = 0;
-  }
-}
+}, 50);  // Delay lets browser finish rendering
+
 }
 
 /* -------------------------------------------- */
