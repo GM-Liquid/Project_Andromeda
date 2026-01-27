@@ -79,30 +79,29 @@ function buildItemTypeOptions({ select, allowedTypes }) {
     fragment.append(groupElement);
   }
 
-selectElement.replaceChildren(fragment);
+  selectElement.replaceChildren(fragment);
 
-// Add this instead of the current final code block
-setTimeout(() => {
-  if (currentValue && allowedTypes.has(currentValue)) {
-    const option = selectElement.querySelector(`option[value="${currentValue}"]`);
-    if (option) {
-      option.selected = true;
+  // Restore selection after re-rendering
+  setTimeout(() => {
+    if (currentValue && allowedTypes.has(currentValue)) {
+      const option = selectElement.querySelector(`option[value="${currentValue}"]`);
+      if (option) {
+        option.selected = true;
+      } else {
+        const firstSelectable = selectElement.querySelector('option:not(:disabled)');
+        if (firstSelectable) {
+          firstSelectable.selected = true;
+        }
+      }
     } else {
       const firstSelectable = selectElement.querySelector('option:not(:disabled)');
       if (firstSelectable) {
         firstSelectable.selected = true;
+      } else {
+        selectElement.selectedIndex = 0;
       }
     }
-  } else {
-    const firstSelectable = selectElement.querySelector('option:not(:disabled)');
-    if (firstSelectable) {
-      firstSelectable.selected = true;
-    } else {
-      selectElement.selectedIndex = 0;
-    }
-  }
-}, 50);  // Delay lets browser finish rendering
-
+  }, 50);
 }
 
 /* -------------------------------------------- */
@@ -166,30 +165,27 @@ Hooks.once('init', function () {
     });
   }
 
+  // Preload Handlebars templates.
+  return preloadHandlebarsTemplates();
+});
+
+/* -------------------------------------------- */
+/*  Document Creation Dialog Hook               */
+/* -------------------------------------------- */
+
 Hooks.on('renderDocumentCreateDialog', (app, html) => {
   if (app?.documentName !== 'Item') return;
   
   const allowedTypes = new Set(app?.documentTypes?.Item ?? game.documentTypes?.Item ?? []);
   if (!allowedTypes.size) return;
 
-  const originalActivateListeners = app.activateListeners.bind(app);
-  app.activateListeners = function(html) {
-    originalActivateListeners(html);
-    
-    const select = html.find('select[name="type"]')[0];
-    if (select) {
-      buildItemTypeOptions({ select: html.find('select[name="type"]'), allowedTypes });
+  // Use afterRender to ensure the dialog is fully rendered
+  app.addEventListener('afterRender', () => {
+    const select = html.find('select[name="type"]');
+    if (select.length) {
+      buildItemTypeOptions({ select, allowedTypes });
     }
-    
-    return this;
-  };
-});
-
-
-
-
-  // Preload Handlebars templates.
-  return preloadHandlebarsTemplates();
+  }, { once: true });
 });
 
 Hooks.once('ready', async function () {
