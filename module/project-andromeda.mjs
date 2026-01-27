@@ -79,8 +79,6 @@ function buildItemTypeOptions({ select, allowedTypes }) {
     fragment.append(groupElement);
   }
 
-  selectElement.replaceChildren(fragment);
-
 selectElement.replaceChildren(fragment);
 
 // Add this instead of the current final code block
@@ -170,25 +168,21 @@ Hooks.once('init', function () {
 
 Hooks.on('renderDocumentCreateDialog', (app, html) => {
   if (app?.documentName !== 'Item') return;
-  const select = html.find('select[name="type"]');
-  if (!select?.length) return;
+  
+  const select = html[0]?.querySelector('select[name="type"]');  // ← Get vanilla DOM element
+  if (!select) return;
+  
   const allowedTypes = new Set(app?.documentTypes?.Item ?? game.documentTypes?.Item ?? []);
   if (!allowedTypes.size) return;
 
-  // Rebuild optgroups multiple times to catch re-renders
   const buildOptgroups = () => {
-    setTimeout(() => {
-      buildItemTypeOptions({ select, allowedTypes });
-      console.log('[PA] Optgroups rebuilt. Count:', select.find('optgroup').length);
-    }, 150);
+    buildItemTypeOptions({ select: $(select), allowedTypes });  // ← Wrap in jQuery for your function
   };
 
   buildOptgroups();
-  
-  // If Foundry re-renders, catch it
-  setTimeout(buildOptgroups, 300);
-  setTimeout(buildOptgroups, 600);
+  setTimeout(buildOptgroups, 100);
 });
+
 
 
 
