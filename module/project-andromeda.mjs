@@ -187,48 +187,44 @@ Hooks.once('init', function () {
 });
 
 /* -------------------------------------------- */
-/*  Document Creation Dialog Hook               */
+/*  Override Item.createDialog for optgroups    */
 /* -------------------------------------------- */
 
-Hooks.on('renderDocumentCreateDialog', (app, html) => {
-  console.log('[renderDocumentCreateDialog] Hook fired', { documentName: app?.documentName });
-  
-  if (app?.documentName !== 'Item') {
-    console.log('[renderDocumentCreateDialog] Not an Item dialog, skipping');
-    return;
-  }
-  
-  const allowedTypes = new Set(app?.documentTypes?.Item ?? game.documentTypes?.Item ?? []);
-  console.log('[renderDocumentCreateDialog] allowedTypes:', allowedTypes.size);
-  
-  if (!allowedTypes.size) {
-    console.log('[renderDocumentCreateDialog] No allowed types, skipping');
-    return;
-  }
+const OriginalItemCreateDialog = CONFIG.Item.documentClass.createDialog;
 
-  // Try immediate approach first
-  console.log('[renderDocumentCreateDialog] Trying immediate approach');
-  const select = html.find('select[name="type"]');
-  console.log('[renderDocumentCreateDialog] select found (immediate):', select.length);
+CONFIG.Item.documentClass.createDialog = async function(data = {}, options = {}) {
+  console.log('[Item.createDialog override] Called');
   
-  if (select.length) {
-    console.log('[renderDocumentCreateDialog] Calling buildItemTypeOptions immediately');
-    buildItemTypeOptions({ select, allowedTypes });
-    return;
-  }
+  // Call the original dialog
+  const dialog = await OriginalItemCreateDialog.call(this, data, options);
   
-  // If immediate approach fails, try afterRender
-  console.log('[renderDocumentCreateDialog] Immediate approach failed, trying afterRender event listener');
-  app.addEventListener('afterRender', () => {
-    console.log('[afterRender event] Event fired');
-    const select = html.find('select[name="type"]');
-    console.log('[afterRender event] select found:', select.length);
-    if (select.length) {
-      console.log('[afterRender event] Calling buildItemTypeOptions');
-      buildItemTypeOptions({ select, allowedTypes });
-    }
-  }, { once: true });
-});
+  // After the dialog renders, modify the select element
+  const originalRender = dialog.render.bind(dialog);
+  dialog.render = async function(force = false, options = {}) {
+    console.log('[Item.createDialog.render override] Called');
+    const result = await originalRender(force, options);
+    
+    // Now the dialog should be rendered, find and modify the select
+    setTimeout(() => {
+      console.log('[Item.createDialog timeout] Running select modification');
+      const html = dialog.element ? $(dialog.element) : $();
+      const select = html.find('select[name="type"]');
+      console.log('[Item.createDialog] select found:', select.length);
+      
+      if (select.length) {
+        const allowedTypes = new Set(this.documentTypes?.Item ?? game.documentTypes?.Item ?? []);
+        console.log('[Item.createDialog] allowedTypes:', allowedTypes.size);
+        if (allowedTypes.size) {
+          buildItemTypeOptions({ select, allowedTypes });
+        }
+      }
+    }, 100);
+    
+    return result;
+  };
+  
+  return dialog;
+};
 
 Hooks.once('ready', async function () {
   // DEBUG-LOG
