@@ -93,7 +93,7 @@ function buildItemTypeOptions({ select, allowedTypes }) {
 
   console.log('[buildItemTypeOptions] About to replaceChildren');
   selectElement.replaceChildren(fragment);
-  console.log('[buildItemTypeOptions] replaceChildren complete');
+  console.log('[buildItemTypeOptions] replaceChildren complete, select HTML:', selectElement.innerHTML);
 
   // Restore selection after re-rendering
   setTimeout(() => {
@@ -187,44 +187,33 @@ Hooks.once('init', function () {
 });
 
 /* -------------------------------------------- */
-/*  Override Item.createDialog for optgroups    */
+/*  renderDialog Hook for Item Creation Dialog  */
 /* -------------------------------------------- */
 
-const OriginalItemCreateDialog = CONFIG.Item.documentClass.createDialog;
-
-CONFIG.Item.documentClass.createDialog = async function(data = {}, options = {}) {
-  console.log('[Item.createDialog override] Called');
+Hooks.on('renderDialog', (dialog, html) => {
+  console.log('[renderDialog] Hook fired, dialog title:', dialog.title);
   
-  // Call the original dialog
-  const dialog = await OriginalItemCreateDialog.call(this, data, options);
+  // Check if this is the item creation dialog by looking for type selector
+  const select = html.find('select[name="type"]');
+  if (!select.length) {
+    console.log('[renderDialog] Not an item creation dialog (no type select), skipping');
+    return;
+  }
   
-  // After the dialog renders, modify the select element
-  const originalRender = dialog.render.bind(dialog);
-  dialog.render = async function(force = false, options = {}) {
-    console.log('[Item.createDialog.render override] Called');
-    const result = await originalRender(force, options);
-    
-    // Now the dialog should be rendered, find and modify the select
-    setTimeout(() => {
-      console.log('[Item.createDialog timeout] Running select modification');
-      const html = dialog.element ? $(dialog.element) : $();
-      const select = html.find('select[name="type"]');
-      console.log('[Item.createDialog] select found:', select.length);
-      
-      if (select.length) {
-        const allowedTypes = new Set(this.documentTypes?.Item ?? game.documentTypes?.Item ?? []);
-        console.log('[Item.createDialog] allowedTypes:', allowedTypes.size);
-        if (allowedTypes.size) {
-          buildItemTypeOptions({ select, allowedTypes });
-        }
-      }
-    }, 100);
-    
-    return result;
-  };
+  console.log('[renderDialog] Found type select, this is an item creation dialog');
   
-  return dialog;
-};
+  // Get the allowed types from the game
+  const allowedTypes = new Set(game.documentTypes?.Item ?? []);
+  console.log('[renderDialog] allowedTypes:', allowedTypes.size);
+  
+  if (!allowedTypes.size) {
+    console.log('[renderDialog] No allowed types, skipping');
+    return;
+  }
+  
+  console.log('[renderDialog] Calling buildItemTypeOptions');
+  buildItemTypeOptions({ select, allowedTypes });
+});
 
 Hooks.once('ready', async function () {
   // DEBUG-LOG
