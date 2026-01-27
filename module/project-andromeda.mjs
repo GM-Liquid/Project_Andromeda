@@ -14,9 +14,14 @@ import './helpers/handlebars-helpers.mjs';
 const ITEM_SUPERTYPE_ORDER = ['equipment', 'environment', 'traits', 'other'];
 
 function buildItemTypeOptions({ select, allowedTypes }) {
+  console.log('[buildItemTypeOptions] Called with:', { select: !!select, allowedTypes: allowedTypes.size });
   const selectElement = select.get(0);
+  console.log('[buildItemTypeOptions] selectElement found:', !!selectElement);
   if (!selectElement) return;
+  
   const currentValue = select.val();
+  console.log('[buildItemTypeOptions] currentValue:', currentValue);
+  
   const groupLabels = new Map();
   const orderedLabels = [];
 
@@ -26,6 +31,8 @@ function buildItemTypeOptions({ select, allowedTypes }) {
     groupLabels.set(groupKey, label);
     orderedLabels.push(label);
   }
+
+  console.log('[buildItemTypeOptions] orderedLabels:', orderedLabels);
 
   const options = [];
   const unknownTypes = new Set(allowedTypes);
@@ -55,6 +62,8 @@ function buildItemTypeOptions({ select, allowedTypes }) {
     }
   }
 
+  console.log('[buildItemTypeOptions] options:', options.length, 'items');
+
   const grouped = foundry.applications.fields.prepareSelectOptionGroups({
     options,
     groups: orderedLabels,
@@ -62,9 +71,12 @@ function buildItemTypeOptions({ select, allowedTypes }) {
     sort: false
   });
 
+  console.log('[buildItemTypeOptions] grouped result:', grouped);
+
   const fragment = document.createDocumentFragment();
 
   for (const group of grouped) {
+    console.log('[buildItemTypeOptions] Processing group:', group.label, 'options:', group.options?.length ?? 0);
     if (!group.options?.length) continue;
     const groupElement = document.createElement('optgroup');
     groupElement.label = group.label;
@@ -79,10 +91,13 @@ function buildItemTypeOptions({ select, allowedTypes }) {
     fragment.append(groupElement);
   }
 
+  console.log('[buildItemTypeOptions] About to replaceChildren');
   selectElement.replaceChildren(fragment);
+  console.log('[buildItemTypeOptions] replaceChildren complete');
 
   // Restore selection after re-rendering
   setTimeout(() => {
+    console.log('[buildItemTypeOptions] setTimeout callback running');
     if (currentValue && allowedTypes.has(currentValue)) {
       const option = selectElement.querySelector(`option[value="${currentValue}"]`);
       if (option) {
@@ -109,6 +124,8 @@ function buildItemTypeOptions({ select, allowedTypes }) {
 /* -------------------------------------------- */
 
 Hooks.once('init', function () {
+  console.log('[Project Andromeda] Init hook firing');
+  
   // Add utility classes to the global game object so that they're more easily
   // accessible in global contexts.
   game.projectAndromeda = {
@@ -174,15 +191,40 @@ Hooks.once('init', function () {
 /* -------------------------------------------- */
 
 Hooks.on('renderDocumentCreateDialog', (app, html) => {
-  if (app?.documentName !== 'Item') return;
+  console.log('[renderDocumentCreateDialog] Hook fired', { documentName: app?.documentName });
+  
+  if (app?.documentName !== 'Item') {
+    console.log('[renderDocumentCreateDialog] Not an Item dialog, skipping');
+    return;
+  }
   
   const allowedTypes = new Set(app?.documentTypes?.Item ?? game.documentTypes?.Item ?? []);
-  if (!allowedTypes.size) return;
+  console.log('[renderDocumentCreateDialog] allowedTypes:', allowedTypes.size);
+  
+  if (!allowedTypes.size) {
+    console.log('[renderDocumentCreateDialog] No allowed types, skipping');
+    return;
+  }
 
-  // Use afterRender to ensure the dialog is fully rendered
+  // Try immediate approach first
+  console.log('[renderDocumentCreateDialog] Trying immediate approach');
+  const select = html.find('select[name="type"]');
+  console.log('[renderDocumentCreateDialog] select found (immediate):', select.length);
+  
+  if (select.length) {
+    console.log('[renderDocumentCreateDialog] Calling buildItemTypeOptions immediately');
+    buildItemTypeOptions({ select, allowedTypes });
+    return;
+  }
+  
+  // If immediate approach fails, try afterRender
+  console.log('[renderDocumentCreateDialog] Immediate approach failed, trying afterRender event listener');
   app.addEventListener('afterRender', () => {
+    console.log('[afterRender event] Event fired');
     const select = html.find('select[name="type"]');
+    console.log('[afterRender event] select found:', select.length);
     if (select.length) {
+      console.log('[afterRender event] Calling buildItemTypeOptions');
       buildItemTypeOptions({ select, allowedTypes });
     }
   }, { once: true });
