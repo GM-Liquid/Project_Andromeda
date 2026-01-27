@@ -1339,3 +1339,9 @@ input.rank4 {
   font-size: 0.95em;
   font-weight: 600;
 }
+
+select[name="type"] optgroup {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
