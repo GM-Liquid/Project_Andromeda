@@ -80,17 +80,28 @@ function buildItemTypeOptions({ select, allowedTypes }) {
   }
 
   selectElement.replaceChildren(fragment);
+  
+// Instead of: selectElement.value = currentValue;
 
-  if (currentValue && allowedTypes.has(currentValue)) {
-    selectElement.value = currentValue;
+
+if (currentValue && allowedTypes.has(currentValue)) {
+  const option = selectElement.querySelector(`option[value="${currentValue}"]`);
+  if (option) {
+    option.selected = true;
   } else {
     const firstSelectable = selectElement.querySelector('option:not(:disabled)');
     if (firstSelectable) {
-      selectElement.value = firstSelectable.value;
-    } else {
-      selectElement.selectedIndex = 0;
+      firstSelectable.selected = true;
     }
   }
+} else {
+  const firstSelectable = selectElement.querySelector('option:not(:disabled)');
+  if (firstSelectable) {
+    firstSelectable.selected = true;
+  } else {
+    selectElement.selectedIndex = 0;
+  }
+}
 }
 
 /* -------------------------------------------- */
