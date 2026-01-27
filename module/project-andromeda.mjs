@@ -17,36 +17,63 @@ function buildItemTypeOptions({ select, allowedTypes }) {
   const selectElement = select.get(0);
   if (!selectElement) return;
   const currentValue = select.val();
-  const grouped = new Map();
+  const groupLabels = new Map();
+  const orderedLabels = [];
+
+  for (const groupKey of ITEM_SUPERTYPE_ORDER) {
+    const labelKey = ITEM_SUPERTYPE_LABELS[groupKey];
+    const label = labelKey ? game.i18n.localize(labelKey) : groupKey;
+    groupLabels.set(groupKey, label);
+    orderedLabels.push(label);
+  }
+
+  const options = [];
   const unknownTypes = new Set(allowedTypes);
 
   for (const config of ITEM_TYPE_CONFIGS) {
     if (!allowedTypes.has(config.type)) continue;
     unknownTypes.delete(config.type);
     const groupKey = config.supertype ?? 'other';
-    const list = grouped.get(groupKey) ?? [];
-    list.push(config.type);
-    grouped.set(groupKey, list);
+    const groupLabel = groupLabels.get(groupKey) ?? groupLabels.get('other') ?? groupKey;
+    options.push({
+      value: config.type,
+      label: game.i18n.localize(`TYPES.Item.${config.type}`),
+      group: groupLabel,
+      selected: config.type === currentValue
+    });
   }
 
   if (unknownTypes.size) {
-    grouped.set('other', [...(grouped.get('other') ?? []), ...unknownTypes]);
+    const fallbackGroupLabel = groupLabels.get('other') ?? 'other';
+    for (const type of unknownTypes) {
+      options.push({
+        value: type,
+        label: game.i18n.localize(`TYPES.Item.${type}`),
+        group: fallbackGroupLabel,
+        selected: type === currentValue
+      });
+    }
   }
+
+  const grouped = foundry.applications.fields.prepareSelectOptionGroups({
+    options,
+    groups: orderedLabels,
+    blank: false,
+    sort: false
+  });
 
   const fragment = document.createDocumentFragment();
 
-  for (const groupKey of ITEM_SUPERTYPE_ORDER) {
-    const types = grouped.get(groupKey);
-    if (!types?.length) continue;
-    const labelKey = ITEM_SUPERTYPE_LABELS[groupKey];
-    const label = labelKey ? game.i18n.localize(labelKey) : groupKey;
+  for (const group of grouped) {
+    if (!group.options?.length) continue;
     const groupElement = document.createElement('optgroup');
-    groupElement.label = label;
-    for (const type of types) {
-      const typeLabel = game.i18n.localize(`TYPES.Item.${type}`);
+    groupElement.label = group.label;
+    for (const optionData of group.options) {
       const option = document.createElement('option');
-      option.value = type;
-      option.textContent = typeLabel;
+      option.value = optionData.value;
+      option.textContent = optionData.label;
+      if (optionData.selected) option.selected = true;
+      if (optionData.disabled) option.disabled = true;
       groupElement.append(option);
     }
     fragment.append(groupElement);
