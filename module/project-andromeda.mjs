@@ -168,14 +168,20 @@ Hooks.once('init', function () {
     });
   }
 
-  Hooks.on('renderDocumentCreateDialog', (app, html) => {
-    if (app?.documentName !== 'Item') return;
-    const select = html.find('select[name="type"]');
-    if (!select?.length) return;
-    const allowedTypes = new Set(app?.documentTypes?.Item ?? game.documentTypes?.Item ?? []);
-    if (!allowedTypes.size) return;
+Hooks.on('renderDocumentCreateDialog', (app, html) => {
+  if (app?.documentName !== 'Item') return;
+  const select = html.find('select[name="type"]');
+  if (!select?.length) return;
+  const allowedTypes = new Set(app?.documentTypes?.Item ?? game.documentTypes?.Item ?? []);
+  if (!allowedTypes.size) return;
+
+  // Wait for Foundry's form field processing to complete
+  // Then rebuild the optgroups
+  setTimeout(() => {
     buildItemTypeOptions({ select, allowedTypes });
-  });
+  }, 200);  // Increased delay to account for Foundry's async rendering
+});
+
 
   // Preload Handlebars templates.
   return preloadHandlebarsTemplates();
