@@ -1,1 +1,554 @@
-{{> (template 'systems/project-andromeda/templates/actor/actor-character-sheet.hbs')}}
+<form class='{{cssClass}} {{actor.type}} flexcol' autocomplete='off'>
+
+
+  <div class='sheet-tabs-hex-container'>
+    <nav class='sheet-tabs-hex' data-group='primary'>
+      <a class='hex-button' data-tab='features'>{{localize 'MY_RPG.SheetLabels.Features'}}</a>
+      {{#each itemTabs as |tab|}}
+        <a class='hex-button' data-tab='{{tab.key}}'>{{tab.label}}</a>
+      {{/each}}
+      {{#if isCharacter}}
+        <a class='hex-button' data-tab='biography'>{{localize 'MY_RPG.SheetLabels.Biography'}}</a>
+      {{/if}}
+    </nav>
+  </div>
+
+  <div class='sheet-scrollable'>
+    <section class='sheet-body'>
+
+      {{#if isCharacter}}
+        <div class='tab biography' data-group='primary' data-tab='biography'>
+        <h1>{{localize 'MY_RPG.SheetLabels.Biography'}}</h1>
+        <section class='resources grid grid-6col'>
+          <div class='resource flex-group-center'>
+            <label>{{localize 'MY_RPG.Biography.Weight'}}</label>
+            <input
+              type='text'
+              class='small-input'
+              name='system.biography.weight'
+              value='{{system.biography.weight}}'
+            />
+          </div>
+          <div class='resource flex-group-center'>
+            <label>{{localize 'MY_RPG.Biography.Height'}}</label>
+            <input
+              type='text'
+              class='small-input'
+              name='system.biography.height'
+              value='{{system.biography.height}}'
+            />
+          </div>
+          <div class='resource flex-group-center'>
+            <label>{{localize 'MY_RPG.Biography.EyeColor'}}</label>
+            <input
+              type='text'
+              class='small-input'
+              name='system.biography.eyeColor'
+              value='{{system.biography.eyeColor}}'
+            />
+          </div>
+          <div class='resource flex-group-center'>
+            <label>{{localize 'MY_RPG.Biography.HairColor'}}</label>
+            <input
+              type='text'
+              class='small-input'
+              name='system.biography.hairColor'
+              value='{{system.biography.hairColor}}'
+            />
+          </div>
+          <div class='resource flex-group-center'>
+            <label>{{localize 'MY_RPG.KeyInfo.Gender'}}</label>
+            <input type='text' class='small-input' name='system.gender' value='{{system.gender}}' />
+          </div>
+          <div class='resource flex-group-center'>
+            <label>{{localize 'MY_RPG.KeyInfo.Age'}}</label>
+            <input type='text' class='small-input' name='system.age' value='{{system.age}}' />
+          </div>
+        </section>
+
+        <section class='appearance'>
+          <div class='form-group'>
+            <label>{{localize 'MY_RPG.Biography.Appearance'}}</label>
+            <textarea
+              class='rich-editor'
+              name='system.biography.appearance'
+              rows='5'
+            >{{system.biography.appearance}}</textarea>
+          </div>
+          <div class='form-group'>
+            <label>{{localize 'MY_RPG.Biography.Story'}}</label>
+            <textarea class='rich-editor' name='system.biography.story' rows='6'>{{system.biography.story}}</textarea>
+          </div>
+          <div class='form-group'>
+            <label>{{localize 'MY_RPG.Biography.Notes'}}</label>
+            <textarea class='rich-editor' name='system.biography.notes' rows='8'>{{system.biography.notes}}</textarea>
+          </div>
+        </section>
+        </div>
+      {{/if}}
+
+      <!--         "Features" -->
+      <div class='tab features features-tab' data-group='primary' data-tab='features'>
+
+        <div class='sheet-box'>
+          <h2>{{localize 'MY_RPG.SheetLabels.KeyInfo'}}</h2>
+
+          <section class='flexrow top-row'>
+            <div class='portrait-col'>
+              <img class='profile-img' src='{{actor.img}}' data-edit='img' title='{{actor.name}}' />
+            </div>
+
+            <div class='attributes-col center-attributes'>
+              <table class='attributes-table'>
+                <thead>
+                  <tr>
+                    {{#each system.abilities as |ability key|}}
+                      <th
+                        class='rollable {{ability.rankClass}}'
+                        data-ability='{{key}}'
+                        data-label='{{ability.label}}'
+                      >{{ability.label}}</th>
+                    {{/each}}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    {{#each system.abilities as |ability key|}}
+                      <td>
+                        <div class='ability-die-control' data-ability-key='{{key}}'>
+                          <button
+                            type='button'
+                            class='ability-step'
+                            data-step='-1'
+                            aria-label='{{localize "MY_RPG.AbilityDice.Decrease"}}'
+                          >
+                            <span aria-hidden='true'>-</span>
+                          </button>
+                          <div class='ability-die-value {{ability.rankClass}}'>
+                            {{ability.dieLabel}}
+                          </div>
+                          <button
+                            type='button'
+                            class='ability-step'
+                            data-step='1'
+                            aria-label='{{localize "MY_RPG.AbilityDice.Increase"}}'
+                          >
+                            <span aria-hidden='true'>+</span>
+                          </button>
+                          <input type='hidden' name='system.abilities.{{key}}.value' value='{{ability.value}}' />
+                        </div>
+                      </td>
+                    {{/each}}
+                  </tr>
+                </tbody>
+              </table>
+<table class="rank-hint-table attributes-table">
+  <tr>
+    <th colspan='4'>{{localize 'MY_RPG.RankGradient.Title'}}</th>
+  </tr>
+  <tr>
+    <td class='rank1'>{{rankLabel 1}}</td>
+    <td class='rank2'>{{rankLabel 2}}</td>
+    <td class='rank3'>{{rankLabel 3}}</td>
+    <td class='rank4'>{{rankLabel 4}}</td>
+  </tr>
+</table>
+
+            </div>
+          </section>
+
+
+          <section class='resources grid grid-2col key-info-grid key-info-health'>
+            <div class='resource flex-group-center'>
+              <label class='resource-label'>{{localize 'MY_RPG.Stress.Label'}}</label>
+              <div class='resource-content flexcol'>
+                <div class='stress-track' data-total='{{system.stress.max}}'>
+                  {{#each system.stressTrack as |cell|}}
+                    <button
+                      type='button'
+                      class='stress-cell {{#if cell.filled}}filled{{/if}} {{#if cell.marked}}marked{{/if}}'
+                      data-index='{{cell.index}}'
+                      aria-label='{{cell.ariaLabel}}'
+                      aria-pressed='{{#if cell.filled}}true{{else}}false{{/if}}'
+                    ></button>
+                  {{/each}}
+                </div>
+              </div>
+            </div>
+          </section>
+
+
+          <section class='resources grid grid-3col key-info-grid'>
+            <!-- Имя -->
+            <div class='resource flex-group-center'>
+              <label class='resource-label'>{{localize 'MY_RPG.KeyInfo.Name'}}</label>
+              <div class='resource-content flexcol'>
+                <input type='text' class='key-info-input' name='name' value='{{actor.name}}'/>
+              </div>
+            </div>
+
+            <!-- Призвание -->
+            {{#unless isNpc}}
+              <div class='resource flex-group-center'>
+                <label class='resource-label'>{{localize 'MY_RPG.KeyInfo.Calling'}}</label>
+                <div class='resource-content flexcol'>
+                  <input type='text' class='key-info-input' name='system.calling' value='{{system.calling}}'/>
+                </div>
+              </div>
+            {{/unless}}
+
+            <!-- Текущий ранг -->
+            <div class='resource flex-group-center'>
+              <label class='resource-label'>{{localize 'MY_RPG.KeyInfo.CurrentRank'}}</label>
+              <div class='resource-content flexcol'>
+                <input type='text' class='key-info-input' name='system.currentRank' value='{{system.currentRank}}'/>
+              </div>
+            </div>
+
+            {{#unless isNpc}}
+              <div class='resource flex-group-center'>
+                <label class='resource-label'>{{localize 'MY_RPG.KeyInfo.MomentOfGlory'}}</label>
+                <div class='resource-content flexcol'>
+                  <input
+                    type='number'
+                    class='key-info-input'
+                    name='system.momentOfGlory'
+                    value='{{system.momentOfGlory}}'
+                    step='1'
+                    inputmode='numeric'
+                  />
+                </div>
+              </div>
+            {{/unless}}
+            <!--          (Speed) -->
+            <div class='resource flex-group-center'>
+              <label class='resource-label'>{{localize 'MY_RPG.Speed.Label'}}</label>
+              <div class='resource-content flexcol'>
+                <input
+                  type='number'
+                  class='key-info-input'
+                  name='system.speed.value'
+                  value='{{system.speed.value}}'
+                  step='1'
+                  inputmode='numeric'
+                  readonly
+                  tabindex='-1'
+                />
+              </div>
+            </div>
+
+            <div class='resource flex-group-center'>
+              <label class='resource-label'>
+                {{localize 'MY_RPG.Defenses.PhysicalLabel'}}
+              </label>
+              <div class='resource-content flexcol'>
+                <input
+                  type='number'
+                  class='key-info-input'
+                  name='system.defenses.physical'
+                  value='{{system.defenses.physical}}'
+                  step='1'
+                  inputmode='numeric'
+                  readonly
+                  tabindex='-1'
+                />
+              </div>
+            </div>
+
+            <div class='resource flex-group-center'>
+              <label class='resource-label'>
+                {{localize 'MY_RPG.Defenses.MagicalLabel'}}
+              </label>
+              <div class='resource-content flexcol'>
+                <input
+                  type='number'
+                  class='key-info-input'
+                  name='system.defenses.azure'
+                  value='{{system.defenses.azure}}'
+                  step='1'
+                  inputmode='numeric'
+                  readonly
+                  tabindex='-1'
+                />
+              </div>
+            </div>
+
+            <div class='resource flex-group-center'>
+              <label class='resource-label'>
+{{localize 'MY_RPG.Defenses.PsychicLabel'}}
+              </label>
+              <div class='resource-content flexcol'>
+                <input
+                  type='number'
+                  class='key-info-input'
+                  name='system.defenses.mental'
+                  value='{{system.defenses.mental}}'
+                  step='1'
+                  inputmode='numeric'
+                  readonly
+                  tabindex='-1'
+                />
+              </div>
+            </div>
+          </section>
+        </div>
+        <!--                sheet-box Key Info -->
+
+        <section class='flexcol'>
+          <div class='sheet-box'>
+            <h2>{{localize 'MY_RPG.SheetLabels.Skills'}}</h2>
+            <div class='skills-grid'>
+              {{#each skillColumns as |column|}}
+                <div class='skills-column'>
+                  <div class='skills-column-header'>
+                    <span class='skills-column-title'>{{column.label}}</span>
+                  </div>
+                  {{#each column.skills as |skill|}}
+                    <div class='skill skill-row'>
+                      <div
+                        class='skill-col skill-name rollable'
+                        data-skill='{{skill.key}}'
+                        data-label='{{skill.label}}'
+                      >
+                        {{skill.label}}
+                      </div>
+
+                      <div class='skill-col skill-value'>
+                        <input
+                          class='{{skill.rankClass}}'
+                          type='number'
+                          name='system.skills.{{skill.key}}.value'
+                          value='{{skill.value}}'
+                          step='1'
+                          inputmode='numeric'
+                          pattern='\d+'
+                          min='0'
+                        />
+                      </div>
+                    </div>
+                  {{/each}}
+                </div>
+              {{/each}}
+            </div>
+          </div>
+
+          <div class='sheet-box limited-height'>
+            <h2>{{localize 'MY_RPG.TempBonus.Label'}}</h2>
+            <table>
+                <tr>
+                  <td>{{localize 'MY_RPG.TempHealth.Label'}}</td>
+                  <td><input
+                      type='number'
+                      name='system.temphealth'
+                      value='{{system.temphealth}}'
+                    /></td>
+                </tr>
+                <tr>
+                  <td>{{localize 'MY_RPG.Temp.BonusPhysicalLabel'}}</td>
+                  <td><input
+                      type='number'
+                      name='system.tempphys'
+                      value='{{system.tempphys}}'
+                    /></td>
+                </tr>
+                <tr>
+                  <td>{{localize 'MY_RPG.Temp.BonusMagicalLabel'}}</td>
+                  <td><input
+                      type='number'
+                      name='system.tempazure'
+                      value='{{system.tempazure}}'
+                    /></td>
+                </tr>
+                <tr>
+                  <td>{{localize 'MY_RPG.Temp.BonusPsychicLabel'}}</td>
+                  <td><input
+                      type='number'
+                      name='system.tempmental'
+                      value='{{system.tempmental}}'
+                    /></td>
+                </tr>
+                <tr>
+                  <td>{{localize 'MY_RPG.TempSpeed.Label'}}</td>
+                  <td><input
+                      type='number'
+                      name='system.tempspeed'
+                      value='{{system.tempspeed}}'
+                    /></td>
+                </tr>
+              </table>
+            </div>
+
+        </section>
+
+      </div>
+      <!--               Features -->
+
+      {{#each itemTabs as |tab|}}
+        <div class='tab {{tab.key}}' data-group='primary' data-tab='{{tab.key}}'>
+          <section class='item-groups' data-groups='{{tab.key}}'>
+            {{#each (lookup ../itemGroups tab.key) as |group|}}
+              <section class='item-group' data-item-group='{{group.key}}'>
+                <header class='item-group__header'>
+                  <h3>
+                    {{#if group.icon}}<i class='{{group.icon}}'></i>{{/if}}
+                    <span class='item-group__title'>{{group.label}}</span>
+                    {{#if group.capacity}}
+                      <span class='item-group__capacity'>{{group.capacity.value}} / {{group.capacity.max}}</span>
+                    {{/if}}
+                  </h3>
+                  <button
+                    type='button'
+                    class='item-create item-control'
+                    data-type='{{group.type}}'
+                    data-group-key='{{group.key}}'
+                    title='{{group.createLabel}}'
+                  >
+                    <i class='fa-solid fa-plus'></i>
+                    <span class='sr-only'>{{group.createLabel}}</span>
+                  </button>
+                </header>
+                {{#if group.items.length}}
+                  <ol class='item-list'>
+                    {{#each group.items as |item|}}
+                      <li
+                        class='item-row {{#if item.equipped}}item-row--equipped{{/if}}'
+                        data-item-id='{{item.id}}'
+                        data-group-key='{{item.groupKey}}'
+                      >
+                        <div class='item-row__header'>
+                          <div class='item-row__name'>
+                            <img src='{{item.img}}' alt='' />
+                            <span class='item-row__label'>{{item.name}}</span>
+                          </div>
+                          {{#if item.hasBadges}}
+                            <ul class='item-row__badges'>
+                              {{#each item.badges as |badge|}}
+                                <li class='item-badge'>{{badge}}</li>
+                              {{/each}}
+                            </ul>
+                          {{/if}}
+                          <div class='item-row__actions' data-item-id='{{item.id}}' data-group-key='{{item.groupKey}}'>
+                            {{#if item.showQuantity}}
+                              <div class='item-quantity-control' aria-label='{{../../itemControls.quantity}}'>
+                                <button
+                                  type='button'
+                                  class='item-quantity-step'
+                                  data-step='-1'
+                                  title='{{../../itemControls.quantityDecrease}}'
+                                >
+                                  <i class='fa-solid fa-minus'></i>
+                                  <span class='sr-only'>{{../../itemControls.quantityDecrease}}</span>
+                                </button>
+                                <span class='item-quantity-value'>{{item.quantity}}</span>
+                                <button
+                                  type='button'
+                                  class='item-quantity-step'
+                                  data-step='1'
+                                  title='{{../../itemControls.quantityIncrease}}'
+                                >
+                                  <i class='fa-solid fa-plus'></i>
+                                  <span class='sr-only'>{{../../itemControls.quantityIncrease}}</span>
+                                </button>
+                              </div>
+                            {{/if}}
+                            {{#if item.showEquip}}
+                              <label class='item-equip-toggle' title='{{../../itemControls.equip}}'>
+                                <input
+                                  type='checkbox'
+                                  class='item-equip-checkbox'
+                                  {{#if item.equipped}}checked{{/if}}
+                                  aria-label='{{../../itemControls.equipAria}}'
+                                />
+                              </label>
+                            {{/if}}
+                            {{#if item.canRoll}}
+                              <button
+                                type='button'
+                                class='item-roll item-control'
+                                data-item-id='{{item.id}}'
+                                data-group-key='{{item.groupKey}}'
+                                title='{{../../itemControls.roll}}'
+                              >
+                                <i class='fa-solid fa-dice-d10'></i>
+                                <span class='sr-only'>{{../../itemControls.roll}}</span>
+                              </button>
+                            {{/if}}
+                            <button
+                              type='button'
+                              class='item-chat item-control'
+                              data-item-id='{{item.id}}'
+                              data-group-key='{{item.groupKey}}'
+                              title='{{../../itemControls.chat}}'
+                            >
+                              <i class='fa-solid fa-comment-dots'></i>
+                              <span class='sr-only'>{{../../itemControls.chat}}</span>
+                            </button>
+                            <button
+                              type='button'
+                              class='item-edit item-control'
+                              data-item-id='{{item.id}}'
+                              data-group-key='{{item.groupKey}}'
+                              title='{{../../itemControls.edit}}'
+                            >
+                              <i class='fa-solid fa-pen'></i>
+                              <span class='sr-only'>{{../../itemControls.edit}}</span>
+                            </button>
+                            <button
+                              type='button'
+                              class='item-delete item-control'
+                              data-item-id='{{item.id}}'
+                              data-group-key='{{item.groupKey}}'
+                              title='{{../../itemControls.delete}}'
+                            >
+                              <i class='fa-solid fa-trash'></i>
+                              <span class='sr-only'>{{../../itemControls.delete}}</span>
+                            </button>
+                          </div>
+                        </div>
+                        {{#if item.hasSummary}}
+                          <div class='item-row__summary'>
+                            {{{item.summary}}}
+                          </div>
+                        {{/if}}
+                      </li>
+                    {{/each}}
+                  </ol>
+                {{else}}
+                  <p class='item-group__empty'>{{group.empty}}</p>
+                {{/if}}
+              </section>
+            {{/each}}
+          </section>
+          {{#isTab tab.key 'inventory'}}
+            <div class='sheet-box'>
+              <h2>{{localize 'MY_RPG.Resources.Title'}}</h2>
+              <section class='resources grid grid-2col'>
+                <div class='resource flex-group-center'>
+                  <label class='resource-label'>{{localize 'MY_RPG.Resources.SuppliesLabel'}}</label>
+                  <input
+                    type='number'
+                    name='system.supplies'
+                    value='{{../system.supplies}}'
+                    step='1'
+                    inputmode='numeric'
+                  />
+                </div>
+                <div class='resource flex-group-center'>
+                  <label class='resource-label'>{{localize 'MY_RPG.Resources.MoneyLabel'}}</label>
+                  <input
+                    type='number'
+                    name='system.money'
+                    value='{{../system.money}}'
+                    step='1'
+                    inputmode='numeric'
+                  />
+                </div>
+              </section>
+            </div>
+          {{/isTab}}
+        </div>
+      {{/each}}
+
+    </section>
+  </div>
+</form>

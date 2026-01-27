@@ -157,7 +157,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
   /** @override */
   get template() {
     if (this.actor.type === 'npc') {
-      return `systems/project-andromeda/templates/actor/actor-character-sheet.hbs`;
+      return `systems/project-andromeda/templates/actor/actor-npc-sheet.hbs`;
     }
     return `systems/project-andromeda/templates/actor/actor-${this.actor.type}-sheet.hbs`;
   }
