@@ -14,14 +14,10 @@ import './helpers/handlebars-helpers.mjs';
 const ITEM_SUPERTYPE_ORDER = ['equipment', 'environment', 'traits', 'other'];
 
 function buildItemTypeOptions({ select, allowedTypes }) {
-  console.log('[buildItemTypeOptions] Called with:', { select: !!select, allowedTypes: allowedTypes.size });
   const selectElement = select.get(0);
-  console.log('[buildItemTypeOptions] selectElement found:', !!selectElement);
   if (!selectElement) return;
   
   const currentValue = select.val();
-  console.log('[buildItemTypeOptions] currentValue:', currentValue);
-  
   const groupLabels = new Map();
   const orderedLabels = [];
 
@@ -31,8 +27,6 @@ function buildItemTypeOptions({ select, allowedTypes }) {
     groupLabels.set(groupKey, label);
     orderedLabels.push(label);
   }
-
-  console.log('[buildItemTypeOptions] orderedLabels:', orderedLabels);
 
   const options = [];
   const unknownTypes = new Set(allowedTypes);
@@ -62,8 +56,6 @@ function buildItemTypeOptions({ select, allowedTypes }) {
     }
   }
 
-  console.log('[buildItemTypeOptions] options:', options.length, 'items');
-
   const grouped = foundry.applications.fields.prepareSelectOptionGroups({
     options,
     groups: orderedLabels,
@@ -71,15 +63,16 @@ function buildItemTypeOptions({ select, allowedTypes }) {
     sort: false
   });
 
-  console.log('[buildItemTypeOptions] grouped result:', grouped);
-
   const fragment = document.createDocumentFragment();
 
   for (const group of grouped) {
-    console.log('[buildItemTypeOptions] Processing group:', group.label, 'options:', group.options?.length ?? 0);
+    // The group object has both a 'group' property (the label) and 'options' array
+    const groupLabel = group.group || group.label;
     if (!group.options?.length) continue;
+    
     const groupElement = document.createElement('optgroup');
-    groupElement.label = group.label;
+    groupElement.label = groupLabel;
+    
     for (const optionData of group.options) {
       const option = document.createElement('option');
       option.value = optionData.value;
@@ -91,13 +84,10 @@ function buildItemTypeOptions({ select, allowedTypes }) {
     fragment.append(groupElement);
   }
 
-  console.log('[buildItemTypeOptions] About to replaceChildren');
   selectElement.replaceChildren(fragment);
-  console.log('[buildItemTypeOptions] replaceChildren complete, select HTML:', selectElement.innerHTML);
 
   // Restore selection after re-rendering
   setTimeout(() => {
-    console.log('[buildItemTypeOptions] setTimeout callback running');
     if (currentValue && allowedTypes.has(currentValue)) {
       const option = selectElement.querySelector(`option[value="${currentValue}"]`);
       if (option) {
@@ -124,8 +114,6 @@ function buildItemTypeOptions({ select, allowedTypes }) {
 /* -------------------------------------------- */
 
 Hooks.once('init', function () {
-  console.log('[Project Andromeda] Init hook firing');
-  
   // Add utility classes to the global game object so that they're more easily
   // accessible in global contexts.
   game.projectAndromeda = {
@@ -191,27 +179,14 @@ Hooks.once('init', function () {
 /* -------------------------------------------- */
 
 Hooks.on('renderDialog', (dialog, html) => {
-  console.log('[renderDialog] Hook fired, dialog title:', dialog.title);
-  
   // Check if this is the item creation dialog by looking for type selector
   const select = html.find('select[name="type"]');
-  if (!select.length) {
-    console.log('[renderDialog] Not an item creation dialog (no type select), skipping');
-    return;
-  }
-  
-  console.log('[renderDialog] Found type select, this is an item creation dialog');
+  if (!select.length) return;
   
   // Get the allowed types from the game
   const allowedTypes = new Set(game.documentTypes?.Item ?? []);
-  console.log('[renderDialog] allowedTypes:', allowedTypes.size);
+  if (!allowedTypes.size) return;
   
-  if (!allowedTypes.size) {
-    console.log('[renderDialog] No allowed types, skipping');
-    return;
-  }
-  
-  console.log('[renderDialog] Calling buildItemTypeOptions');
   buildItemTypeOptions({ select, allowedTypes });
 });
 
