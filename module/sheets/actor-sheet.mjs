@@ -796,8 +796,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
         type: item.type,
         skill: skillKey,
         skillValue,
-        modifier,
-        damage: damageValue
+        modifier
       });
     }
   }
