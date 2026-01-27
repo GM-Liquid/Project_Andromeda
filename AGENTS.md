@@ -1,4 +1,4 @@
-# MyRPG — **Agents.md** (AI Helper Guide)
+# Project Andromeda — **Agents.md** (AI Helper Guide)
 
 > **Spec reference:** This document follows the [agentsmd.net specification](https://agentsmd.net/#what-is-agentsmd).\
 > **Purpose:** Explain the structure, conventions, and *extra* rules an AI assistant (e.g. OpenAI Codex) **must** respect when working with this repository.
@@ -9,40 +9,58 @@
 
 | Key fact                      | Value                                                           |
 | ----------------------------- | --------------------------------------------------------------- |
-| **System name**               | **MyRPG**                                                       |
-| **Foundry VTT compatibility** | v12 (tested on 12.324)                                          |
-| **Current version (**``**)**  | `2.282` -> **auto-bumped to** `2.283` on next commit            |
+| **System name**               | **Project Andromeda**                                           |
+| **Foundry VTT compatibility** | v12 (verified 12)                                               |
+| **Current version (**``**)**  | `2.347` -> **auto-bumped to** `2.348` on next commit            |
 | **Languages**                 | English, Русский (full parity required)                         |
 | **Main tech**                 | ES‑module JavaScript (`*.mjs`), Handlebars (`*.hbs`), JSON, CSS |
-| **Licence**                   | MIT (source) / CC BY‑SA 4.0 (game rules)                        |
+| **Licence**                   | CC BY-NC-SA 4.0                                                 |
 
 
 ## 2 · Repository Map
 
-myrpg/
+project-andromeda/
 │  README.md
 │  AGENTS.md          ← you are here
 │  system.json        ← manifest (version bumped automatically)
+│  template.json      ← data templates
+│  package.json
 │
 ├─ module/
+│   project-andromeda.mjs
 │   config.mjs
-│   actor.mjs
-│   actor-sheet.mjs
-│   utils.mjs
-│   handlebars-helpers.mjs
-│   templates.mjs
+│   documents/
+│   │   actor.mjs
+│   │   item.mjs
+│   helpers/
+│   │   config.mjs
+│   │   handlebars-helpers.mjs
+│   │   item-config.mjs
+│   │   migrations.mjs
+│   │   templates.mjs
+│   │   utils.mjs
+│   sheets/
+│       actor-sheet.mjs
+│       item-sheet.mjs
 │
 ├─ templates/
 │   └─ actor/
 │       ├─ actor-character-sheet.hbs
 │       └─ actor-npc-sheet.hbs
+│   └─ item/
+│       ├─ armor-sheet.hbs
+│       ├─ cartridge-sheet.hbs
+│       ├─ gear-sheet.hbs
+│       ├─ generic-sheet.hbs
+│       ├─ implant-sheet.hbs
+│       └─ weapon-sheet.hbs
 │
 ├─ lang/
 │   en.json   ← English strings
 │   ru.json   ← Russian strings (must mirror English keys)
 │
-└─ styles/
-    myrpg.css
+└─ css/
+    project-andromeda.css
 ```
 
 ---
@@ -51,26 +69,27 @@ myrpg/
 
 ### 3.1 Core Characteristics
 
-MyRPG uses **three** primary attributes; no *Dexterity* characteristic is present.
+Project Andromeda uses **three** primary abilities; no *Dexterity* characteristic is present.
 
 | Abbreviation | Name (EN / RU)     | Range      |
 | ------------ | ------------------ | ---------- |
-| **MIG**      | Might / Сила       | **1 – 10** |
-| **FIN**      | Finesse / Ловкость | **1 – 10** |
-| **MIN**      | Mind / Разум       | **1 – 10** |
+| **CON**      | Body / Тело        | **d4 → d20 (incl. 2d8)** |
+| **INT**      | Mind / Разум       | **d4 → d20 (incl. 2d8)** |
+| **SPI**      | Spirit / Дух       | **d4 → d20 (incl. 2d8)** |
 
-Derived stats and in‑game effects are computed in `actor.mjs` from these three values.
+Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normalized via helper utilities; derived stats and in‑game effects are computed in `module/documents/actor.mjs`.
 
 ### 3.2 Skills
 
-- Skills are integer values that can grow without a hard upper cap.
-- No “maximum skill” limitation must be enforced in sheets, rolls, or UI.
+- Skills are integer values with no hard upper cap.
+- Each skill is tied to an ability key in `template.json` and uses that ability’s die for rolls.
+- Skill modifiers equal the skill’s numeric value plus applicable item bonuses (cartridges/implants/weapons), and should not be capped in sheets, rolls, or UI.
 
 ---
 
 ## 4 · Build, Deployment & Versioning
 
-- **Auto‑version bump:** With **every** change merged to `main`, Codex (or any CI bot) must increment the `version` field in `system.json` by **+0.001** (e.g. `2.204 → 2.205`).
+- **Auto‑version bump:** With **every** change merged to `main`, increment the `version` field in `system.json` by **+0.001** (current baseline `2.347`, next `2.348`).
 - The build pipeline (GitHub Actions) simply zips the repository for Foundry distribution.
 - Releases follow Semantic‑ish numbering: `<major>.<minor><patch>` where *minor* and *patch* are three‑digit sequences (allows CI bumping).
 
@@ -95,10 +114,10 @@ Derived stats and in‑game effects are computed in `actor.mjs` from these three
 
   ```json
   // en.json
-  "MYRPG.RollTitle": "Might Check"
+  "MY_RPG.RollTitle": "Might Check"
 
   // ru.json
-  "MYRPG.RollTitle": "Проверка Силы"
+  "MY_RPG.RollTitle": "Проверка Силы"
   ```
 
 - **Naming**: camelCase for JS variables, kebab‑case for file names, UPPER\_SNAKE for Handlebars helpers.
@@ -118,12 +137,12 @@ Derived stats and in‑game effects are computed in `actor.mjs` from these three
 3. **Provide code** in a single contiguous block, ready for one‑click copy.
 4. **Ensure RU + EN localisation** for any code that introduces UI text.
 5. **Automatically bump version** (`system.json → version +0.001`) whenever code is updated.
-6. If adding or renaming a field that affects characteristics or skills, confirm the 1‑10 range rule and absence of DEX.
+6. If adding or renaming a field that affects characteristics or skills, confirm the ability die step rules and absence of DEX.
 
 7. When implementing sheet interactions, prioritize incremental updates: submit data with `render: false`, then update only the impacted parts of the DOM to reflect changes immediately. This applies equally to PCs and NPCs.
 8. **Adhere to code style**: All generated or modified code must strictly follow the formatting rules defined in `.prettierrc.json` and the linting rules in `eslint.config.mjs`.
+9. **Keep this document in sync**: When important mechanics or repository structure change, update AGENTS.md in the same change.
 
 ---
 
-*Last updated: 2025‑07‑02*
-
+*Last updated: 2026‑01‑27*
