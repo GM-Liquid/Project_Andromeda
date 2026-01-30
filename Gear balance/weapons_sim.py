@@ -86,6 +86,7 @@ DEFAULT_MAX_ROUNDS = 100
 DEFAULT_MAX_RETREAT_ROUNDS = 5
 
 PROPERTY_DEFS = [
+    ("Ближний бой", True),
     ("Магическое", True),
     ("Бронебойность X", 1),
     ("Эскалация X", 1),
@@ -106,62 +107,14 @@ PROPERTY_DEFS = [
     ("Досягаемость X", 1),
 ]
 
+
+MELEE_PROPERTY = "Ближний бой"
 REROLL_PROPERTY = "Переброс"
 
 UTILITY_ACTION_PROPERTIES = {}
 
-PROPERTY_COMPATIBILITY = {
-    "Магическое": ("ranged",),
-    "Бронебойность X": ("ranged",),
-    "Эскалация X": ("ranged",),
-    "Перезарядка X": ("ranged",),
-    "Стабилизация X": ("ranged",),
-    "Кровотечение X": ("melee",),
-    "Гарант X": ("ranged",),
-    "Агрессивный обстрел": ("ranged",),
-    "Опасное X": ("melee",),
-    "Пробивание X": ("ranged",),
-    "Дезориентирующее": ("melee", "ranged"),
-    "Обездвиживание X": ("melee", "ranged"),
-    "Ошеломление X": ("melee", "ranged"),
-    "Риск": ("melee", "ranged"),
-    "Замедление": ("melee", "ranged"),
-    "Переброс": ("melee", "ranged"),
-    "Точность X": ("ranged",),
-    "Досягаемость X": ("melee",),
-}
-
-PROPERTY_CLASS_PREFERENCE = ("ranged", "melee")
-
-def get_property_classes(prop_name: str) -> Tuple[str, ...]:
-    """Return all weapon classes a property can appear on."""
-    return PROPERTY_COMPATIBILITY.get(prop_name, ("ranged", "melee"))
-
-
-def pick_canonical_property_class(prop_name: str) -> str:
-    """Choose a single class for tooling when multiple are available."""
-    candidates = get_property_classes(prop_name)
-    for preferred in PROPERTY_CLASS_PREFERENCE:
-        if preferred in candidates:
-            return preferred
-    return candidates[0]
-
-
-def intersect_property_classes(*prop_names: str) -> Tuple[str, ...]:
-    """Get ordered list of classes shared by all supplied properties."""
-    if not prop_names:
-        return tuple(PROPERTY_CLASS_PREFERENCE)
-    shared = set(get_property_classes(prop_names[0]))
-    for name in prop_names[1:]:
-        shared &= set(get_property_classes(name))
-    if not shared:
-        return tuple()
-    ordered = tuple(cls for cls in PROPERTY_CLASS_PREFERENCE if cls in shared)
-    if len(ordered) != len(shared):
-        ordered += tuple(sorted(shared - set(ordered)))
-    return ordered
-
 SIMULATED_PROPERTIES = {
+    "Ближний бой",
     "Замедление",
     "Бронебойность X",
     "Эскалация X",
@@ -734,159 +687,6 @@ class Scenario:
     allow_ranged_retreat: bool
 
 
-@dataclass(frozen=True)
-class MetaMatchup:
-    """Defines the weapon types on each side for a meta sample."""
-    name: str
-    attacker_type: str
-    defender_type: str
-    weight: float
-
-
-@dataclass(frozen=True)
-class MetaScenarioCondition:
-    """Additional scenario conditions that can be sampled."""
-    name: str
-    initial_distance: float
-    allow_ranged_retreat: bool
-    weight: float = 1.0
-
-    def to_scenario(self) -> Scenario:
-        return Scenario(
-            name=self.name,
-            initial_distance=self.initial_distance,
-            allow_ranged_retreat=self.allow_ranged_retreat,
-        )
-
-
-@dataclass(frozen=True)
-class MetaEvaluationConfig:
-    """Configuration for the meta scenario sampler."""
-    matchups: Tuple[MetaMatchup, ...]
-    scenarios: Tuple[MetaScenarioCondition, ...]
-
-
-@dataclass(frozen=True)
-class MetaSample:
-    matchup: MetaMatchup
-    scenario_condition: MetaScenarioCondition
-    weight: float
-    config_is_attacker: bool
-    attacker_weapon: Weapon
-    defender_weapon: Weapon
-
-DEFAULT_META_MATCHUPS: Tuple[MetaMatchup, ...] = (
-    MetaMatchup("RR", "ranged", "ranged", 0.25),
-    MetaMatchup("MM", "melee", "melee", 0.25),
-    MetaMatchup("RM", "ranged", "melee", 0.25),
-    MetaMatchup("MR", "melee", "ranged", 0.25),
-)
-
-
-def build_default_meta_config(scenario: Scenario) -> MetaEvaluationConfig:
-    """Create a meta configuration rooted in the provided scenario."""
-    condition = MetaScenarioCondition(
-        name=scenario.name,
-        initial_distance=scenario.initial_distance,
-        allow_ranged_retreat=scenario.allow_ranged_retreat,
-        weight=1.0,
-    )
-    return MetaEvaluationConfig(
-        matchups=DEFAULT_META_MATCHUPS,
-        scenarios=(condition,),
-    )
-
-
-def build_meta_samples(
-    config_weapon: Weapon,
-    opponent_weapon: Weapon,
-    meta_config: MetaEvaluationConfig,
-) -> List[MetaSample]:
-    samples: List[MetaSample] = []
-    for matchup in meta_config.matchups:
-        for scenario_condition in meta_config.scenarios:
-            if (
-                config_weapon.weapon_type == matchup.attacker_type
-                and opponent_weapon.weapon_type == matchup.defender_type
-            ):
-                attacker_weapon = config_weapon
-                defender_weapon = opponent_weapon
-                config_is_attacker = True
-            elif (
-                config_weapon.weapon_type == matchup.defender_type
-                and opponent_weapon.weapon_type == matchup.attacker_type
-            ):
-                attacker_weapon = opponent_weapon
-                defender_weapon = config_weapon
-                config_is_attacker = False
-            else:
-                continue
-            sample_weight = matchup.weight * scenario_condition.weight
-            if sample_weight <= 0:
-                continue
-            samples.append(
-                MetaSample(
-                    matchup=matchup,
-                    scenario_condition=scenario_condition,
-                    weight=sample_weight,
-                    config_is_attacker=config_is_attacker,
-                    attacker_weapon=attacker_weapon,
-                    defender_weapon=defender_weapon,
-                )
-            )
-    return samples
-
-
-def evaluate_meta_winrate(
-    config_weapon: Weapon,
-    opponent_weapon: Weapon,
-    rank: int,
-    simulations: int,
-    meta_config: MetaEvaluationConfig,
-    show_progress: bool,
-    pool: Optional[SimulationPool],
-    rng: Optional[random.Random] = None,
-    progress_prefix: Optional[str] = None,
-) -> float:
-    """Return the meta-weighted win rate for the primary weapon by averaging probabilities before any logit conversion."""
-    samples = build_meta_samples(config_weapon, opponent_weapon, meta_config)
-    if not samples:
-        raise ValueError("No meta samples generated for the given weapon.")
-    total_weight = sum(sample.weight for sample in samples)
-    if total_weight <= 0:
-        raise ValueError("Meta sample weights must sum to a positive value.")
-    weighted_win = 0.0
-    for sample in samples:
-        scenario = sample.scenario_condition.to_scenario()
-        progress_label = (
-            f"{progress_prefix} | {sample.matchup.name}"
-            f" @ {scenario.name}"
-            if progress_prefix
-            else f"{sample.matchup.name} @ {scenario.name}"
-        )
-        if rng is not None:
-            random.seed(rng.randint(0, 2**31 - 1))
-        stats = run_matchup(
-            sample.attacker_weapon,
-            sample.defender_weapon,
-            rank=rank,
-            simulations=simulations,
-            scenario=scenario,
-            progress_label=progress_label,
-            show_progress=show_progress,
-            track_rounds=False,
-            pool=pool,
-        )
-        total = max(stats["weapon1_wins"] + stats["weapon2_wins"], 1)
-        win_rate = (
-            stats["weapon1_wins"] / total
-            if sample.config_is_attacker
-            else stats["weapon2_wins"] / total
-        )
-        weighted_win += sample.weight * win_rate
-    return weighted_win / total_weight
-
-
 def build_weapons(rank: int, x_value: int, rerolls: int) -> List[Weapon]:
     """Create weapon list for future property tests and baseline extraction."""
     weapons: List[Weapon] = []
@@ -911,7 +711,7 @@ def build_weapons(rank: int, x_value: int, rerolls: int) -> List[Weapon]:
         props = {prop_name: prop_setting}
         if rerolls:
             props["Переброс"] = rerolls
-        weapon_type = pick_canonical_property_class(prop_name)
+        weapon_type = "melee" if prop_name == "Ближний бой" else "ranged"
         weapon_name = f"{weapon_type.upper()} | {prop_name} | DMG 1"
         weapons.append(
             Weapon(
@@ -958,20 +758,6 @@ def get_simple_weapon(
         properties={},
         rank=rank,
     )
-
-
-def build_baseline_weapons(baseline_damage: int, rank: int) -> Dict[str, Weapon]:
-    """Create fresh baseline weapons for each weapon class."""
-    return {
-        weapon_type: Weapon(
-            name=f"{weapon_type.upper()} | DMG {baseline_damage} | BASELINE",
-            damage=baseline_damage,
-            weapon_type=weapon_type,
-            properties={},
-            rank=rank,
-        )
-        for weapon_type in ("melee", "ranged")
-    }
 
 
 def get_damage_values_for_rank(rank: int) -> List[int]:
@@ -1322,10 +1108,10 @@ def build_property_weapon(
     x_value: int,
     baseline_damage: int,
     rank: int,
-    weapon_type: str,
 ) -> Weapon:
     prop_value = property_lookup[prop_name]
     prop_setting = x_value if isinstance(prop_value, int) else prop_value
+    weapon_type = "melee" if prop_name == MELEE_PROPERTY else "ranged"
     return Weapon(
         name=f"{weapon_type.upper()} | {prop_name} | DMG {baseline_damage}",
         damage=baseline_damage,
@@ -1421,8 +1207,6 @@ def calculate_property_pairs(
     show_progress: bool,
     pool: Optional[SimulationPool],
     property_costs: Dict[str, Dict[str, Optional[float]]],
-    meta_config: Optional[MetaEvaluationConfig] = None,
-    meta_rng: Optional[random.Random] = None,
 ) -> Dict[Tuple[str, str], Dict[str, float]]:
     property_lookup = {
         prop_name: prop_value
@@ -1431,9 +1215,13 @@ def calculate_property_pairs(
     }
     property_names = sorted(property_lookup.keys())
     baseline_damage = BASELINE_DAMAGE_BY_RANK[rank]
-    meta_config = meta_config or build_default_meta_config(scenario)
-    rng = meta_rng or random.Random()
-    baseline_weapons = build_baseline_weapons(baseline_damage, rank)
+    baseline_weapon = Weapon(
+        name=f"RANGED | DMG {baseline_damage} | BASELINE",
+        damage=baseline_damage,
+        weapon_type="ranged",
+        properties={},
+        rank=rank,
+    )
 
     def resolve_cost(prop_name: str) -> float:
         entry = property_costs.get(prop_name, {})
@@ -1449,10 +1237,7 @@ def calculate_property_pairs(
             for prop_name in (prop_a, prop_b):
                 value = property_lookup[prop_name]
                 props[prop_name] = x_value if isinstance(value, int) else value
-            shared_classes = intersect_property_classes(prop_a, prop_b)
-            if not shared_classes:
-                continue
-            weapon_type = shared_classes[0]
+            weapon_type = "melee" if MELEE_PROPERTY in pair_key else "ranged"
             weapon_name = f"{weapon_type.upper()} | {prop_a} + {prop_b} | DMG {baseline_damage}"
             test_weapon = Weapon(
                 name=weapon_name,
@@ -1461,22 +1246,23 @@ def calculate_property_pairs(
                 properties=props,
                 rank=rank,
             )
-            progress_prefix = None
+            progress_label = None
             if should_show_progress(simulations, show_progress):
-                progress_prefix = f"{prop_a} + {prop_b}"
-            # Sampled probabilities are already averaged, so logit conversion occurs after aggregation.
-            meta_win_rate = evaluate_meta_winrate(
+                progress_label = f"{prop_a} + {prop_b}"
+            stats = run_matchup(
                 test_weapon,
-                baseline_weapons[weapon_type],
+                baseline_weapon,
                 rank=rank,
                 simulations=simulations,
-                meta_config=meta_config,
+                scenario=scenario,
+                progress_label=progress_label,
                 show_progress=show_progress,
+                track_rounds=False,
                 pool=pool,
-                rng=rng,
-                progress_prefix=progress_prefix,
             )
-            raw_delta = meta_win_rate - baseline_win_rate
+            total = max(stats["weapon1_wins"] + stats["weapon2_wins"], 1)
+            win_rate = stats["weapon1_wins"] / total
+            raw_delta = win_rate - baseline_win_rate
             rounded_delta = round_to_half_percent(raw_delta)
             rounded_win_rate = clamp_prob(baseline_win_rate + rounded_delta)
             delta_logit = logit(rounded_win_rate) - base_logit
@@ -1485,7 +1271,7 @@ def calculate_property_pairs(
             cost_b = resolve_cost(prop_b)
             dop_cost = round(cost_pair - (cost_a + cost_b), 2)
             pair_results[pair_key] = {
-                "winrate": round(meta_win_rate, 5),
+                "winrate": round(win_rate, 5),
                 "cost_pair": cost_pair,
                 "dop_cost": dop_cost,
             }
@@ -1501,8 +1287,6 @@ def recalc_property_pairs_for_ranks(
     pool: Optional[SimulationPool] = None,
     base_values_data: Optional[Dict[int, Dict[str, object]]] = None,
     property_values_data: Optional[Dict[int, Dict[str, object]]] = None,
-    meta_config: Optional[MetaEvaluationConfig] = None,
-    meta_rng: Optional[random.Random] = None,
 ) -> Dict[int, Dict[str, object]]:
     if base_values_data is None:
         base_values_data = load_base_values()
@@ -1536,8 +1320,6 @@ def recalc_property_pairs_for_ranks(
             show_progress=show_progress,
             pool=pool,
             property_costs=property_costs,
-            meta_config=meta_config,
-            meta_rng=meta_rng,
         )
         property_pairs_data[current_rank] = {
             "rank": current_rank,
@@ -1556,8 +1338,6 @@ def calculate_property_matchups(
     show_progress: bool,
     pool: Optional[SimulationPool],
     property_costs: Dict[str, Dict[str, Optional[float]]],
-    meta_config: Optional[MetaEvaluationConfig] = None,
-    meta_rng: Optional[random.Random] = None,
 ) -> Dict[str, Dict[str, Dict[str, float]]]:
     property_lookup = {
         prop_name: prop_value
@@ -1581,7 +1361,6 @@ def calculate_property_matchups(
             x_value,
             baseline_damage,
             rank,
-            weapon_type=pick_canonical_property_class(prop_a),
         )
         for j in range(i, len(property_names)):
             prop_b = property_names[j]
@@ -1591,23 +1370,23 @@ def calculate_property_matchups(
                 x_value,
                 baseline_damage,
                 rank,
-                weapon_type=pick_canonical_property_class(prop_b),
             )
-            progress_prefix = None
+            progress_label = None
             if should_show_progress(simulations, show_progress):
-                progress_prefix = f"{prop_a} vs {prop_b}"
-            # Averaged probabilities feed into logit calibration outside this helper.
-            win_rate_a = evaluate_meta_winrate(
+                progress_label = f"{prop_a} vs {prop_b}"
+            stats = run_matchup(
                 weapon_a,
                 weapon_b,
                 rank=rank,
                 simulations=simulations,
-                meta_config=meta_config,
+                scenario=scenario,
+                progress_label=progress_label,
                 show_progress=show_progress,
+                track_rounds=False,
                 pool=pool,
-                rng=rng,
-                progress_prefix=progress_prefix,
             )
+            total = max(stats["weapon1_wins"] + stats["weapon2_wins"], 1)
+            win_rate_a = stats["weapon1_wins"] / total
             win_rate_b = 1.0 - win_rate_a
             cost_opp_a = round(
                 cost_from_winrate(win_rate_a, base_logit, calibration), 2
@@ -1642,8 +1421,6 @@ def recalc_property_matchups_for_ranks(
     pool: Optional[SimulationPool] = None,
     base_values_data: Optional[Dict[int, Dict[str, object]]] = None,
     property_values_data: Optional[Dict[int, Dict[str, object]]] = None,
-    meta_config: Optional[MetaEvaluationConfig] = None,
-    meta_rng: Optional[random.Random] = None,
 ) -> Dict[int, Dict[str, object]]:
     if base_values_data is None:
         base_values_data = load_base_values()
@@ -1678,8 +1455,6 @@ def recalc_property_matchups_for_ranks(
             show_progress=show_progress,
             pool=pool,
             property_costs=property_costs,
-            meta_config=meta_config,
-            meta_rng=meta_rng,
         )
         property_matchups_data[current_rank] = {
             "rank": current_rank,
@@ -1698,8 +1473,6 @@ def calculate_property_costs(
     scenario: Scenario,
     show_progress: bool = False,
     pool: Optional[SimulationPool] = None,
-    meta_config: Optional[MetaEvaluationConfig] = None,
-    meta_rng: Optional[random.Random] = None,
 ) -> Dict[str, Dict[str, Optional[float]]]:
     baseline_damage = BASELINE_DAMAGE_BY_RANK[rank]
     calibration = build_logit_calibration(
@@ -1708,16 +1481,31 @@ def calculate_property_costs(
         baseline_damage,
     )
     base_logit = logit(baseline_win_rate)
-    meta_config = meta_config or build_default_meta_config(scenario)
-    rng = meta_rng or random.Random()
+    all_properties = {prop_name for prop_name, _ in PROPERTY_DEFS}
+    no_effect_properties = all_properties - SIMULATED_PROPERTIES - {"Переброс"}
+
+    baseline_weapons = {
+        "melee": Weapon(
+            name=f"MELEE | DMG {baseline_damage} | BASELINE",
+            damage=baseline_damage,
+            weapon_type="melee",
+            properties={},
+            rank=rank,
+        ),
+        "ranged": Weapon(
+            name=f"RANGED | DMG {baseline_damage} | BASELINE",
+            damage=baseline_damage,
+            weapon_type="ranged",
+            properties={},
+            rank=rank,
+        ),
+    }
 
     property_costs: Dict[str, Dict[str, Optional[float]]] = {}
     property_names = [
         prop_name for prop_name, _ in PROPERTY_DEFS if prop_name != REROLL_PROPERTY
     ]
     no_effect_properties = set(property_names) - SIMULATED_PROPERTIES
-    baseline_weapons = build_baseline_weapons(baseline_damage, rank)
-
     for prop_name, prop_value in PROPERTY_DEFS:
         if prop_name == REROLL_PROPERTY:
             continue
@@ -1728,27 +1516,33 @@ def calculate_property_costs(
             }
             continue
         prop_setting = x_value if isinstance(prop_value, int) else prop_value
-        weapon_type = pick_canonical_property_class(prop_name)
+        props = {prop_name: prop_setting}
+        weapon_type = "melee" if prop_name == MELEE_PROPERTY else "ranged"
         test_weapon = Weapon(
             name=f"{weapon_type.upper()} | {prop_name} | DMG {baseline_damage}",
             damage=baseline_damage,
             weapon_type=weapon_type,
-            properties={prop_name: prop_setting},
+            properties=props,
             rank=rank,
         )
-        # Meta sampling averages probabilities across matchup/scenario samples so logit conversion happens once.
-        meta_win_rate = evaluate_meta_winrate(
+        baseline_weapon = baseline_weapons["ranged"]
+        progress_label = None
+        if should_show_progress(simulations, show_progress):
+            progress_label = f"{prop_name} | {weapon_type.upper()}"
+        stats = run_matchup(
             test_weapon,
-            baseline_weapons[weapon_type],
+            baseline_weapon,
             rank=rank,
             simulations=simulations,
-            meta_config=meta_config,
+            scenario=scenario,
+            progress_label=progress_label,
             show_progress=show_progress,
+            track_rounds=False,
             pool=pool,
-            rng=rng,
-            progress_prefix=f"{prop_name} | {weapon_type.upper()}",
         )
-        raw_delta = meta_win_rate - baseline_win_rate
+        total = max(stats["weapon1_wins"] + stats["weapon2_wins"], 1)
+        win_rate = stats["weapon1_wins"] / total
+        raw_delta = win_rate - baseline_win_rate
         rounded_delta = round_to_half_percent(raw_delta)
         rounded_win_rate = clamp_prob(baseline_win_rate + rounded_delta)
         delta_logit = logit(rounded_win_rate) - base_logit
@@ -1758,6 +1552,7 @@ def calculate_property_costs(
             "delta_win_rate": rounded_delta,
         }
     return property_costs
+
 
 def print_property_costs(property_costs: Dict[str, object]):
     if not property_costs:
@@ -2593,39 +2388,39 @@ def recalc_base_values_for_rank(
     scenario: Scenario,
     show_progress: bool = False,
     pool: Optional[SimulationPool] = None,
-    meta_config: Optional[MetaEvaluationConfig] = None,
-    meta_rng: Optional[random.Random] = None,
 ) -> Tuple[float, Dict[int, float]]:
     weapons = build_weapons(current_rank, x_value, rerolls=0)
     baseline_damage = BASELINE_DAMAGE_BY_RANK[current_rank]
     damage_values = get_damage_values_for_rank(current_rank)
-    meta_config = meta_config or build_default_meta_config(scenario)
-    rng = meta_rng or random.Random()
-    baseline_weapons = build_baseline_weapons(baseline_damage, current_rank)
-    baseline_weapon = baseline_weapons["ranged"]
+    baseline_weapon = get_simple_weapon(weapons, "ranged", baseline_damage, current_rank)
 
     print()
     print("=" * 80)
-    print(f"BASE VALUES (META-WEIGHTED) | RANK {current_rank}")
+    print(f"BASE VALUES (RANGED VS RANGED) | RANK {current_rank}")
     print("=" * 80)
     print()
     print(f"Params: rank {current_rank}, rerolls 0, X {x_value}")
     print(f"Simulations per scenario: {simulations}")
-    print("Scenario: 15 m without retreat (meta sampling)")
+    print("Scenario: 15 m without retreat")
     print(f"Baseline damage: {baseline_damage}")
     print()
 
-    baseline_win_rate = evaluate_meta_winrate(
+    progress_label = None
+    if should_show_progress(simulations, show_progress):
+        progress_label = f"Rank {current_rank} | Baseline"
+    stats = run_matchup(
         baseline_weapon,
         baseline_weapon,
         rank=current_rank,
         simulations=simulations,
-        meta_config=meta_config,
+        scenario=scenario,
+        progress_label=progress_label,
         show_progress=show_progress,
+        track_rounds=False,
         pool=pool,
-        rng=rng,
-        progress_prefix=f"Rank {current_rank} | Baseline",
     )
+    total = max(stats["weapon1_wins"] + stats["weapon2_wins"], 1)
+    baseline_win_rate = stats["weapon1_wins"] / total
 
     print(f"Baseline win rate: {baseline_win_rate*100:.1f}%")
     print()
@@ -2640,17 +2435,22 @@ def recalc_base_values_for_rank(
         if damage == baseline_damage:
             continue
         test_weapon = get_simple_weapon(weapons, "ranged", damage, current_rank)
-        win_rate = evaluate_meta_winrate(
+        progress_label = None
+        if should_show_progress(simulations, show_progress):
+            progress_label = f"Rank {current_rank} | DMG {damage}"
+        stats = run_matchup(
             test_weapon,
             baseline_weapon,
             rank=current_rank,
             simulations=simulations,
-            meta_config=meta_config,
+            scenario=scenario,
+            progress_label=progress_label,
             show_progress=show_progress,
+            track_rounds=False,
             pool=pool,
-            rng=rng,
-            progress_prefix=f"Rank {current_rank} | DMG {damage}",
         )
+        total = max(stats["weapon1_wins"] + stats["weapon2_wins"], 1)
+        win_rate = stats["weapon1_wins"] / total
         diff_rate = win_rate - baseline_win_rate
         damage_deltas[damage] = diff_rate
         print(f"{damage:>4} {win_rate*100:>6.1f}% {diff_rate*100:>+6.1f}%")
@@ -2666,8 +2466,6 @@ def recalc_base_values_for_ranks(
     show_progress: bool = False,
     pool: Optional[SimulationPool] = None,
     base_values_data: Optional[Dict[int, Dict[str, object]]] = None,
-    meta_config: Optional[MetaEvaluationConfig] = None,
-    meta_rng: Optional[random.Random] = None,
 ) -> Dict[int, Dict[str, object]]:
     if base_values_data is None:
         base_values_data = load_base_values()
@@ -2680,8 +2478,6 @@ def recalc_base_values_for_ranks(
             scenario=scenario,
             show_progress=show_progress,
             pool=pool,
-            meta_config=meta_config,
-            meta_rng=meta_rng,
         )
         rounded_baseline = round_to_half_percent(baseline_win_rate)
         rounded_damage_deltas = {
@@ -2706,8 +2502,6 @@ def recalc_property_values_for_ranks(
     pool: Optional[SimulationPool] = None,
     base_values_data: Optional[Dict[int, Dict[str, object]]] = None,
     property_values_data: Optional[Dict[int, Dict[str, object]]] = None,
-    meta_config: Optional[MetaEvaluationConfig] = None,
-    meta_rng: Optional[random.Random] = None,
 ) -> Dict[int, Dict[str, object]]:
     if base_values_data is None:
         base_values_data = load_base_values()
@@ -2733,8 +2527,6 @@ def recalc_property_values_for_ranks(
             scenario=scenario,
             show_progress=show_progress,
             pool=pool,
-            meta_config=meta_config,
-            meta_rng=meta_rng,
         )
         print()
         print("=" * 80)

@@ -1,5 +1,3 @@
-import random
-
 import weapons_sim as ws
 
 
@@ -34,20 +32,6 @@ def main():
     x_value = ws.prompt_int("Value of X for properties? ", 1)
     accuracy_confidence = ws.prompt_accuracy("Desired accuracy % (e.g., 95, 99): ")
     rerolls = ws.prompt_int("Number of rerolls? (0+): ", 0)
-
-    seed_value = None
-    while True:
-        raw_seed = input("Random seed (blank for random): ").strip()
-        if not raw_seed:
-            break
-        try:
-            seed_value = int(raw_seed)
-            break
-        except ValueError:
-            print("Enter an integer or leave blank.")
-    meta_rng = random.Random(seed_value) if seed_value is not None else random.Random()
-    if seed_value is not None:
-        print(f"Using random seed {seed_value}.")
 
     simulations_per_scenario = ws.required_simulations_for_accuracy(
         margin=ws.TARGET_MARGIN,
@@ -100,7 +84,6 @@ def main():
                 scenario=base_scenario,
                 show_progress=show_progress,
                 pool=pool,
-                meta_rng=meta_rng,
             )
             ws.write_base_values(base_values_data)
             print()
@@ -117,7 +100,6 @@ def main():
                 show_progress=show_progress,
                 pool=pool,
                 base_values_data=base_values_data,
-                meta_rng=meta_rng,
             )
             ws.write_property_values(property_values_data)
             print()
@@ -137,7 +119,6 @@ def main():
                 pool=pool,
                 base_values_data=base_values_data,
                 property_values_data=property_values_data,
-                meta_rng=meta_rng,
             )
             ws.write_property_combos(pair_data)
             print()
@@ -157,7 +138,6 @@ def main():
                 pool=pool,
                 base_values_data=base_values_data,
                 property_values_data=property_values_data,
-                meta_rng=meta_rng,
             )
             ws.write_property_matchups(matchup_data)
             print()
