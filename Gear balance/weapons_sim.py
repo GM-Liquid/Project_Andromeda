@@ -38,6 +38,7 @@ from sim_accel import (
     PROP_STUN,    
     PROP_TYPE,
     PROP_MAGIC,
+    PROP_ARMORPIERCE,
     BatchTask,
     SimulationPool,
     acquire_executor,
@@ -560,6 +561,12 @@ class CombatSimulator:
                     self.combat_log.append(
                         f"Round {self.round_count}: {attacker.name} misses, but бронебойность наносит {damage} урона"
                     )
+                if not defender.is_alive():
+                    if shot_fired:
+                        self.record_shot(attacker)
+                    attacker.actions_remaining -= 1
+                    return False
+
             else:
                 if self.verbose:
                     self.combat_log.append(
@@ -604,10 +611,21 @@ class CombatSimulator:
         ):
             self.perform_attack(self.attacker, self.defender)
 
+        if (
+            self.attacker.is_alive()
+            and self.defender.is_alive()
+            and "Агрессивный обстрел" in self.attacker.weapon.properties
+            and self.attacker.reaction_remaining
+            and self.can_attack(self.attacker, self.defender)
+        ):
+            self.attacker.reaction_remaining = False
+            self.perform_reaction_attack(self.attacker, self.defender)
+
+        # Defender acts if alive (up to 2 actions)
+
         if not self.defender.is_alive():
             return False
 
-        # Defender acts if alive (up to 2 actions)
         while (
             self.defender.actions_remaining > 0
             and self.attacker.is_alive()
@@ -617,6 +635,16 @@ class CombatSimulator:
 
         if not self.attacker.is_alive():
             return False
+        
+        if (
+            self.attacker.is_alive()
+            and self.defender.is_alive()
+            and "Агрессивный обстрел" in self.defender.weapon.properties
+            and self.defender.reaction_remaining
+            and self.can_attack(self.defender, self.attacker)
+        ):
+            self.defender.reaction_remaining = False
+            self.perform_reaction_attack(self.defender, self.attacker)
 
         # Check if anyone is dead
         if not self.attacker.is_alive() or not self.defender.is_alive():
@@ -787,6 +815,7 @@ def build_weapon_props_array(weapon: Weapon) -> Tuple[List[int], float]:
     props[PROP_DANGEROUS] = normalize_int(weapon.properties.get("Опасное X"))
     props[PROP_RISK] = 1 if "Риск" in weapon.properties else 0
     props[PROP_AGGRESSIVE] = 1 if "Агрессивный обстрел" in weapon.properties else 0
+    props[PROP_ARMORPIERCE] = normalize_int(weapon.properties.get("Бронебойность X"))
     props[PROP_BLEED] = normalize_int(weapon.properties.get("Кровотечение X"))
     props[PROP_DISORIENT] = 1 if "Дезориентирующее" in weapon.properties else 0
     props[PROP_IMMOBILIZE] = normalize_int(

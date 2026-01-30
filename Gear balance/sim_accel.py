@@ -30,7 +30,7 @@ PROP_AGGRESSIVE = 12
 PROP_BLEED = 13
 PROP_DISORIENT = 14
 PROP_IMMOBILIZE = 15
-PROP_SUPPRESSION = 16
+PROP_ARMORPIERCE = 16
 PROP_REROLLS = 17
 PROP_MAGIC = 18
 PROP_COUNT = 19
@@ -412,7 +412,7 @@ if NUMBA_AVAILABLE:
         if hit == 1:
             margin = total_roll - defense
             damage = margin + w_props[w_idx, PROP_DAMAGE]
-            if roll_value == dice:
+            if raw_roll == dice:
                 escalation = w_props[w_idx, PROP_ESCALATION]
                 if escalation > 0:
                     damage += escalation
@@ -478,6 +478,10 @@ if NUMBA_AVAILABLE:
                 if hit == 1:
                     damage = reroll_damage
                     break
+            # Armor pierce: deal 1 damage on a miss if target rank <= X
+            max_rank = w_props[w_idx, PROP_ARMORPIERCE]
+            if max_rank > 0 and rank <= max_rank:
+                damage = 1
 
         if hit == 1 and damage < 1:
             damage = 1
@@ -526,20 +530,21 @@ if NUMBA_AVAILABLE:
             rank,
         )
 
-        if hit == 1:
+        if damage > 0:
             hp[target] -= damage
-            _apply_status_on_hit(
-                att,
-                target,
-                actions,
-                reaction,
-                bleed,
-                slow,
-                immobile,
-                w_props,
-                weapon_idx,
-                rank,
-            )
+            if hit == 1:
+                _apply_status_on_hit(
+                    att,
+                    target,
+                    actions,
+                    reaction,
+                    bleed,
+                    slow,
+                    immobile,
+                    w_props,
+                    weapon_idx,
+                    rank,
+                )
 
         if shot_fired == 1:
             _record_shot(att, shots, reload_required, w_props, weapon_idx)
@@ -597,34 +602,6 @@ if NUMBA_AVAILABLE:
         )
 
     @njit(cache=True)
-    def _should_use_suppression(
-        att,
-        target,
-        actions,
-        suppression_used,
-        slow,
-        immobile,
-        w_props,
-        w_range,
-        weapon_idx,
-        distance,
-    ):
-        if actions[att] <= 1:
-            return False
-        if suppression_used[att] == 1:
-            return False
-        if distance > w_range[weapon_idx[att]]:
-            return False
-        if w_props[weapon_idx[target], PROP_TYPE] != 0:
-            return False
-        if slow[target] > 0:
-            return False
-        if immobile[target] > 0:
-            return False
-        return True
-
-
-    @njit(cache=True)
     def _perform_attack(
         att,
         target,
@@ -634,7 +611,6 @@ if NUMBA_AVAILABLE:
         moved,
         shots,
         reload_required,
-        suppression_used,
         bleed,
         slow,
         immobile,
@@ -658,26 +634,6 @@ if NUMBA_AVAILABLE:
             shots[att] = 0
             return
 
-        if w_props[w_idx, PROP_SUPPRESSION] > 0:
-            if _should_use_suppression(
-                att,
-                target,
-                actions,
-                suppression_used,
-                slow,
-                immobile,
-                w_props,
-                w_range,
-                weapon_idx,
-                distance,
-            ):
-                if slow[target] < 2:
-                    slow[target] = 2
-                suppression_used[att] = 1
-                _record_shot(att, shots, reload_required, w_props, weapon_idx)
-                actions[att] -= 1
-                return
-
         hit, damage, shot_fired = _roll_attack(
             att,
             target,
@@ -693,20 +649,21 @@ if NUMBA_AVAILABLE:
             rank,
         )
 
-        if hit == 1:
+        if damage > 0:
             hp[target] -= damage
-            _apply_status_on_hit(
-                att,
-                target,
-                actions,
-                reaction,
-                bleed,
-                slow,
-                immobile,
-                w_props,
-                weapon_idx,
-                rank,
-            )
+            if hit == 1:
+                _apply_status_on_hit(
+                    att,
+                    target,
+                    actions,
+                    reaction,
+                    bleed,
+                    slow,
+                    immobile,
+                    w_props,
+                    weapon_idx,
+                    rank,
+                )
         else:
             if shot_fired == 1 and w_props[w_idx, PROP_RISK] > 0:
                 if reaction[target] == 1 and distance <= w_range[weapon_idx[target]]:
@@ -774,7 +731,6 @@ if NUMBA_AVAILABLE:
         bleed = np.empty(2, dtype=np.int32)
         slow = np.empty(2, dtype=np.int32)
         immobile = np.empty(2, dtype=np.int32)
-        suppression_used = np.empty(2, dtype=np.int32)
         weapon_idx = np.empty(2, dtype=np.int32)
 
         for sim_i in range(simulations):
@@ -807,8 +763,6 @@ if NUMBA_AVAILABLE:
             slow[1] = 0
             immobile[0] = 0
             immobile[1] = 0
-            suppression_used[0] = 0
-            suppression_used[1] = 0
 
             distance = initial_distance
             rounds = 0
@@ -822,8 +776,6 @@ if NUMBA_AVAILABLE:
                 reaction[1] = 1
                 moved[0] = 0
                 moved[1] = 0
-                suppression_used[0] = 0
-                suppression_used[1] = 0
 
                 if bleed[0] > 0:
                     hp[0] -= 1
@@ -892,7 +844,6 @@ if NUMBA_AVAILABLE:
                         moved,
                         shots,
                         reload_required,
-                        suppression_used,
                         bleed,
                         slow,
                         immobile,
@@ -939,7 +890,6 @@ if NUMBA_AVAILABLE:
                         moved,
                         shots,
                         reload_required,
-                        suppression_used,
                         bleed,
                         slow,
                         immobile,
