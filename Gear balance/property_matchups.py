@@ -1,4 +1,4 @@
-# -*- coding: cp1251 -*-
+# -*- coding: utf-8 -*-
 PROPERTY_MATCHUPS = {
     1: {
         "????": {

@@ -1,4 +1,4 @@
-# -*- coding: cp1251 -*-
+# -*- coding: utf-8 -*-
 PROPERTY_COMBOS = {
     1: {
         ("????", "?????? ?"): {"winrate": 0.49934, "cost_pair": 0.00, "dop_cost": 0.00},

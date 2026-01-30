@@ -1002,7 +1002,7 @@ def load_base_values() -> Dict[int, Dict[str, object]]:
 
 
 def write_base_values(values: Dict[int, Dict[str, object]]):
-    lines = ["# -*- coding: cp1251 -*-", "BASE_VALUES = {"]
+    lines = ["# -*- coding: utf-8 -*-", "BASE_VALUES = {"]
     for rank in sorted(values.keys()):
         rank_values = values[rank]
         rank_field = rank_values.get("rank", rank)
@@ -1020,7 +1020,7 @@ def write_base_values(values: Dict[int, Dict[str, object]]):
         lines.append("    },")
     lines.append("}")
 
-    BASE_VALUES_PATH.write_text("\n".join(lines) + "\n", encoding="cp1251")
+    BASE_VALUES_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def load_property_values() -> Dict[int, Dict[str, object]]:
@@ -1044,7 +1044,7 @@ def load_property_values() -> Dict[int, Dict[str, object]]:
 
 
 def write_property_values(values: Dict[int, Dict[str, object]]):
-    lines = ["# -*- coding: cp1251 -*-", "PROPERTY_VALUES = {"]
+    lines = ["# -*- coding: utf-8 -*-", "PROPERTY_VALUES = {"]
     for rank in sorted(values.keys()):
         rank_values = values[rank]
         rank_field = rank_values.get("rank", rank)
@@ -1076,7 +1076,7 @@ def write_property_values(values: Dict[int, Dict[str, object]]):
         lines.append("    },")
     lines.append("}")
 
-    PROPERTY_VALUES_PATH.write_text("\n".join(lines) + "\n", encoding="cp1251")
+    PROPERTY_VALUES_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def escape_string(value: str) -> str:
@@ -1116,7 +1116,7 @@ def load_property_combos() -> Dict[int, Dict[str, object]]:
 
 
 def write_property_combos(values: Dict[int, Dict[str, object]]):
-    lines = ["# -*- coding: cp1251 -*-", "PROPERTY_COMBOS = {"]
+    lines = ["# -*- coding: utf-8 -*-", "PROPERTY_COMBOS = {"]
     for rank in sorted(values.keys()):
         rank_values = values[rank]
         pair_costs = rank_values.get("pair_costs") or {}
@@ -1130,7 +1130,7 @@ def write_property_combos(values: Dict[int, Dict[str, object]]):
             )
         lines.append("    },")
     lines.append("}")
-    PROPERTY_COMBOS_PATH.write_text("\n".join(lines) + "\n", encoding="cp1251")
+    PROPERTY_COMBOS_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def load_property_matchups() -> Dict[int, Dict[str, object]]:
@@ -1147,7 +1147,7 @@ def load_property_matchups() -> Dict[int, Dict[str, object]]:
 
 
 def write_property_matchups(values: Dict[int, Dict[str, object]]):
-    lines = ["# -*- coding: cp1251 -*-", "PROPERTY_MATCHUPS = {"]
+    lines = ["# -*- coding: utf-8 -*-", "PROPERTY_MATCHUPS = {"]
     for rank in sorted(values.keys()):
         rank_values = values[rank]
         rank_matchups = rank_values.get("matchups") or {}
@@ -1164,7 +1164,7 @@ def write_property_matchups(values: Dict[int, Dict[str, object]]):
             lines.append("        },")
         lines.append("    },")
     lines.append("}")
-    PROPERTY_MATCHUPS_PATH.write_text("\n".join(lines) + "\n", encoding="cp1251")
+    PROPERTY_MATCHUPS_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def cost_from_winrate(
