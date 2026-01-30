@@ -22,7 +22,7 @@ from sim_accel import (
     PROP_ACCURACY,
     PROP_AGGRESSIVE,
     PROP_APPLY_SLOW,
-    PROP_ARMOR_PIERCE,
+    PROP_PENETRATION,
     PROP_BLEED,
     PROP_COUNT,
     PROP_DANGEROUS,
@@ -38,6 +38,7 @@ from sim_accel import (
     PROP_STUN,
     PROP_SUPPRESSION,
     PROP_TYPE,
+    PROP_MAGIC,
     BatchTask,
     SimulationPool,
     acquire_executor,
@@ -79,74 +80,56 @@ EXTREME_CONFIDENCE = 0.999999  # "once in 1,000,000 runs" two-sided
 BASE_VALUES_PATH = Path(__file__).with_name("base_values.py")
 PROPERTY_VALUES_PATH = Path(__file__).with_name("property_values.py")
 PROPERTY_COMBOS_PATH = Path(__file__).with_name("property_combos.py")
+PROPERTY_MATCHUPS_PATH = Path(__file__).with_name("property_matchups.py")
 
 DEFAULT_MAX_ROUNDS = 100
 DEFAULT_MAX_RETREAT_ROUNDS = 5
 
 PROPERTY_DEFS = [
-    ("РћРіРѕРЅСЊ РЅР° РїРѕРґР°РІР»РµРЅРёРµ", True),
-    ("РњР°РіРёС‡РµСЃРєРѕРµ", True),
-    ("Р‘СЂРѕРЅРµР±РѕР№РЅРѕСЃС‚СЊ РҐ", 1),
-    ("Р‘РµСЃС€СѓРјРЅРѕРµ", True),
-    ("Р­СЃРєР°Р»Р°С†РёСЏ РҐ", 1),
-    ("РЎРїР»РµС€ РҐ", 1),
-    ("РџРµСЂРµР·Р°СЂСЏРґРєР° РҐ", 1),
-    ("РЎС‚Р°Р±РёР»РёР·Р°С†РёСЏ X", 1),
-    ("Р”РѕСЃСЏРіР°РµРјРѕСЃС‚СЊ РҐ", 1),
-    ("РЎРєСЂС‹С‚РЅРѕРµ РҐ", 1),
-    ("Р›РµРіРєРѕРµ", True),
-    ("РўРѕС‡РЅРѕСЃС‚СЊ РҐ", 1),
-    ("Р“Р°СЂР°РЅС‚ РҐ", 1),
-    ("РџРµСЂРµР±СЂРѕСЃ", True),
-    ("РђРіСЂРµСЃСЃРёРІРЅС‹Р№ РѕР±СЃС‚СЂРµР»", True),
-    ("РћС€РµР»РѕРјР»РµРЅРёРµ X", 1),
-    ("Рђ-С„Р°РєС‚РѕСЂ", True),
-    ("Р—Р°РјРµРґР»РµРЅРёРµ", True),
-    ("РћРїР°СЃРЅРѕРµ РҐ", 1),
-    ("Р РёСЃРє", True),
-    ("РўРѕС‡РЅРѕРµ X", 1),
-    ("РџСЂРѕР±РёС‚РёРµ X", 1),
-    ("РљСЂРѕРІРѕС‚РµС‡РµРЅРёРµ РҐ", 1),
-    ("Р”РµР·РѕСЂРёРµРЅС‚РёСЂСѓСЋС‰РµРµ", True),
-    ("РћР±РµР·РґРІРёР¶РёРІР°РЅРёРµ РҐ", 1),
+    ("??????? ???", True),
+    ("??????????", True),
+    ("????????????? ?", 1),
+    ("????????? ?", 1),
+    ("??????????? ?", 1),
+    ("???????????? X", 1),
+    ("???????????? ?", 1),
+    ("?????? ?", 1),
+    ("????????", True),
+    ("??????????? ???????", True),
+    ("??????????? X", 1),
+    ("??????????", True),
+    ("??????? ?", 1),
+    ("????", True),
+    ("???????? X", 1),
+    ("???????????? ?", 1),
+    ("????????????????", True),
+    ("?????????????? ?", 1),
 ]
 
-PROPERTY_COMPATIBILITY = {
-    "РћРіРѕРЅСЊ РЅР° РїРѕРґР°РІР»РµРЅРёРµ": ("ranged",),
-    "РђРіСЂРµСЃСЃРёРІРЅС‹Р№ РѕР±СЃС‚СЂРµР»": ("ranged",),
-    "РџРµСЂРµР·Р°СЂСЏРґРєР° РҐ": ("ranged",),
-    "Р”РѕСЃСЏРіР°РµРјРѕСЃС‚СЊ РҐ": ("melee",),
-    "РЎС‚Р°Р±РёР»РёР·Р°С†РёСЏ X": ("ranged",),
-    "РўРѕС‡РЅРѕРµ X": ("ranged",),
-    "РџСЂРѕР±РёС‚РёРµ X": ("ranged",),
-}
 
-UTILITY_ACTION_PROPERTIES = {
-    "РћРіРѕРЅСЊ РЅР° РїРѕРґР°РІР»РµРЅРёРµ": {
-        "status": "Р—Р°РјРµРґР»РµРЅ",
-        "duration": 2,
-        "requires_target_melee": True,
-        "log": "РїРѕРґР°РІР»СЏРµС‚ РѕРіРЅРµРј",
-    },
-}
+MELEE_PROPERTY = "??????? ???"
+REROLL_PROPERTY = "????????"
+
+UTILITY_ACTION_PROPERTIES = {}
 
 SIMULATED_PROPERTIES = {
-    "РћРіРѕРЅСЊ РЅР° РїРѕРґР°РІР»РµРЅРёРµ",
-    "Р‘СЂРѕРЅРµР±РѕР№РЅРѕСЃС‚СЊ РҐ",
-    "Р­СЃРєР°Р»Р°С†РёСЏ РҐ",
-    "РџРµСЂРµР·Р°СЂСЏРґРєР° РҐ",
-    "РЎС‚Р°Р±РёР»РёР·Р°С†РёСЏ X",
-    "Р”РѕСЃСЏРіР°РµРјРѕСЃС‚СЊ РҐ",
-    "РўРѕС‡РЅРѕСЃС‚СЊ РҐ",
-    "Р“Р°СЂР°РЅС‚ РҐ",
-    "РћС€РµР»РѕРјР»РµРЅРёРµ X",
-    "Р—Р°РјРµРґР»РµРЅРёРµ",
-    "РћРїР°СЃРЅРѕРµ РҐ",
-    "Р РёСЃРє",
-    "РђРіСЂРµСЃСЃРёРІРЅС‹Р№ РѕР±СЃС‚СЂРµР»",
-    "РљСЂРѕРІРѕС‚РµС‡РµРЅРёРµ РҐ",
-    "Р”РµР·РѕСЂРёРµРЅС‚РёСЂСѓСЋС‰РµРµ",
-    "РћР±РµР·РґРІРёР¶РёРІР°РЅРёРµ РҐ",
+    "??????? ???",
+    "??????????",
+    "????????????? ?",
+    "????????? ?",
+    "??????????? ?",
+    "???????????? X",
+    "???????????? ?",
+    "?????? ?",
+    "??????????? ???????",
+    "??????????? X",
+    "??????????",
+    "??????? ?",
+    "????",
+    "???????? X",
+    "???????????? ?",
+    "????????????????",
+    "?????????????? ?",
 }
 
 # ============================================================================
@@ -408,33 +391,38 @@ class CombatSimulator:
             return 0, 0, False
         
         stabilization_bonus = 0
-        if "РЎС‚Р°Р±РёР»РёР·Р°С†РёСЏ X" in attacker.weapon.properties and not attacker.moved_this_round:
-            stabilization_bonus = attacker.weapon.properties["РЎС‚Р°Р±РёР»РёР·Р°С†РёСЏ X"]
+        if "???????????? X" in attacker.weapon.properties and not attacker.moved_this_round:
+            stabilization_bonus = attacker.weapon.properties["???????????? X"]
+        penetration_bonus = 1 if "???????? X" in attacker.weapon.properties else 0
+
+        defense_value = float(defender.defense)
+        if "??????????" in attacker.weapon.properties:
+            defense_value = round(defense_value / 3.0, 1)
 
         def evaluate_roll() -> Tuple[int, bool, int]:
             roll_value = random.randint(1, attacker.dice)
             raw_roll = roll_value
 
-            if "РћРїР°СЃРЅРѕРµ РҐ" in attacker.weapon.properties:
-                danger_threshold = attacker.weapon.properties["РћРїР°СЃРЅРѕРµ РҐ"]
+            if "??????? ?" in attacker.weapon.properties:
+                danger_threshold = attacker.weapon.properties["??????? ?"]
                 if raw_roll > danger_threshold:
                     attacker.take_damage(1)
 
-            if "РўРѕС‡РЅРѕСЃС‚СЊ РҐ" in attacker.weapon.properties:
-                accuracy_bonus = attacker.weapon.properties["РўРѕС‡РЅРѕСЃС‚СЊ РҐ"]
+            if "???????? ?" in attacker.weapon.properties:
+                accuracy_bonus = attacker.weapon.properties["???????? ?"]
                 roll_value = min(roll_value + accuracy_bonus, attacker.dice)
 
-            if "Р“Р°СЂР°РЅС‚ РҐ" in attacker.weapon.properties:
-                guarantee = attacker.weapon.properties["Р“Р°СЂР°РЅС‚ РҐ"]
+            if "?????? ?" in attacker.weapon.properties:
+                guarantee = attacker.weapon.properties["?????? ?"]
                 if roll_value != 1:  # Except 1
                     roll_value = max(roll_value, guarantee)
 
-            total_roll = roll_value + attacker.skill + stabilization_bonus
-            hit_value = total_roll >= defender.defense
+            total_roll = roll_value + attacker.skill + stabilization_bonus + penetration_bonus
+            hit_value = total_roll >= defense_value
 
             damage_value = 0
             if hit_value:
-                margin = total_roll - defender.defense
+                margin = total_roll - defense_value
                 damage_value = margin + attacker.weapon.damage
                 if roll_value == attacker.dice and "Р­СЃРєР°Р»Р°С†РёСЏ РҐ" in attacker.weapon.properties:
                     escalation_value = attacker.weapon.properties["Р­СЃРєР°Р»Р°С†РёСЏ РҐ"]
@@ -446,11 +434,6 @@ class CombatSimulator:
 
         if not hit:
             damage = 0
-            if "Р‘СЂРѕРЅРµР±РѕР№РЅРѕСЃС‚СЊ РҐ" in attacker.weapon.properties:
-                max_rank = attacker.weapon.properties["Р‘СЂРѕРЅРµР±РѕР№РЅРѕСЃС‚СЊ РҐ"]
-                if defender.rank <= max_rank:
-                    damage = 1
-
             rerolls = attacker.weapon.properties.get("РџРµСЂРµР±СЂРѕСЃ", 0)
             if rerolls is True:
                 rerolls = 1
@@ -704,24 +687,23 @@ def build_weapons(rank: int, x_value: int, rerolls: int) -> List[Weapon]:
             )
 
     for prop_name, prop_value in PROPERTY_DEFS:
-        if prop_name == "РџРµСЂРµР±СЂРѕСЃ":
+        if prop_name == "????????":
             continue
-        for wtype in PROPERTY_COMPATIBILITY.get(prop_name, ("melee", "ranged")):
-            prop_setting = x_value if type(prop_value) is int else prop_value
-            props = {prop_name: prop_setting}
-            if rerolls:
-                props["РџРµСЂРµР±СЂРѕСЃ"] = rerolls
-            weapon_name = f"{wtype.upper()} | {prop_name} | DMG 1"
-            weapons.append(
-                Weapon(
-                    name=weapon_name,
-                    damage=1,
-                    weapon_type=wtype,
-                    properties=props,
-                    rank=rank,
-                )
+        prop_setting = x_value if isinstance(prop_value, int) else prop_value
+        props = {prop_name: prop_setting}
+        if rerolls:
+            props["????????"] = rerolls
+        weapon_type = "melee" if prop_name == "??????? ???" else "ranged"
+        weapon_name = f"{weapon_type.upper()} | {prop_name} | DMG 1"
+        weapons.append(
+            Weapon(
+                name=weapon_name,
+                damage=1,
+                weapon_type=weapon_type,
+                properties=props,
+                rank=rank,
             )
-
+        )
     return weapons
 
 
@@ -802,28 +784,26 @@ def build_weapon_props_array(weapon: Weapon) -> Tuple[List[int], float]:
     props = [0] * PROP_COUNT
     props[PROP_TYPE] = 0 if weapon.weapon_type == "melee" else 1
     props[PROP_DAMAGE] = int(weapon.damage)
-    props[PROP_ARMOR_PIERCE] = normalize_int(
-        weapon.properties.get("Р‘СЂРѕРЅРµР±РѕР№РЅРѕСЃС‚СЊ РҐ")
-    )
-    props[PROP_ESCALATION] = normalize_int(weapon.properties.get("Р­СЃРєР°Р»Р°С†РёСЏ РҐ"))
-    props[PROP_RELOAD] = normalize_int(weapon.properties.get("РџРµСЂРµР·Р°СЂСЏРґРєР° РҐ"))
+    props[PROP_PENETRATION] = 1 if "???????? X" in weapon.properties else 0
+    props[PROP_ESCALATION] = normalize_int(weapon.properties.get("????????? ?"))
+    props[PROP_RELOAD] = normalize_int(weapon.properties.get("??????????? ?"))
     props[PROP_STABILIZATION] = normalize_int(
-        weapon.properties.get("РЎС‚Р°Р±РёР»РёР·Р°С†РёСЏ X")
+        weapon.properties.get("???????????? X")
     )
-    props[PROP_ACCURACY] = normalize_int(weapon.properties.get("РўРѕС‡РЅРѕСЃС‚СЊ РҐ"))
-    props[PROP_GUARANTEE] = normalize_int(weapon.properties.get("Р“Р°СЂР°РЅС‚ РҐ"))
-    props[PROP_STUN] = normalize_int(weapon.properties.get("РћС€РµР»РѕРјР»РµРЅРёРµ X"))
-    props[PROP_APPLY_SLOW] = 1 if "Р—Р°РјРµРґР»РµРЅРёРµ" in weapon.properties else 0
-    props[PROP_DANGEROUS] = normalize_int(weapon.properties.get("РћРїР°СЃРЅРѕРµ РҐ"))
-    props[PROP_RISK] = 1 if "Р РёСЃРє" in weapon.properties else 0
-    props[PROP_AGGRESSIVE] = 1 if "РђРіСЂРµСЃСЃРёРІРЅС‹Р№ РѕР±СЃС‚СЂРµР»" in weapon.properties else 0
-    props[PROP_BLEED] = normalize_int(weapon.properties.get("РљСЂРѕРІРѕС‚РµС‡РµРЅРёРµ РҐ"))
-    props[PROP_DISORIENT] = 1 if "Р”РµР·РѕСЂРёРµРЅС‚РёСЂСѓСЋС‰РµРµ" in weapon.properties else 0
+    props[PROP_ACCURACY] = normalize_int(weapon.properties.get("???????? ?"))
+    props[PROP_GUARANTEE] = normalize_int(weapon.properties.get("?????? ?"))
+    props[PROP_STUN] = normalize_int(weapon.properties.get("??????????? X"))
+    props[PROP_APPLY_SLOW] = 1 if "??????????" in weapon.properties else 0
+    props[PROP_DANGEROUS] = normalize_int(weapon.properties.get("??????? ?"))
+    props[PROP_RISK] = 1 if "????" in weapon.properties else 0
+    props[PROP_AGGRESSIVE] = 1 if "??????????? ???????" in weapon.properties else 0
+    props[PROP_BLEED] = normalize_int(weapon.properties.get("???????????? ?"))
+    props[PROP_DISORIENT] = 1 if "????????????????" in weapon.properties else 0
     props[PROP_IMMOBILIZE] = normalize_int(
-        weapon.properties.get("РћР±РµР·РґРІРёР¶РёРІР°РЅРёРµ РҐ")
+        weapon.properties.get("?????????????? ?")
     )
-    props[PROP_SUPPRESSION] = 1 if "РћРіРѕРЅСЊ РЅР° РїРѕРґР°РІР»РµРЅРёРµ" in weapon.properties else 0
-    props[PROP_REROLLS] = normalize_int(weapon.properties.get("РџРµСЂРµР±СЂРѕСЃ"))
+    props[PROP_MAGIC] = 1 if "??????????" in weapon.properties else 0
+    props[PROP_REROLLS] = normalize_int(weapon.properties.get("????????"))
 
     return props, weapon.get_range()
 
@@ -1099,6 +1079,372 @@ def write_property_values(values: Dict[int, Dict[str, object]]):
     PROPERTY_VALUES_PATH.write_text("\n".join(lines) + "\n", encoding="cp1251")
 
 
+def escape_string(value: str) -> str:
+    return value.replace("\\", "\\\\").replace('"', '\\"')
+
+
+def build_property_weapon(
+    prop_name: str,
+    property_lookup: Dict[str, object],
+    x_value: int,
+    baseline_damage: int,
+    rank: int,
+) -> Weapon:
+    prop_value = property_lookup[prop_name]
+    prop_setting = x_value if isinstance(prop_value, int) else prop_value
+    weapon_type = "melee" if prop_name == MELEE_PROPERTY else "ranged"
+    return Weapon(
+        name=f"{weapon_type.upper()} | {prop_name} | DMG {baseline_damage}",
+        damage=baseline_damage,
+        weapon_type=weapon_type,
+        properties={prop_name: prop_setting},
+        rank=rank,
+    )
+
+
+def load_property_combos() -> Dict[int, Dict[str, object]]:
+    try:
+        module = importlib.import_module("property_combos")
+        importlib.reload(module)
+        values = getattr(module, "PROPERTY_COMBOS", {})
+        normalized: Dict[int, Dict[str, object]] = {}
+        for key, rank_values in values.items():
+            normalized[int(key)] = rank_values
+        return normalized
+    except Exception:
+        return {}
+
+
+def write_property_combos(values: Dict[int, Dict[str, object]]):
+    lines = ["# -*- coding: cp1251 -*-", "PROPERTY_COMBOS = {"]
+    for rank in sorted(values.keys()):
+        rank_values = values[rank]
+        pair_costs = rank_values.get("pair_costs") or {}
+        lines.append(f"    {rank}: {{")
+        for pair_key in sorted(pair_costs.keys()):
+            entry = pair_costs[pair_key]
+            prop_a, prop_b = pair_key
+            lines.append(
+                f'        ("{escape_string(prop_a)}", "{escape_string(prop_b)}"): '
+                f'{{"winrate": {entry["winrate"]:.5f}, "cost_pair": {entry["cost_pair"]:.2f}, "dop_cost": {entry["dop_cost"]:.2f}}},'
+            )
+        lines.append("    },")
+    lines.append("}")
+    PROPERTY_COMBOS_PATH.write_text("\n".join(lines) + "\n", encoding="cp1251")
+
+
+def load_property_matchups() -> Dict[int, Dict[str, object]]:
+    try:
+        module = importlib.import_module("property_matchups")
+        importlib.reload(module)
+        values = getattr(module, "PROPERTY_MATCHUPS", {})
+        normalized: Dict[int, Dict[str, object]] = {}
+        for key, rank_values in values.items():
+            normalized[int(key)] = rank_values
+        return normalized
+    except Exception:
+        return {}
+
+
+def write_property_matchups(values: Dict[int, Dict[str, object]]):
+    lines = ["# -*- coding: cp1251 -*-", "PROPERTY_MATCHUPS = {"]
+    for rank in sorted(values.keys()):
+        rank_values = values[rank]
+        rank_matchups = rank_values.get("matchups") or {}
+        lines.append(f"    {rank}: {{")
+        for prop_name in sorted(rank_matchups.keys()):
+            opponent_map = rank_matchups[prop_name]
+            lines.append(f'        "{escape_string(prop_name)}": {{')
+            for opponent in sorted(opponent_map.keys()):
+                entry = opponent_map[opponent]
+                lines.append(
+                    f'            "{escape_string(opponent)}": '
+                    f'{{"winrate": {entry["winrate"]:.5f}, "cost_opp": {entry["cost_opp"]:.2f}, "opp_cost": {entry["opp_cost"]:.2f}}},'
+                )
+            lines.append("        },")
+        lines.append("    },")
+    lines.append("}")
+    PROPERTY_MATCHUPS_PATH.write_text("\n".join(lines) + "\n", encoding="cp1251")
+
+
+def cost_from_winrate(
+    win_rate: float,
+    base_logit: float,
+    calibration: List[Tuple[int, float]],
+) -> float:
+    clamped = clamp_prob(win_rate)
+    delta_logit = logit(clamped) - base_logit
+    return interpolate_damage_equivalent(delta_logit, calibration)
+
+
+def calculate_property_pairs(
+    rank: int,
+    x_value: int,
+    simulations: int,
+    scenario: Scenario,
+    baseline_win_rate: float,
+    calibration: List[Tuple[int, float]],
+    base_logit: float,
+    show_progress: bool,
+    pool: Optional[SimulationPool],
+    property_costs: Dict[str, Dict[str, Optional[float]]],
+) -> Dict[Tuple[str, str], Dict[str, float]]:
+    property_lookup = {
+        prop_name: prop_value
+        for prop_name, prop_value in PROPERTY_DEFS
+        if prop_name != REROLL_PROPERTY
+    }
+    property_names = sorted(property_lookup.keys())
+    baseline_damage = BASELINE_DAMAGE_BY_RANK[rank]
+    baseline_weapon = Weapon(
+        name=f"RANGED | DMG {baseline_damage} | BASELINE",
+        damage=baseline_damage,
+        weapon_type="ranged",
+        properties={},
+        rank=rank,
+    )
+
+    def resolve_cost(prop_name: str) -> float:
+        entry = property_costs.get(prop_name, {})
+        return normalize_property_entry(entry)["cost"] or 0.0
+
+    pair_results: Dict[Tuple[str, str], Dict[str, float]] = {}
+    for i in range(len(property_names)):
+        for j in range(i + 1, len(property_names)):
+            prop_a = property_names[i]
+            prop_b = property_names[j]
+            pair_key = tuple(sorted((prop_a, prop_b)))
+            props = {}
+            for prop_name in (prop_a, prop_b):
+                value = property_lookup[prop_name]
+                props[prop_name] = x_value if isinstance(value, int) else value
+            weapon_type = "melee" if MELEE_PROPERTY in pair_key else "ranged"
+            weapon_name = f"{weapon_type.upper()} | {prop_a} + {prop_b} | DMG {baseline_damage}"
+            test_weapon = Weapon(
+                name=weapon_name,
+                damage=baseline_damage,
+                weapon_type=weapon_type,
+                properties=props,
+                rank=rank,
+            )
+            progress_label = None
+            if should_show_progress(simulations, show_progress):
+                progress_label = f"{prop_a} + {prop_b}"
+            stats = run_matchup(
+                test_weapon,
+                baseline_weapon,
+                rank=rank,
+                simulations=simulations,
+                scenario=scenario,
+                progress_label=progress_label,
+                show_progress=show_progress,
+                track_rounds=False,
+                pool=pool,
+            )
+            total = max(stats["weapon1_wins"] + stats["weapon2_wins"], 1)
+            win_rate = stats["weapon1_wins"] / total
+            raw_delta = win_rate - baseline_win_rate
+            rounded_delta = round_to_half_percent(raw_delta)
+            rounded_win_rate = clamp_prob(baseline_win_rate + rounded_delta)
+            delta_logit = logit(rounded_win_rate) - base_logit
+            cost_pair = round(interpolate_damage_equivalent(delta_logit, calibration), 2)
+            cost_a = resolve_cost(prop_a)
+            cost_b = resolve_cost(prop_b)
+            dop_cost = round(cost_pair - (cost_a + cost_b), 2)
+            pair_results[pair_key] = {
+                "winrate": round(win_rate, 5),
+                "cost_pair": cost_pair,
+                "dop_cost": dop_cost,
+            }
+    return pair_results
+
+
+def recalc_property_pairs_for_ranks(
+    ranks: List[int],
+    x_value: int,
+    simulations: int,
+    scenario: Scenario,
+    show_progress: bool = False,
+    pool: Optional[SimulationPool] = None,
+    base_values_data: Optional[Dict[int, Dict[str, object]]] = None,
+    property_values_data: Optional[Dict[int, Dict[str, object]]] = None,
+) -> Dict[int, Dict[str, object]]:
+    if base_values_data is None:
+        base_values_data = load_base_values()
+    if property_values_data is None:
+        property_values_data = load_property_values()
+
+    property_pairs_data: Dict[int, Dict[str, object]] = {}
+    for current_rank in ranks:
+        base_data = base_values_data.get(current_rank)
+        if not base_data:
+            continue
+        baseline_win_rate = base_data["baseline_win_rate"]
+        damage_deltas = dict(base_data.get("damage_win_rate", {}))
+        if not damage_deltas:
+            continue
+        calibration = build_logit_calibration(
+            baseline_win_rate,
+            damage_deltas,
+            BASELINE_DAMAGE_BY_RANK[current_rank],
+        )
+        base_logit = logit(baseline_win_rate)
+        property_costs = property_values_data.get(current_rank, {}).get("property_costs", {})
+        pair_results = calculate_property_pairs(
+            rank=current_rank,
+            x_value=x_value,
+            simulations=simulations,
+            scenario=scenario,
+            baseline_win_rate=baseline_win_rate,
+            calibration=calibration,
+            base_logit=base_logit,
+            show_progress=show_progress,
+            pool=pool,
+            property_costs=property_costs,
+        )
+        property_pairs_data[current_rank] = {
+            "rank": current_rank,
+            "pair_costs": pair_results,
+        }
+    return property_pairs_data
+
+
+def calculate_property_matchups(
+    rank: int,
+    x_value: int,
+    simulations: int,
+    scenario: Scenario,
+    calibration: List[Tuple[int, float]],
+    base_logit: float,
+    show_progress: bool,
+    pool: Optional[SimulationPool],
+    property_costs: Dict[str, Dict[str, Optional[float]]],
+) -> Dict[str, Dict[str, Dict[str, float]]]:
+    property_lookup = {
+        prop_name: prop_value
+        for prop_name, prop_value in PROPERTY_DEFS
+        if prop_name != REROLL_PROPERTY
+    }
+    property_names = sorted(property_lookup.keys())
+    baseline_damage = BASELINE_DAMAGE_BY_RANK[rank]
+    matchups: Dict[str, Dict[str, Dict[str, float]]] = {
+        prop_name: {} for prop_name in property_names
+    }
+
+    def resolve_cost(name: str) -> float:
+        entry = property_costs.get(name, {})
+        return normalize_property_entry(entry)["cost"] or 0.0
+
+    for i, prop_a in enumerate(property_names):
+        weapon_a = build_property_weapon(
+            prop_a,
+            property_lookup,
+            x_value,
+            baseline_damage,
+            rank,
+        )
+        for j in range(i, len(property_names)):
+            prop_b = property_names[j]
+            weapon_b = build_property_weapon(
+                prop_b,
+                property_lookup,
+                x_value,
+                baseline_damage,
+                rank,
+            )
+            progress_label = None
+            if should_show_progress(simulations, show_progress):
+                progress_label = f"{prop_a} vs {prop_b}"
+            stats = run_matchup(
+                weapon_a,
+                weapon_b,
+                rank=rank,
+                simulations=simulations,
+                scenario=scenario,
+                progress_label=progress_label,
+                show_progress=show_progress,
+                track_rounds=False,
+                pool=pool,
+            )
+            total = max(stats["weapon1_wins"] + stats["weapon2_wins"], 1)
+            win_rate_a = stats["weapon1_wins"] / total
+            win_rate_b = 1.0 - win_rate_a
+            cost_opp_a = round(
+                cost_from_winrate(win_rate_a, base_logit, calibration), 2
+            )
+            cost_opp_b = round(
+                cost_from_winrate(win_rate_b, base_logit, calibration), 2
+            )
+            base_cost_a = resolve_cost(prop_a)
+            base_cost_b = resolve_cost(prop_b)
+            matchups[prop_a][prop_b] = {
+                "winrate": round(win_rate_a, 5),
+                "cost_opp": cost_opp_a,
+                "opp_cost": round(cost_opp_a - base_cost_a, 2),
+            }
+            if prop_a == prop_b:
+                continue
+            matchups[prop_b][prop_a] = {
+                "winrate": round(win_rate_b, 5),
+                "cost_opp": cost_opp_b,
+                "opp_cost": round(cost_opp_b - base_cost_b, 2),
+            }
+
+    return matchups
+
+
+def recalc_property_matchups_for_ranks(
+    ranks: List[int],
+    x_value: int,
+    simulations: int,
+    scenario: Scenario,
+    show_progress: bool = False,
+    pool: Optional[SimulationPool] = None,
+    base_values_data: Optional[Dict[int, Dict[str, object]]] = None,
+    property_values_data: Optional[Dict[int, Dict[str, object]]] = None,
+) -> Dict[int, Dict[str, object]]:
+    if base_values_data is None:
+        base_values_data = load_base_values()
+    if property_values_data is None:
+        property_values_data = load_property_values()
+
+    property_matchups_data: Dict[int, Dict[str, object]] = {}
+    for current_rank in ranks:
+        base_data = base_values_data.get(current_rank)
+        if not base_data:
+            continue
+        baseline_win_rate = base_data["baseline_win_rate"]
+        damage_deltas = dict(base_data.get("damage_win_rate", {}))
+        if not damage_deltas:
+            continue
+        calibration = build_logit_calibration(
+            baseline_win_rate,
+            damage_deltas,
+            BASELINE_DAMAGE_BY_RANK[current_rank],
+        )
+        base_logit = logit(baseline_win_rate)
+        property_costs = property_values_data.get(current_rank, {}).get(
+            "property_costs", {}
+        )
+        matchup_results = calculate_property_matchups(
+            rank=current_rank,
+            x_value=x_value,
+            simulations=simulations,
+            scenario=scenario,
+            calibration=calibration,
+            base_logit=base_logit,
+            show_progress=show_progress,
+            pool=pool,
+            property_costs=property_costs,
+        )
+        property_matchups_data[current_rank] = {
+            "rank": current_rank,
+            "matchups": matchup_results,
+        }
+
+    return property_matchups_data
+
+
 def calculate_property_costs(
     rank: int,
     x_value: int,
@@ -1137,75 +1483,55 @@ def calculate_property_costs(
     }
 
     property_costs: Dict[str, Dict[str, Optional[float]]] = {}
+    property_names = [
+        prop_name for prop_name, _ in PROPERTY_DEFS if prop_name != REROLL_PROPERTY
+    ]
+    no_effect_properties = set(property_names) - SIMULATED_PROPERTIES
     for prop_name, prop_value in PROPERTY_DEFS:
-        if prop_name == "РџРµСЂРµР±СЂРѕСЃ":
+        if prop_name == REROLL_PROPERTY:
             continue
         if prop_name in no_effect_properties:
             property_costs[prop_name] = {
                 "cost": 0.0,
-                "delta_win_rate": 0.0,   # или None, если хочешь явно помечать "не измеряли"
+                "delta_win_rate": 0.0,
             }
             continue
-        compatible_types = PROPERTY_COMPATIBILITY.get(prop_name, ("melee", "ranged"))
-        if "melee" in compatible_types:
-            weapon_types = ("melee",)
-        else:
-            weapon_types = ("ranged",)
-        damage_equivalents: List[float] = []
-        delta_win_rates: List[float] = []
-        for weapon_type in weapon_types:
-            if prop_name in UTILITY_ACTION_PROPERTIES:
-                config = UTILITY_ACTION_PROPERTIES[prop_name]
-                if config.get("requires_target_melee") and weapon_type == "ranged":
-                    damage_equivalents.append(0.0)
-                    continue
-            prop_setting = x_value if type(prop_value) is int else prop_value
-            props = {prop_name: prop_setting}
-            test_weapon = Weapon(
-                name=f"{weapon_type.upper()} | {prop_name} | DMG {baseline_damage}",
-                damage=baseline_damage,
-                weapon_type=weapon_type,
-                properties=props,
-                rank=rank,
-            )
-            baseline_weapon = baseline_weapons[weapon_type]
-            progress_label = None
-            if should_show_progress(simulations, show_progress):
-                progress_label = f"{prop_name} | {weapon_type.upper()}"
-            stats = run_matchup(
-                test_weapon,
-                baseline_weapon,
-                rank=rank,
-                simulations=simulations,
-                scenario=scenario,
-                progress_label=progress_label,
-                show_progress=show_progress,
-                track_rounds=False,
-                pool=pool,
-            )
-            total = max(stats["weapon1_wins"] + stats["weapon2_wins"], 1)
-            win_rate = stats["weapon1_wins"] / total
-            raw_delta = win_rate - baseline_win_rate
-            rounded_delta = round_to_half_percent(raw_delta)
-            delta_win_rates.append(rounded_delta)
-            rounded_win_rate = clamp_prob(baseline_win_rate + rounded_delta)
-            delta_logit = logit(rounded_win_rate) - base_logit
-            damage_equivalents.append(
-                interpolate_damage_equivalent(delta_logit, calibration)
-            )
-
-        if damage_equivalents:
-            avg_cost = sum(damage_equivalents) / len(damage_equivalents)
-            avg_delta_win_rate = (
-                sum(delta_win_rates) / len(delta_win_rates)
-                if delta_win_rates
-                else 0.0
-            )
-            property_costs[prop_name] = {
-                "cost": round(avg_cost, 2),
-                "delta_win_rate": avg_delta_win_rate,
-            }
-
+        prop_setting = x_value if isinstance(prop_value, int) else prop_value
+        props = {prop_name: prop_setting}
+        weapon_type = "melee" if prop_name == MELEE_PROPERTY else "ranged"
+        test_weapon = Weapon(
+            name=f"{weapon_type.upper()} | {prop_name} | DMG {baseline_damage}",
+            damage=baseline_damage,
+            weapon_type=weapon_type,
+            properties=props,
+            rank=rank,
+        )
+        baseline_weapon = baseline_weapons["ranged"]
+        progress_label = None
+        if should_show_progress(simulations, show_progress):
+            progress_label = f"{prop_name} | {weapon_type.upper()}"
+        stats = run_matchup(
+            test_weapon,
+            baseline_weapon,
+            rank=rank,
+            simulations=simulations,
+            scenario=scenario,
+            progress_label=progress_label,
+            show_progress=show_progress,
+            track_rounds=False,
+            pool=pool,
+        )
+        total = max(stats["weapon1_wins"] + stats["weapon2_wins"], 1)
+        win_rate = stats["weapon1_wins"] / total
+        raw_delta = win_rate - baseline_win_rate
+        rounded_delta = round_to_half_percent(raw_delta)
+        rounded_win_rate = clamp_prob(baseline_win_rate + rounded_delta)
+        delta_logit = logit(rounded_win_rate) - base_logit
+        damage_equivalent = interpolate_damage_equivalent(delta_logit, calibration)
+        property_costs[prop_name] = {
+            "cost": round(damage_equivalent, 2),
+            "delta_win_rate": rounded_delta,
+        }
     return property_costs
 
 

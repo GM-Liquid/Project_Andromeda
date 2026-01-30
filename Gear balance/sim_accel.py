@@ -16,7 +16,7 @@ PARALLEL_MIN_CHUNK_SIZE = 1_000
 
 PROP_TYPE = 0
 PROP_DAMAGE = 1
-PROP_ARMOR_PIERCE = 2
+PROP_PENETRATION = 2
 PROP_ESCALATION = 3
 PROP_RELOAD = 4
 PROP_STABILIZATION = 5
@@ -32,7 +32,8 @@ PROP_DISORIENT = 14
 PROP_IMMOBILIZE = 15
 PROP_SUPPRESSION = 16
 PROP_REROLLS = 17
-PROP_COUNT = 18
+PROP_MAGIC = 18
+PROP_COUNT = 19
 
 try:
     import numpy as np
@@ -383,7 +384,17 @@ if NUMBA_AVAILABLE:
 
 
     @njit(cache=True)
-    def _evaluate_roll(att, hp, w_props, w_idx, dice, skill, defense, stabilization):
+    def _evaluate_roll(
+        att,
+        hp,
+        w_props,
+        w_idx,
+        dice,
+        skill,
+        defense,
+        stabilization,
+        penetration,
+    ):
         roll_value = np.random.randint(1, dice + 1)
         raw_roll = roll_value
         danger = w_props[w_idx, PROP_DANGEROUS]
@@ -395,7 +406,7 @@ if NUMBA_AVAILABLE:
         guarantee = w_props[w_idx, PROP_GUARANTEE]
         if guarantee > 0 and roll_value != 1 and roll_value < guarantee:
             roll_value = guarantee
-        total_roll = roll_value + skill + stabilization
+        total_roll = roll_value + skill + stabilization + penetration
         hit = 1 if total_roll >= defense else 0
         damage = 0
         if hit == 1:
@@ -409,7 +420,20 @@ if NUMBA_AVAILABLE:
 
 
     @njit(cache=True)
-    def _roll_attack(att, target, hp, moved, w_props, w_range, weapon_idx, distance, dice, skill, defense, rank):
+    def _roll_attack(
+        att,
+        target,
+        hp,
+        moved,
+        w_props,
+        w_range,
+        weapon_idx,
+        distance,
+        dice,
+        skill,
+        defense,
+        rank,
+    ):
         w_idx = weapon_idx[att]
         if distance > w_range[w_idx]:
             return 0, 0, 0
@@ -418,17 +442,38 @@ if NUMBA_AVAILABLE:
         if w_props[w_idx, PROP_STABILIZATION] > 0 and moved[att] == 0:
             stabilization = w_props[w_idx, PROP_STABILIZATION]
 
-        _, hit, damage = _evaluate_roll(att, hp, w_props, w_idx, dice, skill, defense, stabilization)
+        penetration_bonus = w_props[w_idx, PROP_PENETRATION]
+        magic_flag = w_props[w_idx, PROP_MAGIC]
+        defense_value = float(defense)
+        if magic_flag > 0:
+            defense_value = np.round(defense_value / 3.0, 1)
+
+        _, hit, damage = _evaluate_roll(
+            att,
+            hp,
+            w_props,
+            w_idx,
+            dice,
+            skill,
+            defense_value,
+            stabilization,
+            penetration_bonus,
+        )
 
         if hit == 0:
             damage = 0
-            armor_pierce = w_props[w_idx, PROP_ARMOR_PIERCE]
-            if armor_pierce > 0 and rank <= armor_pierce:
-                damage = 1
             rerolls = w_props[w_idx, PROP_REROLLS]
             for _ in range(rerolls):
                 _, hit, reroll_damage = _evaluate_roll(
-                    att, hp, w_props, w_idx, dice, skill, defense, stabilization
+                    att,
+                    hp,
+                    w_props,
+                    w_idx,
+                    dice,
+                    skill,
+                    defense_value,
+                    stabilization,
+                    penetration_bonus,
                 )
                 if hit == 1:
                     damage = reroll_damage
