@@ -11,7 +11,7 @@
 | ----------------------------- | --------------------------------------------------------------- |
 | **System name**               | **Project Andromeda**                                           |
 | **Foundry VTT compatibility** | v12 (verified 12)                                               |
-| **Current version (**``**)**  | `2.347` -> **auto-bumped to** `2.348` on next commit            |
+| **Current version (**``**)**  | `2.358` -> **auto-bumped to** `2.359` on next Foundry change    |
 | **Languages**                 | English, Русский (full parity required)                         |
 | **Main tech**                 | ES‑module JavaScript (`*.mjs`), Handlebars (`*.hbs`), JSON, CSS |
 | **Licence**                   | CC BY-NC-SA 4.0                                                 |
@@ -22,7 +22,7 @@
 project-andromeda/
 │  README.md
 │  AGENTS.md          ← you are here
-│  system.json        ← manifest (version bumped automatically)
+│  system.json        ← manifest (version bumped for Foundry changes only)
 │  template.json      ← data templates
 │  package.json
 │
@@ -59,6 +59,16 @@ project-andromeda/
 │   en.json   ← English strings
 │   ru.json   ← Russian strings (must mirror English keys)
 │
+├─ Gear balance/
+│   base_values.py
+│   property_values.py
+│   property_combos.py
+│   sim_driver.py
+│   weapons_sim.py
+│   sim_accel.py
+│   weapons_tournament_all.py
+│   Андромеда_ Контент - Свойства (1).csv
+│
 └─ css/
     project-andromeda.css
 ```
@@ -89,7 +99,8 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 
 ## 4 · Build, Deployment & Versioning
 
-- **Auto‑version bump:** With **every** change merged to `main`, increment the `version` field in `system.json` by **+0.001** (current baseline `2.347`, next `2.348`).
+- **Auto‑version bump:** Only when a change **affects the Foundry system** (e.g. `module/`, `templates/`, `css/`, `lang/`, `assets/`, `system.json`, `template.json`), increment `system.json` by **+0.001** (current baseline `2.358`, next `2.359`).  
+  Changes that **do not** touch the Foundry system (e.g. Python tools, balance sims, docs in `/Gear balance`) **do not** require a version bump.
 - The build pipeline (GitHub Actions) simply zips the repository for Foundry distribution.
 - Releases follow Semantic‑ish numbering: `<major>.<minor><patch>` where *minor* and *patch* are three‑digit sequences (allows CI bumping).
 
@@ -128,6 +139,22 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 
 ---
 
+## 6.1 · Gear Balance Workspace
+
+The `Gear balance/` folder is **not** part of the Foundry build. It is a local tooling workspace for simulations and data prep.
+
+- **Source of truth:** `Андромеда_ Контент - Свойства (1).csv` defines the list of weapon properties.
+- **Sync rule:** `Gear balance/weapons_sim.py` must include **all** properties from that CSV and **no extra** ones. If you add/remove/rename a property, update both files together.
+- **Naming:** Preserve the exact property names (including `X`/`Х` suffixes).
+- **Versioning:** Changes in `Gear balance/` **do not** require a `system.json` version bump.
+
+Typical workflow:
+1. Edit the CSV to change/add/remove a property.
+2. Update `PROPERTY_DEFS` and any related logic in `weapons_sim.py`.
+3. Run quick validation (e.g. `python -m py_compile "Gear balance/weapons_sim.py"`).
+
+---
+
 ## 7 · AI Assistant-Specific Guidelines
 
 > The maintainer is a **junior game‑designer** and **beginner programmer**.
@@ -136,7 +163,7 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 2. **Ask clarifying questions** whenever a requirement is ambiguous.
 3. **Provide code** in a single contiguous block, ready for one‑click copy.
 4. **Ensure RU + EN localisation** for any code that introduces UI text.
-5. **Automatically bump version** (`system.json → version +0.001`) whenever code is updated.
+5. **Automatically bump version** (`system.json → version +0.001`) **only** when the change affects the Foundry system (see §4).
 6. If adding or renaming a field that affects characteristics or skills, confirm the ability die step rules and absence of DEX.
 
 7. When implementing sheet interactions, prioritize incremental updates: submit data with `render: false`, then update only the impacted parts of the DOM to reflect changes immediately. This applies equally to PCs and NPCs.
@@ -145,4 +172,4 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 
 ---
 
-*Last updated: 2026‑01‑27*
+*Last updated: 2026‑01‑29*
