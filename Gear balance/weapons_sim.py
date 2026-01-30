@@ -1,4 +1,4 @@
-﻿"""
+"""
 Weapons Simulator for Andromeda TTRPG
 Baseline-vs-baseline scenarios with distance and optional ranged retreat
 """
@@ -35,8 +35,7 @@ from sim_accel import (
     PROP_REROLLS,
     PROP_RISK,
     PROP_STABILIZATION,
-    PROP_STUN,
-    PROP_SUPPRESSION,
+    PROP_STUN,    
     PROP_TYPE,
     PROP_MAGIC,
     BatchTask,
@@ -86,50 +85,52 @@ DEFAULT_MAX_ROUNDS = 100
 DEFAULT_MAX_RETREAT_ROUNDS = 5
 
 PROPERTY_DEFS = [
-    ("??????? ???", True),
-    ("??????????", True),
-    ("????????????? ?", 1),
-    ("????????? ?", 1),
-    ("??????????? ?", 1),
-    ("???????????? X", 1),
-    ("???????????? ?", 1),
-    ("?????? ?", 1),
-    ("????????", True),
-    ("??????????? ???????", True),
-    ("??????????? X", 1),
-    ("??????????", True),
-    ("??????? ?", 1),
-    ("????", True),
-    ("???????? X", 1),
-    ("???????????? ?", 1),
-    ("????????????????", True),
-    ("?????????????? ?", 1),
+    ("Ближний бой", True),
+    ("Магическое", True),
+    ("Бронебойность X", 1),
+    ("Эскалация X", 1),
+    ("Перезарядка X", 1),
+    ("Стабилизация X", 1),
+    ("Кровотечение X", 1),
+    ("Гарант X", 1),
+    ("Переброс", True),
+    ("Агрессивный обстрел", True),
+    ("Ошеломление X", 1),
+    ("Замедление", True),
+    ("Опасное X", 1),
+    ("Риск", True),
+    ("Пробивание X", 1),
+    ("Дезориентирующее", True),
+    ("Обездвиживание X", 1),
+    ("Точность X", 1),
+    ("Досягаемость X", 1),
 ]
 
 
-MELEE_PROPERTY = "??????? ???"
-REROLL_PROPERTY = "????????"
+MELEE_PROPERTY = "Ближний бой"
+REROLL_PROPERTY = "Переброс"
 
 UTILITY_ACTION_PROPERTIES = {}
 
 SIMULATED_PROPERTIES = {
-    "??????? ???",
-    "??????????",
-    "????????????? ?",
-    "????????? ?",
-    "??????????? ?",
-    "???????????? X",
-    "???????????? ?",
-    "?????? ?",
-    "??????????? ???????",
-    "??????????? X",
-    "??????????",
-    "??????? ?",
-    "????",
-    "???????? X",
-    "???????????? ?",
-    "????????????????",
-    "?????????????? ?",
+    "Ближний бой",
+    "Замедление",
+    "Бронебойность X",
+    "Эскалация X",
+    "Перезарядка X",
+    "Стабилизация X",
+    "Кровотечение X",
+    "Гарант X",
+    "Агрессивный обстрел",
+    "Ошеломление X",
+    "Магическое",
+    "Опасное X",
+    "Риск",
+    "Пробивание X",
+    "Дезориентирующее",
+    "Обездвиживание X",
+    "Точность X",
+    "Досягаемость X"
 }
 
 # ============================================================================
@@ -153,7 +154,7 @@ class Weapon:
     def get_range(self) -> float:
         """Get effective range of weapon in meters"""
         base_range = 2.0 if self.weapon_type == "melee" else 100.0
-        range_bonus = self.properties.get("Р”РѕСЃСЏРіР°РµРјРѕСЃС‚СЊ РҐ", 0)
+        range_bonus = self.properties.get("Досягаемость X", 0)
         return base_range + range_bonus
 
 
@@ -219,8 +220,8 @@ class Character:
         self.aggressive_fire_pending = False
         self.utility_actions_used.clear()
         
-        # Apply Р”РћРў effects at start of round
-        if "РљСЂРѕРІРѕС‚РµС‡РµРЅРёРµ" in self.status_effects:
+        # Apply ДОТ effects at start of round
+        if "Кровотечение" in self.status_effects:
             self.take_damage(1)
     
     def end_round(self):
@@ -297,7 +298,7 @@ class CombatSimulator:
             return False
         if config.get("requires_target_melee") and defender.weapon.weapon_type != "melee":
             return False
-        if status == "Р—Р°РјРµРґР»РµРЅ" and "РћР±РµР·РґРІРёР¶РµРЅ" in defender.status_effects:
+        if status == "Замедлен" and "Обездвижен" in defender.status_effects:
             return False
 
         return True
@@ -311,7 +312,7 @@ class CombatSimulator:
             defender.status_effects[status] = max(defender.status_effects.get(status, 0), duration)
 
         if self.verbose:
-            log_text = config.get("log", "РёСЃРїРѕР»СЊР·СѓРµС‚ СЃРїРµС†РґРµР№СЃС‚РІРёРµ")
+            log_text = config.get("log", "использует спецдействие")
             self.combat_log.append(
                 f"Round {self.round_count}: {attacker.name} {log_text}"
             )
@@ -325,14 +326,14 @@ class CombatSimulator:
         Movement is symmetric and depends on weapon types, not roles.
 
         Status effects:
-        - "РћР±РµР·РґРІРёР¶РµРЅ": cannot move
-        - "Р—Р°РјРµРґР»РµРЅ": speed reduced by 50%
+        - "Обездвижен": cannot move
+        - "Замедлен": speed reduced by 50%
         """
         def effective_speed(ch: Character) -> float:
-            if "РћР±РµР·РґРІРёР¶РµРЅ" in ch.status_effects:
+            if "Обездвижен" in ch.status_effects:
                 return 0.0
             spd = float(ch.speed)
-            if "Р—Р°РјРµРґР»РµРЅ" in ch.status_effects:
+            if "Замедлен" in ch.status_effects:
                 spd *= 0.5
             return spd
 
@@ -391,29 +392,29 @@ class CombatSimulator:
             return 0, 0, False
         
         stabilization_bonus = 0
-        if "???????????? X" in attacker.weapon.properties and not attacker.moved_this_round:
-            stabilization_bonus = attacker.weapon.properties["???????????? X"]
-        penetration_bonus = 1 if "???????? X" in attacker.weapon.properties else 0
+        if "Стабилизация X" in attacker.weapon.properties and not attacker.moved_this_round:
+            stabilization_bonus = attacker.weapon.properties["Стабилизация X"]
+        penetration_bonus = 1 if "Пробивание X" in attacker.weapon.properties else 0
 
         defense_value = float(defender.defense)
-        if "??????????" in attacker.weapon.properties:
+        if "Магическое" in attacker.weapon.properties:
             defense_value = round(defense_value / 3.0, 1)
 
         def evaluate_roll() -> Tuple[int, bool, int]:
             roll_value = random.randint(1, attacker.dice)
             raw_roll = roll_value
 
-            if "??????? ?" in attacker.weapon.properties:
-                danger_threshold = attacker.weapon.properties["??????? ?"]
+            if "Опасное X" in attacker.weapon.properties:
+                danger_threshold = attacker.weapon.properties["Опасное X"]
                 if raw_roll > danger_threshold:
                     attacker.take_damage(1)
 
-            if "???????? ?" in attacker.weapon.properties:
-                accuracy_bonus = attacker.weapon.properties["???????? ?"]
+            if "Точность X" in attacker.weapon.properties:
+                accuracy_bonus = attacker.weapon.properties["Точность X"]
                 roll_value = min(roll_value + accuracy_bonus, attacker.dice)
 
-            if "?????? ?" in attacker.weapon.properties:
-                guarantee = attacker.weapon.properties["?????? ?"]
+            if "Гарант X" in attacker.weapon.properties:
+                guarantee = attacker.weapon.properties["Гарант X"]
                 if roll_value != 1:  # Except 1
                     roll_value = max(roll_value, guarantee)
 
@@ -424,8 +425,8 @@ class CombatSimulator:
             if hit_value:
                 margin = total_roll - defense_value
                 damage_value = margin + attacker.weapon.damage
-                if roll_value == attacker.dice and "Р­СЃРєР°Р»Р°С†РёСЏ РҐ" in attacker.weapon.properties:
-                    escalation_value = attacker.weapon.properties["Р­СЃРєР°Р»Р°С†РёСЏ РҐ"]
+                if raw_roll == attacker.dice and "Эскалация X" in attacker.weapon.properties:
+                    escalation_value = attacker.weapon.properties["Эскалация X"]
                     damage_value += escalation_value
 
             return roll_value, hit_value, damage_value
@@ -434,7 +435,7 @@ class CombatSimulator:
 
         if not hit:
             damage = 0
-            rerolls = attacker.weapon.properties.get("РџРµСЂРµР±СЂРѕСЃ", 0)
+            rerolls = attacker.weapon.properties.get("Переброс", 0)
             if rerolls is True:
                 rerolls = 1
             try:
@@ -448,13 +449,18 @@ class CombatSimulator:
                     damage = reroll_damage
                     break
 
+            if (not hit) and ("Бронебойность X" in attacker.weapon.properties):
+                max_rank = attacker.weapon.properties["Бронебойность X"]
+                if defender.rank <= max_rank:
+                    damage = max(damage, 1)
+
         damage = max(1, damage) if hit else damage
 
         return roll, damage, hit
     
     def record_shot(self, attacker: Character):
-        """Track shots for РџРµСЂРµР·Р°СЂСЏРґРєР°."""
-        reload_after = attacker.weapon.properties.get("РџРµСЂРµР·Р°СЂСЏРґРєР° РҐ")
+        """Track shots for Перезарядка"""
+        reload_after = attacker.weapon.properties.get("Перезарядка X")
         if not reload_after:
             return
         attacker.shots_fired_since_reload += 1
@@ -463,7 +469,7 @@ class CombatSimulator:
     
     def perform_reaction_attack(self, attacker: Character, defender: Character) -> bool:
         """Perform a reaction attack without spending actions."""
-        if "РџРµСЂРµР·Р°СЂСЏРґРєР° РҐ" in attacker.weapon.properties and attacker.reload_required:
+        if "Перезарядка X" in attacker.weapon.properties and attacker.reload_required:
             return False
         
         roll, damage, hit = self.roll_attack(attacker, defender)
@@ -474,12 +480,12 @@ class CombatSimulator:
             self.apply_status_effects(attacker, defender, hit)
             if self.verbose:
                 self.combat_log.append(
-                    f"Round {self.round_count}: {attacker.name} СЂРµР°РєС†РёРµР№ РЅР°РЅРѕСЃРёС‚ {damage} СѓСЂРѕРЅР°"
+                    f"Round {self.round_count}: {attacker.name} реакцией наносит {damage} урона"
                 )
         else:
             if self.verbose:
                 self.combat_log.append(
-                    f"Round {self.round_count}: {attacker.name} СЂРµР°РєС†РёРµР№ РїСЂРѕРјР°С…РёРІР°РµС‚СЃСЏ"
+                    f"Round {self.round_count}: {attacker.name} реакцией промахивается"
                 )
         
         if shot_fired:
@@ -492,37 +498,37 @@ class CombatSimulator:
         if not hit:
             return
         
-        # Р”РћРў effects (apply for X rounds)
-        if "РљСЂРѕРІРѕС‚РµС‡РµРЅРёРµ РҐ" in attacker.weapon.properties:
-            duration = attacker.weapon.properties["РљСЂРѕРІРѕС‚РµС‡РµРЅРёРµ РҐ"]
-            defender.status_effects["РљСЂРѕРІРѕС‚РµС‡РµРЅРёРµ"] = max(
-                defender.status_effects.get("РљСЂРѕРІРѕС‚РµС‡РµРЅРёРµ", 0),
+        # ДОТ effects (apply for X rounds)
+        if "Кровотечение X" in attacker.weapon.properties:
+            duration = attacker.weapon.properties["Кровотечение X"]
+            defender.status_effects["Кровотечение"] = max(
+                defender.status_effects.get("Кровотечение", 0),
                 duration,
             )
         
-        # Р—Р°РјРµРґР»РµРЅРёРµ (next round speed -50%)
-        if "Р—Р°РјРµРґР»РµРЅРёРµ" in attacker.weapon.properties:
-            defender.status_effects["Р—Р°РјРµРґР»РµРЅ"] = max(
-                defender.status_effects.get("Р—Р°РјРµРґР»РµРЅ", 0),
+        # Замедление (next round speed -50%)
+        if "Замедление" in attacker.weapon.properties:
+            defender.status_effects["Замедлен"] = max(
+                defender.status_effects.get("Замедлен", 0),
                 2,
             )
         
-        # Р”РµР·РѕСЂРёРµРЅС‚РёСЂСѓСЋС‰РµРµ (lose reaction)
-        if "Р”РµР·РѕСЂРёРµРЅС‚РёСЂСѓСЋС‰РµРµ" in attacker.weapon.properties:
+        # Дезориентирующее (lose reaction)
+        if "Дезориентирующее" in attacker.weapon.properties:
             defender.reaction_remaining = False
         
-        # РћР±РµР·РґРІРёР¶РёРІР°РЅРёРµ (can't move for X rounds)
-        if "РћР±РµР·РґРІРёР¶РёРІР°РЅРёРµ РҐ" in attacker.weapon.properties:
-            max_rank = attacker.weapon.properties["РћР±РµР·РґРІРёР¶РёРІР°РЅРёРµ РҐ"]
+        # Обездвиживание (can't move for X rounds)
+        if "Обездвиживание X" in attacker.weapon.properties:
+            max_rank = attacker.weapon.properties["Обездвиживание X"]
             if defender.rank <= max_rank:
-                defender.status_effects["РћР±РµР·РґРІРёР¶РµРЅ"] = max(
-                    defender.status_effects.get("РћР±РµР·РґРІРёР¶РµРЅ", 0),
+                defender.status_effects["Обездвижен"] = max(
+                    defender.status_effects.get("Обездвижен", 0),
                     2,
                 )
         
-        # РћС€РµР»РѕРјР»РµРЅРёРµ (lose action)
-        if "РћС€РµР»РѕРјР»РµРЅРёРµ X" in attacker.weapon.properties:
-            max_rank = attacker.weapon.properties["РћС€РµР»РѕРјР»РµРЅРёРµ X"]
+        # Ошеломление (lose action)
+        if "Ошеломление X" in attacker.weapon.properties:
+            max_rank = attacker.weapon.properties["Ошеломление X"]
             if defender.rank <= max_rank:
                 defender.actions_remaining = max(0, defender.actions_remaining - 1)
     
@@ -531,17 +537,11 @@ class CombatSimulator:
         if attacker.actions_remaining <= 0:
             return False
         
-        if "РџРµСЂРµР·Р°СЂСЏРґРєР° РҐ" in attacker.weapon.properties and attacker.reload_required:
+        if "Перезарядка X" in attacker.weapon.properties and attacker.reload_required:
             attacker.actions_remaining -= 1
             attacker.reload_required = False
             attacker.shots_fired_since_reload = 0
             return False
-        
-        if "РћРіРѕРЅСЊ РЅР° РїРѕРґР°РІР»РµРЅРёРµ" in attacker.weapon.properties:
-            if self.should_use_utility_action(attacker, defender, "РћРіРѕРЅСЊ РЅР° РїРѕРґР°РІР»РµРЅРёРµ"):
-                self.apply_utility_action(attacker, defender, "РћРіРѕРЅСЊ РЅР° РїРѕРґР°РІР»РµРЅРёРµ")
-                attacker.actions_remaining -= 1
-                return False
         
         roll, damage, hit = self.roll_attack(attacker, defender)
         shot_fired = roll > 0
@@ -554,12 +554,19 @@ class CombatSimulator:
                     f"Round {self.round_count}: {attacker.name} hits for {damage} damage"
                 )
         else:
-            if self.verbose:
-                self.combat_log.append(
-                    f"Round {self.round_count}: {attacker.name} misses"
-                )
+            if damage > 0:
+                defender.take_damage(damage)
+                if self.verbose:
+                    self.combat_log.append(
+                        f"Round {self.round_count}: {attacker.name} misses, but бронебойность наносит {damage} урона"
+                    )
+            else:
+                if self.verbose:
+                    self.combat_log.append(
+                        f"Round {self.round_count}: {attacker.name} misses"
+                    )
             
-            if shot_fired and "Р РёСЃРє" in attacker.weapon.properties:
+            if shot_fired and "Риск" in attacker.weapon.properties:
                 if defender.reaction_remaining and self.can_attack(defender, attacker):
                     defender.reaction_remaining = False
                     self.perform_reaction_attack(defender, attacker)
@@ -571,17 +578,6 @@ class CombatSimulator:
         
         attacker.actions_remaining -= 1
         return hit
-    
-    def perform_aggressive_reaction(self, attacker: Character, defender: Character):
-        """Grant one extra reaction attack per round."""
-        if "РђРіСЂРµСЃСЃРёРІРЅС‹Р№ РѕР±СЃС‚СЂРµР»" not in attacker.weapon.properties:
-            return
-        if not attacker.reaction_remaining:
-            return
-        if not self.can_attack(attacker, defender):
-            return
-        attacker.reaction_remaining = False
-        self.perform_reaction_attack(attacker, defender)
 
     def simulate_round(self) -> bool:
         """
@@ -607,9 +603,6 @@ class CombatSimulator:
             and self.defender.is_alive()
         ):
             self.perform_attack(self.attacker, self.defender)
-        
-        if self.attacker.is_alive() and self.defender.is_alive():
-            self.perform_aggressive_reaction(self.attacker, self.defender)
 
         if not self.defender.is_alive():
             return False
@@ -621,9 +614,6 @@ class CombatSimulator:
             and self.defender.is_alive()
         ):
             self.perform_attack(self.defender, self.attacker)
-        
-        if self.attacker.is_alive() and self.defender.is_alive():
-            self.perform_aggressive_reaction(self.defender, self.attacker)
 
         if not self.attacker.is_alive():
             return False
@@ -687,13 +677,13 @@ def build_weapons(rank: int, x_value: int, rerolls: int) -> List[Weapon]:
             )
 
     for prop_name, prop_value in PROPERTY_DEFS:
-        if prop_name == "????????":
+        if prop_name == "Переброс":
             continue
         prop_setting = x_value if isinstance(prop_value, int) else prop_value
         props = {prop_name: prop_setting}
         if rerolls:
-            props["????????"] = rerolls
-        weapon_type = "melee" if prop_name == "??????? ???" else "ranged"
+            props["Переброс"] = rerolls
+        weapon_type = "melee" if prop_name == "Ближний бой" else "ranged"
         weapon_name = f"{weapon_type.upper()} | {prop_name} | DMG 1"
         weapons.append(
             Weapon(
@@ -784,26 +774,26 @@ def build_weapon_props_array(weapon: Weapon) -> Tuple[List[int], float]:
     props = [0] * PROP_COUNT
     props[PROP_TYPE] = 0 if weapon.weapon_type == "melee" else 1
     props[PROP_DAMAGE] = int(weapon.damage)
-    props[PROP_PENETRATION] = 1 if "???????? X" in weapon.properties else 0
-    props[PROP_ESCALATION] = normalize_int(weapon.properties.get("????????? ?"))
-    props[PROP_RELOAD] = normalize_int(weapon.properties.get("??????????? ?"))
+    props[PROP_PENETRATION] = 1 if "Пробивание X" in weapon.properties else 0
+    props[PROP_ESCALATION] = normalize_int(weapon.properties.get("Эскалация X"))
+    props[PROP_RELOAD] = normalize_int(weapon.properties.get("Перезарядка X"))
     props[PROP_STABILIZATION] = normalize_int(
-        weapon.properties.get("???????????? X")
+        weapon.properties.get("Стабилизация X")
     )
-    props[PROP_ACCURACY] = normalize_int(weapon.properties.get("???????? ?"))
-    props[PROP_GUARANTEE] = normalize_int(weapon.properties.get("?????? ?"))
-    props[PROP_STUN] = normalize_int(weapon.properties.get("??????????? X"))
-    props[PROP_APPLY_SLOW] = 1 if "??????????" in weapon.properties else 0
-    props[PROP_DANGEROUS] = normalize_int(weapon.properties.get("??????? ?"))
-    props[PROP_RISK] = 1 if "????" in weapon.properties else 0
-    props[PROP_AGGRESSIVE] = 1 if "??????????? ???????" in weapon.properties else 0
-    props[PROP_BLEED] = normalize_int(weapon.properties.get("???????????? ?"))
-    props[PROP_DISORIENT] = 1 if "????????????????" in weapon.properties else 0
+    props[PROP_ACCURACY] = normalize_int(weapon.properties.get("Точность X"))
+    props[PROP_GUARANTEE] = normalize_int(weapon.properties.get("Гарант X"))
+    props[PROP_STUN] = normalize_int(weapon.properties.get("Ошеломление X"))
+    props[PROP_APPLY_SLOW] = 1 if "Замедление" in weapon.properties else 0
+    props[PROP_DANGEROUS] = normalize_int(weapon.properties.get("Опасное X"))
+    props[PROP_RISK] = 1 if "Риск" in weapon.properties else 0
+    props[PROP_AGGRESSIVE] = 1 if "Агрессивный обстрел" in weapon.properties else 0
+    props[PROP_BLEED] = normalize_int(weapon.properties.get("Кровотечение X"))
+    props[PROP_DISORIENT] = 1 if "Дезориентирующее" in weapon.properties else 0
     props[PROP_IMMOBILIZE] = normalize_int(
-        weapon.properties.get("?????????????? ?")
+        weapon.properties.get("Обездвиживание X")
     )
-    props[PROP_MAGIC] = 1 if "??????????" in weapon.properties else 0
-    props[PROP_REROLLS] = normalize_int(weapon.properties.get("????????"))
+    props[PROP_MAGIC] = 1 if "Магическое" in weapon.properties else 0
+    props[PROP_REROLLS] = normalize_int(weapon.properties.get("Переброс"))
 
     return props, weapon.get_range()
 
@@ -1055,7 +1045,7 @@ def write_property_values(values: Dict[int, Dict[str, object]]):
         lines.append('        "property_costs": {')
         ordered_keys: List[str] = []
         property_order = [
-            prop_name for prop_name, _ in PROPERTY_DEFS if prop_name != "РџРµСЂРµР±СЂРѕСЃ"
+            prop_name for prop_name, _ in PROPERTY_DEFS if prop_name != "Переброс"
         ]
         for prop_name in property_order:
             if prop_name in property_costs:
@@ -1463,7 +1453,7 @@ def calculate_property_costs(
     )
     base_logit = logit(baseline_win_rate)
     all_properties = {prop_name for prop_name, _ in PROPERTY_DEFS}
-    no_effect_properties = all_properties - SIMULATED_PROPERTIES - {"РџРµСЂРµР±СЂРѕСЃ"}
+    no_effect_properties = all_properties - SIMULATED_PROPERTIES - {"Переброс"}
 
     baseline_weapons = {
         "melee": Weapon(
