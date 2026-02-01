@@ -5,6 +5,7 @@ Shared acceleration helpers for Gear balance simulations.
 from __future__ import annotations
 
 import concurrent.futures
+import math
 import os
 import random
 from dataclasses import dataclass
@@ -13,6 +14,7 @@ from typing import Any, Dict, List, Optional, Tuple
 PARALLEL_MIN_SIMULATIONS = 20_000
 PARALLEL_CHUNKS_PER_WORKER = 4
 PARALLEL_MIN_CHUNK_SIZE = 1_000
+OPPORTUNITY_LEAVE_CHANCE = 0.0
 
 PROP_TYPE = 0
 PROP_DAMAGE = 1
@@ -50,6 +52,35 @@ except Exception:
         return wrapper
 
     NUMBA_AVAILABLE = False
+
+
+def multinomial_counts(simulations: int, probs, seed: Optional[int] = None):
+    """Return multinomial counts for `simulations` given probability vector `probs`.
+
+    This is used to allocate pooled simulation counts across scenario buckets
+    without building a per-simulation scenario list.
+
+    Parameters
+    ----------
+    simulations:
+        Total number of trials.
+    probs:
+        1D array-like of probabilities (does not need to be normalized).
+    seed:
+        Optional RNG seed.
+    """
+    if np is None:
+        raise RuntimeError("multinomial_counts requires NumPy")
+    if simulations <= 0:
+        return np.zeros(len(probs), dtype=np.int64)
+    p = np.asarray(probs, dtype=np.float64)
+    s = float(p.sum())
+    if s <= 0.0:
+        p = np.full_like(p, 1.0 / max(len(p), 1))
+    else:
+        p = p / s
+    rng = np.random.default_rng(seed)
+    return rng.multinomial(int(simulations), p)
 
 
 def resolve_worker_count(max_workers: Optional[int]) -> int:
@@ -442,11 +473,25 @@ if NUMBA_AVAILABLE:
         if w_props[w_idx, PROP_STABILIZATION] > 0 and moved[att] == 0:
             stabilization = w_props[w_idx, PROP_STABILIZATION]
 
-        penetration_bonus = w_props[w_idx, PROP_PENETRATION]
+        penetration_bonus = 0
+        penetration_threshold = w_props[w_idx, PROP_PENETRATION]
+        target_idx = weapon_idx[target]
+        target_melee_cover = (
+            w_props[target_idx, PROP_TYPE] == 0
+            and distance > w_range[target_idx]
+        )
+        if (
+            penetration_threshold > 0
+            and rank < penetration_threshold
+            and not target_melee_cover
+        ):
+            penetration_bonus = 2
         magic_flag = w_props[w_idx, PROP_MAGIC]
         defense_value = float(defense)
         if magic_flag > 0:
             defense_value = np.round(defense_value / 3.0, 1)
+        if target_melee_cover:
+            defense_value += 2
 
         _, hit, damage = _evaluate_roll(
             att,
@@ -695,6 +740,39 @@ if NUMBA_AVAILABLE:
         if shot_fired == 1:
             _record_shot(att, shots, reload_required, w_props, weapon_idx)
 
+        if (
+            shot_fired == 1
+            and w_props[w_idx, PROP_TYPE] == 1
+            and w_props[weapon_idx[target], PROP_TYPE] == 0
+            and distance <= w_range[weapon_idx[target]]
+            and reaction[target] == 1
+            and hp[target] > 0
+        ):
+            reaction[target] = 0
+            _perform_reaction_attack(
+                target,
+                att,
+                hp,
+                moved,
+                actions,
+                reaction,
+                bleed,
+                slow,
+                immobile,
+                shots,
+                reload_required,
+                w_props,
+                w_range,
+                weapon_idx,
+                distance,
+                dice,
+                skill,
+                defense,
+                rank,
+            )
+            if hp[att] <= 0:
+                return
+
         actions[att] -= 1
 
 
@@ -712,8 +790,6 @@ if NUMBA_AVAILABLE:
         max_rounds: int,
         start_index: int,
         initial_distance: float,
-        allow_ranged_retreat: int,
-        max_retreat_rounds: int,
         seed: int,
     ) -> Tuple[int, int, int]:
         np.random.seed(seed)
@@ -721,13 +797,12 @@ if NUMBA_AVAILABLE:
         w2_wins = 0
         total_rounds = 0
 
-        hp = np.empty(2, dtype=np.int32)
+        hp = np.empty(2, dtype=np.float64)
         actions = np.empty(2, dtype=np.int32)
         reaction = np.empty(2, dtype=np.int32)
         moved = np.empty(2, dtype=np.int32)
         shots = np.empty(2, dtype=np.int32)
         reload_required = np.empty(2, dtype=np.int32)
-        retreat_rounds = np.empty(2, dtype=np.int32)
         bleed = np.empty(2, dtype=np.int32)
         slow = np.empty(2, dtype=np.int32)
         immobile = np.empty(2, dtype=np.int32)
@@ -755,8 +830,6 @@ if NUMBA_AVAILABLE:
             shots[1] = 0
             reload_required[0] = 0
             reload_required[1] = 0
-            retreat_rounds[0] = 0
-            retreat_rounds[1] = 0
             bleed[0] = 0
             bleed[1] = 0
             slow[0] = 0
@@ -792,6 +865,7 @@ if NUMBA_AVAILABLE:
                 if slow[1] > 0:
                     eff_speed_1 *= 0.5
 
+                prev_distance = distance
                 melee_close = 0.0
                 ranged_retreat = 0.0
 
@@ -810,22 +884,19 @@ if NUMBA_AVAILABLE:
                         moved[1] = 1
                         melee_close += eff_speed_1
 
-                if allow_ranged_retreat == 1:
-                    if att_type == 1 and def_type == 0:
-                        if distance < att_range and retreat_rounds[0] < max_retreat_rounds:
-                            movement = eff_speed_0 / 2.0
-                            if movement > 0:
-                                moved[0] = 1
-                                ranged_retreat += movement
-                                retreat_rounds[0] += 1
+                if att_type == 1 and def_type == 0:
+                    if distance < att_range:
+                        movement = eff_speed_0 / 2.0
+                        if movement > 0:
+                            moved[0] = 1
+                            ranged_retreat += movement
 
-                    if def_type == 1 and att_type == 0:
-                        if distance < def_range and retreat_rounds[1] < max_retreat_rounds:
-                            movement = eff_speed_1 / 2.0
-                            if movement > 0:
-                                moved[1] = 1
-                                ranged_retreat += movement
-                                retreat_rounds[1] += 1
+                if def_type == 1 and att_type == 0:
+                    if distance < def_range:
+                        movement = eff_speed_1 / 2.0
+                        if movement > 0:
+                            moved[1] = 1
+                            ranged_retreat += movement
 
                 if melee_close != 0.0 or ranged_retreat != 0.0:
                     distance = distance - melee_close + ranged_retreat
@@ -833,6 +904,66 @@ if NUMBA_AVAILABLE:
                         distance = 0.0
                     elif distance > 100.0:
                         distance = 100.0
+
+                dash_close = 0.0
+                if att_type == 0 and distance > att_range and actions[0] > 0:
+                    if eff_speed_0 > 0:
+                        gap = distance - att_range
+                        dash_actions = int(math.ceil(gap / eff_speed_0))
+                        if dash_actions > actions[0]:
+                            dash_actions = actions[0]
+                        if dash_actions > 0:
+                            actions[0] -= dash_actions
+                            moved[0] = 1
+                            dash_close += eff_speed_0 * dash_actions
+
+                if def_type == 0 and distance > def_range and actions[1] > 0:
+                    if eff_speed_1 > 0:
+                        gap = distance - def_range
+                        dash_actions = int(math.ceil(gap / eff_speed_1))
+                        if dash_actions > actions[1]:
+                            dash_actions = actions[1]
+                        if dash_actions > 0:
+                            actions[1] -= dash_actions
+                            moved[1] = 1
+                            dash_close += eff_speed_1 * dash_actions
+
+                if dash_close != 0.0:
+                    distance = distance - dash_close
+                    if distance < 0.0:
+                        distance = 0.0
+                    elif distance > 100.0:
+                        distance = 100.0
+
+                if att_type != def_type:
+                    melee_idx = 0 if att_type == 0 else 1
+                    ranged_idx = 1 - melee_idx
+                    melee_range = w_range[weapon_idx[melee_idx]]
+                    if prev_distance <= melee_range and distance > melee_range:
+                        if reaction[melee_idx] == 1:
+                            if np.random.random() < OPPORTUNITY_LEAVE_CHANCE:
+                                reaction[melee_idx] = 0
+                                _perform_reaction_attack(
+                                    melee_idx,
+                                    ranged_idx,
+                                    hp,
+                                    moved,
+                                    actions,
+                                    reaction,
+                                    bleed,
+                                    slow,
+                                    immobile,
+                                    shots,
+                                    reload_required,
+                                    w_props,
+                                    w_range,
+                                    weapon_idx,
+                                    prev_distance,
+                                    dice,
+                                    skill,
+                                    defense,
+                                    rank,
+                                )
 
                 while actions[0] > 0 and hp[0] > 0 and hp[1] > 0:
                     _perform_attack(
@@ -973,8 +1104,6 @@ else:
         max_rounds: int,
         start_index: int,
         initial_distance: float,
-        allow_ranged_retreat: int,
-        max_retreat_rounds: int,
         seed: int,
     ) -> Tuple[int, int, int]:
         raise RuntimeError("Numba is not available.")
@@ -993,8 +1122,6 @@ def full_matchup_chunk(
     max_rounds: int,
     start_index: int,
     initial_distance: float,
-    allow_ranged_retreat: bool,
-    max_retreat_rounds: int,
     track_rounds: bool,
     seed: Optional[int],
     use_numba: bool = True,
@@ -1017,8 +1144,6 @@ def full_matchup_chunk(
             max_rounds,
             start_index,
             initial_distance,
-            1 if allow_ranged_retreat else 0,
-            max_retreat_rounds,
             seed,
         )
         return w1_wins, w2_wins, [], [], total_rounds

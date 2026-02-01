@@ -47,6 +47,7 @@ from sim_accel import (
     acquire_executor,
     batch_map,
     build_simulation_chunks,
+    multinomial_counts,
     fast_matchup_chunk,
     full_matchup_chunk,
 )
@@ -88,7 +89,7 @@ PROPERTY_TRIPLES_PATH = Path(__file__).with_name("property_triples.py")
 CUSTOM_SIMULATIONS_PATH = Path(__file__).with_name("custom_simulations.json")
 
 DEFAULT_MAX_ROUNDS = 100
-DEFAULT_MAX_RETREAT_ROUNDS = 5
+OPPORTUNITY_LEAVE_CHANCE = 0.0
 
 WEAPON_TYPES = ("melee", "ranged")
 
@@ -395,6 +396,8 @@ class CombatSimulator:
         - "Immobilized": cannot move
         - "Slowed": speed reduced by 50%
         """
+        prev_distance = self.distance
+
         def effective_speed(ch: Character) -> float:
             if "Immobilized" in ch.status_effects:
                 return 0.0
@@ -405,22 +408,94 @@ class CombatSimulator:
 
         attacker_range = attacker.weapon.get_range()
         defender_range = defender.weapon.get_range()
+        attacker_type = attacker.weapon.weapon_type
+        defender_type = defender.weapon.weapon_type
 
-        closing_distance = 0.0
-        if self.distance > attacker_range:
+        melee_close = 0.0
+        ranged_retreat = 0.0
+
+        if attacker_type == "melee" and self.distance > attacker_range:
             movement = effective_speed(attacker)
             if movement > 0:
                 attacker.moved_this_round = True
-                closing_distance += movement
+                melee_close += movement
 
-        if self.distance > defender_range:
+        if defender_type == "melee" and self.distance > defender_range:
             movement = effective_speed(defender)
             if movement > 0:
                 defender.moved_this_round = True
-                closing_distance += movement
+                melee_close += movement
 
-        if closing_distance > 0:
-            self.distance = max(0.0, self.distance - closing_distance)
+        if (
+            attacker_type == "ranged"
+            and defender_type == "melee"
+            and self.distance < attacker_range
+        ):
+            movement = effective_speed(attacker) / 2.0
+            if movement > 0:
+                attacker.moved_this_round = True
+                ranged_retreat += movement
+
+        if (
+            defender_type == "ranged"
+            and attacker_type == "melee"
+            and self.distance < defender_range
+        ):
+            movement = effective_speed(defender) / 2.0
+            if movement > 0:
+                defender.moved_this_round = True
+                ranged_retreat += movement
+
+        if melee_close != 0.0 or ranged_retreat != 0.0:
+            self.distance = self.distance - melee_close + ranged_retreat
+            if self.distance < 0.0:
+                self.distance = 0.0
+            elif self.distance > 100.0:
+                self.distance = 100.0
+
+        dash_close = 0.0
+        for ch, ch_type, ch_range in (
+            (attacker, attacker_type, attacker_range),
+            (defender, defender_type, defender_range),
+        ):
+            if ch_type != "melee":
+                continue
+            if ch.actions_remaining <= 0 or self.distance <= ch_range:
+                continue
+            speed = effective_speed(ch)
+            if speed <= 0:
+                continue
+            gap = self.distance - ch_range
+            dash_actions = min(ch.actions_remaining, math.ceil(gap / speed))
+            if dash_actions <= 0:
+                continue
+            ch.actions_remaining -= dash_actions
+            ch.moved_this_round = True
+            dash_close += speed * dash_actions
+
+        if dash_close != 0.0:
+            self.distance -= dash_close
+            if self.distance < 0.0:
+                self.distance = 0.0
+            elif self.distance > 100.0:
+                self.distance = 100.0
+
+        if attacker_type != defender_type:
+            melee = attacker if attacker_type == "melee" else defender
+            ranged = defender if melee is attacker else attacker
+            melee_range = melee.weapon.get_range()
+            if prev_distance <= melee_range and self.distance > melee_range:
+                if (
+                    melee.reaction_remaining
+                    and melee.is_alive()
+                    and ranged.is_alive()
+                    and random.random() < OPPORTUNITY_LEAVE_CHANCE
+                ):
+                    melee.reaction_remaining = False
+                    current_distance = self.distance
+                    self.distance = prev_distance
+                    self.perform_reaction_attack(melee, ranged)
+                    self.distance = current_distance
 
     def roll_attack(self, attacker: Character, defender: Character) -> Tuple[int, int, bool]:
         """
@@ -438,11 +513,26 @@ class CombatSimulator:
         stabilization_bonus = 0
         if "Stabilization X" in attacker.weapon.properties and not attacker.moved_this_round:
             stabilization_bonus = attacker.weapon.properties["Stabilization X"]
-        penetration_bonus = 1 if "Penetration X" in attacker.weapon.properties else 0
+        defender_melee_cover = (
+            defender.weapon.weapon_type == "melee"
+            and self.distance > defender.weapon.get_range()
+        )
+
+        penetration_bonus = 0
+        penetration_threshold = attacker.weapon.properties.get("Penetration X")
+        if penetration_threshold and not defender_melee_cover:
+            try:
+                threshold_value = int(penetration_threshold)
+            except (TypeError, ValueError):
+                threshold_value = 0
+            if defender.rank < threshold_value:
+                penetration_bonus = 2
 
         defense_value = float(defender.defense)
         if "Magical" in attacker.weapon.properties:
             defense_value = round(defense_value / 3.0, 1)
+        if defender_melee_cover:
+            defense_value += 2
 
         def evaluate_roll() -> Tuple[int, bool, int]:
             roll_value = random.randint(1, attacker.dice)
@@ -625,6 +715,19 @@ class CombatSimulator:
         
         if shot_fired:
             self.record_shot(attacker)
+
+        if (
+            shot_fired
+            and attacker.weapon.weapon_type == "ranged"
+            and defender.weapon.weapon_type == "melee"
+            and defender.reaction_remaining
+            and defender.is_alive()
+            and self.distance <= defender.weapon.get_range()
+        ):
+            defender.reaction_remaining = False
+            self.perform_reaction_attack(defender, attacker)
+            if not attacker.is_alive():
+                return False
         
         attacker.actions_remaining -= 1
         return hit
@@ -727,35 +830,56 @@ class Scenario:
     """Defines a distance + movement configuration."""
     name: str
     initial_distance: float
-    allow_ranged_retreat: bool
 
 
 @dataclass(frozen=True)
 class ScenarioOption:
-    """Defines per-battle opponent context."""
+    """Defines per-battle matchup context."""
     name: str
-    opponent_type: str  # "melee" or "ranged"
-    initial_distance: float
+    matchup: str  # "mm", "rr", or "mr" (melee-melee, ranged-ranged, mixed)
+    distance_mult: float
     weight: float
 
 
+DEFAULT_OPPONENT_TYPE_WEIGHTS = {
+    # How often you face melee vs ranged opponents when evaluating "vs world".
+    # Defaults preserve your earlier split: melee 0.4 (0.3+0.1) / ranged 0.6 (0.15+0.45).
+    "melee": 0.40,
+    "ranged": 0.60,
+}
+
+
 DEFAULT_SCENARIO_OPTIONS = [
-    ScenarioOption("melee_10m", "melee", 10.0, 0.3),
-    ScenarioOption("melee_30m", "melee", 30.0, 0.1),
-    ScenarioOption("ranged_10m", "ranged", 10.0, 0.15),
-    ScenarioOption("ranged_30m", "ranged", 30.0, 0.45),
+    # Same-type matchups keep your old distance tendencies.
+    ScenarioOption("mm_1x", "mm", 1.0, 0.33),
+    ScenarioOption("mm_2x", "mm", 2.0, 0.34),
+    ScenarioOption("mm_3x", "mm", 3.0, 0.33),
+    ScenarioOption("rr_1x", "rr", 1.0, 0.33),
+    ScenarioOption("rr_2x", "rr", 2.0, 0.34),
+    ScenarioOption("rr_3x", "rr", 3.0, 0.33),
+    # Mixed matchup: neutral-ish default (overall 10m/30m from your old pool: 0.45/0.55).
+    # Tweak these two weights if you want "ranged usually starts far" or "melee ambushes".
+    ScenarioOption("mr_1x", "mr", 1.0, 0.33),
+    ScenarioOption("mr_2x", "mr", 2.0, 0.34),
+    ScenarioOption("mr_3x", "mr", 3.0, 0.33),
 ]
+
+
+def matchup_key(type_a: str, type_b: str) -> str:
+    if type_a == "melee" and type_b == "melee":
+        return "mm"
+    if type_a == "ranged" and type_b == "ranged":
+        return "rr"
+    return "mr"
 
 
 MELEE_BASELINE_SCENARIO = Scenario(
     name="Baseline melee (close)",
     initial_distance=10.0,
-    allow_ranged_retreat=False,
 )
 RANGED_BASELINE_SCENARIO = Scenario(
     name="Baseline ranged (long)",
     initial_distance=30.0,
-    allow_ranged_retreat=False,
 )
 DEFAULT_BASELINE_SCENARIOS = {
     "melee": MELEE_BASELINE_SCENARIO,
@@ -764,11 +888,11 @@ DEFAULT_BASELINE_SCENARIOS = {
 
 
 def build_scenario_sampler(
-    opponent_type: str,
+    matchup: str,
     scenarios: Optional[List[ScenarioOption]] = None,
 ) -> Tuple[List[ScenarioOption], List[float]]:
     pool = DEFAULT_SCENARIO_OPTIONS if scenarios is None else scenarios
-    matches = [entry for entry in pool if entry.opponent_type == opponent_type]
+    matches = [entry for entry in pool if entry.matchup == matchup]
     if not matches:
         matches = pool
     weights = [entry.weight for entry in matches]
@@ -801,7 +925,8 @@ def build_weapons(rank: int, x_value: int, rerolls: int) -> List[Weapon]:
         props = {prop_name: prop_setting}
         if rerolls:
             props["Reroll"] = rerolls
-        weapon_type = "melee" if prop_name == "Melee" else "ranged"
+        allowed_types = allowed_weapon_types_for(prop_name)
+        weapon_type = "melee" if "melee" in allowed_types else "ranged"
         weapon_name = f"{weapon_type.upper()} | {prop_name} | DMG 1"
         weapons.append(
             Weapon(
@@ -892,7 +1017,9 @@ def build_weapon_props_array(weapon: Weapon) -> Tuple[List[int], float]:
     props = [0] * PROP_COUNT
     props[PROP_TYPE] = 0 if weapon.weapon_type == "melee" else 1
     props[PROP_DAMAGE] = int(weapon.damage)
-    props[PROP_PENETRATION] = 1 if "Penetration X" in weapon.properties else 0
+    props[PROP_PENETRATION] = normalize_int(
+        weapon.properties.get("Penetration X")
+    )
     props[PROP_ESCALATION] = normalize_int(weapon.properties.get("Escalation X"))
     props[PROP_RELOAD] = normalize_int(weapon.properties.get("Reload X"))
     props[PROP_STABILIZATION] = normalize_int(
@@ -1470,6 +1597,20 @@ def calculate_property_pairs(
         if prop_name != REROLL_PROPERTY
     }
     baseline_damage = BASELINE_DAMAGE_BY_RANK[rank]
+    base_melee = Weapon(
+        name=f"MELEE | DMG {baseline_damage} | BASELINE",
+        damage=baseline_damage,
+        weapon_type="melee",
+        properties={},
+        rank=rank,
+    )
+    base_ranged = Weapon(
+        name=f"RANGED | DMG {baseline_damage} | BASELINE",
+        damage=baseline_damage,
+        weapon_type="ranged",
+        properties={},
+        rank=rank,
+    )
     results: Dict[str, Dict[Tuple[str, str], Dict[str, float]]] = {}
     for weapon_type in ("melee", "ranged"):
         stats = baseline_stats.get(weapon_type)
@@ -1483,16 +1624,11 @@ def calculate_property_pairs(
             baseline_damage,
         )
         base_logit = logit(baseline_win_rate)
-        baseline_weapon = Weapon(
-            name=f"{weapon_type.upper()} | DMG {baseline_damage} | BASELINE",
-            damage=baseline_damage,
-            weapon_type=weapon_type,
-            properties={},
-            rank=rank,
-        )
 
         type_results: Dict[Tuple[str, str], Dict[str, float]] = {}
         property_names = properties_for_weapon_type(weapon_type)
+        test_weapons: List[Weapon] = []
+        pair_weapons: Dict[Tuple[str, str], Weapon] = {}
         for prop_a, prop_b in combinations(property_names, 2):
             props: Dict[str, object] = {}
             labels = []
@@ -1509,23 +1645,27 @@ def calculate_property_pairs(
                 properties=props,
                 rank=rank,
             )
+            test_weapons.append(test_weapon)
+            pair_weapons[pair_key] = test_weapon
 
+        win_rates = {}
+        if test_weapons:
             progress_label = None
             if should_show_progress(simulations, show_progress):
-                progress_label = f"{weapon_type.title()} | {labels[0]} + {labels[1]}"
-            stats = run_matchup(
-                test_weapon,
-                baseline_weapon,
-                rank=rank,
-                simulations=simulations,
-                scenario=scenario,
-                progress_label=progress_label,
-                show_progress=show_progress,
-                track_rounds=False,
-                pool=pool,
+                progress_label = f"{weapon_type.title()} pairs"
+            win_rates = run_vs_world_batch(
+                test_weapons,
+                base_melee,
+                base_ranged,
+                rank,
+                simulations,
+                pool,
+                show_progress,
+                progress_label or f"Rank {rank} {weapon_type.title()} pairs",
             )
-            total = max(stats["weapon1_wins"] + stats["weapon2_wins"], 1)
-            win_rate = stats["weapon1_wins"] / total
+
+        for pair_key, test_weapon in pair_weapons.items():
+            win_rate = win_rates[test_weapon.name]
             raw_delta = win_rate - baseline_win_rate
             rounded_delta = round_to_half_percent(raw_delta)
             rounded_win_rate = clamp_prob(baseline_win_rate + rounded_delta)
@@ -1533,8 +1673,9 @@ def calculate_property_pairs(
             cost_pair = round(
                 interpolate_damage_equivalent(delta_logit, calibration), 2
             )
-            cost_a = resolve_property_cost(labels[0], weapon_type, property_costs)
-            cost_b = resolve_property_cost(labels[1], weapon_type, property_costs)
+            label_a, label_b = pair_key
+            cost_a = resolve_property_cost(label_a, weapon_type, property_costs)
+            cost_b = resolve_property_cost(label_b, weapon_type, property_costs)
             dop_cost = round(cost_pair - (cost_a + cost_b), 2)
 
             type_results[pair_key] = {
@@ -1604,6 +1745,20 @@ def calculate_property_triples(
         if prop_name != REROLL_PROPERTY
     }
     baseline_damage = BASELINE_DAMAGE_BY_RANK[rank]
+    base_melee = Weapon(
+        name=f"MELEE | DMG {baseline_damage} | BASELINE",
+        damage=baseline_damage,
+        weapon_type="melee",
+        properties={},
+        rank=rank,
+    )
+    base_ranged = Weapon(
+        name=f"RANGED | DMG {baseline_damage} | BASELINE",
+        damage=baseline_damage,
+        weapon_type="ranged",
+        properties={},
+        rank=rank,
+    )
     results: Dict[str, Dict[Tuple[str, str, str], Dict[str, float]]] = {}
     for weapon_type in ("melee", "ranged"):
         stats = baseline_stats.get(weapon_type)
@@ -1617,16 +1772,11 @@ def calculate_property_triples(
             baseline_damage,
         )
         base_logit = logit(baseline_win_rate)
-        baseline_weapon = Weapon(
-            name=f"{weapon_type.upper()} | DMG {baseline_damage} | BASELINE",
-            damage=baseline_damage,
-            weapon_type=weapon_type,
-            properties={},
-            rank=rank,
-        )
 
         type_results: Dict[Tuple[str, str, str], Dict[str, float]] = {}
         property_names = properties_for_weapon_type(weapon_type)
+        test_weapons: List[Weapon] = []
+        triple_weapons: Dict[Tuple[str, str, str], Weapon] = {}
         for combo in combinations(property_names, 3):
             props: Dict[str, object] = {}
             labels = []
@@ -1643,23 +1793,27 @@ def calculate_property_triples(
                 properties=props,
                 rank=rank,
             )
+            test_weapons.append(test_weapon)
+            triple_weapons[triple_key] = test_weapon
 
+        win_rates = {}
+        if test_weapons:
             progress_label = None
             if should_show_progress(simulations, show_progress):
-                progress_label = f"{weapon_type.title()} | {' + '.join(labels)}"
-            stats = run_matchup(
-                test_weapon,
-                baseline_weapon,
-                rank=rank,
-                simulations=simulations,
-                scenario=scenario,
-                progress_label=progress_label,
-                show_progress=show_progress,
-                track_rounds=False,
-                pool=pool,
+                progress_label = f"{weapon_type.title()} triples"
+            win_rates = run_vs_world_batch(
+                test_weapons,
+                base_melee,
+                base_ranged,
+                rank,
+                simulations,
+                pool,
+                show_progress,
+                progress_label or f"Rank {rank} {weapon_type.title()} triples",
             )
-            total = max(stats["weapon1_wins"] + stats["weapon2_wins"], 1)
-            win_rate = stats["weapon1_wins"] / total
+
+        for triple_key, test_weapon in triple_weapons.items():
+            win_rate = win_rates[test_weapon.name]
             raw_delta = win_rate - baseline_win_rate
             rounded_delta = round_to_half_percent(raw_delta)
             rounded_win_rate = clamp_prob(baseline_win_rate + rounded_delta)
@@ -1669,7 +1823,7 @@ def calculate_property_triples(
             )
             base_cost_sum = sum(
                 resolve_property_cost(label, weapon_type, property_costs)
-                for label in labels
+                for label in triple_key
             )
             dop_cost = round(cost_triple - base_cost_sum, 2)
 
@@ -1838,26 +1992,31 @@ def calculate_property_costs(
         if prop_name not in SIMULATED_PROPERTIES and prop_name != REROLL_PROPERTY
     }
 
+    # Prepare baseline weapons
+    base_melee = Weapon(
+        name=f"MELEE | DMG {baseline_damage} | BASELINE",
+        damage=baseline_damage,
+        weapon_type="melee",
+        properties={},
+        rank=rank,
+    )
+    base_ranged = Weapon(
+        name=f"RANGED | DMG {baseline_damage} | BASELINE",
+        damage=baseline_damage,
+        weapon_type="ranged",
+        properties={},
+        rank=rank,
+    )
+
+    # Collect all test weapons
+    test_weapons_map = {} # (weapon_type, prop_key) -> Weapon
+    all_test_weapons = []
+
     property_costs: Dict[str, Dict[str, Optional[float]]] = {}
     for weapon_type in ("melee", "ranged"):
         stats = baseline_stats.get(weapon_type)
         if not stats:
             continue
-        baseline_win_rate = stats.get("baseline_win_rate", 0.5)
-        damage_deltas = stats.get("damage_win_rate", {})
-        calibration = build_logit_calibration(
-            baseline_win_rate,
-            damage_deltas,
-            baseline_damage,
-        )
-        base_logit = logit(baseline_win_rate)
-        baseline_weapon = Weapon(
-            name=f"{weapon_type.upper()} | DMG {baseline_damage} | BASELINE",
-            damage=baseline_damage,
-            weapon_type=weapon_type,
-            properties={},
-            rank=rank,
-        )
 
         type_costs: Dict[str, Dict[str, Optional[float]]] = {}
         for prop_name in properties_for_weapon_type(weapon_type):
@@ -1874,30 +2033,59 @@ def calculate_property_costs(
                 }
                 continue
 
+            type_costs[prop_key] = {
+                "cost": None,
+                "delta_win_rate": None,
+            }
             test_weapon = Weapon(
-                name=f"{weapon_type.upper()} | {prop_name} | DMG {baseline_damage}",
+                name=f"{weapon_type.upper()} | {prop_key} | DMG {baseline_damage}",
                 damage=baseline_damage,
                 weapon_type=weapon_type,
                 properties={prop_name: prop_setting},
                 rank=rank,
             )
+            test_weapons_map[(weapon_type, prop_key)] = test_weapon
+            all_test_weapons.append(test_weapon)
+        
+        property_costs[weapon_type] = type_costs
 
-            progress_label = None
-            if should_show_progress(simulations, show_progress):
-                progress_label = f"{weapon_type.title()} | {prop_key}"
-            stats = run_matchup(
-                test_weapon,
-                baseline_weapon,
-                rank=rank,
-                simulations=simulations,
-                scenario=scenario,
-                progress_label=progress_label,
-                show_progress=show_progress,
-                track_rounds=False,
-                pool=pool,
-            )
-            total = max(stats["weapon1_wins"] + stats["weapon2_wins"], 1)
-            win_rate = stats["weapon1_wins"] / total
+    # Run batch simulations
+    win_rates = run_vs_world_batch(
+        all_test_weapons,
+        base_melee,
+        base_ranged,
+        rank,
+        simulations,
+        pool,
+        show_progress,
+        f"Rank {rank} Properties"
+    )
+
+    # Process results
+    for weapon_type in ("melee", "ranged"):
+        stats = baseline_stats.get(weapon_type)
+        if not stats:
+            continue
+        baseline_win_rate = stats.get("baseline_win_rate", 0.5)
+        damage_deltas = stats.get("damage_win_rate", {})
+        calibration = build_logit_calibration(
+            baseline_win_rate,
+            damage_deltas,
+            baseline_damage,
+        )
+        base_logit = logit(baseline_win_rate)
+        
+        type_costs = property_costs[weapon_type]
+        
+        for prop_key, entry in type_costs.items():
+            # Skip if already set (no_effect_props)
+            if entry.get("delta_win_rate") is not None or entry.get("cost") is not None:
+                continue
+            weapon = test_weapons_map.get((weapon_type, prop_key))
+            if weapon is None:
+                continue
+            win_rate = win_rates[weapon.name]
+            
             raw_delta = win_rate - baseline_win_rate
             rounded_delta = round_to_half_percent(raw_delta)
             rounded_win_rate = clamp_prob(baseline_win_rate + rounded_delta)
@@ -1907,8 +2095,6 @@ def calculate_property_costs(
                 "cost": round(damage_equivalent, 2),
                 "delta_win_rate": rounded_delta,
             }
-
-        property_costs[weapon_type] = type_costs
 
     return property_costs
 
@@ -2273,20 +2459,20 @@ def run_matchup(
     use_pool = bool(scenario_pool)
 
     if use_pool:
-        scenario_candidates, scenario_weights = build_scenario_sampler(
-            weapon2.weapon_type, scenario_pool
-        )
+        key = matchup_key(weapon1.weapon_type, weapon2.weapon_type)
+        scenario_candidates, scenario_weights = build_scenario_sampler(key, scenario_pool)
     else:
         scenario_candidates, scenario_weights = [], []
 
 
+    params = RANK_PARAMS[rank]
+    speed = float(params["speed"])
+
     if use_numba and NUMBA_AVAILABLE and not track_rounds:
-        params = RANK_PARAMS[rank]
         base_hp = params["hp"]
         dice = params["dice"]
         skill = params["skill"]
         defense = params["defense"]
-        speed = float(params["speed"])
         weapon_props, weapon_ranges = build_matchup_props(weapon1, weapon2)
         w1_wins = 0
         w2_wins = 0
@@ -2307,9 +2493,7 @@ def run_matchup(
                 simulations,
                 DEFAULT_MAX_ROUNDS,
                 0,
-               float(scenario.initial_distance),
-                scenario.allow_ranged_retreat,
-                DEFAULT_MAX_RETREAT_ROUNDS,
+                float(scenario.initial_distance),
                 False,
                 None,
                 True,
@@ -2324,15 +2508,7 @@ def run_matchup(
             }
 
         # Pool enabled: sample counts without building a length-N scenario list.
-        import numpy as np
-        weights = np.asarray(scenario_weights, dtype=np.float64)
-        w_sum = float(weights.sum())
-        if w_sum <= 0.0:
-            probs = np.full_like(weights, 1.0 / len(weights))
-        else:
-            probs = weights / w_sum
-
-        counts = np.random.default_rng().multinomial(simulations, probs)
+        counts = multinomial_counts(simulations, scenario_weights)
 
         for scenario_option, count in zip(scenario_candidates, counts):
             if count <= 0:
@@ -2349,9 +2525,7 @@ def run_matchup(
                 int(count),
                 DEFAULT_MAX_ROUNDS,
                 start_index,
-                float(scenario_option.initial_distance),
-                scenario.allow_ranged_retreat,
-                DEFAULT_MAX_RETREAT_ROUNDS,
+                float(scenario_option.distance_mult) * speed,
                 False,
                 None,
                 True,
@@ -2403,7 +2577,7 @@ def run_matchup(
             scenario_choice = random.choices(
                 scenario_candidates, weights=scenario_weights, k=1
             )[0]
-            sim.initial_distance = scenario_choice.initial_distance
+            sim.initial_distance = float(scenario_choice.distance_mult) * speed
         else:
             sim.initial_distance = scenario.initial_distance
 
@@ -2477,6 +2651,77 @@ def run_matchup_batch(
         progress_label="Batch matchups",
         show_progress=show_progress,
     )
+
+
+def _normalized_opponent_weights() -> Tuple[float, float]:
+    """Return (p_melee, p_ranged) normalized from DEFAULT_OPPONENT_TYPE_WEIGHTS."""
+    w_m = float(DEFAULT_OPPONENT_TYPE_WEIGHTS.get("melee", 0.0))
+    w_r = float(DEFAULT_OPPONENT_TYPE_WEIGHTS.get("ranged", 0.0))
+    total = w_m + w_r
+    if total <= 0.0:
+        return 0.5, 0.5
+    return w_m / total, w_r / total
+
+
+def run_vs_world_batch(
+    test_weapons: List[Weapon],
+    baseline_melee: Weapon,
+    baseline_ranged: Weapon,
+    rank: int,
+    simulations: int,
+    pool: Optional[SimulationPool],
+    show_progress: bool,
+    progress_label: str,
+) -> Dict[str, float]:
+    """
+    Runs a batch of simulations for multiple weapons against the 'World' (weighted mix of opponents).
+    Returns a dictionary mapping weapon.name -> win_rate.
+    """
+    p_melee, p_ranged = _normalized_opponent_weights()
+    sims_m = int(round(simulations * p_melee))
+    sims_r = max(simulations - sims_m, 0)
+    
+    # We use a dummy Scenario for the required argument; pooled runs sample from DEFAULT_SCENARIO_OPTIONS.
+    dummy_scenario = MELEE_BASELINE_SCENARIO
+
+    tasks = []
+    # For each test weapon, we schedule two matchups: vs Melee Baseline and vs Ranged Baseline
+    for wp in test_weapons:
+        # Task 0: vs Melee
+        if sims_m > 0:
+            tasks.append(BatchTask(
+                args=(wp, baseline_melee, rank, sims_m, dummy_scenario),
+                kwargs={"track_rounds": False, "parallel": False, "pool": None}
+            ))
+        # Task 1: vs Ranged
+        if sims_r > 0:
+            tasks.append(BatchTask(
+                args=(wp, baseline_ranged, rank, sims_r, dummy_scenario),
+                kwargs={"track_rounds": False, "parallel": False, "pool": None}
+            ))
+
+    results = batch_map(run_matchup, tasks, pool=pool, progress_label=progress_label, show_progress=show_progress)
+    
+    # Aggregate results
+    win_rates = {}
+    idx = 0
+    for wp in test_weapons:
+        wins = 0
+        total = 0
+        if sims_m > 0:
+            res = results[idx]
+            wins += res["weapon1_wins"]
+            total += (res["weapon1_wins"] + res["weapon2_wins"])
+            idx += 1
+        if sims_r > 0:
+            res = results[idx]
+            wins += res["weapon1_wins"]
+            total += (res["weapon1_wins"] + res["weapon2_wins"])
+            idx += 1
+        
+        win_rates[wp.name] = wins / max(total, 1)
+        
+    return win_rates
 
 
 def _run_matchup_chunk(
@@ -2691,39 +2936,39 @@ def recalc_base_values_for_rank(
     print(f"Simulations per scenario: {simulations}")
     print(f"Baseline damage: {baseline_damage}")
     print()
-    print("Scenarios:")
-    for weapon_type, baseline_scenario in scenarios.items():
-        distance = baseline_scenario.initial_distance
-        print(f"  {weapon_type.title()} baseline → {distance:.1f}m")
-    print()
+    print("Opponent Pool: Weighted mix of Melee and Ranged scenarios.")
+    
+    # Prepare baseline weapons
+    base_melee = get_simple_weapon(weapons, "melee", baseline_damage, current_rank)
+    base_ranged = get_simple_weapon(weapons, "ranged", baseline_damage, current_rank)
+    
+    # Prepare all test weapons (for all damage values and types)
+    all_test_weapons = []
+    for weapon_type in ("melee", "ranged"):
+        # Baseline for this type
+        all_test_weapons.append(get_simple_weapon(weapons, weapon_type, baseline_damage, current_rank))
+        # Damage variants
+        for damage in damage_values:
+            if damage == baseline_damage:
+                continue
+            all_test_weapons.append(get_simple_weapon(weapons, weapon_type, damage, current_rank))
+
+    # Run all simulations in one batch
+    win_rates = run_vs_world_batch(
+        all_test_weapons, 
+        base_melee, 
+        base_ranged, 
+        current_rank, 
+        simulations, 
+        pool, 
+        show_progress, 
+        f"Rank {current_rank} Base Values"
+    )
 
     results: Dict[str, Dict[str, object]] = {}
     for weapon_type in ("melee", "ranged"):
-        baseline_scenario = scenarios.get(weapon_type)
-        if baseline_scenario is None:
-            continue
-        baseline_weapon = get_simple_weapon(
-            weapons, weapon_type, baseline_damage, current_rank
-        )
-
-        progress_label = None
-        if should_show_progress(simulations, show_progress):
-            progress_label = (
-                f"Rank {current_rank} | {weapon_type.title()} baseline"
-            )
-        stats = run_matchup(
-            baseline_weapon,
-            baseline_weapon,
-            rank=current_rank,
-            simulations=simulations,
-            scenario=baseline_scenario,
-            progress_label=progress_label,
-            show_progress=show_progress,
-            track_rounds=False,
-            pool=pool,
-        )
-        total = max(stats["weapon1_wins"] + stats["weapon2_wins"], 1)
-        baseline_win_rate = stats["weapon1_wins"] / total
+        base_w_name = get_simple_weapon(weapons, weapon_type, baseline_damage, current_rank).name
+        baseline_win_rate = win_rates[base_w_name]
 
         print(f"Baseline win rate ({weapon_type}): {baseline_win_rate*100:.1f}%")
         print()
@@ -2737,27 +2982,9 @@ def recalc_base_values_for_rank(
         for damage in damage_values:
             if damage == baseline_damage:
                 continue
-            test_weapon = get_simple_weapon(
-                weapons, weapon_type, damage, current_rank
-            )
-            scenario_label = None
-            if should_show_progress(simulations, show_progress):
-                scenario_label = (
-                    f"Rank {current_rank} | {weapon_type.title()} DMG {damage}"
-                )
-            stats = run_matchup(
-                test_weapon,
-                baseline_weapon,
-                rank=current_rank,
-                simulations=simulations,
-                scenario=baseline_scenario,
-                progress_label=scenario_label,
-                show_progress=show_progress,
-                track_rounds=False,
-                pool=pool,
-            )
-            total = max(stats["weapon1_wins"] + stats["weapon2_wins"], 1)
-            win_rate = stats["weapon1_wins"] / total
+            
+            w_name = get_simple_weapon(weapons, weapon_type, damage, current_rank).name
+            win_rate = win_rates[w_name]
             diff_rate = win_rate - baseline_win_rate
             damage_deltas[damage] = diff_rate
             print(
@@ -2765,8 +2992,9 @@ def recalc_base_values_for_rank(
             )
         print()
 
+        # Note: initial_distance is less relevant with pool, but we keep the structure
         results[weapon_type] = {
-            "initial_distance": baseline_scenario.initial_distance,
+            "initial_distance": 0.0, 
             "baseline_win_rate": baseline_win_rate,
             "damage_win_rate": damage_deltas,
         }
@@ -2978,7 +3206,6 @@ if __name__ == "__main__":
     base_scenario = Scenario(
         name="15m | retreat: N",
         initial_distance=15,
-        allow_ranged_retreat=False,
     )
 
     ranks_to_process = expand_ranks(rank_input)

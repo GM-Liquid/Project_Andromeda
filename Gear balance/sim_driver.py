@@ -115,7 +115,6 @@ def main():
     base_scenario = ws.Scenario(
         name="15m | retreat: N",
         initial_distance=15,
-        allow_ranged_retreat=False,
     )
 
     ranks_to_process = ws.expand_ranks(rank_input)
