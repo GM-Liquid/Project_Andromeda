@@ -1,4 +1,4 @@
-"""
+﻿"""
 Shared acceleration helpers for Gear balance simulations.
 """
 
@@ -559,6 +559,9 @@ if NUMBA_AVAILABLE:
         skill,
         defense,
         rank,
+        damage_total,
+        action_spent_total,
+        track_action_damage,
     ):
         w_idx = weapon_idx[att]
         if w_props[w_idx, PROP_RELOAD] > 0 and reload_required[att] == 1:
@@ -582,6 +585,8 @@ if NUMBA_AVAILABLE:
 
         if damage > 0:
             hp[target] -= damage
+            if track_action_damage != 0:
+                damage_total[weapon_idx[att]] += damage
             if hit == 1:
                 _apply_status_on_hit(
                     att,
@@ -621,6 +626,9 @@ if NUMBA_AVAILABLE:
         skill,
         defense,
         rank,
+        damage_total,
+        action_spent_total,
+        track_action_damage,
     ):
         w_idx = weapon_idx[att]
         if w_props[w_idx, PROP_AGGRESSIVE] <= 0:
@@ -651,6 +659,9 @@ if NUMBA_AVAILABLE:
             skill,
             defense,
             rank,
+            damage_total,
+            action_spent_total,
+            track_action_damage,
         )
 
     @njit(cache=True)
@@ -675,6 +686,9 @@ if NUMBA_AVAILABLE:
         skill,
         defense,
         rank,
+        damage_total,
+        action_spent_total,
+        track_action_damage,
     ):
         if actions[att] <= 0:
             return
@@ -683,9 +697,15 @@ if NUMBA_AVAILABLE:
 
         if w_props[w_idx, PROP_RELOAD] > 0 and reload_required[att] == 1:
             actions[att] -= 1
+            if track_action_damage != 0:
+                action_spent_total[weapon_idx[att]] += 1
             reload_required[att] = 0
             shots[att] = 0
             return
+
+        actions[att] -= 1
+        if track_action_damage != 0:
+            action_spent_total[weapon_idx[att]] += 1
 
         hit, damage, shot_fired = _roll_attack(
             att,
@@ -705,6 +725,8 @@ if NUMBA_AVAILABLE:
 
         if damage > 0:
             hp[target] -= damage
+            if track_action_damage != 0:
+                damage_total[weapon_idx[att]] += damage
             if hit == 1:
                 _apply_status_on_hit(
                     att,
@@ -743,6 +765,9 @@ if NUMBA_AVAILABLE:
                         skill,
                         defense,
                         rank,
+                        damage_total,
+                        action_spent_total,
+                        track_action_damage,
                     )
                     if hp[att] <= 0:
                         return
@@ -780,11 +805,12 @@ if NUMBA_AVAILABLE:
                 skill,
                 defense,
                 rank,
+                damage_total,
+                action_spent_total,
+                track_action_damage,
             )
             if hp[att] <= 0:
                 return
-
-        actions[att] -= 1
 
 
     @njit(cache=True)
@@ -802,11 +828,14 @@ if NUMBA_AVAILABLE:
         start_index: int,
         initial_distance: float,
         seed: int,
-    ) -> Tuple[int, int, int]:
+        track_action_damage: int,
+    ) -> Tuple[int, int, int, float, float, int, int]:
         np.random.seed(seed)
         w1_wins = 0
         w2_wins = 0
         total_rounds = 0
+        damage_total = np.zeros(2, dtype=np.float64)
+        action_spent_total = np.zeros(2, dtype=np.int64)
 
         hp = np.empty(2, dtype=np.float64)
         actions = np.empty(2, dtype=np.int32)
@@ -866,8 +895,12 @@ if NUMBA_AVAILABLE:
 
                 if bleed[0] > 0:
                     hp[0] -= 1
+                    if track_action_damage != 0:
+                        damage_total[weapon_idx[1]] += 1.0
                 if bleed[1] > 0:
                     hp[1] -= 1
+                    if track_action_damage != 0:
+                        damage_total[weapon_idx[0]] += 1.0
 
                 if hp[0] <= 0 or hp[1] <= 0:
                     break
@@ -928,6 +961,8 @@ if NUMBA_AVAILABLE:
                             dash_actions = actions[0]
                         if dash_actions > 0:
                             actions[0] -= dash_actions
+                            if track_action_damage != 0:
+                                action_spent_total[weapon_idx[0]] += dash_actions
                             moved[0] = 1
                             dash_close += eff_speed_0 * dash_actions
 
@@ -939,6 +974,8 @@ if NUMBA_AVAILABLE:
                             dash_actions = actions[1]
                         if dash_actions > 0:
                             actions[1] -= dash_actions
+                            if track_action_damage != 0:
+                                action_spent_total[weapon_idx[1]] += dash_actions
                             moved[1] = 1
                             dash_close += eff_speed_1 * dash_actions
 
@@ -978,6 +1015,9 @@ if NUMBA_AVAILABLE:
                                     skill,
                                     defense,
                                     rank,
+                                    damage_total,
+                                    action_spent_total,
+                                    track_action_damage,
                                 )
 
                 while actions[0] > 0 and hp[0] > 0 and hp[1] > 0:
@@ -1002,6 +1042,9 @@ if NUMBA_AVAILABLE:
                         skill,
                         defense,
                         rank,
+                        damage_total,
+                        action_spent_total,
+                        track_action_damage,
                     )
 
                 if hp[0] > 0 and hp[1] > 0:
@@ -1026,6 +1069,9 @@ if NUMBA_AVAILABLE:
                         skill,
                         defense,
                         rank,
+                        damage_total,
+                        action_spent_total,
+                        track_action_damage,
                     )
 
                 while actions[1] > 0 and hp[0] > 0 and hp[1] > 0:
@@ -1050,6 +1096,9 @@ if NUMBA_AVAILABLE:
                         skill,
                         defense,
                         rank,
+                        damage_total,
+                        action_spent_total,
+                        track_action_damage,
                     )
 
                 if hp[0] > 0 and hp[1] > 0:
@@ -1074,6 +1123,9 @@ if NUMBA_AVAILABLE:
                         skill,
                         defense,
                         rank,
+                        damage_total,
+                        action_spent_total,
+                        track_action_damage,
                     )
 
                 if hp[0] <= 0 or hp[1] <= 0:
@@ -1106,7 +1158,15 @@ if NUMBA_AVAILABLE:
                 else:
                     w1_wins += 1
 
-        return w1_wins, w2_wins, total_rounds
+        return (
+            w1_wins,
+            w2_wins,
+            total_rounds,
+            damage_total[0],
+            damage_total[1],
+            int(action_spent_total[0]),
+            int(action_spent_total[1]),
+        )
 
 else:
 
@@ -1124,7 +1184,8 @@ else:
         start_index: int,
         initial_distance: float,
         seed: int,
-    ) -> Tuple[int, int, int]:
+        track_action_damage: int,
+    ) -> Tuple[int, int, int, float, float, int, int]:
         raise RuntimeError("Numba is not available.")
 
 
@@ -1144,13 +1205,22 @@ def full_matchup_chunk(
     track_rounds: bool,
     seed: Optional[int],
     use_numba: bool = True,
-) -> Tuple[int, int, List[int], List[int], int]:
+    track_action_damage: bool = False,
+) -> Tuple[int, int, List[int], List[int], int, float, float, int, int]:
     if use_numba and NUMBA_AVAILABLE and not track_rounds:
         if seed is None:
             seed = random.randrange(1, 2**31)
         w_props = np.asarray(weapon_props, dtype=np.float64)
         w_range = np.asarray(weapon_range, dtype=np.float64)
-        w1_wins, w2_wins, total_rounds = _full_matchup_numba(
+        (
+            w1_wins,
+            w2_wins,
+            total_rounds,
+            w1_damage,
+            w2_damage,
+            w1_attacks,
+            w2_attacks,
+        ) = _full_matchup_numba(
             w_props,
             w_range,
             dice,
@@ -1164,7 +1234,19 @@ def full_matchup_chunk(
             start_index,
             initial_distance,
             seed,
+            1 if track_action_damage else 0,
         )
-        return w1_wins, w2_wins, [], [], total_rounds
+        return (
+            w1_wins,
+            w2_wins,
+            [],
+            [],
+            total_rounds,
+            float(w1_damage),
+            float(w2_damage),
+            int(w1_attacks),
+            int(w2_attacks),
+        )
 
     raise RuntimeError("Full matchup requires Numba and track_rounds=False.")
+

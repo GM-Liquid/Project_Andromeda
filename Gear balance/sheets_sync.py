@@ -5,6 +5,7 @@ from pathlib import Path
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
+from sim_rules import CONTROL_PROPERTIES
 
 
 def load_config():
@@ -55,15 +56,33 @@ def build_property_rows(data, rank_order, types, order_mode):
                         continue
                     seen.add(prop_name)
                     properties.append(prop_name)
+    damage_properties = [name for name in properties if not is_control_property_label(name)]
+    control_properties = [name for name in properties if is_control_property_label(name)]
+
+    total_cols = 1 + (len(rank_order) * len(types))
     rows = []
-    for prop_name in properties:
+
+    for prop_name in damage_properties:
         row = [prop_name]
         for rank in rank_order:
             rank_data = data.get(str(rank), {}).get("property_costs", {})
             for prop_type in types:
                 cost_entry = rank_data.get(prop_type, {}).get(prop_name)
-                row.append("" if cost_entry is None else cost_entry.get("cost", ""))
+                row.append(get_property_value(cost_entry, use_prevention=False))
         rows.append(row)
+
+    if control_properties:
+        rows.append([""] * total_cols)
+
+    for prop_name in control_properties:
+        row = [prop_name]
+        for rank in rank_order:
+            rank_data = data.get(str(rank), {}).get("property_costs", {})
+            for prop_type in types:
+                cost_entry = rank_data.get(prop_type, {}).get(prop_name)
+                row.append(get_property_value(cost_entry, use_prevention=True))
+        rows.append(row)
+
     return rows
 
 
@@ -74,6 +93,30 @@ def property_label_sort_key(label):
         base = match.group(1).strip().lower()
         return (base, 0, int(match.group(2)))
     return (text.lower(), 1, 0)
+
+
+CONTROL_PROPERTY_LABELS = {
+    name[:-2] if name.endswith(" X") else name for name in CONTROL_PROPERTIES
+}
+
+
+def is_control_property_label(label):
+    text = str(label).strip()
+    match = re.match(r"^(.*?)(?:\s+(-?\d+))$", text)
+    base = match.group(1).strip() if match else text
+    return base in CONTROL_PROPERTY_LABELS
+
+
+def get_property_value(cost_entry, use_prevention):
+    if cost_entry is None:
+        return ""
+    if isinstance(cost_entry, dict):
+        key = "damage_prevention" if use_prevention else "cost"
+        value = cost_entry.get(key)
+        return "" if value is None else value
+    if use_prevention:
+        return ""
+    return cost_entry
 
 
 def load_dotenv(paths):
