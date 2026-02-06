@@ -1,6 +1,7 @@
-import weapons_sim as ws
-from datetime import datetime
 from typing import Dict
+
+import sheets_sync
+import weapons_sim as ws
 
 
 def prompt_action() -> int:
@@ -8,16 +9,17 @@ def prompt_action() -> int:
     print("What do you want to do?")
     print("1) Recalculate base values (damage only)")
     print("2) Recalculate 1-property values")
-    print("3) Recalculate 2-property combos")
-    print("4) Recalculate property matchups")
-    print("5) Recalculate everything")
-    print("6) Recalculate 3-property triples")
-    print("7) Run custom duel simulation")
+    print("3) Recalculate 1-property values (X 1-10 batch)")
+    print("4) Recalculate 2-property combos")
+    print("5) Recalculate property matchups")
+    print("6) Recalculate everything")
+    print("7) Recalculate 3-property triples")
+    print("8) Run custom duel simulation")
     while True:
-        raw = input("Choose 1-7: ").strip().lower()
-        if raw in ("1", "2", "3", "4", "5", "6", "7"):
+        raw = input("Choose 1-8: ").strip().lower()
+        if raw in ("1", "2", "3", "4", "5", "6", "7", "8"):
             return int(raw)
-        print("Enter 1-7.")
+        print("Enter 1-8.")
 
 
 def prompt_weapon_class(label: str) -> str:
@@ -30,13 +32,13 @@ def prompt_weapon_class(label: str) -> str:
         print("Enter melee or ranged.")
 
 
-def prompt_weapon_damage(label: str) -> int:
+def prompt_weapon_damage(label: str) -> float:
     while True:
-        raw = input(f"{label} weapon damage (integer): ").strip()
+        raw = input(f"{label} weapon damage (number): ").strip()
         try:
-            value = int(raw)
+            value = float(raw)
         except ValueError:
-            print("Enter a whole number.")
+            print("Enter a number.")
             continue
         if value <= 0:
             print("Must be positive.")
@@ -68,18 +70,33 @@ def main():
     task_map = {
         1: ("base",),
         2: ("props",),
-        3: ("pairs",),
-        4: ("matchups",),
-        5: ("base", "props", "pairs", "matchups", "triples"),
-        6: ("triples",),
-        7: ("custom",),
+        3: ("props_batch",),
+        4: ("pairs",),
+        5: ("matchups",),
+        6: ("base", "props", "pairs", "matchups", "triples"),
+        7: ("triples",),
+        8: ("custom",),
     }
     tasks = task_map[action]
 
-    rank_input = ws.prompt_rank("Character rank? (1-4 or all): ", allow_all=True)
-    x_value = ws.prompt_int("Value of X for properties? ", 1)
-    accuracy_confidence = ws.prompt_accuracy("Desired accuracy % (e.g., 95, 99): ")
-    rerolls = ws.prompt_int("Number of rerolls? (0+): ", 0)
+    rank_input = None
+    x_value = None
+    x_values = None
+    needs_batch_settings = any(task != "custom" for task in tasks)
+    if needs_batch_settings:
+        rank_input = ws.prompt_rank(
+            "Character rank? (1-4 or all): ",
+            allow_all=True,
+        )
+        if "props_batch" in tasks:
+            x_values = list(range(1, 11))
+        else:
+            x_value = ws.prompt_int("Value of X for properties? ", 1)
+        accuracy_confidence = ws.prompt_accuracy(
+            "Desired accuracy % (e.g., 95, 99): "
+        )
+    else:
+        accuracy_confidence = 0.99
 
     simulations_per_scenario = ws.required_simulations_for_accuracy(
         margin=ws.TARGET_MARGIN,
@@ -102,7 +119,7 @@ def main():
     )
     if "base" in tasks:
         print("Base values ignore rerolls; using 0.")
-    if "props" in tasks:
+    if "props" in tasks or "props_batch" in tasks:
         print("Property values ignore rerolls; using 0.")
 
     show_progress = ws.prompt_yes_no("Show simulation progress? (y/n): ")
@@ -117,7 +134,7 @@ def main():
         initial_distance=15,
     )
 
-    ranks_to_process = ws.expand_ranks(rank_input)
+    ranks_to_process = ws.expand_ranks(rank_input) if needs_batch_settings else []
 
     try:
         base_values_data = None
@@ -134,23 +151,49 @@ def main():
             )
             ws.write_base_values(base_values_data)
             print()
-            print("Base values saved to base_values.py (rounded to 0.5%).")
+            print(
+                f"Base values saved to {ws.BASE_VALUES_PATH.name} (rounded to 0.5%)."
+            )
 
         if "props" in tasks:
-            if base_values_data is None:
-                base_values_data = ws.load_base_values()
-            property_values_data = ws.recalc_property_values_for_ranks(
+            property_values_data = ws.recalc_property_values_v2_for_ranks(
                 ranks=ranks_to_process,
                 x_value=x_value,
                 simulations=simulations_per_scenario,
                 scenario=base_scenario,
                 show_progress=show_progress,
                 pool=pool,
-                base_values_data=base_values_data,
             )
             ws.write_property_values(property_values_data)
             print()
-            print("Property values saved to property_values.py.")
+            print(f"Property values saved to {ws.PROPERTY_VALUES_PATH.name}.")
+            config = sheets_sync.load_config()
+            try:
+                sheets_sync.write_property_values(config)
+            except Exception as exc:
+                print(f"Failed to write property values to Google Sheet: {exc}")
+                raise
+            print("Property values written to Google Sheet.")
+
+        if "props_batch" in tasks:
+            property_values_data = ws.recalc_property_values_v2_for_ranks_multi_x(
+                ranks=ranks_to_process,
+                x_values=x_values or list(range(1, 11)),
+                simulations=simulations_per_scenario,
+                scenario=base_scenario,
+                show_progress=show_progress,
+                pool=pool,
+            )
+            ws.write_property_values(property_values_data)
+            print()
+            print(f"Property values saved to {ws.PROPERTY_VALUES_PATH.name}.")
+            config = sheets_sync.load_config()
+            try:
+                sheets_sync.write_property_values(config)
+            except Exception as exc:
+                print(f"Failed to write property values to Google Sheet: {exc}")
+                raise
+            print("Property values written to Google Sheet.")
 
         if "pairs" in tasks:
             if base_values_data is None:
@@ -169,7 +212,7 @@ def main():
             )
             ws.write_property_combos(pair_data)
             print()
-            print("Property pair costs saved to property_combos.py.")
+            print(f"Property pair costs saved to {ws.PROPERTY_COMBOS_PATH.name}.")
 
         if "matchups" in tasks:
             if base_values_data is None:
@@ -188,7 +231,7 @@ def main():
             )
             ws.write_property_matchups(matchup_data)
             print()
-            print("Property matchup data saved to property_matchups.py.")
+            print(f"Property matchup data saved to {ws.PROPERTY_MATCHUPS_PATH.name}.")
 
         if "triples" in tasks:
             if base_values_data is None:
@@ -207,13 +250,13 @@ def main():
             )
             ws.write_property_triples(triple_data)
             print()
-            print("Property triple costs saved to property_triples.py.")
+            print(f"Property triple costs saved to {ws.PROPERTY_TRIPLES_PATH.name}.")
 
         if "custom" in tasks:
             print()
             print("Custom duel simulation")
             custom_rank = rank_input
-            if custom_rank == "all":
+            if custom_rank is None or custom_rank == "all":
                 custom_rank = ws.prompt_rank("Custom duel rank? (1-4): ")
             custom_rank = int(custom_rank)
             weapon1_type = prompt_weapon_class("First")
@@ -250,23 +293,6 @@ def main():
             print(f"Weapon 1 win rate: {stats['weapon1_win_rate']*100:.2f}%")
             print(f"Weapon 2 win rate: {stats['weapon2_win_rate']*100:.2f}%")
             print(f"Average rounds: {stats['avg_rounds']:.2f}")
-            entry = {
-                "timestamp": datetime.utcnow().isoformat() + "Z",
-                "rank": custom_rank,
-                "scenario": base_scenario.name,
-                "scenario_distance": base_scenario.initial_distance,
-                "simulations": simulations_per_scenario,
-                "weapon1": ws.summarize_weapon_for_dump(weapon1),
-                "weapon2": ws.summarize_weapon_for_dump(weapon2),
-                "avg_rounds": stats["avg_rounds"],
-                "weapon1_win_rate": stats["weapon1_win_rate"],
-                "weapon2_win_rate": stats["weapon2_win_rate"],
-            }
-            ws.append_custom_simulation(entry)
-            print()
-            print(
-                f"Custom duel data appended to {ws.CUSTOM_SIMULATIONS_PATH.name}."
-            )
     finally:
         if pool is not None:
             pool.close()

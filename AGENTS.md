@@ -147,6 +147,7 @@ The `Gear balance/` folder is **not** part of the Foundry build. It is a local t
 - **Sync rule:** `Gear balance/weapons_sim.py` must include **all** properties from that CSV and **no extra** ones. If you add/remove/rename a property, update both files together.
 - **Naming:** Preserve the exact property names (including `X`/`Х` suffixes).
 - **Versioning:** Changes in `Gear balance/` **do not** require a `system.json` version bump.
+- **Simulation rules mirror:** If you change the base simulation rules (rolls, actions, reactions, statuses, movement, damage), update the rules description in `Gear balance/sim_rules.py` in the same change.
 
 Typical workflow:
 1. Edit the CSV to change/add/remove a property.

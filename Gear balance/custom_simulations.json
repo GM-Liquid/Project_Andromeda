@@ -64,5 +64,159 @@
     "avg_rounds": 4.759510316658879,
     "weapon1_win_rate": 0.48880917572231686,
     "weapon2_win_rate": 0.5111908242776831
+  },
+  {
+    "timestamp": "2026-02-02T23:30:42.677032Z",
+    "rank": 1,
+    "scenario": "15m | retreat: N",
+    "scenario_distance": 15,
+    "simulations": 108222,
+    "weapon1": {
+      "weapon_type": "melee",
+      "damage": 1.1,
+      "properties": {},
+      "rank": 1
+    },
+    "weapon2": {
+      "weapon_type": "ranged",
+      "damage": 1.0,
+      "properties": {},
+      "rank": 1
+    },
+    "avg_rounds": 4.508011310084826,
+    "weapon1_win_rate": 0.3956312025281366,
+    "weapon2_win_rate": 0.6043687974718635
+  },
+  {
+    "timestamp": "2026-02-02T23:31:32.311922Z",
+    "rank": 1,
+    "scenario": "15m | retreat: N",
+    "scenario_distance": 15,
+    "simulations": 108222,
+    "weapon1": {
+      "weapon_type": "melee",
+      "damage": 2.1,
+      "properties": {},
+      "rank": 1
+    },
+    "weapon2": {
+      "weapon_type": "ranged",
+      "damage": 2.0,
+      "properties": {},
+      "rank": 1
+    },
+    "avg_rounds": 3.39745153480808,
+    "weapon1_win_rate": 0.3615161427436196,
+    "weapon2_win_rate": 0.6384838572563805
+  },
+  {
+    "timestamp": "2026-02-02T23:36:48.706241Z",
+    "rank": 1,
+    "scenario": "15m | retreat: N",
+    "scenario_distance": 15,
+    "simulations": 108222,
+    "weapon1": {
+      "weapon_type": "melee",
+      "damage": 2.1,
+      "properties": {},
+      "rank": 1
+    },
+    "weapon2": {
+      "weapon_type": "ranged",
+      "damage": 2.0,
+      "properties": {},
+      "rank": 1
+    },
+    "avg_rounds": 3.4407883794422576,
+    "weapon1_win_rate": 0.46660568091515586,
+    "weapon2_win_rate": 0.5333943190848441
+  },
+  {
+    "timestamp": "2026-02-02T23:37:52.793228Z",
+    "rank": 1,
+    "scenario": "15m | retreat: N",
+    "scenario_distance": 15,
+    "simulations": 265396,
+    "weapon1": {
+      "weapon_type": "melee",
+      "damage": 2.2,
+      "properties": {},
+      "rank": 1
+    },
+    "weapon2": {
+      "weapon_type": "ranged",
+      "damage": 2.0,
+      "properties": {},
+      "rank": 1
+    },
+    "avg_rounds": 3.4393321677794693,
+    "weapon1_win_rate": 0.4709867518726733,
+    "weapon2_win_rate": 0.5290132481273266
+  },
+  {
+    "timestamp": "2026-02-02T23:38:56.986114Z",
+    "rank": 1,
+    "scenario": "15m | retreat: N",
+    "scenario_distance": 15,
+    "simulations": 153659,
+    "weapon1": {
+      "weapon_type": "melee",
+      "damage": 2.4,
+      "properties": {},
+      "rank": 1
+    },
+    "weapon2": {
+      "weapon_type": "ranged",
+      "damage": 2.0,
+      "properties": {},
+      "rank": 1
+    },
+    "avg_rounds": 3.3370905706792313,
+    "weapon1_win_rate": 0.5295231649301375,
+    "weapon2_win_rate": 0.4704768350698625
+  },
+  {
+    "timestamp": "2026-02-03T00:00:46.749928Z",
+    "rank": 1,
+    "scenario": "15m | retreat: N",
+    "scenario_distance": 15,
+    "simulations": 265396,
+    "weapon1": {
+      "weapon_type": "melee",
+      "damage": 2.3,
+      "properties": {},
+      "rank": 1
+    },
+    "weapon2": {
+      "weapon_type": "ranged",
+      "damage": 2.0,
+      "properties": {},
+      "rank": 1
+    },
+    "avg_rounds": 3.371245233537808,
+    "weapon1_win_rate": 0.5177395288549941,
+    "weapon2_win_rate": 0.4822604711450059
+  },
+  {
+    "timestamp": "2026-02-03T00:01:59.373519Z",
+    "rank": 1,
+    "scenario": "15m | retreat: N",
+    "scenario_distance": 15,
+    "simulations": 265396,
+    "weapon1": {
+      "weapon_type": "melee",
+      "damage": 2.25,
+      "properties": {},
+      "rank": 1
+    },
+    "weapon2": {
+      "weapon_type": "ranged",
+      "damage": 2.0,
+      "properties": {},
+      "rank": 1
+    },
+    "avg_rounds": 3.3691803945801744,
+    "weapon1_win_rate": 0.5150152978944671,
+    "weapon2_win_rate": 0.4849847021055329
   }
 ]

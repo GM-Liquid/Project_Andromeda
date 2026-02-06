@@ -1,0 +1,15 @@
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+COPY ["Gear balance/sim_rules.py", "/app/sim_rules.py"]
+COPY ["Gear balance/sim_accel.py", "/app/sim_accel.py"]
+COPY ["Gear balance/weapons_sim.py", "/app/weapons_sim.py"]
+COPY ["Gear balance/sheets_custom_duel_server.py", "/app/sheets_custom_duel_server.py"]
+
+EXPOSE 8080
+
+CMD ["python", "sheets_custom_duel_server.py", "--host", "0.0.0.0", "--port", "8080"]

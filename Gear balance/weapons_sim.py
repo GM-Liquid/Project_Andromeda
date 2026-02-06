@@ -8,6 +8,7 @@ import math
 import concurrent.futures
 import locale
 import os
+import re
 import sys
 import json
 from dataclasses import dataclass, field
@@ -16,9 +17,44 @@ from collections import Counter
 from itertools import combinations
 from typing import List, Dict, Set, Tuple, Optional
 import statistics
-import importlib
-
-import base_values
+from sim_rules import (
+    ACTIONS_PER_ROUND,
+    ARMOR_PIERCE_MIN_DAMAGE,
+    BASELINE_DAMAGE_BY_RANK,
+    BASELINE_SCENARIO_DEFS,
+    BLEED_DAMAGE_PER_ROUND,
+    DANGEROUS_SELF_DAMAGE,
+    DEFAULT_INITIAL_DISTANCE,
+    DEFAULT_MAX_ROUNDS,
+    DEFAULT_OPPONENT_TYPE_WEIGHTS,
+    DEFAULT_SCENARIO_OPTIONS_DEF,
+    DISTANCE_MAX,
+    DISTANCE_MIN,
+    EPSILON,
+    EXTREME_CONFIDENCE,
+    IMMOBILIZE_DURATION_ROUNDS,
+    MAGICAL_DEFENSE_DIVISOR,
+    MAX_DAMAGE_BY_RANK,
+    MELEE_BASE_RANGE,
+    MELEE_COVER_BONUS,
+    MIN_HIT_DAMAGE,
+    OPPORTUNITY_LEAVE_CHANCE,
+    PENETRATION_BONUS,
+    PROPERTY_DEFS,
+    PROPERTY_WEAPON_RESTRICTIONS,
+    RANGED_BASE_RANGE,
+    RANGED_RETREAT_SPEED_MULT,
+    RANK_PARAMS,
+    REACTION_AVAILABLE_DEFAULT,
+    REROLL_PROPERTY,
+    SIMULATED_PROPERTIES,
+    SLOW_DURATION_ROUNDS,
+    SLOW_SPEED_MULT,
+    STUN_ACTION_LOSS,
+    TARGET_MARGIN,
+    UTILITY_ACTION_PROPERTIES,
+    WEAPON_TYPES,
+)
 from sim_accel import (
     NUMBA_AVAILABLE,
     PARALLEL_MIN_SIMULATIONS,
@@ -56,95 +92,24 @@ from sim_accel import (
 # CONSTANTS
 # ============================================================================
 
-RANK_PARAMS = {
-    1: {"dice": 6, "skill": 1, "hp": 15, "defense": 5, "speed": 6},
-    2: {"dice": 8, "skill": 3, "hp": 20, "defense": 7, "speed": 9},
-    3: {"dice": 10, "skill": 6, "hp": 25, "defense": 11, "speed": 12},
-    4: {"dice": 12, "skill": 10, "hp": 30, "defense": 15, "speed": 15},
-}
-
-BASELINE_DAMAGE_BY_RANK = {
-    1: 2,
-    2: 3,
-    3: 5,
-    4: 10,
-}
-
-MAX_DAMAGE_BY_RANK = {
-    1: 4,
-    2: 6,
-    3: 10,
-    4: 20,
-}
-
-EPSILON = 1e-6
-TARGET_MARGIN = 0.0025  # +/- 0.25% absolute win-rate error
-EXTREME_CONFIDENCE = 0.999999  # "once in 1,000,000 runs" two-sided
-
-BASE_VALUES_PATH = Path(__file__).with_name("base_values.py")
-PROPERTY_VALUES_PATH = Path(__file__).with_name("property_values.py")
-PROPERTY_COMBOS_PATH = Path(__file__).with_name("property_combos.py")
-PROPERTY_MATCHUPS_PATH = Path(__file__).with_name("property_matchups.py")
-PROPERTY_TRIPLES_PATH = Path(__file__).with_name("property_triples.py")
-CUSTOM_SIMULATIONS_PATH = Path(__file__).with_name("custom_simulations.json")
-
-DEFAULT_MAX_ROUNDS = 100
-OPPORTUNITY_LEAVE_CHANCE = 0.0
-
-WEAPON_TYPES = ("melee", "ranged")
-
-PROPERTY_DEFS = [
-    ("Magical", True),
-    ("Armor Pierce X", 1),
-    ("Escalation X", 1),
-    ("Reload X", 1),
-    ("Stabilization X", 1),
-    ("Bleed X", 1),
-    ("Guarantee X", 1),
-    ("Reroll", True),
-    ("Aggressive Fire", True),
-    ("Stun X", 1),
-    ("Slow", True),
-    ("Dangerous X", 1),
-    ("Risk", True),
-    ("Penetration X", 1),
-    ("Disorienting", True),
-    ("Immobilize X", 1),
-    ("Accuracy X", 1),
-    ("Reach X", 1),
-]
-
-REROLL_PROPERTY = "Reroll"
-
-UTILITY_ACTION_PROPERTIES = {}
+BASE_VALUES_PATH = Path(__file__).with_name("base_values.json")
+PROPERTY_VALUES_PATH = Path(__file__).with_name("property_values.json")
+PROPERTY_COMBOS_PATH = Path(__file__).with_name("property_combos.json")
+PROPERTY_MATCHUPS_PATH = Path(__file__).with_name("property_matchups.json")
+PROPERTY_TRIPLES_PATH = Path(__file__).with_name("property_triples.json")
 
 DEFAULT_WEAPON_TYPE_SET = set(WEAPON_TYPES)
-PROPERTY_WEAPON_RESTRICTIONS = {
-    "Reload X": {"ranged"},
-    "Stabilization X": {"ranged"},
-    "Aggressive Fire": {"ranged"},
-    "Reach X": {"melee"},
+MAX_CHARACTER_RANK = max(RANK_PARAMS.keys())
+RANK_LIMITED_PROPERTIES = {
+    "Armor Pierce X",
+    "Immobilize X",
+    "Stun X",
+    "Penetration X",
 }
 
-SIMULATED_PROPERTIES = {
-    "Magical",
-    "Armor Pierce X",
-    "Escalation X",
-    "Reload X",
-    "Stabilization X",
-    "Bleed X",
-    "Guarantee X",
-    "Aggressive Fire",
-    "Stun X",
-    "Slow",
-    "Dangerous X",
-    "Risk",
-    "Penetration X",
-    "Disorienting",
-    "Immobilize X",
-    "Accuracy X",
-    "Reach X",
-}
+
+def should_skip_property_for_x(prop_name: str, x_value: int) -> bool:
+    return prop_name in RANK_LIMITED_PROPERTIES and x_value > MAX_CHARACTER_RANK
 
 
 def allowed_weapon_types_for(prop_name: str) -> Set[str]:
@@ -160,6 +125,19 @@ def property_label(prop_name: str, prop_value: object) -> str:
     if prop_value in (None, False):
         return prop_name
     return f"{prop_name} {prop_value}"
+
+
+def property_label_sort_key(label: str) -> Tuple[str, int, int]:
+    text = str(label)
+    match = re.match(r"^(.*?)(?:\s+(-?\d+))$", text)
+    if match:
+        base = match.group(1).strip().lower()
+        return (base, 0, int(match.group(2)))
+    return (text.lower(), 1, 0)
+
+
+def tuple_label_sort_key(labels: Tuple[str, ...]) -> Tuple[Tuple[str, int, int], ...]:
+    return tuple(property_label_sort_key(label) for label in labels)
 
 
 def properties_for_weapon_type(weapon_type: str) -> List[str]:
@@ -217,7 +195,7 @@ def property_allows_weapon_type(prop_name: str, weapon_type: str) -> bool:
 class Weapon:
     """Represents a weapon with properties"""
     name: str
-    damage: int
+    damage: float
     weapon_type: str  # "melee" or "ranged"
     properties: Dict[str, any] = field(default_factory=dict)
     rank: int = 1
@@ -229,7 +207,7 @@ class Weapon:
     
     def get_range(self) -> float:
         """Get effective range of weapon in meters"""
-        base_range = 2.0 if self.weapon_type == "melee" else 100.0
+        base_range = MELEE_BASE_RANGE if self.weapon_type == "melee" else RANGED_BASE_RANGE
         range_bonus = self.properties.get("Reach X", 0)
         return base_range + range_bonus
 
@@ -240,21 +218,24 @@ class Character:
     name: str
     rank: int
     weapon: Weapon
-    hp: int = None
-    max_hp: int = None
-    defense: int = None
+    hp: float = None
+    max_hp: float = None
+    defense: float = None
     dice: int = None
     skill: int = None
-    speed: int = None
+    speed: float = None
     position: float = 0.0
-    actions_remaining: int = 2
-    reaction_remaining: bool = True
+    actions_remaining: int = ACTIONS_PER_ROUND
+    reaction_remaining: bool = REACTION_AVAILABLE_DEFAULT
     moved_this_round: bool = False
     shots_fired_since_reload: int = 0
     reload_required: bool = False
     aggressive_fire_pending: bool = False
     status_effects: Dict[str, int] = field(default_factory=dict)
     utility_actions_used: Set[str] = field(default_factory=set)
+    rerolls_remaining: int = 0
+    action_damage_dealt: float = 0.0
+    actions_taken: int = 0
     
     def __post_init__(self):
         """Initialize character stats from rank"""
@@ -268,8 +249,8 @@ class Character:
     def reset_for_combat(self):
         """Reset per-combat state for reuse."""
         self.hp = self.max_hp
-        self.actions_remaining = 2
-        self.reaction_remaining = True
+        self.actions_remaining = ACTIONS_PER_ROUND
+        self.reaction_remaining = REACTION_AVAILABLE_DEFAULT
         self.moved_this_round = False
         self.shots_fired_since_reload = 0
         self.reload_required = False
@@ -277,26 +258,31 @@ class Character:
         self.status_effects.clear()
         self.utility_actions_used.clear()
         self.position = 0.0
+        self.rerolls_remaining = normalize_int(
+            self.weapon.properties.get(REROLL_PROPERTY)
+        )
+        self.action_damage_dealt = 0.0
+        self.actions_taken = 0
 
     def is_alive(self) -> bool:
         """Check if character is still alive"""
-        return self.hp > 0
+        return self.hp > 0.0
     
-    def take_damage(self, damage: int):
+    def take_damage(self, damage: float):
         """Apply damage to character"""
-        self.hp = max(0, self.hp - damage)
+        self.hp = max(0.0, self.hp - damage)
     
     def reset_round(self):
         """Reset round-based resources"""
-        self.actions_remaining = 2
-        self.reaction_remaining = True
+        self.actions_remaining = ACTIONS_PER_ROUND
+        self.reaction_remaining = REACTION_AVAILABLE_DEFAULT
         self.moved_this_round = False
         self.aggressive_fire_pending = False
         self.utility_actions_used.clear()
         
         # Apply ДОТ effects at start of round
         if "Bleeding" in self.status_effects:
-            self.take_damage(1)
+            self.take_damage(BLEED_DAMAGE_PER_ROUND)
     
     def end_round(self):
         """Handle end-of-round status effect ticks"""
@@ -322,9 +308,9 @@ class CombatSimulator:
         self,
         attacker: Character,
         defender: Character,
-        max_rounds: int = 100,
+        max_rounds: int = DEFAULT_MAX_ROUNDS,
         verbose: bool = False,
-        initial_distance: float = 25.0,
+        initial_distance: float = DEFAULT_INITIAL_DISTANCE,
     ):
         self.attacker = attacker
         self.defender = defender
@@ -403,7 +389,7 @@ class CombatSimulator:
                 return 0.0
             spd = float(ch.speed)
             if "Slowed" in ch.status_effects:
-                spd *= 0.5
+                spd *= SLOW_SPEED_MULT
             return spd
 
         attacker_range = attacker.weapon.get_range()
@@ -431,7 +417,7 @@ class CombatSimulator:
             and defender_type == "melee"
             and self.distance < attacker_range
         ):
-            movement = effective_speed(attacker) / 2.0
+            movement = effective_speed(attacker) * RANGED_RETREAT_SPEED_MULT
             if movement > 0:
                 attacker.moved_this_round = True
                 ranged_retreat += movement
@@ -441,17 +427,17 @@ class CombatSimulator:
             and attacker_type == "melee"
             and self.distance < defender_range
         ):
-            movement = effective_speed(defender) / 2.0
+            movement = effective_speed(defender) * RANGED_RETREAT_SPEED_MULT
             if movement > 0:
                 defender.moved_this_round = True
                 ranged_retreat += movement
 
         if melee_close != 0.0 or ranged_retreat != 0.0:
             self.distance = self.distance - melee_close + ranged_retreat
-            if self.distance < 0.0:
-                self.distance = 0.0
-            elif self.distance > 100.0:
-                self.distance = 100.0
+            if self.distance < DISTANCE_MIN:
+                self.distance = DISTANCE_MIN
+            elif self.distance > DISTANCE_MAX:
+                self.distance = DISTANCE_MAX
 
         dash_close = 0.0
         for ch, ch_type, ch_range in (
@@ -475,10 +461,10 @@ class CombatSimulator:
 
         if dash_close != 0.0:
             self.distance -= dash_close
-            if self.distance < 0.0:
-                self.distance = 0.0
-            elif self.distance > 100.0:
-                self.distance = 100.0
+            if self.distance < DISTANCE_MIN:
+                self.distance = DISTANCE_MIN
+            elif self.distance > DISTANCE_MAX:
+                self.distance = DISTANCE_MAX
 
         if attacker_type != defender_type:
             melee = attacker if attacker_type == "melee" else defender
@@ -497,7 +483,11 @@ class CombatSimulator:
                     self.perform_reaction_attack(melee, ranged)
                     self.distance = current_distance
 
-    def roll_attack(self, attacker: Character, defender: Character) -> Tuple[int, int, bool]:
+    def roll_attack(
+        self,
+        attacker: Character,
+        defender: Character,
+    ) -> Tuple[int, float, bool]:
         """
         Roll attack and determine hit.
         Returns: (roll_result, damage, hit_bool)
@@ -508,15 +498,18 @@ class CombatSimulator:
                 self.combat_log.append(
                     f"Round {self.round_count}: {attacker.name} cannot reach (distance: {self.distance:.1f}m)"
                 )
-            return 0, 0, False
+            return 0, 0.0, False
         
         stabilization_bonus = 0
         if "Stabilization X" in attacker.weapon.properties and not attacker.moved_this_round:
             stabilization_bonus = attacker.weapon.properties["Stabilization X"]
-        defender_melee_cover = (
-            defender.weapon.weapon_type == "melee"
-            and self.distance > defender.weapon.get_range()
-        )
+        def melee_has_cover(character: Character) -> bool:
+            return (
+                character.weapon.weapon_type == "melee"
+                and self.distance > character.weapon.get_range()
+            )
+
+        defender_melee_cover = melee_has_cover(defender)
 
         penetration_bonus = 0
         penetration_threshold = attacker.weapon.properties.get("Penetration X")
@@ -525,23 +518,23 @@ class CombatSimulator:
                 threshold_value = int(penetration_threshold)
             except (TypeError, ValueError):
                 threshold_value = 0
-            if defender.rank < threshold_value:
-                penetration_bonus = 2
+            if defender.rank <= threshold_value:
+                penetration_bonus = PENETRATION_BONUS
 
         defense_value = float(defender.defense)
         if "Magical" in attacker.weapon.properties:
-            defense_value = round(defense_value / 3.0, 1)
+            defense_value = round(defense_value / MAGICAL_DEFENSE_DIVISOR, 1)
         if defender_melee_cover:
-            defense_value += 2
+            defense_value += MELEE_COVER_BONUS
 
-        def evaluate_roll() -> Tuple[int, bool, int]:
+        def evaluate_roll() -> Tuple[int, bool, float]:
             roll_value = random.randint(1, attacker.dice)
             raw_roll = roll_value
 
             if "Dangerous X" in attacker.weapon.properties:
                 danger_threshold = attacker.weapon.properties["Dangerous X"]
                 if raw_roll > danger_threshold:
-                    attacker.take_damage(1)
+                    attacker.take_damage(DANGEROUS_SELF_DAMAGE)
 
             if "Accuracy X" in attacker.weapon.properties:
                 accuracy_bonus = attacker.weapon.properties["Accuracy X"]
@@ -555,7 +548,7 @@ class CombatSimulator:
             total_roll = roll_value + attacker.skill + stabilization_bonus + penetration_bonus
             hit_value = total_roll >= defense_value
 
-            damage_value = 0
+            damage_value = 0.0
             if hit_value:
                 margin = total_roll - defense_value
                 damage_value = margin + attacker.weapon.damage
@@ -568,16 +561,9 @@ class CombatSimulator:
         roll, hit, damage = evaluate_roll()
 
         if not hit:
-            damage = 0
-            rerolls = attacker.weapon.properties.get("Reroll", 0)
-            if rerolls is True:
-                rerolls = 1
-            try:
-                rerolls = int(rerolls)
-            except (TypeError, ValueError):
-                rerolls = 0
-
-            for _ in range(rerolls):
+            damage = 0.0
+            while attacker.rerolls_remaining > 0:
+                attacker.rerolls_remaining -= 1
                 roll, hit, reroll_damage = evaluate_roll()
                 if hit:
                     damage = reroll_damage
@@ -586,9 +572,9 @@ class CombatSimulator:
             if (not hit) and ("Armor Pierce X" in attacker.weapon.properties):
                 max_rank = attacker.weapon.properties["Armor Pierce X"]
                 if defender.rank <= max_rank:
-                    damage = max(damage, 1)
+                    damage = max(damage, ARMOR_PIERCE_MIN_DAMAGE)
 
-        damage = max(1, damage) if hit else damage
+        damage = max(MIN_HIT_DAMAGE, damage) if hit else damage
 
         return roll, damage, hit
     
@@ -608,9 +594,11 @@ class CombatSimulator:
         
         roll, damage, hit = self.roll_attack(attacker, defender)
         shot_fired = roll > 0
+        action_damage = 0.0
         
         if hit:
             defender.take_damage(damage)
+            action_damage = damage
             self.apply_status_effects(attacker, defender, hit)
             if self.verbose:
                 self.combat_log.append(
@@ -644,7 +632,7 @@ class CombatSimulator:
         if "Slow" in attacker.weapon.properties:
             defender.status_effects["Slowed"] = max(
                 defender.status_effects.get("Slowed", 0),
-                2,
+                SLOW_DURATION_ROUNDS,
             )
         
         # Disorienting (lose reaction)
@@ -657,14 +645,17 @@ class CombatSimulator:
             if defender.rank <= max_rank:
                 defender.status_effects["Immobilized"] = max(
                     defender.status_effects.get("Immobilized", 0),
-                    2,
+                    IMMOBILIZE_DURATION_ROUNDS,
                 )
         
         # Ошеломление (lose action)
         if "Stun X" in attacker.weapon.properties:
             max_rank = attacker.weapon.properties["Stun X"]
             if defender.rank <= max_rank:
-                defender.actions_remaining = max(0, defender.actions_remaining - 1)
+                defender.actions_remaining = max(
+                    0,
+                    defender.actions_remaining - STUN_ACTION_LOSS,
+                )
     
     def perform_attack(self, attacker: Character, defender: Character) -> bool:
         """Perform a single attack. Returns True if hit."""
@@ -675,13 +666,16 @@ class CombatSimulator:
             attacker.actions_remaining -= 1
             attacker.reload_required = False
             attacker.shots_fired_since_reload = 0
+            attacker.actions_taken += 1
             return False
         
         roll, damage, hit = self.roll_attack(attacker, defender)
         shot_fired = roll > 0
+        action_damage = 0.0
         
         if hit:
             defender.take_damage(damage)
+            action_damage = damage
             self.apply_status_effects(attacker, defender, hit)
             if self.verbose:
                 self.combat_log.append(
@@ -690,6 +684,7 @@ class CombatSimulator:
         else:
             if damage > 0:
                 defender.take_damage(damage)
+                action_damage = damage
                 if self.verbose:
                     self.combat_log.append(
                         f"Round {self.round_count}: {attacker.name} misses, but бронебойность наносит {damage} урона"
@@ -698,6 +693,8 @@ class CombatSimulator:
                     if shot_fired:
                         self.record_shot(attacker)
                     attacker.actions_remaining -= 1
+                    attacker.actions_taken += 1
+                    attacker.action_damage_dealt += action_damage
                     return False
 
             else:
@@ -730,6 +727,8 @@ class CombatSimulator:
                 return False
         
         attacker.actions_remaining -= 1
+        attacker.actions_taken += 1
+        attacker.action_damage_dealt += action_damage
         return hit
 
     def simulate_round(self) -> bool:
@@ -841,27 +840,8 @@ class ScenarioOption:
     weight: float
 
 
-DEFAULT_OPPONENT_TYPE_WEIGHTS = {
-    # How often you face melee vs ranged opponents when evaluating "vs world".
-    # Defaults preserve your earlier split: melee 0.4 (0.3+0.1) / ranged 0.6 (0.15+0.45).
-    "melee": 0.40,
-    "ranged": 0.60,
-}
-
-
 DEFAULT_SCENARIO_OPTIONS = [
-    # Same-type matchups keep your old distance tendencies.
-    ScenarioOption("mm_1x", "mm", 1.0, 0.33),
-    ScenarioOption("mm_2x", "mm", 2.0, 0.34),
-    ScenarioOption("mm_3x", "mm", 3.0, 0.33),
-    ScenarioOption("rr_1x", "rr", 1.0, 0.33),
-    ScenarioOption("rr_2x", "rr", 2.0, 0.34),
-    ScenarioOption("rr_3x", "rr", 3.0, 0.33),
-    # Mixed matchup: neutral-ish default (overall 10m/30m from your old pool: 0.45/0.55).
-    # Tweak these two weights if you want "ranged usually starts far" or "melee ambushes".
-    ScenarioOption("mr_1x", "mr", 1.0, 0.33),
-    ScenarioOption("mr_2x", "mr", 2.0, 0.34),
-    ScenarioOption("mr_3x", "mr", 3.0, 0.33),
+    ScenarioOption(**entry) for entry in DEFAULT_SCENARIO_OPTIONS_DEF
 ]
 
 
@@ -873,14 +853,8 @@ def matchup_key(type_a: str, type_b: str) -> str:
     return "mr"
 
 
-MELEE_BASELINE_SCENARIO = Scenario(
-    name="Baseline melee (close)",
-    initial_distance=10.0,
-)
-RANGED_BASELINE_SCENARIO = Scenario(
-    name="Baseline ranged (long)",
-    initial_distance=30.0,
-)
+MELEE_BASELINE_SCENARIO = Scenario(**BASELINE_SCENARIO_DEFS["melee"])
+RANGED_BASELINE_SCENARIO = Scenario(**BASELINE_SCENARIO_DEFS["ranged"])
 DEFAULT_BASELINE_SCENARIOS = {
     "melee": MELEE_BASELINE_SCENARIO,
     "ranged": RANGED_BASELINE_SCENARIO,
@@ -905,7 +879,7 @@ def build_weapons(rank: int, x_value: int, rerolls: int) -> List[Weapon]:
     """Create weapon list for future property tests and baseline extraction."""
     weapons: List[Weapon] = []
 
-    for wtype in ("melee", "ranged"):
+    for wtype in WEAPON_TYPES:
         for damage in (1, 2, 3):
             weapon_name = f"{wtype.upper()} | DMG {damage} | NO PROPS"
             weapons.append(
@@ -919,12 +893,12 @@ def build_weapons(rank: int, x_value: int, rerolls: int) -> List[Weapon]:
             )
 
     for prop_name, prop_value in PROPERTY_DEFS:
-        if prop_name == "Reroll":
+        if prop_name == REROLL_PROPERTY:
             continue
         prop_setting = x_value if isinstance(prop_value, int) else prop_value
         props = {prop_name: prop_setting}
         if rerolls:
-            props["Reroll"] = rerolls
+            props[REROLL_PROPERTY] = rerolls
         allowed_types = allowed_weapon_types_for(prop_name)
         weapon_type = "melee" if "melee" in allowed_types else "ranged"
         weapon_name = f"{weapon_type.upper()} | {prop_name} | DMG 1"
@@ -976,7 +950,12 @@ def get_simple_weapon(
 
 
 def get_damage_values_for_rank(rank: int) -> List[int]:
-    max_damage = MAX_DAMAGE_BY_RANK[rank]
+    # Keep enough headroom in base calibration so high-value properties
+    # are mapped against simulated points, not pure tail extrapolation.
+    max_damage = max(
+        MAX_DAMAGE_BY_RANK[rank],
+        BASELINE_DAMAGE_BY_RANK[rank] + 10,
+    )
     return list(range(0, max_damage + 1))
 
 
@@ -1013,10 +992,10 @@ def normalize_int(value: object) -> int:
         return 0
 
 
-def build_weapon_props_array(weapon: Weapon) -> Tuple[List[int], float]:
-    props = [0] * PROP_COUNT
+def build_weapon_props_array(weapon: Weapon) -> Tuple[List[float], float]:
+    props = [0.0] * PROP_COUNT
     props[PROP_TYPE] = 0 if weapon.weapon_type == "melee" else 1
-    props[PROP_DAMAGE] = int(weapon.damage)
+    props[PROP_DAMAGE] = float(weapon.damage)
     props[PROP_PENETRATION] = normalize_int(
         weapon.properties.get("Penetration X")
     )
@@ -1028,18 +1007,18 @@ def build_weapon_props_array(weapon: Weapon) -> Tuple[List[int], float]:
     props[PROP_ACCURACY] = normalize_int(weapon.properties.get("Accuracy X"))
     props[PROP_GUARANTEE] = normalize_int(weapon.properties.get("Guarantee X"))
     props[PROP_STUN] = normalize_int(weapon.properties.get("Stun X"))
-    props[PROP_APPLY_SLOW] = 1 if "Slow" in weapon.properties else 0
+    props[PROP_APPLY_SLOW] = 1.0 if "Slow" in weapon.properties else 0.0
     props[PROP_DANGEROUS] = normalize_int(weapon.properties.get("Dangerous X"))
-    props[PROP_RISK] = 1 if "Risk" in weapon.properties else 0
-    props[PROP_AGGRESSIVE] = 1 if "Aggressive Fire" in weapon.properties else 0
+    props[PROP_RISK] = 1.0 if "Risk" in weapon.properties else 0.0
+    props[PROP_AGGRESSIVE] = 1.0 if "Aggressive Fire" in weapon.properties else 0.0
     props[PROP_ARMORPIERCE] = normalize_int(weapon.properties.get("Armor Pierce X"))
     props[PROP_BLEED] = normalize_int(weapon.properties.get("Bleed X"))
-    props[PROP_DISORIENT] = 1 if "Disorienting" in weapon.properties else 0
+    props[PROP_DISORIENT] = 1.0 if "Disorienting" in weapon.properties else 0.0
     props[PROP_IMMOBILIZE] = normalize_int(
         weapon.properties.get("Immobilize X")
     )
-    props[PROP_MAGIC] = 1 if "Magical" in weapon.properties else 0
-    props[PROP_REROLLS] = normalize_int(weapon.properties.get("Reroll"))
+    props[PROP_MAGIC] = 1.0 if "Magical" in weapon.properties else 0.0
+    props[PROP_REROLLS] = normalize_int(weapon.properties.get(REROLL_PROPERTY))
 
     return props, weapon.get_range()
 
@@ -1047,34 +1026,56 @@ def build_weapon_props_array(weapon: Weapon) -> Tuple[List[int], float]:
 def build_matchup_props(
     weapon1: Weapon,
     weapon2: Weapon,
-) -> Tuple[List[List[int]], List[float]]:
+) -> Tuple[List[List[float]], List[float]]:
     props1, range1 = build_weapon_props_array(weapon1)
     props2, range2 = build_weapon_props_array(weapon2)
     return [props1, props2], [range1, range2]
 
 
-def safe_mean(values: List[int]) -> float:
+def safe_mean(values: List[float]) -> float:
     return statistics.mean(values) if values else 0.0
 
 
 def round_to_half_percent(rate: float) -> float:
+    # Deadzone: treat tiny deltas as zero to avoid ±0.5% noise around 0.
+    if abs(rate) < 0.005:
+        return 0.0
     return round(rate / 0.005) * 0.005
 
 
-def format_rate(rate: float) -> str:
-    text = f"{rate:.3f}"
-    return text.rstrip("0").rstrip(".")
+def _load_json(path: Path) -> object:
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
 
 
-def format_cost(value: float) -> str:
-    text = f"{value:.2f}"
-    return "0.00" if text == "-0.00" else text
+def _write_json(path: Path, payload: object):
+    path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
 
 
-def format_delta(value: Optional[float]) -> str:
-    if value is None:
-        return "None"
-    return format_rate(value)
+def _encode_tuple_key(key: Tuple[str, ...]) -> str:
+    return json.dumps(list(key), ensure_ascii=False)
+
+
+def _decode_tuple_key(raw_key: object, expected_len: Optional[int]) -> Tuple[str, ...]:
+    if isinstance(raw_key, (list, tuple)):
+        return tuple(str(part) for part in raw_key)
+    if not isinstance(raw_key, str):
+        return (str(raw_key),)
+    try:
+        decoded = json.loads(raw_key)
+    except Exception:
+        return (raw_key,)
+    if isinstance(decoded, list):
+        if expected_len is None or len(decoded) == expected_len:
+            return tuple(str(part) for part in decoded)
+    return (raw_key,)
 
 
 def normalize_property_entry(entry: object) -> Dict[str, Optional[float]]:
@@ -1098,6 +1099,26 @@ def normalize_property_entry(entry: object) -> Dict[str, Optional[float]]:
     except (TypeError, ValueError):
         cost_value = 0.0
     return {"cost": cost_value, "delta_win_rate": None}
+
+
+def normalize_property_v2_entry(entry: object) -> Dict[str, float]:
+    if isinstance(entry, dict):
+        avg_raw = entry.get("average_action_damage", 0.0)
+        cost_raw = entry.get("cost", 0.0)
+        try:
+            avg_value = float(avg_raw)
+        except (TypeError, ValueError):
+            avg_value = 0.0
+        try:
+            cost_value = float(cost_raw)
+        except (TypeError, ValueError):
+            cost_value = 0.0
+        return {"average_action_damage": avg_value, "cost": cost_value}
+    try:
+        avg_value = float(entry)
+    except (TypeError, ValueError):
+        avg_value = 0.0
+    return {"average_action_damage": avg_value, "cost": 0.0}
 
 
 def clamp_prob(value: float, eps: float = EPSILON) -> float:
@@ -1158,7 +1179,25 @@ def build_logit_calibration(
             continue
         w_value = clamp_prob(baseline_win_rate + diff_rate)
         calibration[damage_int - baseline_damage] = logit(w_value) - base_logit
-    return calibration
+    return enforce_monotonic_calibration(calibration)
+
+
+def enforce_monotonic_calibration(calibration: Dict[int, float]) -> Dict[int, float]:
+    """Ensure delta_logit is non-decreasing as damage delta increases."""
+    if not calibration:
+        return {}
+    ordered = sorted(calibration.items(), key=lambda item: item[0])
+    adjusted: Dict[int, float] = {}
+    prev = None
+    for k, d in ordered:
+        if prev is None:
+            prev = d
+        else:
+            if d < prev:
+                d = prev
+            prev = d
+        adjusted[k] = d
+    return adjusted
 
 
 def interpolate_linear(
@@ -1192,17 +1231,27 @@ def interpolate_damage_equivalent(
     # sort by delta_logit (d)
     points.sort(key=lambda item: item[1])
 
-    # if target outside, extrapolate using nearest segment
+    # if target outside, extrapolate using nearest segment (prefer distinct deltas)
     if delta_logit <= points[0][1]:
         if len(points) == 1:
             return float(points[0][0])
-        (k1, d1), (k2, d2) = points[0], points[1]
+        (k1, d1) = points[0]
+        k2, d2 = points[1]
+        for k_next, d_next in points[1:]:
+            k2, d2 = k_next, d_next
+            if d2 != d1:
+                break
         return interpolate_linear(k1, d1, k2, d2, delta_logit)
 
     if delta_logit >= points[-1][1]:
         if len(points) == 1:
             return float(points[-1][0])
-        (k1, d1), (k2, d2) = points[-2], points[-1]
+        (k2, d2) = points[-1]
+        k1, d1 = points[-2]
+        for k_prev, d_prev in reversed(points[:-1]):
+            k1, d1 = k_prev, d_prev
+            if d1 != d2:
+                break
         return interpolate_linear(k1, d1, k2, d2, delta_logit)
 
     # find bracketing interval
@@ -1229,128 +1278,122 @@ def print_progress(label: str, current: int, total: int):
 
 
 def load_base_values() -> Dict[int, Dict[str, object]]:
-    try:
-        importlib.reload(base_values)
-        values = getattr(base_values, "BASE_VALUES", {})
-        normalized: Dict[int, Dict[str, object]] = {}
-        for key, rank_values in values.items():
-            rank = int(key)
-            rank_data = dict(rank_values)
-            baselines: Dict[str, Dict[str, object]] = {}
-            for weapon_type, baseline_stats in rank_data.get("baselines", {}).items():
-                stats = dict(baseline_stats)
-                stats["initial_distance"] = float(stats.get("initial_distance", 0.0))
-                stats["baseline_win_rate"] = float(stats.get("baseline_win_rate", 0.5))
-                damage_rates = stats.get("damage_win_rate", {})
-                stats["damage_win_rate"] = {
-                    int(damage_key): float(rate)
-                    for damage_key, rate in damage_rates.items()
-                }
-                baselines[weapon_type] = stats
-            rank_data["baselines"] = baselines
-            normalized[rank] = rank_data
-        return normalized
-    except Exception:
+    raw = _load_json(BASE_VALUES_PATH)
+    if not isinstance(raw, dict):
         return {}
+    normalized: Dict[int, Dict[str, object]] = {}
+    for key, rank_values in raw.items():
+        try:
+            rank = int(key)
+        except (TypeError, ValueError):
+            continue
+        rank_data = dict(rank_values or {})
+        baselines: Dict[str, Dict[str, object]] = {}
+        for weapon_type, baseline_stats in (rank_data.get("baselines") or {}).items():
+            stats = dict(baseline_stats or {})
+            avg_rounds = stats.get("avg_rounds", stats.get("initial_distance", 0.0))
+            stats["avg_rounds"] = float(avg_rounds)
+            stats["baseline_win_rate"] = float(stats.get("baseline_win_rate", 0.5))
+            damage_rates = stats.get("damage_win_rate", {})
+            stats["damage_win_rate"] = {
+                int(damage_key): float(rate)
+                for damage_key, rate in (damage_rates or {}).items()
+            }
+            baselines[weapon_type] = stats
+        rank_data["baselines"] = baselines
+        normalized[rank] = rank_data
+    return normalized
 
 
 def write_base_values(values: Dict[int, Dict[str, object]]):
-    lines = ["# -*- coding: utf-8 -*-", "BASE_VALUES = {"]
+    payload: Dict[str, Dict[str, object]] = {}
     for rank in sorted(values.keys()):
         rank_values = values[rank]
         rank_field = rank_values.get("rank", rank)
         baselines = rank_values.get("baselines", {})
-
-        lines.append(f"    {rank}: {{")
-        lines.append(f'        "rank": {rank_field},')
-        lines.append('        "baselines": {')
+        baseline_payload: Dict[str, Dict[str, object]] = {}
         for weapon_type in sorted(baselines.keys()):
             baseline = baselines[weapon_type]
-            initial_distance = baseline.get("initial_distance", 0.0)
-            baseline_rate = format_rate(baseline.get("baseline_win_rate", 0.5))
+            avg_rounds = baseline.get("avg_rounds", baseline.get("initial_distance", 0.0))
+            baseline_rate = float(baseline.get("baseline_win_rate", 0.5))
             damage_rates = baseline.get("damage_win_rate", {})
-            lines.append(f'            "{weapon_type}": {{')
-            lines.append(
-                f'                "initial_distance": {initial_distance:.1f},'
-            )
-            lines.append(f'                "baseline_win_rate": {baseline_rate},')
-            lines.append('                "damage_win_rate": {')
-            for damage_key in sorted(damage_rates.keys()):
-                rate_text = format_rate(damage_rates[damage_key])
-                lines.append(f"                    {damage_key}: {rate_text},")
-            lines.append("                },")
-            lines.append("            },")
-        lines.append("        },")
-        lines.append("    },")
-    lines.append("}")
+            baseline_payload[weapon_type] = {
+                "avg_rounds": round(float(avg_rounds), 2),
+                "baseline_win_rate": baseline_rate,
+                "damage_win_rate": {
+                    str(damage_key): float(damage_rates[damage_key])
+                    for damage_key in sorted(damage_rates.keys())
+                },
+            }
+        payload[str(rank)] = {
+            "rank": rank_field,
+            "baselines": baseline_payload,
+        }
 
-    BASE_VALUES_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    _write_json(BASE_VALUES_PATH, payload)
 
 
 def load_property_values() -> Dict[int, Dict[str, object]]:
-    try:
-        module = importlib.import_module("property_values")
-        importlib.reload(module)
-        values = getattr(module, "PROPERTY_VALUES", {})
-        normalized: Dict[int, Dict[str, object]] = {}
-        for key, rank_values in values.items():
-            rank = int(key)
-            rank_data = dict(rank_values)
-            property_costs = rank_data.get("property_costs") or {}
-            normalized_costs: Dict[str, Dict[str, Optional[float]]] = {}
-            sample = next(iter(property_costs.values()), None)
-            if sample and isinstance(sample, dict) and (
-                "cost" in sample or "delta_win_rate" in sample
-            ):
-                normalized_costs["ranged"] = {
-                    prop_name: normalize_property_entry(entry)
-                    for prop_name, entry in property_costs.items()
-                }
-            else:
-                for weapon_type, type_costs in property_costs.items():
-                    normalized_costs[weapon_type] = {
-                        prop_name: normalize_property_entry(entry)
-                        for prop_name, entry in (type_costs or {}).items()
-                    }
-            rank_data["property_costs"] = normalized_costs
-            normalized[rank] = rank_data
-        return normalized
-    except Exception:
+    raw = _load_json(PROPERTY_VALUES_PATH)
+    if not isinstance(raw, dict):
         return {}
+    normalized: Dict[int, Dict[str, object]] = {}
+    for key, rank_values in raw.items():
+        try:
+            rank = int(key)
+        except (TypeError, ValueError):
+            continue
+        rank_data = dict(rank_values or {})
+        property_costs = rank_data.get("property_costs") or {}
+        normalized_costs: Dict[str, Dict[str, Dict[str, float]]] = {}
+        sample = next(iter(property_costs.values()), None)
+        if sample and isinstance(sample, dict) and (
+            "average_action_damage" in sample
+            or "cost" in sample
+            or "delta_win_rate" in sample
+        ):
+            normalized_costs["ranged"] = {
+                prop_name: normalize_property_v2_entry(entry)
+                for prop_name, entry in property_costs.items()
+            }
+        else:
+            for weapon_type, type_costs in property_costs.items():
+                normalized_costs[weapon_type] = {
+                    prop_name: normalize_property_v2_entry(entry)
+                    for prop_name, entry in (type_costs or {}).items()
+                }
+        rank_data["property_costs"] = normalized_costs
+        normalized[rank] = rank_data
+    return normalized
 
 
 def write_property_values(values: Dict[int, Dict[str, object]]):
-    lines = ["# -*- coding: utf-8 -*-", "PROPERTY_VALUES = {"]
+    payload: Dict[str, Dict[str, object]] = {}
     for rank in sorted(values.keys()):
         rank_values = values[rank]
         rank_field = rank_values.get("rank", rank)
         property_costs = rank_values.get("property_costs") or {}
-
-        lines.append(f"    {rank}: {{")
-        lines.append(f'        "rank": {rank_field},')
-        lines.append('        "property_costs": {')
+        costs_payload: Dict[str, Dict[str, object]] = {}
         for weapon_type in sorted(property_costs.keys()):
             type_costs = property_costs[weapon_type] or {}
-            lines.append(f'            "{weapon_type}": {{')
-            for prop_name in sorted(type_costs.keys()):
-                entry = normalize_property_entry(type_costs[prop_name])
-                cost_text = format_cost(entry["cost"] or 0.0)
-                delta_text = format_delta(entry["delta_win_rate"])
-                escaped_name = escape_string(prop_name)
-                lines.append(
-                    f'                "{escaped_name}": '
-                    f'{{"cost": {cost_text}, "delta_win_rate": {delta_text}}},'
-                )
-            lines.append("            },")
-        lines.append("        },")
-        lines.append("    },")
-    lines.append("}")
+            costs_payload[weapon_type] = {
+                prop_name: normalize_property_v2_entry(type_costs[prop_name])
+                for prop_name in sorted(type_costs.keys(), key=property_label_sort_key)
+            }
+        payload[str(rank)] = {
+            "rank": rank_field,
+            "property_costs": costs_payload,
+        }
 
-    PROPERTY_VALUES_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    _write_json(PROPERTY_VALUES_PATH, payload)
 
 
-def escape_string(value: str) -> str:
-    return value.replace("\\", "\\\\").replace('"', '\\"')
+def load_property_values_v2() -> Dict[int, Dict[str, object]]:
+    return load_property_values()
+
+
+def write_property_values_v2(values: Dict[int, Dict[str, object]]):
+    write_property_values(values)
 
 
 def build_property_weapon(
@@ -1373,159 +1416,163 @@ def build_property_weapon(
 
 
 def load_property_combos() -> Dict[int, Dict[str, object]]:
-    try:
-        module = importlib.import_module("property_combos")
-        importlib.reload(module)
-        values = getattr(module, "PROPERTY_COMBOS", {})
-        normalized: Dict[int, Dict[str, object]] = {}
-        for key, rank_values in values.items():
-            rank_data = dict(rank_values)
-            pair_costs = rank_data.get("pair_costs") or {}
-            normalized_pairs: Dict[str, Dict[Tuple[str, str], Dict[str, float]]] = {}
-            sample = next(iter(pair_costs.values()), None)
-            if sample and isinstance(sample, dict):
-                normalized_pairs = {
-                    weapon_type: dict(type_pairs or {})
-                    for weapon_type, type_pairs in pair_costs.items()
-                }
-            else:
-                normalized_pairs["ranged"] = dict(pair_costs)
-            rank_data["pair_costs"] = normalized_pairs
-            normalized[int(key)] = rank_data
-        return normalized
-    except Exception:
+    raw = _load_json(PROPERTY_COMBOS_PATH)
+    if not isinstance(raw, dict):
         return {}
+    normalized: Dict[int, Dict[str, object]] = {}
+    for key, rank_values in raw.items():
+        try:
+            rank = int(key)
+        except (TypeError, ValueError):
+            continue
+        rank_data = dict(rank_values or {})
+        pair_costs = rank_data.get("pair_costs")
+        if pair_costs is None:
+            pair_costs = {
+                key: value for key, value in rank_data.items() if key != "rank"
+            }
+        normalized_pairs: Dict[str, Dict[Tuple[str, str], Dict[str, float]]] = {}
+        sample = next(iter(pair_costs.values()), None)
+        if sample and isinstance(sample, dict):
+            for weapon_type, type_pairs in pair_costs.items():
+                normalized_pairs[weapon_type] = {
+                    _decode_tuple_key(pair_key, 2): dict(entry or {})
+                    for pair_key, entry in (type_pairs or {}).items()
+                }
+        else:
+            normalized_pairs["ranged"] = {
+                _decode_tuple_key(pair_key, 2): dict(entry or {})
+                for pair_key, entry in (pair_costs or {}).items()
+            }
+        rank_data["pair_costs"] = normalized_pairs
+        normalized[rank] = rank_data
+    return normalized
 
 
 def write_property_combos(values: Dict[int, Dict[str, object]]):
-    lines = ["# -*- coding: utf-8 -*-", "PROPERTY_COMBOS = {"]
+    payload: Dict[str, Dict[str, object]] = {}
     for rank in sorted(values.keys()):
         rank_values = values[rank]
         pair_costs = rank_values.get("pair_costs") or {}
-        lines.append(f"    {rank}: {{")
-        lines.append('        "pair_costs": {')
+        pair_payload: Dict[str, Dict[str, object]] = {}
         for weapon_type in sorted(pair_costs.keys()):
             type_pairs = pair_costs[weapon_type] or {}
-            lines.append(f'            "{weapon_type}": {{')
-            for pair_key in sorted(type_pairs.keys()):
-                entry = type_pairs[pair_key]
-                prop_a, prop_b = pair_key
-                lines.append(
-                    f'                ("{escape_string(prop_a)}", "{escape_string(prop_b)}"): '
-                    f'{{"winrate": {entry["winrate"]:.5f}, "cost_pair": {entry["cost_pair"]:.2f}, "dop_cost": {entry["dop_cost"]:.2f}}},'
+            pair_payload[weapon_type] = {
+                _encode_tuple_key(pair_key): dict(entry or {})
+                for pair_key, entry in sorted(
+                    type_pairs.items(), key=lambda item: tuple_label_sort_key(item[0])
                 )
-            lines.append("            },")
-        lines.append("        },")
-        lines.append("    },")
-    lines.append("}")
-    PROPERTY_COMBOS_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
+            }
+        payload[str(rank)] = {"pair_costs": pair_payload}
+    _write_json(PROPERTY_COMBOS_PATH, payload)
 
 
 def load_property_matchups() -> Dict[int, Dict[str, object]]:
-    try:
-        module = importlib.import_module("property_matchups")
-        importlib.reload(module)
-        values = getattr(module, "PROPERTY_MATCHUPS", {})
-        normalized: Dict[int, Dict[str, object]] = {}
-        for key, rank_values in values.items():
-            rank_data = dict(rank_values)
-            matchups = rank_data.get("matchups") or {}
-            normalized_matchups: Dict[str, Dict[str, Dict[str, float]]] = {}
-            sample = next(iter(matchups.values()), None)
-            if sample and isinstance(sample, dict):
-                normalized_matchups = {
-                    weapon_type: {
-                        prop_name: dict(opponents or {})
-                        for prop_name, opponents in type_matchups.items()
-                    }
-                    for weapon_type, type_matchups in matchups.items()
-                }
-            else:
-                normalized_matchups["ranged"] = dict(matchups)
-            rank_data["matchups"] = normalized_matchups
-            normalized[int(key)] = rank_data
-        return normalized
-    except Exception:
+    raw = _load_json(PROPERTY_MATCHUPS_PATH)
+    if not isinstance(raw, dict):
         return {}
+    normalized: Dict[int, Dict[str, object]] = {}
+    for key, rank_values in raw.items():
+        try:
+            rank = int(key)
+        except (TypeError, ValueError):
+            continue
+        rank_data = dict(rank_values or {})
+        matchups = rank_data.get("matchups")
+        if matchups is None:
+            matchups = {
+                key: value for key, value in rank_data.items() if key != "rank"
+            }
+        normalized_matchups: Dict[str, Dict[str, Dict[str, float]]] = {}
+        sample = next(iter(matchups.values()), None)
+        if sample and isinstance(sample, dict):
+            normalized_matchups = {
+                weapon_type: {
+                    prop_name: dict(opponents or {})
+                    for prop_name, opponents in (type_matchups or {}).items()
+                }
+                for weapon_type, type_matchups in matchups.items()
+            }
+        else:
+            normalized_matchups["ranged"] = dict(matchups)
+        rank_data["matchups"] = normalized_matchups
+        normalized[rank] = rank_data
+    return normalized
 
 
 def write_property_matchups(values: Dict[int, Dict[str, object]]):
-    lines = ["# -*- coding: utf-8 -*-", "PROPERTY_MATCHUPS = {"]
+    payload: Dict[str, Dict[str, object]] = {}
     for rank in sorted(values.keys()):
         rank_values = values[rank]
         rank_matchups = rank_values.get("matchups") or {}
-        lines.append(f"    {rank}: {{")
-        lines.append('        "matchups": {')
+        matchups_payload: Dict[str, Dict[str, Dict[str, object]]] = {}
         for weapon_type in sorted(rank_matchups.keys()):
             type_matchups = rank_matchups[weapon_type] or {}
-            lines.append(f'            "{weapon_type}": {{')
-            for prop_name in sorted(type_matchups.keys()):
-                opponent_map = type_matchups[prop_name]
-                lines.append(f'                "{escape_string(prop_name)}": {{')
-                for opponent in sorted(opponent_map.keys()):
-                    entry = opponent_map[opponent]
-                    lines.append(
-                        f'                    "{escape_string(opponent)}": '
-                        f'{{"winrate": {entry["winrate"]:.5f}, "cost_opp": {entry["cost_opp"]:.2f}, "opp_cost": {entry["opp_cost"]:.2f}}},'
+            matchups_payload[weapon_type] = {
+                prop_name: {
+                    opponent: dict(opponents[opponent] or {})
+                    for opponent in sorted(
+                        (opponents or {}).keys(), key=property_label_sort_key
                     )
-                lines.append("                },")
-            lines.append("            },")
-        lines.append("        },")
-        lines.append("    },")
-    lines.append("}")
-    PROPERTY_MATCHUPS_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
+                }
+                for prop_name, opponents in sorted(
+                    type_matchups.items(), key=lambda item: property_label_sort_key(item[0])
+                )
+            }
+        payload[str(rank)] = {"matchups": matchups_payload}
+    _write_json(PROPERTY_MATCHUPS_PATH, payload)
 
 
 def load_property_triples() -> Dict[int, Dict[str, object]]:
-    try:
-        module = importlib.import_module("property_triples")
-        importlib.reload(module)
-        values = getattr(module, "PROPERTY_TRIPLES", {})
-        normalized: Dict[int, Dict[str, object]] = {}
-        for key, rank_values in values.items():
-            rank_data = dict(rank_values)
-            triple_costs = rank_data.get("triple_costs") or {}
-            normalized_triples: Dict[str, Dict[Tuple[str, str, str], Dict[str, float]]] = {}
-            sample = next(iter(triple_costs.values()), None)
-            if sample and isinstance(sample, dict):
-                normalized_triples = {
-                    weapon_type: {
-                        triple_key: dict(entry or {})
-                        for triple_key, entry in type_triples.items()
-                    }
-                    for weapon_type, type_triples in triple_costs.items()
-                }
-            else:
-                normalized_triples["ranged"] = dict(triple_costs)
-            rank_data["triple_costs"] = normalized_triples
-            normalized[int(key)] = rank_data
-        return normalized
-    except Exception:
+    raw = _load_json(PROPERTY_TRIPLES_PATH)
+    if not isinstance(raw, dict):
         return {}
+    normalized: Dict[int, Dict[str, object]] = {}
+    for key, rank_values in raw.items():
+        try:
+            rank = int(key)
+        except (TypeError, ValueError):
+            continue
+        rank_data = dict(rank_values or {})
+        triple_costs = rank_data.get("triple_costs")
+        if triple_costs is None:
+            triple_costs = {
+                key: value for key, value in rank_data.items() if key != "rank"
+            }
+        normalized_triples: Dict[str, Dict[Tuple[str, str, str], Dict[str, float]]] = {}
+        sample = next(iter(triple_costs.values()), None)
+        if sample and isinstance(sample, dict):
+            for weapon_type, type_triples in triple_costs.items():
+                normalized_triples[weapon_type] = {
+                    _decode_tuple_key(triple_key, 3): dict(entry or {})
+                    for triple_key, entry in (type_triples or {}).items()
+                }
+        else:
+            normalized_triples["ranged"] = {
+                _decode_tuple_key(triple_key, 3): dict(entry or {})
+                for triple_key, entry in (triple_costs or {}).items()
+            }
+        rank_data["triple_costs"] = normalized_triples
+        normalized[rank] = rank_data
+    return normalized
 
 
 def write_property_triples(values: Dict[int, Dict[str, object]]):
-    lines = ["# -*- coding: utf-8 -*-", "PROPERTY_TRIPLES = {"]
+    payload: Dict[str, Dict[str, object]] = {}
     for rank in sorted(values.keys()):
         rank_values = values[rank]
         triple_costs = rank_values.get("triple_costs") or {}
-        lines.append(f"    {rank}: {{")
-        lines.append('        "triple_costs": {')
+        triple_payload: Dict[str, Dict[str, object]] = {}
         for weapon_type in sorted(triple_costs.keys()):
             type_triples = triple_costs[weapon_type] or {}
-            lines.append(f'            "{weapon_type}": {{')
-            for triple_key in sorted(type_triples.keys()):
-                entry = type_triples[triple_key]
-                props = "\", \"".join(escape_string(part) for part in triple_key)
-                lines.append(
-                    f'                ("{props}"): '
-                    f'{{"winrate": {entry["winrate"]:.5f}, "cost_triple": {entry["cost_triple"]:.2f}, "dop_cost": {entry["dop_cost"]:.2f}}},'
+            triple_payload[weapon_type] = {
+                _encode_tuple_key(triple_key): dict(entry or {})
+                for triple_key, entry in sorted(
+                    type_triples.items(), key=lambda item: tuple_label_sort_key(item[0])
                 )
-            lines.append("            },")
-        lines.append("        },")
-        lines.append("    },")
-    lines.append("}")
-    PROPERTY_TRIPLES_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
+            }
+        payload[str(rank)] = {"triple_costs": triple_payload}
+    _write_json(PROPERTY_TRIPLES_PATH, payload)
 
 
 def cost_from_winrate(
@@ -1612,7 +1659,7 @@ def calculate_property_pairs(
         rank=rank,
     )
     results: Dict[str, Dict[Tuple[str, str], Dict[str, float]]] = {}
-    for weapon_type in ("melee", "ranged"):
+    for weapon_type in WEAPON_TYPES:
         stats = baseline_stats.get(weapon_type)
         if not stats:
             continue
@@ -1637,7 +1684,7 @@ def calculate_property_pairs(
                 prop_setting = x_value if isinstance(prop_value, int) else prop_value
                 props[prop_name] = prop_setting
                 labels.append(property_label(prop_name, prop_setting))
-            pair_key = tuple(sorted(labels))
+            pair_key = tuple(sorted(labels, key=property_label_sort_key))
             test_weapon = Weapon(
                 name=f"{weapon_type.upper()} | {labels[0]} + {labels[1]} | DMG {baseline_damage}",
                 damage=baseline_damage,
@@ -1760,7 +1807,7 @@ def calculate_property_triples(
         rank=rank,
     )
     results: Dict[str, Dict[Tuple[str, str, str], Dict[str, float]]] = {}
-    for weapon_type in ("melee", "ranged"):
+    for weapon_type in WEAPON_TYPES:
         stats = baseline_stats.get(weapon_type)
         if not stats:
             continue
@@ -1785,7 +1832,7 @@ def calculate_property_triples(
                 prop_setting = x_value if isinstance(prop_value, int) else prop_value
                 props[prop_name] = prop_setting
                 labels.append(property_label(prop_name, prop_setting))
-            triple_key = tuple(sorted(labels))
+            triple_key = tuple(sorted(labels, key=property_label_sort_key))
             test_weapon = Weapon(
                 name=f"{weapon_type.upper()} | {' + '.join(labels)} | DMG {baseline_damage}",
                 damage=baseline_damage,
@@ -1894,7 +1941,7 @@ def calculate_property_matchups(
     }
     baseline_damage = BASELINE_DAMAGE_BY_RANK[rank]
     results: Dict[str, Dict[str, Dict[str, Dict[str, float]]]] = {}
-    for weapon_type in ("melee", "ranged"):
+    for weapon_type in WEAPON_TYPES:
         stats = baseline_stats.get(weapon_type)
         if not stats:
             continue
@@ -1983,6 +2030,7 @@ def calculate_property_costs(
     scenario: Scenario,
     show_progress: bool = False,
     pool: Optional[SimulationPool] = None,
+    progress_label: Optional[str] = None,
 ) -> Dict[str, Dict[str, Optional[float]]]:
     baseline_damage = BASELINE_DAMAGE_BY_RANK[rank]
     property_lookup = {prop_name: prop_value for prop_name, prop_value in PROPERTY_DEFS}
@@ -2013,7 +2061,7 @@ def calculate_property_costs(
     all_test_weapons = []
 
     property_costs: Dict[str, Dict[str, Optional[float]]] = {}
-    for weapon_type in ("melee", "ranged"):
+    for weapon_type in WEAPON_TYPES:
         stats = baseline_stats.get(weapon_type)
         if not stats:
             continue
@@ -2023,6 +2071,8 @@ def calculate_property_costs(
             if prop_name == REROLL_PROPERTY:
                 continue
             prop_value = property_lookup.get(prop_name)
+            if isinstance(prop_value, int) and should_skip_property_for_x(prop_name, x_value):
+                continue
             prop_setting = x_value if isinstance(prop_value, int) else prop_value
             prop_key = property_label(prop_name, prop_setting)
 
@@ -2058,11 +2108,11 @@ def calculate_property_costs(
         simulations,
         pool,
         show_progress,
-        f"Rank {rank} Properties"
+        progress_label or f"Rank {rank} Properties (X {x_value})"
     )
 
     # Process results
-    for weapon_type in ("melee", "ranged"):
+    for weapon_type in WEAPON_TYPES:
         stats = baseline_stats.get(weapon_type)
         if not stats:
             continue
@@ -2099,6 +2149,194 @@ def calculate_property_costs(
     return property_costs
 
 
+def calculate_property_action_damage(
+    rank: int,
+    x_value: int,
+    simulations: int,
+    scenario: Scenario,
+    show_progress: bool = False,
+    pool: Optional[SimulationPool] = None,
+    progress_label: Optional[str] = None,
+) -> Dict[str, Dict[str, Dict[str, float]]]:
+    baseline_damage = BASELINE_DAMAGE_BY_RANK[rank]
+    property_lookup = {prop_name: prop_value for prop_name, prop_value in PROPERTY_DEFS}
+    no_effect_props = {
+        prop_name
+        for prop_name, _ in PROPERTY_DEFS
+        if prop_name not in SIMULATED_PROPERTIES and prop_name != REROLL_PROPERTY
+    }
+
+    base_melee = Weapon(
+        name=f"MELEE | DMG {baseline_damage} | BASELINE",
+        damage=baseline_damage,
+        weapon_type="melee",
+        properties={},
+        rank=rank,
+    )
+    base_ranged = Weapon(
+        name=f"RANGED | DMG {baseline_damage} | BASELINE",
+        damage=baseline_damage,
+        weapon_type="ranged",
+        properties={},
+        rank=rank,
+    )
+
+    baseline_avg_map = run_vs_world_batch_action_damage(
+        [base_melee, base_ranged],
+        base_melee,
+        base_ranged,
+        rank,
+        simulations,
+        pool,
+        show_progress,
+        progress_label or f"Rank {rank} Baseline Action Damage",
+    )
+    baseline_avg = {
+        "melee": baseline_avg_map.get(base_melee.name, 0.0),
+        "ranged": baseline_avg_map.get(base_ranged.name, 0.0),
+    }
+
+    test_weapons_map = {}
+    all_test_weapons = []
+    property_costs: Dict[str, Dict[str, Dict[str, float]]] = {}
+
+    for weapon_type in WEAPON_TYPES:
+        type_costs: Dict[str, Dict[str, float]] = {}
+        for prop_name in properties_for_weapon_type(weapon_type):
+            if prop_name == REROLL_PROPERTY:
+                continue
+            prop_value = property_lookup.get(prop_name)
+            if isinstance(prop_value, int) and should_skip_property_for_x(prop_name, x_value):
+                continue
+            prop_setting = x_value if isinstance(prop_value, int) else prop_value
+            prop_key = property_label(prop_name, prop_setting)
+
+            if prop_name in no_effect_props:
+                avg_damage = baseline_avg.get(weapon_type, 0.0)
+                type_costs[prop_key] = {
+                    "average_action_damage": round(avg_damage, 2),
+                    "cost": round(avg_damage - baseline_damage, 2),
+                }
+                continue
+
+            type_costs[prop_key] = {
+                "average_action_damage": 0.0,
+                "cost": 0.0,
+            }
+            test_weapon = Weapon(
+                name=f"{weapon_type.upper()} | {prop_key} | DMG {baseline_damage}",
+                damage=baseline_damage,
+                weapon_type=weapon_type,
+                properties={prop_name: prop_setting},
+                rank=rank,
+            )
+            test_weapons_map[(weapon_type, prop_key)] = test_weapon
+            all_test_weapons.append(test_weapon)
+
+        property_costs[weapon_type] = type_costs
+
+    if all_test_weapons:
+        avg_action_damage = run_vs_world_batch_action_damage(
+            all_test_weapons,
+            base_melee,
+            base_ranged,
+            rank,
+            simulations,
+            pool,
+            show_progress,
+            progress_label or f"Rank {rank} Action Damage (X {x_value})",
+        )
+    else:
+        avg_action_damage = {}
+
+    for weapon_type in WEAPON_TYPES:
+        type_costs = property_costs.get(weapon_type) or {}
+        for prop_key, entry in type_costs.items():
+            weapon = test_weapons_map.get((weapon_type, prop_key))
+            if weapon is None:
+                continue
+            avg_damage = avg_action_damage.get(weapon.name, 0.0)
+            type_costs[prop_key] = {
+                "average_action_damage": round(avg_damage, 2),
+                "cost": round(avg_damage - baseline_damage, 2),
+            }
+
+    return property_costs
+
+
+def recalc_property_values_v2_for_ranks(
+    ranks: List[int],
+    x_value: int,
+    simulations: int,
+    scenario: Scenario,
+    show_progress: bool = False,
+    pool: Optional[SimulationPool] = None,
+    property_values_data: Optional[Dict[int, Dict[str, object]]] = None,
+) -> Dict[int, Dict[str, object]]:
+    if property_values_data is None:
+        property_values_data = load_property_values_v2()
+
+    for current_rank in ranks:
+        property_costs = calculate_property_action_damage(
+            rank=current_rank,
+            x_value=x_value,
+            simulations=simulations,
+            scenario=scenario,
+            show_progress=show_progress,
+            pool=pool,
+            progress_label=f"Rank {current_rank} Action Damage (X {x_value})",
+        )
+        property_values_data[current_rank] = {
+            "rank": current_rank,
+            "property_costs": property_costs,
+        }
+
+    return property_values_data
+
+
+def recalc_property_values_v2_for_ranks_multi_x(
+    ranks: List[int],
+    x_values: List[int],
+    simulations: int,
+    scenario: Scenario,
+    show_progress: bool = False,
+    pool: Optional[SimulationPool] = None,
+    property_values_data: Optional[Dict[int, Dict[str, object]]] = None,
+) -> Dict[int, Dict[str, object]]:
+    if property_values_data is None:
+        property_values_data = load_property_values_v2()
+
+    for current_rank in ranks:
+        merged_costs: Dict[str, Dict[str, Dict[str, float]]] = {}
+        existing_costs = property_values_data.get(current_rank, {}).get(
+            "property_costs",
+            {},
+        )
+        for weapon_type, type_costs in existing_costs.items():
+            merged_costs[weapon_type] = dict(type_costs or {})
+
+        for x_value in x_values:
+            property_costs = calculate_property_action_damage(
+                rank=current_rank,
+                x_value=x_value,
+                simulations=simulations,
+                scenario=scenario,
+                show_progress=show_progress,
+                pool=pool,
+                progress_label=f"Rank {current_rank} Action Damage (X {x_value})",
+            )
+            for weapon_type, type_costs in property_costs.items():
+                merged_costs.setdefault(weapon_type, {})
+                merged_costs[weapon_type].update(type_costs)
+
+        property_values_data[current_rank] = {
+            "rank": current_rank,
+            "property_costs": merged_costs,
+        }
+
+    return property_values_data
+
+
 def print_property_costs(property_costs: Dict[str, object]):
     if not property_costs:
         print("No property costs calculated.")
@@ -2125,7 +2363,7 @@ def print_property_costs(property_costs: Dict[str, object]):
         separator = "-" * len(header)
         print(header)
         print(separator)
-        for prop_name in sorted(type_costs.keys()):
+        for prop_name in sorted(type_costs.keys(), key=property_label_sort_key):
             entry = type_costs[prop_name]
             normalized = normalize_property_entry(entry)
             cost = normalized["cost"] or 0.0
@@ -2149,17 +2387,17 @@ def can_use_fast_matchup(
 def build_damage_table(
     dice: int,
     skill: int,
-    defense: int,
-    weapon_damage: int,
-) -> List[int]:
+    defense: float,
+    weapon_damage: float,
+) -> List[float]:
     """Precompute damage per roll for a simple, property-free attack."""
-    table = [0] * (dice + 1)
+    table = [0.0] * (dice + 1)
     for roll_value in range(1, dice + 1):
         total_roll = roll_value + skill
         if total_roll >= defense:
             damage_value = (total_roll - defense) + weapon_damage
-            if damage_value < 1:
-                damage_value = 1
+            if damage_value < 1.0:
+                damage_value = 1.0
             table[roll_value] = damage_value
     return table
 
@@ -2235,6 +2473,18 @@ def run_matchup_fast(
     w1_wins = 0
     w2_wins = 0
     total_rounds = 0
+    w1_action_damage = 0.0
+    w2_action_damage = 0.0
+    w1_actions = 0
+    w2_actions = 0
+    w1_action_damage = 0.0
+    w2_action_damage = 0.0
+    w1_actions = 0
+    w2_actions = 0
+    w1_action_damage = 0.0
+    w2_action_damage = 0.0
+    w1_actions = 0
+    w2_actions = 0
     w1_win_rounds: Optional[List[int]] = [] if track_rounds else None
     w2_win_rounds: Optional[List[int]] = [] if track_rounds else None
 
@@ -2312,6 +2562,10 @@ def run_matchup_fast(
         "weapon1_win_rounds": w1_win_rounds,
         "weapon2_win_rounds": w2_win_rounds,
         "avg_rounds": avg_rounds,
+        "weapon1_action_damage": w1_action_damage,
+        "weapon2_action_damage": w2_action_damage,
+        "weapon1_actions": w1_actions,
+        "weapon2_actions": w2_actions,
     }
 
 
@@ -2378,6 +2632,10 @@ def run_matchup_fast_parallel(
     w1_wins = 0
     w2_wins = 0
     total_rounds = 0
+    w1_action_damage = 0.0
+    w2_action_damage = 0.0
+    w1_actions = 0
+    w2_actions = 0
     w1_win_rounds: Optional[List[int]] = [] if track_rounds else None
     w2_win_rounds: Optional[List[int]] = [] if track_rounds else None
 
@@ -2435,6 +2693,10 @@ def run_matchup_fast_parallel(
         "weapon1_win_rounds": w1_win_rounds,
         "weapon2_win_rounds": w2_win_rounds,
         "avg_rounds": avg_rounds,
+        "weapon1_action_damage": w1_action_damage,
+        "weapon2_action_damage": w2_action_damage,
+        "weapon1_actions": w1_actions,
+        "weapon2_actions": w2_actions,
     }
 
 
@@ -2452,9 +2714,13 @@ def run_matchup(
     pool: Optional[SimulationPool] = None,
     use_numba: bool = True,
     scenario_pool: Optional[List[ScenarioOption]] = None,
+    track_action_damage: bool = False,
 ) -> Dict[str, object]:
     if scenario_pool is None:
         scenario_pool = DEFAULT_SCENARIO_OPTIONS
+
+    if track_action_damage:
+        use_numba = False
 
     use_pool = bool(scenario_pool)
 
@@ -2505,6 +2771,10 @@ def run_matchup(
                 "weapon1_win_rounds": [],
                 "weapon2_win_rounds": [],
                 "avg_rounds": avg_rounds,
+                "weapon1_action_damage": 0.0,
+                "weapon2_action_damage": 0.0,
+                "weapon1_actions": 0,
+                "weapon2_actions": 0,
             }
 
         # Pool enabled: sample counts without building a length-N scenario list.
@@ -2542,11 +2812,19 @@ def run_matchup(
             "weapon1_win_rounds": [],
             "weapon2_win_rounds": [],
             "avg_rounds": avg_rounds,
+            "weapon1_action_damage": 0.0,
+            "weapon2_action_damage": 0.0,
+            "weapon1_actions": 0,
+            "weapon2_actions": 0,
         }
         
     w1_wins = 0
     w2_wins = 0
     total_rounds = 0
+    w1_action_damage = 0.0
+    w2_action_damage = 0.0
+    w1_actions = 0
+    w2_actions = 0
     w1_win_rounds: Optional[List[int]] = [] if track_rounds else None
     w2_win_rounds: Optional[List[int]] = [] if track_rounds else None
     char1 = Character(name="Attacker", rank=rank, weapon=weapon1)
@@ -2584,6 +2862,17 @@ def run_matchup(
         sim.reset_combat()
         result = sim.run_combat()
         total_rounds += result["rounds"]
+        if track_action_damage:
+            if attacker_is_w1:
+                w1_action_damage += char1.action_damage_dealt
+                w1_actions += char1.actions_taken
+                w2_action_damage += char2.action_damage_dealt
+                w2_actions += char2.actions_taken
+            else:
+                w1_action_damage += char2.action_damage_dealt
+                w1_actions += char2.actions_taken
+                w2_action_damage += char1.action_damage_dealt
+                w2_actions += char1.actions_taken
 
         if result["attacker_wins"]:
             if attacker_is_w1:
@@ -2620,6 +2909,10 @@ def run_matchup(
         "weapon1_win_rounds": w1_win_rounds,
         "weapon2_win_rounds": w2_win_rounds,
         "avg_rounds": avg_rounds,
+        "weapon1_action_damage": w1_action_damage,
+        "weapon2_action_damage": w2_action_damage,
+        "weapon1_actions": w1_actions,
+        "weapon2_actions": w2_actions,
     }
 
 
@@ -2722,6 +3015,141 @@ def run_vs_world_batch(
         win_rates[wp.name] = wins / max(total, 1)
         
     return win_rates
+
+
+def run_vs_world_batch_action_damage(
+    test_weapons: List[Weapon],
+    baseline_melee: Weapon,
+    baseline_ranged: Weapon,
+    rank: int,
+    simulations: int,
+    pool: Optional[SimulationPool],
+    show_progress: bool,
+    progress_label: str,
+) -> Dict[str, float]:
+    """
+    Runs a batch of simulations for multiple weapons against the 'World' (weighted mix).
+    Returns a dictionary mapping weapon.name -> average action damage.
+    """
+    p_melee, p_ranged = _normalized_opponent_weights()
+    sims_m = int(round(simulations * p_melee))
+    sims_r = max(simulations - sims_m, 0)
+
+    dummy_scenario = MELEE_BASELINE_SCENARIO
+
+    tasks = []
+    for wp in test_weapons:
+        if sims_m > 0:
+            tasks.append(
+                BatchTask(
+                    args=(wp, baseline_melee, rank, sims_m, dummy_scenario),
+                    kwargs={
+                        "track_rounds": False,
+                        "parallel": False,
+                        "pool": None,
+                        "use_numba": False,
+                        "track_action_damage": True,
+                    },
+                )
+            )
+        if sims_r > 0:
+            tasks.append(
+                BatchTask(
+                    args=(wp, baseline_ranged, rank, sims_r, dummy_scenario),
+                    kwargs={
+                        "track_rounds": False,
+                        "parallel": False,
+                        "pool": None,
+                        "use_numba": False,
+                        "track_action_damage": True,
+                    },
+                )
+            )
+
+    results = batch_map(
+        run_matchup,
+        tasks,
+        pool=pool,
+        progress_label=progress_label,
+        show_progress=show_progress,
+    )
+
+    avg_action_damage = {}
+    idx = 0
+    for wp in test_weapons:
+        total_damage = 0.0
+        total_actions = 0
+        if sims_m > 0:
+            res = results[idx]
+            total_damage += res.get("weapon1_action_damage", 0.0)
+            total_actions += res.get("weapon1_actions", 0)
+            idx += 1
+        if sims_r > 0:
+            res = results[idx]
+            total_damage += res.get("weapon1_action_damage", 0.0)
+            total_actions += res.get("weapon1_actions", 0)
+            idx += 1
+        avg_action_damage[wp.name] = (
+            total_damage / total_actions if total_actions > 0 else 0.0
+        )
+
+    return avg_action_damage
+
+
+def run_vs_world_avg_rounds(
+    weapon: Weapon,
+    baseline_melee: Weapon,
+    baseline_ranged: Weapon,
+    rank: int,
+    simulations: int,
+    pool: Optional[SimulationPool],
+    show_progress: bool,
+    progress_label: str,
+) -> float:
+    p_melee, p_ranged = _normalized_opponent_weights()
+    sims_m = int(round(simulations * p_melee))
+    sims_r = max(simulations - sims_m, 0)
+
+    if sims_m <= 0 and sims_r <= 0:
+        return 0.0
+
+    dummy_scenario = MELEE_BASELINE_SCENARIO
+    tasks = []
+    if sims_m > 0:
+        tasks.append(
+            BatchTask(
+                args=(weapon, baseline_melee, rank, sims_m, dummy_scenario),
+                kwargs={"track_rounds": False, "parallel": False, "pool": None},
+            )
+        )
+    if sims_r > 0:
+        tasks.append(
+            BatchTask(
+                args=(weapon, baseline_ranged, rank, sims_r, dummy_scenario),
+                kwargs={"track_rounds": False, "parallel": False, "pool": None},
+            )
+        )
+
+    results = batch_map(
+        run_matchup,
+        tasks,
+        pool=pool,
+        progress_label=progress_label,
+        show_progress=show_progress,
+    )
+
+    idx = 0
+    total_rounds = 0.0
+    total_sims = 0
+    if sims_m > 0:
+        total_rounds += results[idx]["avg_rounds"] * sims_m
+        total_sims += sims_m
+        idx += 1
+    if sims_r > 0:
+        total_rounds += results[idx]["avg_rounds"] * sims_r
+        total_sims += sims_r
+
+    return total_rounds / max(total_sims, 1)
 
 
 def _run_matchup_chunk(
@@ -2944,7 +3372,7 @@ def recalc_base_values_for_rank(
     
     # Prepare all test weapons (for all damage values and types)
     all_test_weapons = []
-    for weapon_type in ("melee", "ranged"):
+    for weapon_type in WEAPON_TYPES:
         # Baseline for this type
         all_test_weapons.append(get_simple_weapon(weapons, weapon_type, baseline_damage, current_rank))
         # Damage variants
@@ -2966,7 +3394,7 @@ def recalc_base_values_for_rank(
     )
 
     results: Dict[str, Dict[str, object]] = {}
-    for weapon_type in ("melee", "ranged"):
+    for weapon_type in WEAPON_TYPES:
         base_w_name = get_simple_weapon(weapons, weapon_type, baseline_damage, current_rank).name
         baseline_win_rate = win_rates[base_w_name]
 
@@ -2992,9 +3420,19 @@ def recalc_base_values_for_rank(
             )
         print()
 
-        # Note: initial_distance is less relevant with pool, but we keep the structure
+        avg_rounds = run_vs_world_avg_rounds(
+            base_melee if weapon_type == "melee" else base_ranged,
+            base_melee,
+            base_ranged,
+            current_rank,
+            simulations,
+            pool,
+            show_progress,
+            f"Rank {current_rank} {weapon_type.title()} Avg Rounds",
+        )
+
         results[weapon_type] = {
-            "initial_distance": 0.0, 
+            "avg_rounds": avg_rounds,
             "baseline_win_rate": baseline_win_rate,
             "damage_win_rate": damage_deltas,
         }
@@ -3028,7 +3466,7 @@ def recalc_base_values_for_ranks(
         rounded_baselines: Dict[str, Dict[str, object]] = {}
         for weapon_type, stats in baseline_map.items():
             rounded_baselines[weapon_type] = {
-                "initial_distance": stats.get("initial_distance", 0.0),
+                "avg_rounds": round(stats.get("avg_rounds", 0.0), 2),
                 "baseline_win_rate": round_to_half_percent(
                     stats.get("baseline_win_rate", 0.5)
                 ),
@@ -3077,16 +3515,77 @@ def recalc_property_values_for_ranks(
             scenario=scenario,
             show_progress=show_progress,
             pool=pool,
+            progress_label=f"Rank {current_rank} Properties (X {x_value})",
         )
         print()
         print("=" * 80)
-        print(f"PROPERTY COSTS | RANK {current_rank}")
+        print(f"PROPERTY COSTS | RANK {current_rank} | X {x_value}")
         print("=" * 80)
         print_property_costs(property_costs)
 
         property_values_data[current_rank] = {
             "rank": current_rank,
             "property_costs": property_costs,
+        }
+
+    return property_values_data
+
+
+def recalc_property_values_for_ranks_multi_x(
+    ranks: List[int],
+    x_values: List[int],
+    simulations: int,
+    scenario: Scenario,
+    show_progress: bool = False,
+    pool: Optional[SimulationPool] = None,
+    base_values_data: Optional[Dict[int, Dict[str, object]]] = None,
+    property_values_data: Optional[Dict[int, Dict[str, object]]] = None,
+) -> Dict[int, Dict[str, object]]:
+    if base_values_data is None:
+        base_values_data = load_base_values()
+    if property_values_data is None:
+        property_values_data = load_property_values()
+
+    for current_rank in ranks:
+        if current_rank not in base_values_data:
+            print(f"No base values for rank {current_rank}; skipping property costs.")
+            continue
+        baseline_map = base_values_data[current_rank].get("baselines", {})
+        if not baseline_map:
+            print(f"No baseline scenarios for rank {current_rank}; skipping property costs.")
+            continue
+
+        merged_costs: Dict[str, Dict[str, Optional[float]]] = {}
+        existing_costs = property_values_data.get(current_rank, {}).get(
+            "property_costs",
+            {},
+        )
+        for weapon_type, type_costs in existing_costs.items():
+            merged_costs[weapon_type] = dict(type_costs or {})
+
+        for x_value in x_values:
+            property_costs = calculate_property_costs(
+                rank=current_rank,
+                x_value=x_value,
+                simulations=simulations,
+                baseline_stats=baseline_map,
+                scenario=scenario,
+                show_progress=show_progress,
+                pool=pool,
+                progress_label=f"Rank {current_rank} Properties (X {x_value})",
+            )
+            print()
+            print("=" * 80)
+            print(f"PROPERTY COSTS | RANK {current_rank} | X {x_value}")
+            print("=" * 80)
+            print_property_costs(property_costs)
+            for weapon_type, type_costs in property_costs.items():
+                merged_costs.setdefault(weapon_type, {})
+                merged_costs[weapon_type].update(type_costs)
+
+        property_values_data[current_rank] = {
+            "rank": current_rank,
+            "property_costs": merged_costs,
         }
 
     return property_values_data
@@ -3111,7 +3610,6 @@ def simulate_custom_duel(
         show_progress=show_progress,
         track_rounds=False,
         pool=pool,
-        scenario_pool=[],   # <-- add this
     )
     total = max(stats["weapon1_wins"] + stats["weapon2_wins"], 1)
     weapon1_win_rate = stats["weapon1_wins"] / total
@@ -3136,23 +3634,6 @@ def summarize_weapon_for_dump(weapon: Weapon) -> Dict[str, object]:
     }
 
 
-def load_custom_simulations() -> List[Dict[str, object]]:
-    if not CUSTOM_SIMULATIONS_PATH.exists():
-        return []
-    try:
-        return json.loads(CUSTOM_SIMULATIONS_PATH.read_text(encoding="utf-8"))
-    except Exception:
-        return []
-
-
-def append_custom_simulation(entry: Dict[str, object]):
-    data = load_custom_simulations()
-    data.append(entry)
-    CUSTOM_SIMULATIONS_PATH.write_text(
-        json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
-
-
 # ============================================================================
 # EXAMPLE USAGE
 # ============================================================================
@@ -3170,8 +3651,6 @@ if __name__ == "__main__":
     rank_input = prompt_rank("Character rank? (1-4 or all): ", allow_all=True)
     x_value = prompt_int("Value of X for properties? ", 1)
     accuracy_confidence = prompt_accuracy("Desired accuracy % (e.g., 95, 99): ")
-    rerolls = prompt_int("Number of rerolls? (0+): ", 0)
-
     simulations_per_scenario = required_simulations_for_accuracy(
         margin=TARGET_MARGIN,
         confidence=accuracy_confidence,
@@ -3223,23 +3702,22 @@ if __name__ == "__main__":
         )
         write_base_values(base_values_data)
         print()
-        print("Base values saved to base_values.py (rounded to 0.5%).")
+        print(
+            f"Base values saved to {BASE_VALUES_PATH.name} (rounded to 0.5%)."
+        )
 
     if recalc_properties:
-        if base_values_data is None:
-            base_values_data = load_base_values()
-        property_values_data = recalc_property_values_for_ranks(
+        property_values_data = recalc_property_values_v2_for_ranks(
             ranks=ranks_to_process,
             x_value=x_value,
             simulations=simulations_per_scenario,
             scenario=base_scenario,
             show_progress=show_progress,
             pool=pool,
-            base_values_data=base_values_data,
         )
         write_property_values(property_values_data)
         print()
-        print("Property values saved to property_values.py.")
+        print(f"Property values saved to {PROPERTY_VALUES_PATH.name}.")
 
     if pool is not None:
         pool.close()

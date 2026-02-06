@@ -207,7 +207,7 @@ if NUMBA_AVAILABLE:
         w1_table,
         w2_table,
         dice: int,
-        base_hp: int,
+        base_hp: float,
         simulations: int,
         max_rounds: int,
         start_index: int,
@@ -270,7 +270,7 @@ else:
         w1_table,
         w2_table,
         dice: int,
-        base_hp: int,
+        base_hp: float,
         simulations: int,
         max_rounds: int,
         start_index: int,
@@ -280,10 +280,10 @@ else:
 
 
 def fast_matchup_chunk(
-    w1_table: List[int],
-    w2_table: List[int],
+    w1_table: List[float],
+    w2_table: List[float],
     dice: int,
-    base_hp: int,
+    base_hp: float,
     simulations: int,
     max_rounds: int,
     start_index: int,
@@ -294,8 +294,8 @@ def fast_matchup_chunk(
     if use_numba and NUMBA_AVAILABLE and not track_rounds:
         if seed is None:
             seed = random.randrange(1, 2**31)
-        w1_arr = np.asarray(w1_table, dtype=np.int32)
-        w2_arr = np.asarray(w2_table, dtype=np.int32)
+        w1_arr = np.asarray(w1_table, dtype=np.float64)
+        w2_arr = np.asarray(w2_table, dtype=np.float64)
         w1_wins, w2_wins, total_rounds = _fast_matchup_numba(
             w1_arr,
             w2_arr,
@@ -439,7 +439,7 @@ if NUMBA_AVAILABLE:
             roll_value = guarantee
         total_roll = roll_value + skill + stabilization + penetration
         hit = 1 if total_roll >= defense else 0
-        damage = 0
+        damage = 0.0
         if hit == 1:
             margin = total_roll - defense
             damage = margin + w_props[w_idx, PROP_DAMAGE]
@@ -456,6 +456,7 @@ if NUMBA_AVAILABLE:
         target,
         hp,
         moved,
+        rerolls_remaining,
         w_props,
         w_range,
         weapon_idx,
@@ -506,9 +507,10 @@ if NUMBA_AVAILABLE:
         )
 
         if hit == 0:
-            damage = 0
-            rerolls = w_props[w_idx, PROP_REROLLS]
-            for _ in range(rerolls):
+            damage = 0.0
+            rerolls_left = int(rerolls_remaining[att])
+            for _ in range(rerolls_left):
+                rerolls_left -= 1
                 _, hit, reroll_damage = _evaluate_roll(
                     att,
                     hp,
@@ -523,13 +525,14 @@ if NUMBA_AVAILABLE:
                 if hit == 1:
                     damage = reroll_damage
                     break
+            rerolls_remaining[att] = rerolls_left
             # Armor pierce: deal 1 damage on a miss if target rank <= X
             max_rank = w_props[w_idx, PROP_ARMORPIERCE]
             if max_rank > 0 and rank <= max_rank:
-                damage = 1
+                damage = 1.0
 
-        if hit == 1 and damage < 1:
-            damage = 1
+        if hit == 1 and damage < 1.0:
+            damage = 1.0
 
         return hit, damage, 1
 
@@ -547,6 +550,7 @@ if NUMBA_AVAILABLE:
         immobile,
         shots,
         reload_required,
+        rerolls_remaining,
         w_props,
         w_range,
         weapon_idx,
@@ -565,6 +569,7 @@ if NUMBA_AVAILABLE:
             target,
             hp,
             moved,
+            rerolls_remaining,
             w_props,
             w_range,
             weapon_idx,
@@ -607,6 +612,7 @@ if NUMBA_AVAILABLE:
         immobile,
         shots,
         reload_required,
+        rerolls_remaining,
         w_props,
         w_range,
         weapon_idx,
@@ -636,6 +642,7 @@ if NUMBA_AVAILABLE:
             immobile,
             shots,
             reload_required,
+            rerolls_remaining,
             w_props,
             w_range,
             weapon_idx,
@@ -659,6 +666,7 @@ if NUMBA_AVAILABLE:
         bleed,
         slow,
         immobile,
+        rerolls_remaining,
         w_props,
         w_range,
         weapon_idx,
@@ -684,6 +692,7 @@ if NUMBA_AVAILABLE:
             target,
             hp,
             moved,
+            rerolls_remaining,
             w_props,
             w_range,
             weapon_idx,
@@ -725,6 +734,7 @@ if NUMBA_AVAILABLE:
                         immobile,
                         shots,
                         reload_required,
+                        rerolls_remaining,
                         w_props,
                         w_range,
                         weapon_idx,
@@ -761,6 +771,7 @@ if NUMBA_AVAILABLE:
                 immobile,
                 shots,
                 reload_required,
+                rerolls_remaining,
                 w_props,
                 w_range,
                 weapon_idx,
@@ -782,9 +793,9 @@ if NUMBA_AVAILABLE:
         w_range,
         dice: int,
         skill: int,
-        defense: int,
+        defense: float,
         speed: float,
-        base_hp: int,
+        base_hp: float,
         rank: int,
         simulations: int,
         max_rounds: int,
@@ -807,6 +818,7 @@ if NUMBA_AVAILABLE:
         slow = np.empty(2, dtype=np.int32)
         immobile = np.empty(2, dtype=np.int32)
         weapon_idx = np.empty(2, dtype=np.int32)
+        rerolls_remaining = np.empty(2, dtype=np.int32)
 
         for sim_i in range(simulations):
             if (start_index + sim_i) % 2 == 0:
@@ -836,6 +848,8 @@ if NUMBA_AVAILABLE:
             slow[1] = 0
             immobile[0] = 0
             immobile[1] = 0
+            rerolls_remaining[0] = int(w_props[weapon_idx[0], PROP_REROLLS])
+            rerolls_remaining[1] = int(w_props[weapon_idx[1], PROP_REROLLS])
 
             distance = initial_distance
             rounds = 0
@@ -955,6 +969,7 @@ if NUMBA_AVAILABLE:
                                     immobile,
                                     shots,
                                     reload_required,
+                                    rerolls_remaining,
                                     w_props,
                                     w_range,
                                     weapon_idx,
@@ -978,6 +993,7 @@ if NUMBA_AVAILABLE:
                         bleed,
                         slow,
                         immobile,
+                        rerolls_remaining,
                         w_props,
                         w_range,
                         weapon_idx,
@@ -1001,6 +1017,7 @@ if NUMBA_AVAILABLE:
                         immobile,
                         shots,
                         reload_required,
+                        rerolls_remaining,
                         w_props,
                         w_range,
                         weapon_idx,
@@ -1024,6 +1041,7 @@ if NUMBA_AVAILABLE:
                         bleed,
                         slow,
                         immobile,
+                        rerolls_remaining,
                         w_props,
                         w_range,
                         weapon_idx,
@@ -1047,6 +1065,7 @@ if NUMBA_AVAILABLE:
                         immobile,
                         shots,
                         reload_required,
+                        rerolls_remaining,
                         w_props,
                         w_range,
                         weapon_idx,
@@ -1096,9 +1115,9 @@ else:
         w_range,
         dice: int,
         skill: int,
-        defense: int,
+        defense: float,
         speed: float,
-        base_hp: int,
+        base_hp: float,
         rank: int,
         simulations: int,
         max_rounds: int,
@@ -1110,13 +1129,13 @@ else:
 
 
 def full_matchup_chunk(
-    weapon_props: List[List[int]],
+    weapon_props: List[List[float]],
     weapon_range: List[float],
     dice: int,
     skill: int,
-    defense: int,
+    defense: float,
     speed: float,
-    base_hp: int,
+    base_hp: float,
     rank: int,
     simulations: int,
     max_rounds: int,
@@ -1129,7 +1148,7 @@ def full_matchup_chunk(
     if use_numba and NUMBA_AVAILABLE and not track_rounds:
         if seed is None:
             seed = random.randrange(1, 2**31)
-        w_props = np.asarray(weapon_props, dtype=np.int32)
+        w_props = np.asarray(weapon_props, dtype=np.float64)
         w_range = np.asarray(weapon_range, dtype=np.float64)
         w1_wins, w2_wins, total_rounds = _full_matchup_numba(
             w_props,

@@ -1,0 +1,1019 @@
+{
+  "4": {
+    "rank": 4,
+    "property_costs": {
+      "melee": {
+        "Accuracy 1": {
+          "average_action_damage": 13.69,
+          "cost": 3.69
+        },
+        "Accuracy 2": {
+          "average_action_damage": 15.24,
+          "cost": 5.24
+        },
+        "Accuracy 3": {
+          "average_action_damage": 16.02,
+          "cost": 6.02
+        },
+        "Accuracy 4": {
+          "average_action_damage": 16.65,
+          "cost": 6.65
+        },
+        "Accuracy 5": {
+          "average_action_damage": 17.26,
+          "cost": 7.26
+        },
+        "Accuracy 6": {
+          "average_action_damage": 17.77,
+          "cost": 7.77
+        },
+        "Accuracy 7": {
+          "average_action_damage": 18.16,
+          "cost": 8.16
+        },
+        "Accuracy 8": {
+          "average_action_damage": 18.5,
+          "cost": 8.5
+        },
+        "Accuracy 9": {
+          "average_action_damage": 18.75,
+          "cost": 8.75
+        },
+        "Accuracy 10": {
+          "average_action_damage": 18.92,
+          "cost": 8.92
+        },
+        "Armor Pierce 1": {
+          "average_action_damage": 12.08,
+          "cost": 2.08
+        },
+        "Armor Pierce 2": {
+          "average_action_damage": 12.09,
+          "cost": 2.09
+        },
+        "Armor Pierce 3": {
+          "average_action_damage": 12.06,
+          "cost": 2.06
+        },
+        "Armor Pierce 4": {
+          "average_action_damage": 12.26,
+          "cost": 2.26
+        },
+        "Bleed 1": {
+          "average_action_damage": 12.01,
+          "cost": 2.01
+        },
+        "Bleed 2": {
+          "average_action_damage": 12.12,
+          "cost": 2.12
+        },
+        "Bleed 3": {
+          "average_action_damage": 12.09,
+          "cost": 2.09
+        },
+        "Bleed 4": {
+          "average_action_damage": 12.1,
+          "cost": 2.1
+        },
+        "Bleed 5": {
+          "average_action_damage": 12.07,
+          "cost": 2.07
+        },
+        "Bleed 6": {
+          "average_action_damage": 12.14,
+          "cost": 2.14
+        },
+        "Bleed 7": {
+          "average_action_damage": 12.04,
+          "cost": 2.04
+        },
+        "Bleed 8": {
+          "average_action_damage": 12.09,
+          "cost": 2.09
+        },
+        "Bleed 9": {
+          "average_action_damage": 12.08,
+          "cost": 2.08
+        },
+        "Bleed 10": {
+          "average_action_damage": 12.03,
+          "cost": 2.03
+        },
+        "Dangerous 1": {
+          "average_action_damage": 12.11,
+          "cost": 2.11
+        },
+        "Dangerous 2": {
+          "average_action_damage": 12.08,
+          "cost": 2.08
+        },
+        "Dangerous 3": {
+          "average_action_damage": 12.12,
+          "cost": 2.12
+        },
+        "Dangerous 4": {
+          "average_action_damage": 12.04,
+          "cost": 2.04
+        },
+        "Dangerous 5": {
+          "average_action_damage": 12.08,
+          "cost": 2.08
+        },
+        "Dangerous 6": {
+          "average_action_damage": 12.12,
+          "cost": 2.12
+        },
+        "Dangerous 7": {
+          "average_action_damage": 12.11,
+          "cost": 2.11
+        },
+        "Dangerous 8": {
+          "average_action_damage": 12.12,
+          "cost": 2.12
+        },
+        "Dangerous 9": {
+          "average_action_damage": 12.11,
+          "cost": 2.11
+        },
+        "Dangerous 10": {
+          "average_action_damage": 12.04,
+          "cost": 2.04
+        },
+        "Disorienting 1": {
+          "average_action_damage": 12.12,
+          "cost": 2.12
+        },
+        "Disorienting 2": {
+          "average_action_damage": 12.07,
+          "cost": 2.07
+        },
+        "Disorienting 3": {
+          "average_action_damage": 12.05,
+          "cost": 2.05
+        },
+        "Disorienting 4": {
+          "average_action_damage": 12.02,
+          "cost": 2.02
+        },
+        "Disorienting 5": {
+          "average_action_damage": 12.1,
+          "cost": 2.1
+        },
+        "Disorienting 6": {
+          "average_action_damage": 12.11,
+          "cost": 2.11
+        },
+        "Disorienting 7": {
+          "average_action_damage": 12.06,
+          "cost": 2.06
+        },
+        "Disorienting 8": {
+          "average_action_damage": 12.11,
+          "cost": 2.11
+        },
+        "Disorienting 9": {
+          "average_action_damage": 12.08,
+          "cost": 2.08
+        },
+        "Disorienting 10": {
+          "average_action_damage": 12.08,
+          "cost": 2.08
+        },
+        "Escalation 1": {
+          "average_action_damage": 12.13,
+          "cost": 2.13
+        },
+        "Escalation 2": {
+          "average_action_damage": 12.22,
+          "cost": 2.22
+        },
+        "Escalation 3": {
+          "average_action_damage": 12.32,
+          "cost": 2.32
+        },
+        "Escalation 4": {
+          "average_action_damage": 12.39,
+          "cost": 2.39
+        },
+        "Escalation 5": {
+          "average_action_damage": 12.47,
+          "cost": 2.47
+        },
+        "Escalation 6": {
+          "average_action_damage": 12.56,
+          "cost": 2.56
+        },
+        "Escalation 7": {
+          "average_action_damage": 12.73,
+          "cost": 2.73
+        },
+        "Escalation 8": {
+          "average_action_damage": 12.78,
+          "cost": 2.78
+        },
+        "Escalation 9": {
+          "average_action_damage": 12.78,
+          "cost": 2.78
+        },
+        "Escalation 10": {
+          "average_action_damage": 12.93,
+          "cost": 2.93
+        },
+        "Guarantee 1": {
+          "average_action_damage": 12.05,
+          "cost": 2.05
+        },
+        "Guarantee 2": {
+          "average_action_damage": 12.13,
+          "cost": 2.13
+        },
+        "Guarantee 3": {
+          "average_action_damage": 12.93,
+          "cost": 2.93
+        },
+        "Guarantee 4": {
+          "average_action_damage": 13.08,
+          "cost": 3.08
+        },
+        "Guarantee 5": {
+          "average_action_damage": 13.35,
+          "cost": 3.35
+        },
+        "Guarantee 6": {
+          "average_action_damage": 13.72,
+          "cost": 3.72
+        },
+        "Guarantee 7": {
+          "average_action_damage": 14.12,
+          "cost": 4.12
+        },
+        "Guarantee 8": {
+          "average_action_damage": 14.61,
+          "cost": 4.61
+        },
+        "Guarantee 9": {
+          "average_action_damage": 15.15,
+          "cost": 5.15
+        },
+        "Guarantee 10": {
+          "average_action_damage": 15.86,
+          "cost": 5.86
+        },
+        "Immobilize 1": {
+          "average_action_damage": 12.11,
+          "cost": 2.11
+        },
+        "Immobilize 2": {
+          "average_action_damage": 12.07,
+          "cost": 2.07
+        },
+        "Immobilize 3": {
+          "average_action_damage": 12.18,
+          "cost": 2.18
+        },
+        "Immobilize 4": {
+          "average_action_damage": 12.1,
+          "cost": 2.1
+        },
+        "Magical 1": {
+          "average_action_damage": 22.15,
+          "cost": 12.15
+        },
+        "Magical 2": {
+          "average_action_damage": 22.21,
+          "cost": 12.21
+        },
+        "Magical 3": {
+          "average_action_damage": 22.21,
+          "cost": 12.21
+        },
+        "Magical 4": {
+          "average_action_damage": 22.26,
+          "cost": 12.26
+        },
+        "Magical 5": {
+          "average_action_damage": 22.21,
+          "cost": 12.21
+        },
+        "Magical 6": {
+          "average_action_damage": 22.21,
+          "cost": 12.21
+        },
+        "Magical 7": {
+          "average_action_damage": 22.23,
+          "cost": 12.23
+        },
+        "Magical 8": {
+          "average_action_damage": 22.23,
+          "cost": 12.23
+        },
+        "Magical 9": {
+          "average_action_damage": 22.23,
+          "cost": 12.23
+        },
+        "Magical 10": {
+          "average_action_damage": 22.18,
+          "cost": 12.18
+        },
+        "Penetration 1": {
+          "average_action_damage": 12.06,
+          "cost": 2.06
+        },
+        "Penetration 2": {
+          "average_action_damage": 12.04,
+          "cost": 2.04
+        },
+        "Penetration 3": {
+          "average_action_damage": 12.15,
+          "cost": 2.15
+        },
+        "Penetration 4": {
+          "average_action_damage": 15.48,
+          "cost": 5.48
+        },
+        "Reach 1": {
+          "average_action_damage": 12.05,
+          "cost": 2.05
+        },
+        "Reach 2": {
+          "average_action_damage": 12.08,
+          "cost": 2.08
+        },
+        "Reach 3": {
+          "average_action_damage": 12.12,
+          "cost": 2.12
+        },
+        "Reach 4": {
+          "average_action_damage": 12.1,
+          "cost": 2.1
+        },
+        "Reach 5": {
+          "average_action_damage": 12.1,
+          "cost": 2.1
+        },
+        "Reach 6": {
+          "average_action_damage": 12.1,
+          "cost": 2.1
+        },
+        "Reach 7": {
+          "average_action_damage": 12.1,
+          "cost": 2.1
+        },
+        "Reach 8": {
+          "average_action_damage": 12.04,
+          "cost": 2.04
+        },
+        "Reach 9": {
+          "average_action_damage": 12.12,
+          "cost": 2.12
+        },
+        "Reach 10": {
+          "average_action_damage": 12.07,
+          "cost": 2.07
+        },
+        "Risk 1": {
+          "average_action_damage": 12.83,
+          "cost": 2.83
+        },
+        "Risk 2": {
+          "average_action_damage": 12.83,
+          "cost": 2.83
+        },
+        "Risk 3": {
+          "average_action_damage": 12.79,
+          "cost": 2.79
+        },
+        "Risk 4": {
+          "average_action_damage": 12.76,
+          "cost": 2.76
+        },
+        "Risk 5": {
+          "average_action_damage": 12.78,
+          "cost": 2.78
+        },
+        "Risk 6": {
+          "average_action_damage": 12.79,
+          "cost": 2.79
+        },
+        "Risk 7": {
+          "average_action_damage": 12.83,
+          "cost": 2.83
+        },
+        "Risk 8": {
+          "average_action_damage": 12.83,
+          "cost": 2.83
+        },
+        "Risk 9": {
+          "average_action_damage": 12.85,
+          "cost": 2.85
+        },
+        "Risk 10": {
+          "average_action_damage": 12.78,
+          "cost": 2.78
+        },
+        "Slow 1": {
+          "average_action_damage": 12.12,
+          "cost": 2.12
+        },
+        "Slow 2": {
+          "average_action_damage": 12.07,
+          "cost": 2.07
+        },
+        "Slow 3": {
+          "average_action_damage": 12.04,
+          "cost": 2.04
+        },
+        "Slow 4": {
+          "average_action_damage": 12.08,
+          "cost": 2.08
+        },
+        "Slow 5": {
+          "average_action_damage": 12.12,
+          "cost": 2.12
+        },
+        "Slow 6": {
+          "average_action_damage": 12.09,
+          "cost": 2.09
+        },
+        "Slow 7": {
+          "average_action_damage": 12.09,
+          "cost": 2.09
+        },
+        "Slow 8": {
+          "average_action_damage": 12.07,
+          "cost": 2.07
+        },
+        "Slow 9": {
+          "average_action_damage": 12.0,
+          "cost": 2.0
+        },
+        "Slow 10": {
+          "average_action_damage": 12.09,
+          "cost": 2.09
+        },
+        "Stun 1": {
+          "average_action_damage": 12.09,
+          "cost": 2.09
+        },
+        "Stun 2": {
+          "average_action_damage": 12.08,
+          "cost": 2.08
+        },
+        "Stun 3": {
+          "average_action_damage": 12.13,
+          "cost": 2.13
+        },
+        "Stun 4": {
+          "average_action_damage": 12.07,
+          "cost": 2.07
+        }
+      },
+      "ranged": {
+        "Accuracy 1": {
+          "average_action_damage": 13.27,
+          "cost": 3.27
+        },
+        "Accuracy 2": {
+          "average_action_damage": 14.82,
+          "cost": 4.82
+        },
+        "Accuracy 3": {
+          "average_action_damage": 15.63,
+          "cost": 5.63
+        },
+        "Accuracy 4": {
+          "average_action_damage": 16.36,
+          "cost": 6.36
+        },
+        "Accuracy 5": {
+          "average_action_damage": 16.96,
+          "cost": 6.96
+        },
+        "Accuracy 6": {
+          "average_action_damage": 17.46,
+          "cost": 7.46
+        },
+        "Accuracy 7": {
+          "average_action_damage": 17.87,
+          "cost": 7.87
+        },
+        "Accuracy 8": {
+          "average_action_damage": 18.21,
+          "cost": 8.21
+        },
+        "Accuracy 9": {
+          "average_action_damage": 18.45,
+          "cost": 8.45
+        },
+        "Accuracy 10": {
+          "average_action_damage": 18.62,
+          "cost": 8.62
+        },
+        "Aggressive Fire 1": {
+          "average_action_damage": 11.69,
+          "cost": 1.69
+        },
+        "Aggressive Fire 2": {
+          "average_action_damage": 11.69,
+          "cost": 1.69
+        },
+        "Aggressive Fire 3": {
+          "average_action_damage": 11.73,
+          "cost": 1.73
+        },
+        "Aggressive Fire 4": {
+          "average_action_damage": 11.69,
+          "cost": 1.69
+        },
+        "Aggressive Fire 5": {
+          "average_action_damage": 11.74,
+          "cost": 1.74
+        },
+        "Aggressive Fire 6": {
+          "average_action_damage": 11.67,
+          "cost": 1.67
+        },
+        "Aggressive Fire 7": {
+          "average_action_damage": 11.67,
+          "cost": 1.67
+        },
+        "Aggressive Fire 8": {
+          "average_action_damage": 11.65,
+          "cost": 1.65
+        },
+        "Aggressive Fire 9": {
+          "average_action_damage": 11.67,
+          "cost": 1.67
+        },
+        "Aggressive Fire 10": {
+          "average_action_damage": 11.73,
+          "cost": 1.73
+        },
+        "Armor Pierce 1": {
+          "average_action_damage": 11.86,
+          "cost": 1.86
+        },
+        "Armor Pierce 2": {
+          "average_action_damage": 11.83,
+          "cost": 1.83
+        },
+        "Armor Pierce 3": {
+          "average_action_damage": 11.79,
+          "cost": 1.79
+        },
+        "Armor Pierce 4": {
+          "average_action_damage": 11.97,
+          "cost": 1.97
+        },
+        "Bleed 1": {
+          "average_action_damage": 11.84,
+          "cost": 1.84
+        },
+        "Bleed 2": {
+          "average_action_damage": 11.8,
+          "cost": 1.8
+        },
+        "Bleed 3": {
+          "average_action_damage": 11.78,
+          "cost": 1.78
+        },
+        "Bleed 4": {
+          "average_action_damage": 11.82,
+          "cost": 1.82
+        },
+        "Bleed 5": {
+          "average_action_damage": 11.78,
+          "cost": 1.78
+        },
+        "Bleed 6": {
+          "average_action_damage": 11.77,
+          "cost": 1.77
+        },
+        "Bleed 7": {
+          "average_action_damage": 11.81,
+          "cost": 1.81
+        },
+        "Bleed 8": {
+          "average_action_damage": 11.77,
+          "cost": 1.77
+        },
+        "Bleed 9": {
+          "average_action_damage": 11.78,
+          "cost": 1.78
+        },
+        "Bleed 10": {
+          "average_action_damage": 11.78,
+          "cost": 1.78
+        },
+        "Dangerous 1": {
+          "average_action_damage": 11.82,
+          "cost": 1.82
+        },
+        "Dangerous 2": {
+          "average_action_damage": 11.76,
+          "cost": 1.76
+        },
+        "Dangerous 3": {
+          "average_action_damage": 11.76,
+          "cost": 1.76
+        },
+        "Dangerous 4": {
+          "average_action_damage": 11.81,
+          "cost": 1.81
+        },
+        "Dangerous 5": {
+          "average_action_damage": 11.81,
+          "cost": 1.81
+        },
+        "Dangerous 6": {
+          "average_action_damage": 11.75,
+          "cost": 1.75
+        },
+        "Dangerous 7": {
+          "average_action_damage": 11.73,
+          "cost": 1.73
+        },
+        "Dangerous 8": {
+          "average_action_damage": 11.73,
+          "cost": 1.73
+        },
+        "Dangerous 9": {
+          "average_action_damage": 11.77,
+          "cost": 1.77
+        },
+        "Dangerous 10": {
+          "average_action_damage": 11.82,
+          "cost": 1.82
+        },
+        "Disorienting 1": {
+          "average_action_damage": 11.85,
+          "cost": 1.85
+        },
+        "Disorienting 2": {
+          "average_action_damage": 11.86,
+          "cost": 1.86
+        },
+        "Disorienting 3": {
+          "average_action_damage": 11.81,
+          "cost": 1.81
+        },
+        "Disorienting 4": {
+          "average_action_damage": 11.85,
+          "cost": 1.85
+        },
+        "Disorienting 5": {
+          "average_action_damage": 11.82,
+          "cost": 1.82
+        },
+        "Disorienting 6": {
+          "average_action_damage": 11.85,
+          "cost": 1.85
+        },
+        "Disorienting 7": {
+          "average_action_damage": 11.86,
+          "cost": 1.86
+        },
+        "Disorienting 8": {
+          "average_action_damage": 11.8,
+          "cost": 1.8
+        },
+        "Disorienting 9": {
+          "average_action_damage": 11.85,
+          "cost": 1.85
+        },
+        "Disorienting 10": {
+          "average_action_damage": 11.78,
+          "cost": 1.78
+        },
+        "Escalation 1": {
+          "average_action_damage": 11.85,
+          "cost": 1.85
+        },
+        "Escalation 2": {
+          "average_action_damage": 11.96,
+          "cost": 1.96
+        },
+        "Escalation 3": {
+          "average_action_damage": 12.02,
+          "cost": 2.02
+        },
+        "Escalation 4": {
+          "average_action_damage": 12.16,
+          "cost": 2.16
+        },
+        "Escalation 5": {
+          "average_action_damage": 12.2,
+          "cost": 2.2
+        },
+        "Escalation 6": {
+          "average_action_damage": 12.25,
+          "cost": 2.25
+        },
+        "Escalation 7": {
+          "average_action_damage": 12.37,
+          "cost": 2.37
+        },
+        "Escalation 8": {
+          "average_action_damage": 12.51,
+          "cost": 2.51
+        },
+        "Escalation 9": {
+          "average_action_damage": 12.53,
+          "cost": 2.53
+        },
+        "Escalation 10": {
+          "average_action_damage": 12.68,
+          "cost": 2.68
+        },
+        "Guarantee 1": {
+          "average_action_damage": 11.82,
+          "cost": 1.82
+        },
+        "Guarantee 2": {
+          "average_action_damage": 11.81,
+          "cost": 1.81
+        },
+        "Guarantee 3": {
+          "average_action_damage": 12.48,
+          "cost": 2.48
+        },
+        "Guarantee 4": {
+          "average_action_damage": 12.62,
+          "cost": 2.62
+        },
+        "Guarantee 5": {
+          "average_action_damage": 13.15,
+          "cost": 3.15
+        },
+        "Guarantee 6": {
+          "average_action_damage": 13.5,
+          "cost": 3.5
+        },
+        "Guarantee 7": {
+          "average_action_damage": 13.9,
+          "cost": 3.9
+        },
+        "Guarantee 8": {
+          "average_action_damage": 14.36,
+          "cost": 4.36
+        },
+        "Guarantee 9": {
+          "average_action_damage": 14.95,
+          "cost": 4.95
+        },
+        "Guarantee 10": {
+          "average_action_damage": 15.59,
+          "cost": 5.59
+        },
+        "Immobilize 1": {
+          "average_action_damage": 11.79,
+          "cost": 1.79
+        },
+        "Immobilize 2": {
+          "average_action_damage": 11.8,
+          "cost": 1.8
+        },
+        "Immobilize 3": {
+          "average_action_damage": 11.77,
+          "cost": 1.77
+        },
+        "Immobilize 4": {
+          "average_action_damage": 11.24,
+          "cost": 1.24
+        },
+        "Magical 1": {
+          "average_action_damage": 21.88,
+          "cost": 11.88
+        },
+        "Magical 2": {
+          "average_action_damage": 21.88,
+          "cost": 11.88
+        },
+        "Magical 3": {
+          "average_action_damage": 21.92,
+          "cost": 11.92
+        },
+        "Magical 4": {
+          "average_action_damage": 21.91,
+          "cost": 11.91
+        },
+        "Magical 5": {
+          "average_action_damage": 21.92,
+          "cost": 11.92
+        },
+        "Magical 6": {
+          "average_action_damage": 21.91,
+          "cost": 11.91
+        },
+        "Magical 7": {
+          "average_action_damage": 21.88,
+          "cost": 11.88
+        },
+        "Magical 8": {
+          "average_action_damage": 21.93,
+          "cost": 11.93
+        },
+        "Magical 9": {
+          "average_action_damage": 21.92,
+          "cost": 11.92
+        },
+        "Magical 10": {
+          "average_action_damage": 21.92,
+          "cost": 11.92
+        },
+        "Penetration 1": {
+          "average_action_damage": 11.75,
+          "cost": 1.75
+        },
+        "Penetration 2": {
+          "average_action_damage": 11.78,
+          "cost": 1.78
+        },
+        "Penetration 3": {
+          "average_action_damage": 11.82,
+          "cost": 1.82
+        },
+        "Penetration 4": {
+          "average_action_damage": 14.68,
+          "cost": 4.68
+        },
+        "Reload 1": {
+          "average_action_damage": 6.37,
+          "cost": -3.63
+        },
+        "Reload 2": {
+          "average_action_damage": 9.96,
+          "cost": -0.04
+        },
+        "Reload 3": {
+          "average_action_damage": 11.1,
+          "cost": 1.1
+        },
+        "Reload 4": {
+          "average_action_damage": 11.69,
+          "cost": 1.69
+        },
+        "Reload 5": {
+          "average_action_damage": 11.75,
+          "cost": 1.75
+        },
+        "Reload 6": {
+          "average_action_damage": 11.75,
+          "cost": 1.75
+        },
+        "Reload 7": {
+          "average_action_damage": 11.79,
+          "cost": 1.79
+        },
+        "Reload 8": {
+          "average_action_damage": 11.75,
+          "cost": 1.75
+        },
+        "Reload 9": {
+          "average_action_damage": 11.77,
+          "cost": 1.77
+        },
+        "Reload 10": {
+          "average_action_damage": 11.8,
+          "cost": 1.8
+        },
+        "Risk 1": {
+          "average_action_damage": 12.06,
+          "cost": 2.06
+        },
+        "Risk 2": {
+          "average_action_damage": 12.04,
+          "cost": 2.04
+        },
+        "Risk 3": {
+          "average_action_damage": 12.06,
+          "cost": 2.06
+        },
+        "Risk 4": {
+          "average_action_damage": 12.08,
+          "cost": 2.08
+        },
+        "Risk 5": {
+          "average_action_damage": 12.08,
+          "cost": 2.08
+        },
+        "Risk 6": {
+          "average_action_damage": 12.06,
+          "cost": 2.06
+        },
+        "Risk 7": {
+          "average_action_damage": 12.06,
+          "cost": 2.06
+        },
+        "Risk 8": {
+          "average_action_damage": 12.06,
+          "cost": 2.06
+        },
+        "Risk 9": {
+          "average_action_damage": 12.04,
+          "cost": 2.04
+        },
+        "Risk 10": {
+          "average_action_damage": 12.12,
+          "cost": 2.12
+        },
+        "Slow 1": {
+          "average_action_damage": 11.8,
+          "cost": 1.8
+        },
+        "Slow 2": {
+          "average_action_damage": 11.79,
+          "cost": 1.79
+        },
+        "Slow 3": {
+          "average_action_damage": 11.83,
+          "cost": 1.83
+        },
+        "Slow 4": {
+          "average_action_damage": 11.83,
+          "cost": 1.83
+        },
+        "Slow 5": {
+          "average_action_damage": 11.79,
+          "cost": 1.79
+        },
+        "Slow 6": {
+          "average_action_damage": 11.84,
+          "cost": 1.84
+        },
+        "Slow 7": {
+          "average_action_damage": 11.78,
+          "cost": 1.78
+        },
+        "Slow 8": {
+          "average_action_damage": 11.83,
+          "cost": 1.83
+        },
+        "Slow 9": {
+          "average_action_damage": 11.8,
+          "cost": 1.8
+        },
+        "Slow 10": {
+          "average_action_damage": 11.76,
+          "cost": 1.76
+        },
+        "Stabilization 1": {
+          "average_action_damage": 12.68,
+          "cost": 2.68
+        },
+        "Stabilization 2": {
+          "average_action_damage": 13.59,
+          "cost": 3.59
+        },
+        "Stabilization 3": {
+          "average_action_damage": 14.08,
+          "cost": 4.08
+        },
+        "Stabilization 4": {
+          "average_action_damage": 14.53,
+          "cost": 4.53
+        },
+        "Stabilization 5": {
+          "average_action_damage": 14.97,
+          "cost": 4.97
+        },
+        "Stabilization 6": {
+          "average_action_damage": 15.51,
+          "cost": 5.51
+        },
+        "Stabilization 7": {
+          "average_action_damage": 15.97,
+          "cost": 5.97
+        },
+        "Stabilization 8": {
+          "average_action_damage": 16.46,
+          "cost": 6.46
+        },
+        "Stabilization 9": {
+          "average_action_damage": 16.99,
+          "cost": 6.99
+        },
+        "Stabilization 10": {
+          "average_action_damage": 17.46,
+          "cost": 7.46
+        },
+        "Stun 1": {
+          "average_action_damage": 11.77,
+          "cost": 1.77
+        },
+        "Stun 2": {
+          "average_action_damage": 11.77,
+          "cost": 1.77
+        },
+        "Stun 3": {
+          "average_action_damage": 11.79,
+          "cost": 1.79
+        },
+        "Stun 4": {
+          "average_action_damage": 11.81,
+          "cost": 1.81
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "sheet_id": "1a6msabS_c0pSLH4GWatI7NgWkJqxn0U843vDaOGjx_I",
+  "worksheet": "Import_weapon",
+  "property_values": {
+    "property_values_path": "property_values.json",
+    "start_row": 17,
+    "name_col": 2,
+    "first_cost_col": 3,
+    "types": ["melee", "ranged"],
+    "rank_order": [1, 2, 3, 4],
+    "property_name_order": "first-seen"
+  }
+}
