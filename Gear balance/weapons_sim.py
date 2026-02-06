@@ -1457,13 +1457,18 @@ def write_property_combos(values: Dict[int, Dict[str, object]]):
         pair_payload: Dict[str, Dict[str, object]] = {}
         for weapon_type in sorted(pair_costs.keys()):
             type_pairs = pair_costs[weapon_type] or {}
-            pair_payload[weapon_type] = {
-                _encode_tuple_key(pair_key): dict(entry or {})
-                for pair_key, entry in sorted(
-                    type_pairs.items(), key=lambda item: tuple_label_sort_key(item[0])
-                )
-            }
-        payload[str(rank)] = {"pair_costs": pair_payload}
+            filtered_pairs = {}
+            for pair_key, entry in sorted(
+                type_pairs.items(), key=lambda item: tuple_label_sort_key(item[0])
+            ):
+                pair_entry = dict(entry or {})
+                if pair_entry.get("dop_cost", 0) == 0:
+                    continue
+                filtered_pairs[_encode_tuple_key(pair_key)] = pair_entry
+            if filtered_pairs:
+                pair_payload[weapon_type] = filtered_pairs
+        if pair_payload:
+            payload[str(rank)] = {"pair_costs": pair_payload}
     _write_json(PROPERTY_COMBOS_PATH, payload)
 
 
@@ -1508,18 +1513,22 @@ def write_property_matchups(values: Dict[int, Dict[str, object]]):
         matchups_payload: Dict[str, Dict[str, Dict[str, object]]] = {}
         for weapon_type in sorted(rank_matchups.keys()):
             type_matchups = rank_matchups[weapon_type] or {}
-            matchups_payload[weapon_type] = {
-                prop_name: {
-                    opponent: dict(opponents[opponent] or {})
-                    for opponent in sorted(
-                        (opponents or {}).keys(), key=property_label_sort_key
-                    )
-                }
-                for prop_name, opponents in sorted(
-                    type_matchups.items(), key=lambda item: property_label_sort_key(item[0])
-                )
-            }
-        payload[str(rank)] = {"matchups": matchups_payload}
+            filtered_type_matchups: Dict[str, Dict[str, object]] = {}
+            for prop_name, opponents in sorted(
+                type_matchups.items(), key=lambda item: property_label_sort_key(item[0])
+            ):
+                filtered_opponents: Dict[str, object] = {}
+                for opponent in sorted((opponents or {}).keys(), key=property_label_sort_key):
+                    matchup_entry = dict(opponents[opponent] or {})
+                    if matchup_entry.get("opp_cost", 0) == 0:
+                        continue
+                    filtered_opponents[opponent] = matchup_entry
+                if filtered_opponents:
+                    filtered_type_matchups[prop_name] = filtered_opponents
+            if filtered_type_matchups:
+                matchups_payload[weapon_type] = filtered_type_matchups
+        if matchups_payload:
+            payload[str(rank)] = {"matchups": matchups_payload}
     _write_json(PROPERTY_MATCHUPS_PATH, payload)
 
 
