@@ -17,7 +17,6 @@ PARALLEL_MIN_CHUNK_SIZE = 1_000
 OPPORTUNITY_LEAVE_CHANCE = 0.0
 MAGIC_DAMAGE_MULTIPLIER = 2.5
 SPLASH_DAMAGE_MULTIPLIER = 1.5
-BURST_SHOT_COUNT = 3
 
 PROP_TYPE = 0
 PROP_DAMAGE = 1
@@ -396,8 +395,22 @@ if NUMBA_AVAILABLE:
 
 
     @njit(cache=True)
-    def _apply_status_on_hit(att, target, actions, reaction, bleed, slow, immobile, w_props, weapon_idx, rank):
+    def _apply_status_on_hit(
+        att,
+        target,
+        actions,
+        reaction,
+        bleed,
+        slow,
+        immobile,
+        w_props,
+        weapon_idx,
+        weapon_ranks,
+    ):
         w_idx = weapon_idx[att]
+        target_idx = weapon_idx[target]
+        if weapon_ranks[w_idx] < weapon_ranks[target_idx]:
+            return
         bleed_value = w_props[w_idx, PROP_BLEED]
         if bleed_value > 0:
             duration = bleed_value
@@ -408,12 +421,12 @@ if NUMBA_AVAILABLE:
                 slow[target] = 2
         if w_props[w_idx, PROP_DISORIENT] > 0:
             reaction[target] = 0
-        immobile_rank = w_props[w_idx, PROP_IMMOBILIZE]
-        if immobile_rank > 0 and rank <= immobile_rank:
+        immobile_flag = w_props[w_idx, PROP_IMMOBILIZE]
+        if immobile_flag > 0:
             if immobile[target] < 2:
                 immobile[target] = 2
-        stun_rank = w_props[w_idx, PROP_STUN]
-        if stun_rank > 0 and rank <= stun_rank:
+        stun_flag = w_props[w_idx, PROP_STUN]
+        if stun_flag > 0:
             if actions[target] > 0:
                 actions[target] -= 1
             if actions[target] < 0:
@@ -443,7 +456,7 @@ if NUMBA_AVAILABLE:
             roll_value = np.random.randint(1, dice + 1)
         raw_roll = roll_value
         danger = w_props[w_idx, PROP_DANGEROUS]
-        if danger > 0 and raw_roll > danger:
+        if danger > 0 and raw_roll <= danger:
             hp[att] -= 1
             if track_action_damage != 0:
                 damage_received_total[w_idx] += 1.0
@@ -476,16 +489,20 @@ if NUMBA_AVAILABLE:
         w_props,
         w_range,
         weapon_idx,
+        weapon_ranks,
         distance,
         dice,
         skill,
         defense,
-        rank,
         disadvantage,
         damage_received_total,
         track_action_damage,
     ):
         w_idx = weapon_idx[att]
+        target_idx = weapon_idx[target]
+        attacker_rank = weapon_ranks[w_idx]
+        defender_rank = weapon_ranks[target_idx]
+        can_affect_enemy = attacker_rank >= defender_rank
         if distance > w_range[w_idx]:
             return 0, 0, 0
 
@@ -494,10 +511,11 @@ if NUMBA_AVAILABLE:
             stabilization = w_props[w_idx, PROP_STABILIZATION]
 
         penetration_bonus = 0
-        penetration_threshold = w_props[w_idx, PROP_PENETRATION]
-        target_idx = weapon_idx[target]
+        penetration_flag = w_props[w_idx, PROP_PENETRATION]
+        attacker_is_ranged = w_props[w_idx, PROP_TYPE] == 1
         target_melee_cover = (
-            w_props[target_idx, PROP_TYPE] == 0
+            attacker_is_ranged
+            and w_props[target_idx, PROP_TYPE] == 0
             and distance > w_range[target_idx]
         )
         cover_bonus = 2.0
@@ -506,9 +524,10 @@ if NUMBA_AVAILABLE:
         else:
             defense_value = float(defense)
         if (
-            penetration_threshold > 0
+            penetration_flag > 0
+            and attacker_is_ranged
             and target_melee_cover
-            and rank < penetration_threshold
+            and can_affect_enemy
         ):
             penetration_bonus = cover_bonus
 
@@ -550,9 +569,9 @@ if NUMBA_AVAILABLE:
                     damage = reroll_damage
                     break
             rerolls_remaining[att] = rerolls_left
-            # Armor pierce: deal 1 damage on a miss if target rank <= X
-            max_rank = w_props[w_idx, PROP_ARMORPIERCE]
-            if max_rank > 0 and rank <= max_rank:
+            # Armor pierce: deal 1 damage on a miss if target rank <= attacker rank
+            armor_pierce_flag = w_props[w_idx, PROP_ARMORPIERCE]
+            if armor_pierce_flag > 0 and can_affect_enemy:
                 damage = 1.0
 
         if hit == 1 and damage < 1.0:
@@ -587,11 +606,11 @@ if NUMBA_AVAILABLE:
         w_props,
         w_range,
         weapon_idx,
+        weapon_ranks,
         distance,
         dice,
         skill,
         defense,
-        rank,
         damage_total,
         damage_received_total,
         action_spent_total,
@@ -610,11 +629,11 @@ if NUMBA_AVAILABLE:
             w_props,
             w_range,
             weapon_idx,
+            weapon_ranks,
             distance,
             dice,
             skill,
             defense,
-            rank,
             0,
             damage_received_total,
             track_action_damage,
@@ -636,7 +655,7 @@ if NUMBA_AVAILABLE:
                     immobile,
                     w_props,
                     weapon_idx,
-                    rank,
+                    weapon_ranks,
                 )
 
         if shot_fired == 1:
@@ -659,11 +678,11 @@ if NUMBA_AVAILABLE:
         w_props,
         w_range,
         weapon_idx,
+        weapon_ranks,
         distance,
         dice,
         skill,
         defense,
-        rank,
         damage_total,
         damage_received_total,
         action_spent_total,
@@ -693,11 +712,11 @@ if NUMBA_AVAILABLE:
             w_props,
             w_range,
             weapon_idx,
+            weapon_ranks,
             distance,
             dice,
             skill,
             defense,
-            rank,
             damage_total,
             damage_received_total,
             action_spent_total,
@@ -721,11 +740,11 @@ if NUMBA_AVAILABLE:
         w_props,
         w_range,
         weapon_idx,
+        weapon_ranks,
         distance,
         dice,
         skill,
         defense,
-        rank,
         damage_total,
         damage_received_total,
         action_spent_total,
@@ -744,8 +763,7 @@ if NUMBA_AVAILABLE:
             shots[att] = 0
             return
 
-        burst_flag = w_props[w_idx, PROP_BURST]
-        action_cost = 2 if burst_flag > 0 else 1
+        action_cost = 1
         if actions[att] < action_cost:
             return
 
@@ -753,8 +771,8 @@ if NUMBA_AVAILABLE:
         if track_action_damage != 0:
             action_spent_total[weapon_idx[att]] += action_cost
         assault_flag = w_props[w_idx, PROP_ASSAULT]
-        shots_to_fire = BURST_SHOT_COUNT if burst_flag > 0 else 1
-        disadvantage = 1 if burst_flag > 0 else 0
+        shots_to_fire = 1
+        disadvantage = 0
 
         for _ in range(shots_to_fire):
             hit, damage, shot_fired = _roll_attack(
@@ -766,11 +784,11 @@ if NUMBA_AVAILABLE:
                 w_props,
                 w_range,
                 weapon_idx,
+                weapon_ranks,
                 distance,
                 dice,
                 skill,
                 defense,
-                rank,
                 disadvantage,
                 damage_received_total,
                 track_action_damage,
@@ -795,7 +813,7 @@ if NUMBA_AVAILABLE:
                         immobile,
                         w_props,
                         weapon_idx,
-                        rank,
+                        weapon_ranks,
                     )
             else:
                 if shot_fired == 1 and w_props[w_idx, PROP_RISK] > 0:
@@ -817,11 +835,11 @@ if NUMBA_AVAILABLE:
                             w_props,
                             w_range,
                             weapon_idx,
+                            weapon_ranks,
                             distance,
                             dice,
                             skill,
                             defense,
-                            rank,
                             damage_total,
                             damage_received_total,
                             action_spent_total,
@@ -859,11 +877,11 @@ if NUMBA_AVAILABLE:
                     w_props,
                     w_range,
                     weapon_idx,
+                    weapon_ranks,
                     distance,
                     dice,
                     skill,
                     defense,
-                    rank,
                     damage_total,
                     damage_received_total,
                     action_spent_total,
@@ -882,12 +900,12 @@ if NUMBA_AVAILABLE:
     def _full_matchup_numba(
         w_props,
         w_range,
+        weapon_ranks,
         dice: int,
         skill: int,
         defense: float,
         speed: float,
         base_hp: float,
-        rank: int,
         simulations: int,
         max_rounds: int,
         start_index: int,
@@ -964,11 +982,13 @@ if NUMBA_AVAILABLE:
                     if track_action_damage != 0:
                         damage_total[weapon_idx[1]] += 1.0
                         damage_received_total[weapon_idx[0]] += 1.0
+                    bleed[0] -= 1
                 if bleed[1] > 0:
                     hp[1] -= 1
                     if track_action_damage != 0:
                         damage_total[weapon_idx[0]] += 1.0
                         damage_received_total[weapon_idx[1]] += 1.0
+                    bleed[1] -= 1
 
                 if hp[0] <= 0 or hp[1] <= 0:
                     break
@@ -988,8 +1008,6 @@ if NUMBA_AVAILABLE:
                 def_range = w_range[weapon_idx[1]]
                 att_type = w_props[weapon_idx[0], PROP_TYPE]
                 def_type = w_props[weapon_idx[1], PROP_TYPE]
-                att_assault = w_props[weapon_idx[0], PROP_ASSAULT]
-                def_assault = w_props[weapon_idx[1], PROP_ASSAULT]
 
                 if att_type == 0 and distance > att_range:
                     if eff_speed_0 > 0:
@@ -1001,19 +1019,17 @@ if NUMBA_AVAILABLE:
                         moved[1] = 1
                         melee_close += eff_speed_1
 
-                if att_type == 1 and def_type == 0 and att_assault <= 0:
-                    if distance < att_range:
-                        movement = eff_speed_0 / 2.0
-                        if movement > 0:
-                            moved[0] = 1
-                            ranged_retreat += movement
+                if att_type == 1 and def_type == 0:
+                    movement = eff_speed_0 / 2.0
+                    if movement > 0:
+                        moved[0] = 1
+                        ranged_retreat += movement
 
-                if def_type == 1 and att_type == 0 and def_assault <= 0:
-                    if distance < def_range:
-                        movement = eff_speed_1 / 2.0
-                        if movement > 0:
-                            moved[1] = 1
-                            ranged_retreat += movement
+                if def_type == 1 and att_type == 0:
+                    movement = eff_speed_1 / 2.0
+                    if movement > 0:
+                        moved[1] = 1
+                        ranged_retreat += movement
 
                 if melee_close != 0.0 or ranged_retreat != 0.0:
                     distance = distance - melee_close + ranged_retreat
@@ -1080,11 +1096,11 @@ if NUMBA_AVAILABLE:
                                     w_props,
                                     w_range,
                                     weapon_idx,
+                                    weapon_ranks,
                                     prev_distance,
                                     dice,
                                     skill,
                                     defense,
-                                    rank,
                                     damage_total,
                                     damage_received_total,
                                     action_spent_total,
@@ -1108,11 +1124,11 @@ if NUMBA_AVAILABLE:
                         w_props,
                         w_range,
                         weapon_idx,
+                        weapon_ranks,
                         distance,
                         dice,
                         skill,
                         defense,
-                        rank,
                         damage_total,
                         damage_received_total,
                         action_spent_total,
@@ -1136,11 +1152,11 @@ if NUMBA_AVAILABLE:
                         w_props,
                         w_range,
                         weapon_idx,
+                        weapon_ranks,
                         distance,
                         dice,
                         skill,
                         defense,
-                        rank,
                         damage_total,
                         damage_received_total,
                         action_spent_total,
@@ -1164,11 +1180,11 @@ if NUMBA_AVAILABLE:
                         w_props,
                         w_range,
                         weapon_idx,
+                        weapon_ranks,
                         distance,
                         dice,
                         skill,
                         defense,
-                        rank,
                         damage_total,
                         damage_received_total,
                         action_spent_total,
@@ -1192,11 +1208,11 @@ if NUMBA_AVAILABLE:
                         w_props,
                         w_range,
                         weapon_idx,
+                        weapon_ranks,
                         distance,
                         dice,
                         skill,
                         defense,
-                        rank,
                         damage_total,
                         damage_received_total,
                         action_spent_total,
@@ -1206,10 +1222,6 @@ if NUMBA_AVAILABLE:
                 if hp[0] <= 0 or hp[1] <= 0:
                     break
 
-                if bleed[0] > 0:
-                    bleed[0] -= 1
-                if bleed[1] > 0:
-                    bleed[1] -= 1
                 if slow[0] > 0:
                     slow[0] -= 1
                 if slow[1] > 0:
@@ -1250,12 +1262,12 @@ else:
     def _full_matchup_numba(
         w_props,
         w_range,
+        weapon_ranks,
         dice: int,
         skill: int,
         defense: float,
         speed: float,
         base_hp: float,
-        rank: int,
         simulations: int,
         max_rounds: int,
         start_index: int,
@@ -1269,12 +1281,12 @@ else:
 def full_matchup_chunk(
     weapon_props: List[List[float]],
     weapon_range: List[float],
+    weapon_ranks: List[int],
     dice: int,
     skill: int,
     defense: float,
     speed: float,
     base_hp: float,
-    rank: int,
     simulations: int,
     max_rounds: int,
     start_index: int,
@@ -1289,6 +1301,7 @@ def full_matchup_chunk(
             seed = random.randrange(1, 2**31)
         w_props = np.asarray(weapon_props, dtype=np.float64)
         w_range = np.asarray(weapon_range, dtype=np.float64)
+        w_ranks = np.asarray(weapon_ranks, dtype=np.int32)
         (
             w1_wins,
             w2_wins,
@@ -1302,12 +1315,12 @@ def full_matchup_chunk(
         ) = _full_matchup_numba(
             w_props,
             w_range,
+            w_ranks,
             dice,
             skill,
             defense,
             speed,
             base_hp,
-            rank,
             simulations,
             max_rounds,
             start_index,

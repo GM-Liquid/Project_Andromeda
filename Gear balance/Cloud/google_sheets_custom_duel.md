@@ -36,8 +36,8 @@ Each non-empty row in the configured properties ranges is one property, for exam
 
 - `Bleed 1`
 - `Reach 2`
-- `Armor Pierce 1`
-- `Stun 3`
+- `Armor Pierce`
+- `Stun`
 
 You can also put multiple properties in one cell separated by comma or semicolon.
 

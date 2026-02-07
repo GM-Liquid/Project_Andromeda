@@ -4,7 +4,7 @@
 # - Бой идёт раундами, максимум DEFAULT_MAX_ROUNDS. В начале раунда оба бойца:
 #   сбрасывают действия/реакцию, применяют ДОТ (Bleeding), затем происходит движение.
 # - Экономика: ACTIONS_PER_ROUND действий в раунд, одна реакция (REACTION_AVAILABLE_DEFAULT).
-# - Движение: melee сокращает дистанцию, ranged отступает при контакте с melee.
+# - Движение: melee сокращает дистанцию, ranged отступает от melee (не только в контакте).
 #   Могут быть "рывки" с тратой действий для сближения. Дистанция ограничена
 #   DISTANCE_MIN..DISTANCE_MAX. С вероятностью OPPORTUNITY_LEAVE_CHANCE возможна
 #   реакционная атака при выходе melee из зоны угрозы.
@@ -14,7 +14,7 @@
 #   Модификаторы броска: Accuracy X (+ к броску, но не выше dice),
 #   Guarantee X (поднимает бросок до X, кроме случая roll=1),
 #   Stabilization X (если не двигался в раунде),
-#   Penetration X (bonus = cover bonus if target is in cover and target rank < X).
+#   Penetration (ranged only; bonus = cover bonus if target is in cover and target rank <= attacker rank).
 # - Defense: Magical X multiplies up to X damage by 2.5 (no rounding). Splash multiplies all damage by 1.5.
 #   Melee cover adds MELEE_COVER_BONUS.
 # - Попадание: total_roll = roll + skill + stabilization + penetration;
@@ -22,20 +22,21 @@
 # - Урон: damage = (total_roll - defense) + weapon.damage.
 #   При raw_roll == dice добавляется Escalation X. При попадании урон
 #   не ниже MIN_HIT_DAMAGE.
-# - Burst: вместо одной атаки делает 3 выстрела с помехой (2 куба, выбрать меньший) и тратит 2 действия.
 # - Assault: при стрельбе вблизи не провоцирует ответные атаки от melee.
 # - Промах: перебросы от Reroll (пока есть). Если всё равно промах и есть
-#   Armor Pierce X против ранга <= X, наносится ARMOR_PIERCE_MIN_DAMAGE.
-# - Dangerous X: если raw_roll > X, атакующий получает DANGEROUS_SELF_DAMAGE.
+#   Armor Pierce, наносится ARMOR_PIERCE_MIN_DAMAGE (если цель не выше ранга атакующего).
+# - Dangerous X: если raw_roll <= X, атакующий получает DANGEROUS_SELF_DAMAGE.
 # - Risk: при промахе может вызвать реакционную атаку защитника, если есть реакция
 #   и он в дальности.
 # - Реакции: одна реакция за раунд. Aggressive Fire даёт реакционную атаку
 #   после своих действий, если цель в дальности. При стрельбе по melee в зоне
 #   его досягаемости melee может ответить реакцией.
-# - Статусы: Bleed наносит BLEED_DAMAGE_PER_ROUND в начале раунда; Slow снижает
-#   скорость (SLOW_SPEED_MULT) на SLOW_DURATION_ROUNDS; Immobilize запрещает
+# - Статусы: Bleed наносит BLEED_DAMAGE_PER_ROUND в начале раунда и тикается там же;
+#   Slow снижает скорость (SLOW_SPEED_MULT) на SLOW_DURATION_ROUNDS; Immobilize запрещает
 #   движение на IMMOBILIZE_DURATION_ROUNDS; Stun убирает STUN_ACTION_LOSS действий;
-#   Disorienting снимает реакцию. Длительности тикают в конце раунда.
+#   Disorienting снимает реакцию. Длительность (кроме Bleed) тикается в конце раунда.
+# - Ограничение рангов: свойства, влияющие на противника (Disorienting, Stun, Penetration,
+#   Armor Pierce, Immobilize, Bleed, Slow) не действуют на цели более высокого ранга.
 # - Метрики симуляции: action damage считается как урон / потраченные действия
 #   (включая перезарядку и рывки). Реакции действия не тратят и в знаменатель
 #   не входят. Для control-свойств дополнительно считается damage prevention —
@@ -47,8 +48,8 @@
 # hp/defense/speed = базовые хиты/защита/скорость.
 # NOTE: Magical X multiplies up to X damage by 2.5 (no rounding) and no longer affects defense.
 # NOTE: Splash multiplies all damage by 1.5.
-# NOTE: Assault prevents opportunity attacks at close range and stops ranged retreat.
-# NOTE: Penetration X applies when target is in cover and target rank < X.
+# NOTE: Assault prevents opportunity attacks at close range.
+# NOTE: Penetration applies only for ranged attacks, when target is in cover and target rank <= attacker rank.
 RANK_PARAMS = {
     1: {"dice": 6, "skill": 1, "hp": 15.0, "defense": 4.0, "speed": 6.0},
     2: {"dice": 8, "skill": 3, "hp": 20.0, "defense": 6.0, "speed": 9.0},
@@ -97,7 +98,6 @@ DISTANCE_MAX = 100.0
 MELEE_COVER_BONUS = 2.0
 MAGIC_DAMAGE_MULTIPLIER = 2.5
 SPLASH_DAMAGE_MULTIPLIER = 1.5
-PENETRATION_BONUS = 2.0
 
 # Минимальные значения урона, чтобы эффекты не “проваливались” в ноль.
 MIN_HIT_DAMAGE = 1.0
@@ -121,9 +121,8 @@ WEAPON_TYPES = ("melee", "ranged")
 PROPERTY_DEFS = [
     ("Magical", 1),
     ("Splash", True),
-    ("Burst", True),
     ("Assault", True),
-    ("Armor Pierce X", 1),
+    ("Armor Pierce", True),
     ("Escalation X", 1),
     ("Reload X", 1),
     ("Stabilization X", 1),
@@ -133,21 +132,21 @@ PROPERTY_DEFS = [
     ("Aggressive Fire", True),
     ("Concealed", True),
     ("Silent", True),
-    ("Stun X", 1),
+    ("Stun", True),
     ("Slow", True),
     ("Dangerous X", 1),
     ("Risk", True),
-    ("Penetration X", 1),
+    ("Penetration", True),
     ("Disorienting", True),
-    ("Immobilize X", 1),
+    ("Immobilize", True),
     ("Accuracy X", 1),
     ("Reach X", 1),
 ]
 
 # Свойства, влияющие на действия/контроль противника (для damage prevention).
 CONTROL_PROPERTIES = {
-    "Stun X",
-    "Immobilize X",
+    "Stun",
+    "Immobilize",
     "Slow",
     "Disorienting",
 }
@@ -168,8 +167,8 @@ PROPERTY_WEAPON_RESTRICTIONS = {
     "Reload X": {"ranged"},
     "Stabilization X": {"ranged"},
     "Aggressive Fire": {"ranged"},
-    "Burst": {"ranged"},
     "Assault": {"ranged"},
+    "Penetration": {"ranged"},
     "Reach X": {"melee"},
 }
 
@@ -177,22 +176,21 @@ PROPERTY_WEAPON_RESTRICTIONS = {
 SIMULATED_PROPERTIES = {
     "Magical",
     "Splash",
-    "Burst",
     "Assault",
-    "Armor Pierce X",
+    "Armor Pierce",
     "Escalation X",
     "Reload X",
     "Stabilization X",
     "Bleed X",
     "Guarantee X",
     "Aggressive Fire",
-    "Stun X",
+    "Stun",
     "Slow",
     "Dangerous X",
     "Risk",
-    "Penetration X",
+    "Penetration",
     "Disorienting",
-    "Immobilize X",
+    "Immobilize",
     "Accuracy X",
     "Reach X",
 }

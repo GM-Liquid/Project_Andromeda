@@ -62,10 +62,12 @@ def build_property_rows(data, rank_order, types, order_mode):
     for name in properties:
         if is_control_property_label(name):
             control_properties.append(name)
-        elif is_self_damage_property_label(name):
-            self_damage_properties.append(name)
         else:
-            damage_properties.append(name)
+            dual_category = is_dual_category_property_label(name)
+            if dual_category or not is_self_damage_property_label(name):
+                damage_properties.append(name)
+            if dual_category or is_self_damage_property_label(name):
+                self_damage_properties.append(name)
 
     total_cols = 1 + (len(rank_order) * len(types))
     rows = []
@@ -124,6 +126,10 @@ SELF_DAMAGE_PROPERTY_LABELS = {
     name[:-2] if name.endswith(" X") else name for name in SELF_DAMAGE_PROPERTIES
 }
 
+DUAL_CATEGORY_PROPERTY_LABELS = {
+    "Assault",
+}
+
 
 def is_control_property_label(label):
     text = str(label).strip()
@@ -137,6 +143,13 @@ def is_self_damage_property_label(label):
     match = re.match(r"^(.*?)(?:\s+(-?\d+))$", text)
     base = match.group(1).strip() if match else text
     return base in SELF_DAMAGE_PROPERTY_LABELS
+
+
+def is_dual_category_property_label(label):
+    text = str(label).strip()
+    match = re.match(r"^(.*?)(?:\s+(-?\d+))$", text)
+    base = match.group(1).strip() if match else text
+    return base in DUAL_CATEGORY_PROPERTY_LABELS
 
 
 def get_property_value(cost_entry, value_mode):

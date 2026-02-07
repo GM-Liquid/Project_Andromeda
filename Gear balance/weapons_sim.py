@@ -75,10 +75,9 @@ from sim_accel import (
     PROP_REROLLS,
     PROP_RISK,
     PROP_STABILIZATION,
-    PROP_STUN,    
+    PROP_STUN,
     PROP_TYPE,
     PROP_MAGIC,
-    PROP_BURST,
     PROP_SPLASH,
     PROP_ASSAULT,
     PROP_ARMORPIERCE,
@@ -104,14 +103,8 @@ PROPERTY_TRIPLES_PATH = Path(__file__).with_name("property_triples.json")
 
 DEFAULT_WEAPON_TYPE_SET = set(WEAPON_TYPES)
 MAX_CHARACTER_RANK = max(RANK_PARAMS.keys())
-RANK_LIMITED_PROPERTIES = {
-    "Armor Pierce X",
-    "Immobilize X",
-    "Stun X",
-    "Penetration X",
-}
+RANK_LIMITED_PROPERTIES = set()
 REQUIRE_NUMBA = True
-BURST_SHOT_COUNT = 3
 
 
 def require_numba(context: str = "simulation") -> None:
@@ -338,9 +331,15 @@ class Character:
         bleed_damage = 0.0
         
         # Apply ДОТ effects at start of round
-        if "Bleeding" in self.status_effects:
+        bleed_turns = self.status_effects.get("Bleeding")
+        if bleed_turns:
             self.take_damage(BLEED_DAMAGE_PER_ROUND)
             bleed_damage = BLEED_DAMAGE_PER_ROUND
+            bleed_turns -= 1
+            if bleed_turns <= 0:
+                del self.status_effects["Bleeding"]
+            else:
+                self.status_effects["Bleeding"] = bleed_turns
     
         return bleed_damage
 
@@ -349,6 +348,8 @@ class Character:
         # Decrease remaining durations
         expired = []
         for effect in list(self.status_effects.keys()):
+            if effect == "Bleeding":
+                continue
             self.status_effects[effect] -= 1
             if self.status_effects[effect] <= 0:
                 expired.append(effect)
@@ -393,6 +394,10 @@ class CombatSimulator:
         """Check if attacker can reach defender"""
         weapon_range = attacker.weapon.get_range()
         return self.distance <= weapon_range
+
+    def can_affect_enemy(self, attacker: Character, defender: Character) -> bool:
+        """Enemy-affecting properties do not apply to higher-rank targets."""
+        return attacker.rank >= defender.rank
 
     def should_use_utility_action(self, attacker: Character, defender: Character, prop_name: str) -> bool:
         """Decide whether to use a non-damaging utility action instead of a normal attack."""
@@ -472,23 +477,13 @@ class CombatSimulator:
                 defender.moved_this_round = True
                 melee_close += movement
 
-        if (
-            attacker_type == "ranged"
-            and "Assault" not in attacker.weapon.properties
-            and defender_type == "melee"
-            and self.distance < attacker_range
-        ):
+        if attacker_type == "ranged" and defender_type == "melee":
             movement = effective_speed(attacker) * RANGED_RETREAT_SPEED_MULT
             if movement > 0:
                 attacker.moved_this_round = True
                 ranged_retreat += movement
 
-        if (
-            defender_type == "ranged"
-            and "Assault" not in defender.weapon.properties
-            and attacker_type == "melee"
-            and self.distance < defender_range
-        ):
+        if defender_type == "ranged" and attacker_type == "melee":
             movement = effective_speed(defender) * RANGED_RETREAT_SPEED_MULT
             if movement > 0:
                 defender.moved_this_round = True
@@ -573,17 +568,18 @@ class CombatSimulator:
                 and self.distance > character.weapon.get_range()
             )
 
-        defender_melee_cover = melee_has_cover(defender)
+        attacker_is_ranged = attacker.weapon.weapon_type == "ranged"
+        defender_melee_cover = attacker_is_ranged and melee_has_cover(defender)
 
+        can_affect_enemy = self.can_affect_enemy(attacker, defender)
         penetration_bonus = 0
-        penetration_threshold = attacker.weapon.properties.get("Penetration X")
-        if penetration_threshold and defender_melee_cover:
-            try:
-                threshold_value = int(penetration_threshold)
-            except (TypeError, ValueError):
-                threshold_value = 0
-            if defender.rank < threshold_value:
-                penetration_bonus = MELEE_COVER_BONUS
+        if (
+            attacker_is_ranged
+            and "Penetration" in attacker.weapon.properties
+            and defender_melee_cover
+            and can_affect_enemy
+        ):
+            penetration_bonus = MELEE_COVER_BONUS
 
         defense_value = float(defender.defense)
         if defender_melee_cover:
@@ -600,7 +596,7 @@ class CombatSimulator:
 
             if "Dangerous X" in attacker.weapon.properties:
                 danger_threshold = attacker.weapon.properties["Dangerous X"]
-                if raw_roll > danger_threshold:
+                if raw_roll <= danger_threshold:
                     attacker.take_damage(DANGEROUS_SELF_DAMAGE)
 
             if "Accuracy X" in attacker.weapon.properties:
@@ -636,10 +632,12 @@ class CombatSimulator:
                     damage = reroll_damage
                     break
 
-            if (not hit) and ("Armor Pierce X" in attacker.weapon.properties):
-                max_rank = attacker.weapon.properties["Armor Pierce X"]
-                if defender.rank <= max_rank:
-                    damage = max(damage, ARMOR_PIERCE_MIN_DAMAGE)
+            if (
+                (not hit)
+                and ("Armor Pierce" in attacker.weapon.properties)
+                and can_affect_enemy
+            ):
+                damage = max(damage, ARMOR_PIERCE_MIN_DAMAGE)
 
         damage = max(MIN_HIT_DAMAGE, damage) if hit else damage
         magic_cap = normalize_int(attacker.weapon.properties.get("Magical"))
@@ -704,6 +702,9 @@ class CombatSimulator:
         """Apply status effects from weapon properties"""
         if not hit:
             return
+
+        if not self.can_affect_enemy(attacker, defender):
+            return
         
         # ДОТ effects (apply for X rounds)
         if "Bleed X" in attacker.weapon.properties:
@@ -725,22 +726,18 @@ class CombatSimulator:
             defender.reaction_remaining = False
         
         # Обездвиживание (can't move for X rounds)
-        if "Immobilize X" in attacker.weapon.properties:
-            max_rank = attacker.weapon.properties["Immobilize X"]
-            if defender.rank <= max_rank:
-                defender.status_effects["Immobilized"] = max(
-                    defender.status_effects.get("Immobilized", 0),
-                    IMMOBILIZE_DURATION_ROUNDS,
-                )
+        if "Immobilize" in attacker.weapon.properties:
+            defender.status_effects["Immobilized"] = max(
+                defender.status_effects.get("Immobilized", 0),
+                IMMOBILIZE_DURATION_ROUNDS,
+            )
         
         # Ошеломление (lose action)
-        if "Stun X" in attacker.weapon.properties:
-            max_rank = attacker.weapon.properties["Stun X"]
-            if defender.rank <= max_rank:
-                defender.actions_remaining = max(
-                    0,
-                    defender.actions_remaining - STUN_ACTION_LOSS,
-                )
+        if "Stun" in attacker.weapon.properties:
+            defender.actions_remaining = max(
+                0,
+                defender.actions_remaining - STUN_ACTION_LOSS,
+            )
     
     def perform_attack(self, attacker: Character, defender: Character) -> bool:
         """Perform a single attack. Returns True if hit."""
@@ -754,15 +751,14 @@ class CombatSimulator:
             attacker.shots_fired_since_reload = 0
             return False
 
-        burst = "Burst" in attacker.weapon.properties
-        action_cost = 2 if burst else 1
+        action_cost = 1
         if attacker.actions_remaining < action_cost:
             return False
 
         attacker.actions_remaining -= action_cost
         attacker.actions_spent += action_cost
-        shots_to_fire = BURST_SHOT_COUNT if burst else 1
-        disadvantage = burst
+        shots_to_fire = 1
+        disadvantage = False
         total_action_damage = 0.0
         any_hit = False
         shot_fired_any = False
@@ -1113,9 +1109,8 @@ def build_weapon_props_array(weapon: Weapon) -> Tuple[List[float], float]:
     props = [0.0] * PROP_COUNT
     props[PROP_TYPE] = 0 if weapon.weapon_type == "melee" else 1
     props[PROP_DAMAGE] = float(weapon.damage)
-    props[PROP_PENETRATION] = normalize_int(
-        weapon.properties.get("Penetration X")
-    )
+    penetration = normalize_int(weapon.properties.get("Penetration"))
+    props[PROP_PENETRATION] = penetration if weapon.weapon_type == "ranged" else 0
     props[PROP_ESCALATION] = normalize_int(weapon.properties.get("Escalation X"))
     props[PROP_RELOAD] = normalize_int(weapon.properties.get("Reload X"))
     props[PROP_STABILIZATION] = normalize_int(
@@ -1123,21 +1118,20 @@ def build_weapon_props_array(weapon: Weapon) -> Tuple[List[float], float]:
     )
     props[PROP_ACCURACY] = normalize_int(weapon.properties.get("Accuracy X"))
     props[PROP_GUARANTEE] = normalize_int(weapon.properties.get("Guarantee X"))
-    props[PROP_STUN] = normalize_int(weapon.properties.get("Stun X"))
+    props[PROP_STUN] = normalize_int(weapon.properties.get("Stun"))
     props[PROP_APPLY_SLOW] = 1.0 if "Slow" in weapon.properties else 0.0
     props[PROP_DANGEROUS] = normalize_int(weapon.properties.get("Dangerous X"))
     props[PROP_RISK] = 1.0 if "Risk" in weapon.properties else 0.0
     props[PROP_AGGRESSIVE] = 1.0 if "Aggressive Fire" in weapon.properties else 0.0
-    props[PROP_ARMORPIERCE] = normalize_int(weapon.properties.get("Armor Pierce X"))
+    props[PROP_ARMORPIERCE] = normalize_int(
+        weapon.properties.get("Armor Pierce")
+    )
     props[PROP_BLEED] = normalize_int(weapon.properties.get("Bleed X"))
     props[PROP_DISORIENT] = 1.0 if "Disorienting" in weapon.properties else 0.0
-    props[PROP_IMMOBILIZE] = normalize_int(
-        weapon.properties.get("Immobilize X")
-    )
+    props[PROP_IMMOBILIZE] = normalize_int(weapon.properties.get("Immobilize"))
     props[PROP_MAGIC] = float(
         normalize_int(weapon.properties.get("Magical"))
     )
-    props[PROP_BURST] = 1.0 if "Burst" in weapon.properties else 0.0
     props[PROP_SPLASH] = 1.0 if "Splash" in weapon.properties else 0.0
     props[PROP_ASSAULT] = 1.0 if "Assault" in weapon.properties else 0.0
     props[PROP_REROLLS] = normalize_int(weapon.properties.get(REROLL_PROPERTY))
@@ -2223,6 +2217,7 @@ def calculate_property_action_damage(
     baseline_action_damage: Optional[Dict[str, float]] = None,
     baseline_opponent_damage: Optional[Dict[str, float]] = None,
     baseline_received_damage: Optional[Dict[str, float]] = None,
+    base_values_data: Optional[Dict[int, Dict[str, object]]] = None,
 ) -> Dict[str, Dict[str, Dict[str, float]]]:
     baseline_damage = BASELINE_DAMAGE_BY_RANK[rank]
     property_lookup = {prop_name: prop_value for prop_name, prop_value in PROPERTY_DEFS}
@@ -2320,6 +2315,16 @@ def calculate_property_action_damage(
     baseline_avg = resolved_baseline
     baseline_opp = resolved_opponent
     baseline_received = resolved_received
+    if base_values_data is None:
+        base_values_data = load_base_values()
+    rank_baselines = base_values_data.get(rank, {}).get("baselines", {})
+    damage_action_tables = {
+        weapon_type: (rank_baselines.get(weapon_type, {}) or {}).get(
+            "damage_action_damage",
+            {},
+        )
+        for weapon_type in WEAPON_TYPES
+    }
 
     test_weapons_map = {}
     all_test_weapons = []
@@ -2345,7 +2350,11 @@ def calculate_property_action_damage(
             if prop_name in no_effect_props:
                 baseline_value = baseline_avg.get(weapon_type, 0.0)
                 baseline_received_value = baseline_received.get(weapon_type, 0.0)
-                avg_damage = baseline_value
+                bonus_damage = baseline_damage + 1
+                damage_action = damage_action_tables.get(weapon_type, {})
+                avg_damage = float(
+                    damage_action.get(bonus_damage, baseline_value)
+                )
                 type_costs[prop_key] = {
                     "average_action_damage": round(avg_damage, 2),
                     "cost": round_damage_delta(avg_damage - baseline_value),
@@ -2461,6 +2470,7 @@ def recalc_property_values_v2_for_ranks(
             baseline_action_damage=baseline_action_damage,
             baseline_opponent_damage=baseline_received_damage,
             baseline_received_damage=baseline_received_damage,
+            base_values_data=base_values_data,
         )
         property_values_data[current_rank] = {
             "rank": current_rank,
@@ -2517,6 +2527,7 @@ def recalc_property_values_v2_for_ranks_multi_x(
                 baseline_action_damage=baseline_action_damage,
                 baseline_opponent_damage=baseline_received_damage,
                 baseline_received_damage=baseline_received_damage,
+                base_values_data=base_values_data,
             )
             for weapon_type, type_costs in property_costs.items():
                 merged_costs.setdefault(weapon_type, {})
@@ -2956,6 +2967,7 @@ def run_matchup(
         skill = params["skill"]
         defense = params["defense"]
         weapon_props, weapon_ranges = build_matchup_props(weapon1, weapon2)
+        weapon_ranks = [weapon1.rank, weapon2.rank]
         w1_wins = 0
         w2_wins = 0
         total_rounds = 0
@@ -2984,12 +2996,12 @@ def run_matchup(
             ) = full_matchup_chunk(
                 weapon_props,
                 weapon_ranges,
+                weapon_ranks,
                 dice,
                 skill,
                 defense,
                 speed,
                 base_hp,
-                rank,
                 simulations,
                 DEFAULT_MAX_ROUNDS,
                 0,
@@ -3035,12 +3047,12 @@ def run_matchup(
             ) = full_matchup_chunk(
                 weapon_props,
                 weapon_ranges,
+                weapon_ranks,
                 dice,
                 skill,
                 defense,
                 speed,
                 base_hp,
-                rank,
                 int(count),
                 DEFAULT_MAX_ROUNDS,
                 start_index,
