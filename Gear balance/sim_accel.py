@@ -15,6 +15,9 @@ PARALLEL_MIN_SIMULATIONS = 20_000
 PARALLEL_CHUNKS_PER_WORKER = 4
 PARALLEL_MIN_CHUNK_SIZE = 1_000
 OPPORTUNITY_LEAVE_CHANCE = 0.0
+MAGIC_DAMAGE_MULTIPLIER = 2.5
+SPLASH_DAMAGE_MULTIPLIER = 1.5
+BURST_SHOT_COUNT = 3
 
 PROP_TYPE = 0
 PROP_DAMAGE = 1
@@ -35,7 +38,10 @@ PROP_IMMOBILIZE = 15
 PROP_ARMORPIERCE = 16
 PROP_REROLLS = 17
 PROP_MAGIC = 18
-PROP_COUNT = 19
+PROP_BURST = 19
+PROP_SPLASH = 20
+PROP_ASSAULT = 21
+PROP_COUNT = 22
 
 try:
     import numpy as np
@@ -425,12 +431,22 @@ if NUMBA_AVAILABLE:
         defense,
         stabilization,
         penetration,
+        disadvantage,
+        damage_received_total,
+        track_action_damage,
     ):
-        roll_value = np.random.randint(1, dice + 1)
+        if disadvantage == 1:
+            roll_a = np.random.randint(1, dice + 1)
+            roll_b = np.random.randint(1, dice + 1)
+            roll_value = roll_a if roll_a < roll_b else roll_b
+        else:
+            roll_value = np.random.randint(1, dice + 1)
         raw_roll = roll_value
         danger = w_props[w_idx, PROP_DANGEROUS]
         if danger > 0 and raw_roll > danger:
             hp[att] -= 1
+            if track_action_damage != 0:
+                damage_received_total[w_idx] += 1.0
         accuracy = w_props[w_idx, PROP_ACCURACY]
         if accuracy > 0:
             roll_value = min(roll_value + accuracy, dice)
@@ -465,6 +481,9 @@ if NUMBA_AVAILABLE:
         skill,
         defense,
         rank,
+        disadvantage,
+        damage_received_total,
+        track_action_damage,
     ):
         w_idx = weapon_idx[att]
         if distance > w_range[w_idx]:
@@ -481,18 +500,17 @@ if NUMBA_AVAILABLE:
             w_props[target_idx, PROP_TYPE] == 0
             and distance > w_range[target_idx]
         )
+        cover_bonus = 2.0
+        if target_melee_cover:
+            defense_value = float(defense) + cover_bonus
+        else:
+            defense_value = float(defense)
         if (
             penetration_threshold > 0
+            and target_melee_cover
             and rank < penetration_threshold
-            and not target_melee_cover
         ):
-            penetration_bonus = 2
-        magic_flag = w_props[w_idx, PROP_MAGIC]
-        defense_value = float(defense)
-        if magic_flag > 0:
-            defense_value = np.round(defense_value / 3.0, 1)
-        if target_melee_cover:
-            defense_value += 2
+            penetration_bonus = cover_bonus
 
         _, hit, damage = _evaluate_roll(
             att,
@@ -504,6 +522,9 @@ if NUMBA_AVAILABLE:
             defense_value,
             stabilization,
             penetration_bonus,
+            disadvantage,
+            damage_received_total,
+            track_action_damage,
         )
 
         if hit == 0:
@@ -521,6 +542,9 @@ if NUMBA_AVAILABLE:
                     defense_value,
                     stabilization,
                     penetration_bonus,
+                    disadvantage,
+                    damage_received_total,
+                    track_action_damage,
                 )
                 if hit == 1:
                     damage = reroll_damage
@@ -533,6 +557,15 @@ if NUMBA_AVAILABLE:
 
         if hit == 1 and damage < 1.0:
             damage = 1.0
+        magic_cap = w_props[w_idx, PROP_MAGIC]
+        if damage > 0 and magic_cap > 0:
+            if damage > magic_cap:
+                damage = magic_cap * MAGIC_DAMAGE_MULTIPLIER + (damage - magic_cap)
+            else:
+                damage = damage * MAGIC_DAMAGE_MULTIPLIER
+        splash_flag = w_props[w_idx, PROP_SPLASH]
+        if damage > 0 and splash_flag > 0:
+            damage = damage * SPLASH_DAMAGE_MULTIPLIER
 
         return hit, damage, 1
 
@@ -560,6 +593,7 @@ if NUMBA_AVAILABLE:
         defense,
         rank,
         damage_total,
+        damage_received_total,
         action_spent_total,
         track_action_damage,
     ):
@@ -581,12 +615,16 @@ if NUMBA_AVAILABLE:
             skill,
             defense,
             rank,
+            0,
+            damage_received_total,
+            track_action_damage,
         )
 
         if damage > 0:
             hp[target] -= damage
             if track_action_damage != 0:
                 damage_total[weapon_idx[att]] += damage
+                damage_received_total[weapon_idx[target]] += damage
             if hit == 1:
                 _apply_status_on_hit(
                     att,
@@ -627,6 +665,7 @@ if NUMBA_AVAILABLE:
         defense,
         rank,
         damage_total,
+        damage_received_total,
         action_spent_total,
         track_action_damage,
     ):
@@ -660,6 +699,7 @@ if NUMBA_AVAILABLE:
             defense,
             rank,
             damage_total,
+            damage_received_total,
             action_spent_total,
             track_action_damage,
         )
@@ -687,6 +727,7 @@ if NUMBA_AVAILABLE:
         defense,
         rank,
         damage_total,
+        damage_received_total,
         action_spent_total,
         track_action_damage,
     ):
@@ -703,99 +744,24 @@ if NUMBA_AVAILABLE:
             shots[att] = 0
             return
 
-        actions[att] -= 1
+        burst_flag = w_props[w_idx, PROP_BURST]
+        action_cost = 2 if burst_flag > 0 else 1
+        if actions[att] < action_cost:
+            return
+
+        actions[att] -= action_cost
         if track_action_damage != 0:
-            action_spent_total[weapon_idx[att]] += 1
+            action_spent_total[weapon_idx[att]] += action_cost
+        assault_flag = w_props[w_idx, PROP_ASSAULT]
+        shots_to_fire = BURST_SHOT_COUNT if burst_flag > 0 else 1
+        disadvantage = 1 if burst_flag > 0 else 0
 
-        hit, damage, shot_fired = _roll_attack(
-            att,
-            target,
-            hp,
-            moved,
-            rerolls_remaining,
-            w_props,
-            w_range,
-            weapon_idx,
-            distance,
-            dice,
-            skill,
-            defense,
-            rank,
-        )
-
-        if damage > 0:
-            hp[target] -= damage
-            if track_action_damage != 0:
-                damage_total[weapon_idx[att]] += damage
-            if hit == 1:
-                _apply_status_on_hit(
-                    att,
-                    target,
-                    actions,
-                    reaction,
-                    bleed,
-                    slow,
-                    immobile,
-                    w_props,
-                    weapon_idx,
-                    rank,
-                )
-        else:
-            if shot_fired == 1 and w_props[w_idx, PROP_RISK] > 0:
-                if reaction[target] == 1 and distance <= w_range[weapon_idx[target]]:
-                    reaction[target] = 0
-                    _perform_reaction_attack(
-                        target,
-                        att,
-                        hp,
-                        moved,
-                        actions,
-                        reaction,
-                        bleed,
-                        slow,
-                        immobile,
-                        shots,
-                        reload_required,
-                        rerolls_remaining,
-                        w_props,
-                        w_range,
-                        weapon_idx,
-                        distance,
-                        dice,
-                        skill,
-                        defense,
-                        rank,
-                        damage_total,
-                        action_spent_total,
-                        track_action_damage,
-                    )
-                    if hp[att] <= 0:
-                        return
-
-        if shot_fired == 1:
-            _record_shot(att, shots, reload_required, w_props, weapon_idx)
-
-        if (
-            shot_fired == 1
-            and w_props[w_idx, PROP_TYPE] == 1
-            and w_props[weapon_idx[target], PROP_TYPE] == 0
-            and distance <= w_range[weapon_idx[target]]
-            and reaction[target] == 1
-            and hp[target] > 0
-        ):
-            reaction[target] = 0
-            _perform_reaction_attack(
-                target,
+        for _ in range(shots_to_fire):
+            hit, damage, shot_fired = _roll_attack(
                 att,
+                target,
                 hp,
                 moved,
-                actions,
-                reaction,
-                bleed,
-                slow,
-                immobile,
-                shots,
-                reload_required,
                 rerolls_remaining,
                 w_props,
                 w_range,
@@ -805,12 +771,111 @@ if NUMBA_AVAILABLE:
                 skill,
                 defense,
                 rank,
-                damage_total,
-                action_spent_total,
+                disadvantage,
+                damage_received_total,
                 track_action_damage,
             )
-            if hp[att] <= 0:
-                return
+
+            if shot_fired == 0:
+                break
+
+            if damage > 0:
+                hp[target] -= damage
+                if track_action_damage != 0:
+                    damage_total[weapon_idx[att]] += damage
+                    damage_received_total[weapon_idx[target]] += damage
+                if hit == 1:
+                    _apply_status_on_hit(
+                        att,
+                        target,
+                        actions,
+                        reaction,
+                        bleed,
+                        slow,
+                        immobile,
+                        w_props,
+                        weapon_idx,
+                        rank,
+                    )
+            else:
+                if shot_fired == 1 and w_props[w_idx, PROP_RISK] > 0:
+                    if reaction[target] == 1 and distance <= w_range[weapon_idx[target]]:
+                        reaction[target] = 0
+                        _perform_reaction_attack(
+                            target,
+                            att,
+                            hp,
+                            moved,
+                            actions,
+                            reaction,
+                            bleed,
+                            slow,
+                            immobile,
+                            shots,
+                            reload_required,
+                            rerolls_remaining,
+                            w_props,
+                            w_range,
+                            weapon_idx,
+                            distance,
+                            dice,
+                            skill,
+                            defense,
+                            rank,
+                            damage_total,
+                            damage_received_total,
+                            action_spent_total,
+                            track_action_damage,
+                        )
+                        if hp[att] <= 0:
+                            return
+
+            if shot_fired == 1:
+                _record_shot(att, shots, reload_required, w_props, weapon_idx)
+
+            if (
+                shot_fired == 1
+                and w_props[w_idx, PROP_TYPE] == 1
+                and assault_flag <= 0
+                and w_props[weapon_idx[target], PROP_TYPE] == 0
+                and distance <= w_range[weapon_idx[target]]
+                and reaction[target] == 1
+                and hp[target] > 0
+            ):
+                reaction[target] = 0
+                _perform_reaction_attack(
+                    target,
+                    att,
+                    hp,
+                    moved,
+                    actions,
+                    reaction,
+                    bleed,
+                    slow,
+                    immobile,
+                    shots,
+                    reload_required,
+                    rerolls_remaining,
+                    w_props,
+                    w_range,
+                    weapon_idx,
+                    distance,
+                    dice,
+                    skill,
+                    defense,
+                    rank,
+                    damage_total,
+                    damage_received_total,
+                    action_spent_total,
+                    track_action_damage,
+                )
+                if hp[att] <= 0:
+                    return
+
+            if hp[target] <= 0:
+                break
+            if reload_required[att] == 1 and w_props[w_idx, PROP_RELOAD] > 0:
+                break
 
 
     @njit(cache=True)
@@ -829,12 +894,13 @@ if NUMBA_AVAILABLE:
         initial_distance: float,
         seed: int,
         track_action_damage: int,
-    ) -> Tuple[int, int, int, float, float, int, int]:
+    ) -> Tuple[int, int, int, float, float, int, int, float, float]:
         np.random.seed(seed)
         w1_wins = 0
         w2_wins = 0
         total_rounds = 0
         damage_total = np.zeros(2, dtype=np.float64)
+        damage_received_total = np.zeros(2, dtype=np.float64)
         action_spent_total = np.zeros(2, dtype=np.int64)
 
         hp = np.empty(2, dtype=np.float64)
@@ -897,10 +963,12 @@ if NUMBA_AVAILABLE:
                     hp[0] -= 1
                     if track_action_damage != 0:
                         damage_total[weapon_idx[1]] += 1.0
+                        damage_received_total[weapon_idx[0]] += 1.0
                 if bleed[1] > 0:
                     hp[1] -= 1
                     if track_action_damage != 0:
                         damage_total[weapon_idx[0]] += 1.0
+                        damage_received_total[weapon_idx[1]] += 1.0
 
                 if hp[0] <= 0 or hp[1] <= 0:
                     break
@@ -920,6 +988,8 @@ if NUMBA_AVAILABLE:
                 def_range = w_range[weapon_idx[1]]
                 att_type = w_props[weapon_idx[0], PROP_TYPE]
                 def_type = w_props[weapon_idx[1], PROP_TYPE]
+                att_assault = w_props[weapon_idx[0], PROP_ASSAULT]
+                def_assault = w_props[weapon_idx[1], PROP_ASSAULT]
 
                 if att_type == 0 and distance > att_range:
                     if eff_speed_0 > 0:
@@ -931,14 +1001,14 @@ if NUMBA_AVAILABLE:
                         moved[1] = 1
                         melee_close += eff_speed_1
 
-                if att_type == 1 and def_type == 0:
+                if att_type == 1 and def_type == 0 and att_assault <= 0:
                     if distance < att_range:
                         movement = eff_speed_0 / 2.0
                         if movement > 0:
                             moved[0] = 1
                             ranged_retreat += movement
 
-                if def_type == 1 and att_type == 0:
+                if def_type == 1 and att_type == 0 and def_assault <= 0:
                     if distance < def_range:
                         movement = eff_speed_1 / 2.0
                         if movement > 0:
@@ -1016,6 +1086,7 @@ if NUMBA_AVAILABLE:
                                     defense,
                                     rank,
                                     damage_total,
+                                    damage_received_total,
                                     action_spent_total,
                                     track_action_damage,
                                 )
@@ -1043,6 +1114,7 @@ if NUMBA_AVAILABLE:
                         defense,
                         rank,
                         damage_total,
+                        damage_received_total,
                         action_spent_total,
                         track_action_damage,
                     )
@@ -1070,6 +1142,7 @@ if NUMBA_AVAILABLE:
                         defense,
                         rank,
                         damage_total,
+                        damage_received_total,
                         action_spent_total,
                         track_action_damage,
                     )
@@ -1097,6 +1170,7 @@ if NUMBA_AVAILABLE:
                         defense,
                         rank,
                         damage_total,
+                        damage_received_total,
                         action_spent_total,
                         track_action_damage,
                     )
@@ -1124,6 +1198,7 @@ if NUMBA_AVAILABLE:
                         defense,
                         rank,
                         damage_total,
+                        damage_received_total,
                         action_spent_total,
                         track_action_damage,
                     )
@@ -1166,6 +1241,8 @@ if NUMBA_AVAILABLE:
             damage_total[1],
             int(action_spent_total[0]),
             int(action_spent_total[1]),
+            damage_received_total[0],
+            damage_received_total[1],
         )
 
 else:
@@ -1185,7 +1262,7 @@ else:
         initial_distance: float,
         seed: int,
         track_action_damage: int,
-    ) -> Tuple[int, int, int, float, float, int, int]:
+    ) -> Tuple[int, int, int, float, float, int, int, float, float]:
         raise RuntimeError("Numba is not available.")
 
 
@@ -1206,7 +1283,7 @@ def full_matchup_chunk(
     seed: Optional[int],
     use_numba: bool = True,
     track_action_damage: bool = False,
-) -> Tuple[int, int, List[int], List[int], int, float, float, int, int]:
+) -> Tuple[int, int, List[int], List[int], int, float, float, int, int, float, float]:
     if use_numba and NUMBA_AVAILABLE and not track_rounds:
         if seed is None:
             seed = random.randrange(1, 2**31)
@@ -1220,6 +1297,8 @@ def full_matchup_chunk(
             w2_damage,
             w1_attacks,
             w2_attacks,
+            w1_received,
+            w2_received,
         ) = _full_matchup_numba(
             w_props,
             w_range,
@@ -1246,6 +1325,8 @@ def full_matchup_chunk(
             float(w2_damage),
             int(w1_attacks),
             int(w2_attacks),
+            float(w1_received),
+            float(w2_received),
         )
 
     raise RuntimeError("Full matchup requires Numba and track_rounds=False.")

@@ -5,7 +5,7 @@ from pathlib import Path
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-from sim_rules import CONTROL_PROPERTIES
+from sim_rules import CONTROL_PROPERTIES, SELF_DAMAGE_PROPERTIES
 
 
 def load_config():
@@ -56,8 +56,16 @@ def build_property_rows(data, rank_order, types, order_mode):
                         continue
                     seen.add(prop_name)
                     properties.append(prop_name)
-    damage_properties = [name for name in properties if not is_control_property_label(name)]
-    control_properties = [name for name in properties if is_control_property_label(name)]
+    damage_properties = []
+    self_damage_properties = []
+    control_properties = []
+    for name in properties:
+        if is_control_property_label(name):
+            control_properties.append(name)
+        elif is_self_damage_property_label(name):
+            self_damage_properties.append(name)
+        else:
+            damage_properties.append(name)
 
     total_cols = 1 + (len(rank_order) * len(types))
     rows = []
@@ -68,11 +76,24 @@ def build_property_rows(data, rank_order, types, order_mode):
             rank_data = data.get(str(rank), {}).get("property_costs", {})
             for prop_type in types:
                 cost_entry = rank_data.get(prop_type, {}).get(prop_name)
-                row.append(get_property_value(cost_entry, use_prevention=False))
+                row.append(get_property_value(cost_entry, value_mode="cost"))
         rows.append(row)
 
+    if self_damage_properties:
+        if rows:
+            rows.append([""] * total_cols)
+        for prop_name in self_damage_properties:
+            row = [prop_name]
+            for rank in rank_order:
+                rank_data = data.get(str(rank), {}).get("property_costs", {})
+                for prop_type in types:
+                    cost_entry = rank_data.get(prop_type, {}).get(prop_name)
+                    row.append(get_property_value(cost_entry, value_mode="received"))
+            rows.append(row)
+
     if control_properties:
-        rows.append([""] * total_cols)
+        if rows:
+            rows.append([""] * total_cols)
 
     for prop_name in control_properties:
         row = [prop_name]
@@ -80,7 +101,7 @@ def build_property_rows(data, rank_order, types, order_mode):
             rank_data = data.get(str(rank), {}).get("property_costs", {})
             for prop_type in types:
                 cost_entry = rank_data.get(prop_type, {}).get(prop_name)
-                row.append(get_property_value(cost_entry, use_prevention=True))
+                row.append(get_property_value(cost_entry, value_mode="prevention"))
         rows.append(row)
 
     return rows
@@ -99,6 +120,10 @@ CONTROL_PROPERTY_LABELS = {
     name[:-2] if name.endswith(" X") else name for name in CONTROL_PROPERTIES
 }
 
+SELF_DAMAGE_PROPERTY_LABELS = {
+    name[:-2] if name.endswith(" X") else name for name in SELF_DAMAGE_PROPERTIES
+}
+
 
 def is_control_property_label(label):
     text = str(label).strip()
@@ -107,14 +132,29 @@ def is_control_property_label(label):
     return base in CONTROL_PROPERTY_LABELS
 
 
-def get_property_value(cost_entry, use_prevention):
+def is_self_damage_property_label(label):
+    text = str(label).strip()
+    match = re.match(r"^(.*?)(?:\s+(-?\d+))$", text)
+    base = match.group(1).strip() if match else text
+    return base in SELF_DAMAGE_PROPERTY_LABELS
+
+
+def get_property_value(cost_entry, value_mode):
     if cost_entry is None:
         return ""
     if isinstance(cost_entry, dict):
-        key = "damage_prevention" if use_prevention else "cost"
+        if value_mode == "prevention":
+            key = "damage_prevention"
+        elif value_mode == "received":
+            if "damage_received_delta" in cost_entry:
+                key = "damage_received_delta"
+            else:
+                key = "average_damage_received"
+        else:
+            key = "cost"
         value = cost_entry.get(key)
         return "" if value is None else value
-    if use_prevention:
+    if value_mode != "cost":
         return ""
     return cost_entry
 

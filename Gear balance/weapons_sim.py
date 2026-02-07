@@ -34,13 +34,13 @@ from sim_rules import (
     EXTREME_CONFIDENCE,
     CONTROL_PROPERTIES,
     IMMOBILIZE_DURATION_ROUNDS,
-    MAGICAL_DEFENSE_DIVISOR,
+    MAGIC_DAMAGE_MULTIPLIER,
+    SPLASH_DAMAGE_MULTIPLIER,
     MAX_DAMAGE_BY_RANK,
     MELEE_BASE_RANGE,
     MELEE_COVER_BONUS,
     MIN_HIT_DAMAGE,
     OPPORTUNITY_LEAVE_CHANCE,
-    PENETRATION_BONUS,
     PROPERTY_DEFS,
     PROPERTY_WEAPON_RESTRICTIONS,
     RANGED_BASE_RANGE,
@@ -78,6 +78,9 @@ from sim_accel import (
     PROP_STUN,    
     PROP_TYPE,
     PROP_MAGIC,
+    PROP_BURST,
+    PROP_SPLASH,
+    PROP_ASSAULT,
     PROP_ARMORPIERCE,
     BatchTask,
     SimulationPool,
@@ -108,6 +111,7 @@ RANK_LIMITED_PROPERTIES = {
     "Penetration X",
 }
 REQUIRE_NUMBA = True
+BURST_SHOT_COUNT = 3
 
 
 def require_numba(context: str = "simulation") -> None:
@@ -120,6 +124,10 @@ def require_numba(context: str = "simulation") -> None:
 
 def should_skip_property_for_x(prop_name: str, x_value: int) -> bool:
     return prop_name in RANK_LIMITED_PROPERTIES and x_value > MAX_CHARACTER_RANK
+
+
+def is_x_property_value(prop_value: object) -> bool:
+    return isinstance(prop_value, int) and not isinstance(prop_value, bool)
 
 
 def allowed_weapon_types_for(prop_name: str) -> Set[str]:
@@ -144,6 +152,39 @@ def property_label_sort_key(label: str) -> Tuple[str, int, int]:
         base = match.group(1).strip().lower()
         return (base, 0, int(match.group(2)))
     return (text.lower(), 1, 0)
+
+
+def filter_property_costs_for_defs(
+    property_costs: Dict[str, Dict[str, object]],
+) -> Dict[str, Dict[str, object]]:
+    x_bases = set()
+    flag_bases = set()
+    for prop_name, prop_value in PROPERTY_DEFS:
+        if is_x_property_value(prop_value):
+            base_name = prop_name[:-2].strip() if prop_name.endswith(" X") else prop_name
+            x_bases.add(base_name)
+        else:
+            flag_bases.add(prop_name)
+
+    cleaned: Dict[str, Dict[str, object]] = {}
+    for weapon_type, type_costs in (property_costs or {}).items():
+        if weapon_type not in WEAPON_TYPES:
+            continue
+        filtered: Dict[str, object] = {}
+        for raw_label, entry in (type_costs or {}).items():
+            label = str(raw_label).strip()
+            match = re.match(r"^(.*?)(?:\s+(-?\d+))$", label)
+            if match:
+                base = match.group(1).strip()
+                if base in x_bases:
+                    filtered[label] = entry
+                continue
+            if label in flag_bases:
+                filtered[label] = entry
+        if filtered:
+            cleaned[weapon_type] = filtered
+
+    return cleaned
 
 
 def tuple_label_sort_key(labels: Tuple[str, ...]) -> Tuple[Tuple[str, int, int], ...]:
@@ -245,6 +286,7 @@ class Character:
     utility_actions_used: Set[str] = field(default_factory=set)
     rerolls_remaining: int = 0
     action_damage_dealt: float = 0.0
+    damage_received: float = 0.0
     actions_spent: int = 0
     
     def __post_init__(self):
@@ -272,6 +314,7 @@ class Character:
             self.weapon.properties.get(REROLL_PROPERTY)
         )
         self.action_damage_dealt = 0.0
+        self.damage_received = 0.0
         self.actions_spent = 0
 
     def is_alive(self) -> bool:
@@ -280,7 +323,10 @@ class Character:
     
     def take_damage(self, damage: float):
         """Apply damage to character"""
+        if damage <= 0:
+            return
         self.hp = max(0.0, self.hp - damage)
+        self.damage_received += damage
     
     def reset_round(self) -> float:
         """Reset round-based resources"""
@@ -428,6 +474,7 @@ class CombatSimulator:
 
         if (
             attacker_type == "ranged"
+            and "Assault" not in attacker.weapon.properties
             and defender_type == "melee"
             and self.distance < attacker_range
         ):
@@ -438,6 +485,7 @@ class CombatSimulator:
 
         if (
             defender_type == "ranged"
+            and "Assault" not in defender.weapon.properties
             and attacker_type == "melee"
             and self.distance < defender_range
         ):
@@ -502,6 +550,7 @@ class CombatSimulator:
         self,
         attacker: Character,
         defender: Character,
+        disadvantage: bool = False,
     ) -> Tuple[int, float, bool]:
         """
         Roll attack and determine hit.
@@ -528,22 +577,25 @@ class CombatSimulator:
 
         penetration_bonus = 0
         penetration_threshold = attacker.weapon.properties.get("Penetration X")
-        if penetration_threshold and not defender_melee_cover:
+        if penetration_threshold and defender_melee_cover:
             try:
                 threshold_value = int(penetration_threshold)
             except (TypeError, ValueError):
                 threshold_value = 0
-            if defender.rank <= threshold_value:
-                penetration_bonus = PENETRATION_BONUS
+            if defender.rank < threshold_value:
+                penetration_bonus = MELEE_COVER_BONUS
 
         defense_value = float(defender.defense)
-        if "Magical" in attacker.weapon.properties:
-            defense_value = round(defense_value / MAGICAL_DEFENSE_DIVISOR, 1)
         if defender_melee_cover:
             defense_value += MELEE_COVER_BONUS
 
         def evaluate_roll() -> Tuple[int, bool, float]:
-            roll_value = random.randint(1, attacker.dice)
+            if disadvantage:
+                roll_a = random.randint(1, attacker.dice)
+                roll_b = random.randint(1, attacker.dice)
+                roll_value = min(roll_a, roll_b)
+            else:
+                roll_value = random.randint(1, attacker.dice)
             raw_roll = roll_value
 
             if "Dangerous X" in attacker.weapon.properties:
@@ -590,6 +642,16 @@ class CombatSimulator:
                     damage = max(damage, ARMOR_PIERCE_MIN_DAMAGE)
 
         damage = max(MIN_HIT_DAMAGE, damage) if hit else damage
+        magic_cap = normalize_int(attacker.weapon.properties.get("Magical"))
+        if damage > 0 and magic_cap > 0:
+            cap_value = float(magic_cap)
+            if damage > cap_value:
+                damage = cap_value * MAGIC_DAMAGE_MULTIPLIER + (damage - cap_value)
+            else:
+                damage *= MAGIC_DAMAGE_MULTIPLIER
+        splash_flag = "Splash" in attacker.weapon.properties
+        if damage > 0 and splash_flag:
+            damage *= SPLASH_DAMAGE_MULTIPLIER
 
         return roll, damage, hit
     
@@ -691,26 +753,43 @@ class CombatSimulator:
             attacker.reload_required = False
             attacker.shots_fired_since_reload = 0
             return False
-        
-        attacker.actions_remaining -= 1
-        attacker.actions_spent += 1
 
-        roll, damage, hit = self.roll_attack(attacker, defender)
-        shot_fired = roll > 0
-        action_damage = 0.0
-        
-        if hit:
-            defender.take_damage(damage)
-            action_damage = damage
-            self.apply_status_effects(attacker, defender, hit)
-            if self.verbose:
-                self.combat_log.append(
-                    f"Round {self.round_count}: {attacker.name} hits for {damage} damage"
-                )
-        else:
-            if damage > 0:
+        burst = "Burst" in attacker.weapon.properties
+        action_cost = 2 if burst else 1
+        if attacker.actions_remaining < action_cost:
+            return False
+
+        attacker.actions_remaining -= action_cost
+        attacker.actions_spent += action_cost
+        shots_to_fire = BURST_SHOT_COUNT if burst else 1
+        disadvantage = burst
+        total_action_damage = 0.0
+        any_hit = False
+        shot_fired_any = False
+
+        for _ in range(shots_to_fire):
+            roll, damage, hit = self.roll_attack(
+                attacker,
+                defender,
+                disadvantage=disadvantage,
+            )
+            shot_fired = roll > 0
+            if not shot_fired:
+                break
+            shot_fired_any = True
+
+            if hit:
+                any_hit = True
                 defender.take_damage(damage)
-                action_damage = damage
+                total_action_damage += damage
+                self.apply_status_effects(attacker, defender, hit)
+                if self.verbose:
+                    self.combat_log.append(
+                        f"Round {self.round_count}: {attacker.name} hits for {damage} damage"
+                    )
+            elif damage > 0:
+                defender.take_damage(damage)
+                total_action_damage += damage
                 if self.verbose:
                     self.combat_log.append(
                         f"Round {self.round_count}: {attacker.name} misses, but бронебойность наносит {damage} урона"
@@ -718,42 +797,51 @@ class CombatSimulator:
                 if not defender.is_alive():
                     if shot_fired:
                         self.record_shot(attacker)
-                    if shot_fired:
-                        attacker.action_damage_dealt += action_damage
-                    return False
-
+                    if shot_fired_any:
+                        attacker.action_damage_dealt += total_action_damage
+                    return any_hit
             else:
                 if self.verbose:
                     self.combat_log.append(
                         f"Round {self.round_count}: {attacker.name} misses"
                     )
-            
-            if shot_fired and "Risk" in attacker.weapon.properties:
+
+            if shot_fired and (not hit) and "Risk" in attacker.weapon.properties:
                 if defender.reaction_remaining and self.can_attack(defender, attacker):
                     defender.reaction_remaining = False
                     self.perform_reaction_attack(defender, attacker)
                     if not attacker.is_alive():
-                        return False
-        
-        if shot_fired:
-            self.record_shot(attacker)
+                        if shot_fired_any:
+                            attacker.action_damage_dealt += total_action_damage
+                        return any_hit
 
-        if (
-            shot_fired
-            and attacker.weapon.weapon_type == "ranged"
-            and defender.weapon.weapon_type == "melee"
-            and defender.reaction_remaining
-            and defender.is_alive()
-            and self.distance <= defender.weapon.get_range()
-        ):
-            defender.reaction_remaining = False
-            self.perform_reaction_attack(defender, attacker)
-            if not attacker.is_alive():
-                return False
-        
-        if shot_fired:
-            attacker.action_damage_dealt += action_damage
-        return hit
+            if shot_fired:
+                self.record_shot(attacker)
+
+            if (
+                shot_fired
+                and attacker.weapon.weapon_type == "ranged"
+                and "Assault" not in attacker.weapon.properties
+                and defender.weapon.weapon_type == "melee"
+                and defender.reaction_remaining
+                and defender.is_alive()
+                and self.distance <= defender.weapon.get_range()
+            ):
+                defender.reaction_remaining = False
+                self.perform_reaction_attack(defender, attacker)
+                if not attacker.is_alive():
+                    if shot_fired_any:
+                        attacker.action_damage_dealt += total_action_damage
+                    return any_hit
+
+            if not defender.is_alive():
+                break
+            if attacker.reload_required:
+                break
+
+        if shot_fired_any:
+            attacker.action_damage_dealt += total_action_damage
+        return any_hit
 
     def simulate_round(self) -> bool:
         """
@@ -924,7 +1012,7 @@ def build_weapons(rank: int, x_value: int, rerolls: int) -> List[Weapon]:
     for prop_name, prop_value in PROPERTY_DEFS:
         if prop_name == REROLL_PROPERTY:
             continue
-        prop_setting = x_value if isinstance(prop_value, int) else prop_value
+        prop_setting = x_value if is_x_property_value(prop_value) else prop_value
         props = {prop_name: prop_setting}
         if rerolls:
             props[REROLL_PROPERTY] = rerolls
@@ -1046,7 +1134,12 @@ def build_weapon_props_array(weapon: Weapon) -> Tuple[List[float], float]:
     props[PROP_IMMOBILIZE] = normalize_int(
         weapon.properties.get("Immobilize X")
     )
-    props[PROP_MAGIC] = 1.0 if "Magical" in weapon.properties else 0.0
+    props[PROP_MAGIC] = float(
+        normalize_int(weapon.properties.get("Magical"))
+    )
+    props[PROP_BURST] = 1.0 if "Burst" in weapon.properties else 0.0
+    props[PROP_SPLASH] = 1.0 if "Splash" in weapon.properties else 0.0
+    props[PROP_ASSAULT] = 1.0 if "Assault" in weapon.properties else 0.0
     props[PROP_REROLLS] = normalize_int(weapon.properties.get(REROLL_PROPERTY))
 
     return props, weapon.get_range()
@@ -1070,6 +1163,12 @@ def round_to_half_percent(rate: float) -> float:
     if abs(rate) < 0.005:
         return 0.0
     return round(rate / 0.005) * 0.005
+
+
+def round_damage_delta(value: float, threshold: float = 0.2) -> float:
+    if abs(value) <= threshold:
+        return 0.0
+    return round(value, 2)
 
 
 def _load_json(path: Path) -> object:
@@ -1135,6 +1234,8 @@ def normalize_property_v2_entry(entry: object) -> Dict[str, float]:
         avg_raw = entry.get("average_action_damage", 0.0)
         cost_raw = entry.get("cost", 0.0)
         prevention_raw = entry.get("damage_prevention", 0.0)
+        received_raw = entry.get("average_damage_received", 0.0)
+        received_delta_raw = entry.get("damage_received_delta", 0.0)
         try:
             avg_value = float(avg_raw)
         except (TypeError, ValueError):
@@ -1147,16 +1248,32 @@ def normalize_property_v2_entry(entry: object) -> Dict[str, float]:
             prevention_value = float(prevention_raw)
         except (TypeError, ValueError):
             prevention_value = 0.0
+        try:
+            received_value = float(received_raw)
+        except (TypeError, ValueError):
+            received_value = 0.0
+        try:
+            received_delta = float(received_delta_raw)
+        except (TypeError, ValueError):
+            received_delta = 0.0
         return {
             "average_action_damage": avg_value,
             "cost": cost_value,
             "damage_prevention": prevention_value,
+            "average_damage_received": received_value,
+            "damage_received_delta": received_delta,
         }
     try:
         avg_value = float(entry)
     except (TypeError, ValueError):
         avg_value = 0.0
-    return {"average_action_damage": avg_value, "cost": 0.0, "damage_prevention": 0.0}
+    return {
+        "average_action_damage": avg_value,
+        "cost": 0.0,
+        "damage_prevention": 0.0,
+        "average_damage_received": 0.0,
+        "damage_received_delta": 0.0,
+    }
 
 
 def clamp_prob(value: float, eps: float = EPSILON) -> float:
@@ -1335,6 +1452,9 @@ def load_base_values() -> Dict[int, Dict[str, object]]:
             stats["average_action_damage"] = float(
                 stats.get("average_action_damage", 0.0)
             )
+            stats["average_damage_received"] = float(
+                stats.get("average_damage_received", 0.0)
+            )
             damage_action = stats.get("damage_action_damage", {})
             stats["damage_action_damage"] = {
                 int(damage_key): float(value)
@@ -1363,6 +1483,9 @@ def write_base_values(values: Dict[int, Dict[str, object]]):
                 "baseline_win_rate": baseline_rate,
                 "average_action_damage": round(
                     float(baseline.get("average_action_damage", 0.0)), 2
+                ),
+                "average_damage_received": round(
+                    float(baseline.get("average_damage_received", 0.0)), 2
                 ),
                 "damage_action_damage": {
                     str(damage_key): round(float(damage_action[damage_key]), 2)
@@ -1449,7 +1572,7 @@ def build_property_weapon(
     weapon_type: str,
 ) -> Weapon:
     prop_value = property_lookup[prop_name]
-    prop_setting = x_value if isinstance(prop_value, int) else prop_value
+    prop_setting = x_value if is_x_property_value(prop_value) else prop_value
     return Weapon(
         name=f"{weapon_type.upper()} | {prop_name} | DMG {baseline_damage}",
         damage=baseline_damage,
@@ -1727,7 +1850,7 @@ def calculate_property_pairs(
             labels = []
             for prop_name in (prop_a, prop_b):
                 prop_value = property_lookup[prop_name]
-                prop_setting = x_value if isinstance(prop_value, int) else prop_value
+                prop_setting = x_value if is_x_property_value(prop_value) else prop_value
                 props[prop_name] = prop_setting
                 labels.append(property_label(prop_name, prop_setting))
             pair_key = tuple(sorted(labels, key=property_label_sort_key))
@@ -1759,16 +1882,16 @@ def calculate_property_pairs(
 
         for pair_key, test_weapon in pair_weapons.items():
             avg_action_damage = action_damage_map.get(test_weapon.name, 0.0)
-            cost_pair = round(avg_action_damage - baseline_action_damage, 2)
+            raw_cost_pair = avg_action_damage - baseline_action_damage
             label_a, label_b = pair_key
             cost_a = resolve_property_cost(label_a, weapon_type, property_costs)
             cost_b = resolve_property_cost(label_b, weapon_type, property_costs)
-            dop_cost = round(cost_pair - (cost_a + cost_b), 2)
+            raw_dop_cost = raw_cost_pair - (cost_a + cost_b)
 
             type_results[pair_key] = {
                 "average_action_damage": round(avg_action_damage, 2),
-                "cost_pair": cost_pair,
-                "dop_cost": dop_cost,
+                "cost_pair": round_damage_delta(raw_cost_pair),
+                "dop_cost": round_damage_delta(raw_dop_cost),
             }
         results[weapon_type] = type_results
     return results
@@ -1862,7 +1985,7 @@ def calculate_property_triples(
             labels = []
             for prop_name in combo:
                 prop_value = property_lookup[prop_name]
-                prop_setting = x_value if isinstance(prop_value, int) else prop_value
+                prop_setting = x_value if is_x_property_value(prop_value) else prop_value
                 props[prop_name] = prop_setting
                 labels.append(property_label(prop_name, prop_setting))
             triple_key = tuple(sorted(labels, key=property_label_sort_key))
@@ -1894,17 +2017,17 @@ def calculate_property_triples(
 
         for triple_key, test_weapon in triple_weapons.items():
             avg_action_damage = action_damage_map.get(test_weapon.name, 0.0)
-            cost_triple = round(avg_action_damage - baseline_action_damage, 2)
+            raw_cost_triple = avg_action_damage - baseline_action_damage
             base_cost_sum = sum(
                 resolve_property_cost(label, weapon_type, property_costs)
                 for label in triple_key
             )
-            dop_cost = round(cost_triple - base_cost_sum, 2)
+            raw_dop_cost = raw_cost_triple - base_cost_sum
 
             type_results[triple_key] = {
                 "average_action_damage": round(avg_action_damage, 2),
-                "cost_triple": cost_triple,
-                "dop_cost": dop_cost,
+                "cost_triple": round_damage_delta(raw_cost_triple),
+                "dop_cost": round_damage_delta(raw_dop_cost),
             }
         results[weapon_type] = type_results
     return results
@@ -1977,7 +2100,9 @@ def calculate_property_matchups(
         matchups: Dict[str, Dict[str, Dict[str, float]]] = {}
         for i, prop_a in enumerate(property_names):
             prop_a_value = property_lookup[prop_a]
-            prop_a_setting = x_value if isinstance(prop_a_value, int) else prop_a_value
+            prop_a_setting = (
+                x_value if is_x_property_value(prop_a_value) else prop_a_value
+            )
             label_a = property_label(prop_a, prop_a_setting)
             weapon_a = build_property_weapon(
                 prop_a,
@@ -1990,7 +2115,9 @@ def calculate_property_matchups(
             matchups.setdefault(label_a, {})
             for prop_b in property_names[i:]:
                 prop_b_value = property_lookup[prop_b]
-                prop_b_setting = x_value if isinstance(prop_b_value, int) else prop_b_value
+                prop_b_setting = (
+                    x_value if is_x_property_value(prop_b_value) else prop_b_value
+                )
                 label_b = property_label(prop_b, prop_b_setting)
                 weapon_b = build_property_weapon(
                     prop_b,
@@ -2029,15 +2156,15 @@ def calculate_property_matchups(
                     if stats["weapon2_actions"] > 0
                     else 0.0
                 )
-                cost_opp_a = round(avg_action_a - baseline_action_damage, 2)
-                cost_opp_b = round(avg_action_b - baseline_action_damage, 2)
+                raw_cost_opp_a = avg_action_a - baseline_action_damage
+                raw_cost_opp_b = avg_action_b - baseline_action_damage
                 base_cost_a = resolve_property_cost(label_a, weapon_type, property_costs)
                 base_cost_b = resolve_property_cost(label_b, weapon_type, property_costs)
                 matchups[label_a][label_b] = {
                     "winrate": round(win_rate_a, 5),
                     "average_action_damage": round(avg_action_a, 2),
-                    "cost_opp": cost_opp_a,
-                    "opp_cost": round(cost_opp_a - base_cost_a, 2),
+                    "cost_opp": round_damage_delta(raw_cost_opp_a),
+                    "opp_cost": round_damage_delta(raw_cost_opp_a - base_cost_a),
                 }
                 if prop_a == prop_b:
                     continue
@@ -2045,8 +2172,8 @@ def calculate_property_matchups(
                 matchups[label_b][label_a] = {
                     "winrate": round(win_rate_b, 5),
                     "average_action_damage": round(avg_action_b, 2),
-                    "cost_opp": cost_opp_b,
-                    "opp_cost": round(cost_opp_b - base_cost_b, 2),
+                    "cost_opp": round_damage_delta(raw_cost_opp_b),
+                    "opp_cost": round_damage_delta(raw_cost_opp_b - base_cost_b),
                 }
         results[weapon_type] = matchups
     return results
@@ -2062,10 +2189,14 @@ def calculate_property_costs(
     progress_label: Optional[str] = None,
 ) -> Dict[str, Dict[str, Optional[float]]]:
     baseline_action_damage = {}
+    baseline_received_damage = {}
     for weapon_type, stats in baseline_stats.items():
         avg_value = stats.get("average_action_damage")
         if avg_value is not None:
             baseline_action_damage[weapon_type] = float(avg_value)
+        received_value = stats.get("average_damage_received")
+        if received_value is not None:
+            baseline_received_damage[weapon_type] = float(received_value)
 
     return calculate_property_action_damage(
         rank=rank,
@@ -2076,6 +2207,8 @@ def calculate_property_costs(
         pool=pool,
         progress_label=progress_label,
         baseline_action_damage=baseline_action_damage,
+        baseline_opponent_damage=baseline_received_damage,
+        baseline_received_damage=baseline_received_damage,
     )
 
 
@@ -2089,6 +2222,7 @@ def calculate_property_action_damage(
     progress_label: Optional[str] = None,
     baseline_action_damage: Optional[Dict[str, float]] = None,
     baseline_opponent_damage: Optional[Dict[str, float]] = None,
+    baseline_received_damage: Optional[Dict[str, float]] = None,
 ) -> Dict[str, Dict[str, Dict[str, float]]]:
     baseline_damage = BASELINE_DAMAGE_BY_RANK[rank]
     property_lookup = {prop_name: prop_value for prop_name, prop_value in PROPERTY_DEFS}
@@ -2115,6 +2249,7 @@ def calculate_property_action_damage(
 
     resolved_baseline = {}
     resolved_opponent = {}
+    resolved_received = {}
     if baseline_action_damage:
         for weapon_type in WEAPON_TYPES:
             value = baseline_action_damage.get(weapon_type)
@@ -2125,6 +2260,16 @@ def calculate_property_action_damage(
             value = baseline_opponent_damage.get(weapon_type)
             if value is not None:
                 resolved_opponent[weapon_type] = float(value)
+    if baseline_received_damage:
+        for weapon_type in WEAPON_TYPES:
+            value = baseline_received_damage.get(weapon_type)
+            if value is not None:
+                resolved_received[weapon_type] = float(value)
+    elif baseline_opponent_damage:
+        for weapon_type in WEAPON_TYPES:
+            value = baseline_opponent_damage.get(weapon_type)
+            if value is not None:
+                resolved_received[weapon_type] = float(value)
 
     missing_types = [
         weapon_type
@@ -2132,10 +2277,15 @@ def calculate_property_action_damage(
         if (
             resolved_baseline.get(weapon_type, 0.0) <= 0.0
             or resolved_opponent.get(weapon_type, 0.0) <= 0.0
+            or resolved_received.get(weapon_type, 0.0) <= 0.0
         )
     ]
     if missing_types:
-        baseline_avg_map, baseline_opp_map = run_vs_world_batch_action_metrics(
+        (
+            baseline_avg_map,
+            baseline_opp_map,
+            baseline_received_map,
+        ) = run_vs_world_batch_action_metrics(
             [base_melee, base_ranged],
             base_melee,
             base_ranged,
@@ -2153,14 +2303,23 @@ def calculate_property_action_damage(
             "melee": baseline_opp_map.get(base_melee.name, 0.0),
             "ranged": baseline_opp_map.get(base_ranged.name, 0.0),
         }
+        baseline_received = {
+            "melee": baseline_received_map.get(base_melee.name, 0.0),
+            "ranged": baseline_received_map.get(base_ranged.name, 0.0),
+        }
         for weapon_type in missing_types:
             if resolved_baseline.get(weapon_type, 0.0) <= 0.0:
                 resolved_baseline[weapon_type] = baseline_avg.get(weapon_type, 0.0)
             if resolved_opponent.get(weapon_type, 0.0) <= 0.0:
                 resolved_opponent[weapon_type] = baseline_opp.get(weapon_type, 0.0)
+            if resolved_received.get(weapon_type, 0.0) <= 0.0:
+                resolved_received[weapon_type] = baseline_received.get(
+                    weapon_type, 0.0
+                )
 
     baseline_avg = resolved_baseline
     baseline_opp = resolved_opponent
+    baseline_received = resolved_received
 
     test_weapons_map = {}
     all_test_weapons = []
@@ -2173,20 +2332,26 @@ def calculate_property_action_damage(
             if prop_name == REROLL_PROPERTY:
                 continue
             prop_value = property_lookup.get(prop_name)
-            if isinstance(prop_value, int) and should_skip_property_for_x(prop_name, x_value):
+            if is_x_property_value(prop_value) and should_skip_property_for_x(
+                prop_name,
+                x_value,
+            ):
                 continue
-            prop_setting = x_value if isinstance(prop_value, int) else prop_value
+            prop_setting = x_value if is_x_property_value(prop_value) else prop_value
             prop_key = property_label(prop_name, prop_setting)
             if prop_name in CONTROL_PROPERTIES:
                 control_keys.add((weapon_type, prop_key))
 
             if prop_name in no_effect_props:
                 baseline_value = baseline_avg.get(weapon_type, 0.0)
+                baseline_received_value = baseline_received.get(weapon_type, 0.0)
                 avg_damage = baseline_value
                 type_costs[prop_key] = {
                     "average_action_damage": round(avg_damage, 2),
-                    "cost": round(avg_damage - baseline_value, 2),
+                    "cost": round_damage_delta(avg_damage - baseline_value),
                     "damage_prevention": 0.0,
+                    "average_damage_received": round(baseline_received_value, 2),
+                    "damage_received_delta": 0.0,
                 }
                 continue
 
@@ -2194,6 +2359,8 @@ def calculate_property_action_damage(
                 "average_action_damage": 0.0,
                 "cost": 0.0,
                 "damage_prevention": 0.0,
+                "average_damage_received": 0.0,
+                "damage_received_delta": 0.0,
             }
             test_weapon = Weapon(
                 name=f"{weapon_type.upper()} | {prop_key} | DMG {baseline_damage}",
@@ -2208,7 +2375,11 @@ def calculate_property_action_damage(
         property_costs[weapon_type] = type_costs
 
     if all_test_weapons:
-        avg_action_damage, avg_opponent_damage = run_vs_world_batch_action_metrics(
+        (
+            avg_action_damage,
+            avg_opponent_damage,
+            avg_received_damage,
+        ) = run_vs_world_batch_action_metrics(
             all_test_weapons,
             base_melee,
             base_ranged,
@@ -2221,6 +2392,7 @@ def calculate_property_action_damage(
     else:
         avg_action_damage = {}
         avg_opponent_damage = {}
+        avg_received_damage = {}
 
     for weapon_type in WEAPON_TYPES:
         type_costs = property_costs.get(weapon_type) or {}
@@ -2230,15 +2402,23 @@ def calculate_property_action_damage(
                 continue
             avg_damage = avg_action_damage.get(weapon.name, 0.0)
             baseline_value = baseline_avg.get(weapon_type, 0.0)
+            avg_received = avg_received_damage.get(weapon.name, 0.0)
+            baseline_received_value = baseline_received.get(weapon_type, 0.0)
             damage_prevention = 0.0
             if (weapon_type, prop_key) in control_keys:
                 baseline_incoming = baseline_opp.get(weapon_type, 0.0)
                 opp_damage = avg_opponent_damage.get(weapon.name, 0.0)
-                damage_prevention = round(baseline_incoming - opp_damage, 2)
+                damage_prevention = round_damage_delta(
+                    baseline_incoming - opp_damage
+                )
             type_costs[prop_key] = {
                 "average_action_damage": round(avg_damage, 2),
-                "cost": round(avg_damage - baseline_value, 2),
+                "cost": round_damage_delta(avg_damage - baseline_value),
                 "damage_prevention": damage_prevention,
+                "average_damage_received": round(avg_received, 2),
+                "damage_received_delta": round_damage_delta(
+                    avg_received - baseline_received_value
+                ),
             }
 
     return property_costs
@@ -2261,11 +2441,15 @@ def recalc_property_values_v2_for_ranks(
 
     for current_rank in ranks:
         baseline_action_damage = {}
+        baseline_received_damage = {}
         baselines = base_values_data.get(current_rank, {}).get("baselines", {})
         for weapon_type, stats in (baselines or {}).items():
             avg_value = stats.get("average_action_damage")
             if avg_value is not None:
                 baseline_action_damage[weapon_type] = float(avg_value)
+            received_value = stats.get("average_damage_received")
+            if received_value is not None:
+                baseline_received_damage[weapon_type] = float(received_value)
         property_costs = calculate_property_action_damage(
             rank=current_rank,
             x_value=x_value,
@@ -2275,6 +2459,8 @@ def recalc_property_values_v2_for_ranks(
             pool=pool,
             progress_label=f"Rank {current_rank} Action Damage (X {x_value})",
             baseline_action_damage=baseline_action_damage,
+            baseline_opponent_damage=baseline_received_damage,
+            baseline_received_damage=baseline_received_damage,
         )
         property_values_data[current_rank] = {
             "rank": current_rank,
@@ -2301,16 +2487,21 @@ def recalc_property_values_v2_for_ranks_multi_x(
 
     for current_rank in ranks:
         baseline_action_damage = {}
+        baseline_received_damage = {}
         baselines = base_values_data.get(current_rank, {}).get("baselines", {})
         for weapon_type, stats in (baselines or {}).items():
             avg_value = stats.get("average_action_damage")
             if avg_value is not None:
                 baseline_action_damage[weapon_type] = float(avg_value)
+            received_value = stats.get("average_damage_received")
+            if received_value is not None:
+                baseline_received_damage[weapon_type] = float(received_value)
         merged_costs: Dict[str, Dict[str, Dict[str, float]]] = {}
         existing_costs = property_values_data.get(current_rank, {}).get(
             "property_costs",
             {},
         )
+        existing_costs = filter_property_costs_for_defs(existing_costs)
         for weapon_type, type_costs in existing_costs.items():
             merged_costs[weapon_type] = dict(type_costs or {})
 
@@ -2324,6 +2515,8 @@ def recalc_property_values_v2_for_ranks_multi_x(
                 pool=pool,
                 progress_label=f"Rank {current_rank} Action Damage (X {x_value})",
                 baseline_action_damage=baseline_action_damage,
+                baseline_opponent_damage=baseline_received_damage,
+                baseline_received_damage=baseline_received_damage,
             )
             for weapon_type, type_costs in property_costs.items():
                 merged_costs.setdefault(weapon_type, {})
@@ -2491,6 +2684,8 @@ def run_matchup_fast(
     w2_action_damage = 0.0
     w1_actions = 0
     w2_actions = 0
+    w1_damage_received = 0.0
+    w2_damage_received = 0.0
     w1_action_damage = 0.0
     w2_action_damage = 0.0
     w1_actions = 0
@@ -2650,6 +2845,8 @@ def run_matchup_fast_parallel(
     w2_action_damage = 0.0
     w1_actions = 0
     w2_actions = 0
+    w1_damage_received = 0.0
+    w2_damage_received = 0.0
     w1_win_rounds: Optional[List[int]] = [] if track_rounds else None
     w2_win_rounds: Optional[List[int]] = [] if track_rounds else None
 
@@ -2766,6 +2963,8 @@ def run_matchup(
         w2_action_damage = 0.0
         w1_actions = 0
         w2_actions = 0
+        w1_damage_received = 0.0
+        w2_damage_received = 0.0
         start_index = 0
 
         # If no pool: run all sims at the explicit scenario distance.
@@ -2780,6 +2979,8 @@ def run_matchup(
                 chunk_w2_damage,
                 chunk_w1_actions,
                 chunk_w2_actions,
+                chunk_w1_received,
+                chunk_w2_received,
             ) = full_matchup_chunk(
                 weapon_props,
                 weapon_ranges,
@@ -2809,6 +3010,8 @@ def run_matchup(
                 "weapon2_action_damage": chunk_w2_damage,
                 "weapon1_actions": chunk_w1_actions,
                 "weapon2_actions": chunk_w2_actions,
+                "weapon1_damage_received": chunk_w1_received,
+                "weapon2_damage_received": chunk_w2_received,
             }
 
         # Pool enabled: sample counts without building a length-N scenario list.
@@ -2827,6 +3030,8 @@ def run_matchup(
                 chunk_w2_damage,
                 chunk_w1_actions,
                 chunk_w2_actions,
+                chunk_w1_received,
+                chunk_w2_received,
             ) = full_matchup_chunk(
                 weapon_props,
                 weapon_ranges,
@@ -2853,6 +3058,8 @@ def run_matchup(
             w2_action_damage += chunk_w2_damage
             w1_actions += chunk_w1_actions
             w2_actions += chunk_w2_actions
+            w1_damage_received += chunk_w1_received
+            w2_damage_received += chunk_w2_received
 
         avg_rounds = total_rounds / simulations if simulations else 0.0
         return {
@@ -2865,6 +3072,8 @@ def run_matchup(
             "weapon2_action_damage": w2_action_damage,
             "weapon1_actions": w1_actions,
             "weapon2_actions": w2_actions,
+            "weapon1_damage_received": w1_damage_received,
+            "weapon2_damage_received": w2_damage_received,
         }
         
     w1_wins = 0
@@ -2917,11 +3126,15 @@ def run_matchup(
                 w1_actions += char1.actions_spent
                 w2_action_damage += char2.action_damage_dealt
                 w2_actions += char2.actions_spent
+                w1_damage_received += char1.damage_received
+                w2_damage_received += char2.damage_received
             else:
                 w1_action_damage += char2.action_damage_dealt
                 w1_actions += char2.actions_spent
                 w2_action_damage += char1.action_damage_dealt
                 w2_actions += char1.actions_spent
+                w1_damage_received += char2.damage_received
+                w2_damage_received += char1.damage_received
 
         if result["attacker_wins"]:
             if attacker_is_w1:
@@ -2962,6 +3175,8 @@ def run_matchup(
         "weapon2_action_damage": w2_action_damage,
         "weapon1_actions": w1_actions,
         "weapon2_actions": w2_actions,
+        "weapon1_damage_received": w1_damage_received,
+        "weapon2_damage_received": w2_damage_received,
     }
 
 
@@ -3075,12 +3290,13 @@ def run_vs_world_batch_action_metrics(
     pool: Optional[SimulationPool],
     show_progress: bool,
     progress_label: str,
-) -> Tuple[Dict[str, float], Dict[str, float]]:
+) -> Tuple[Dict[str, float], Dict[str, float], Dict[str, float]]:
     """
     Runs a batch of simulations for multiple weapons against the 'World' (weighted mix).
-    Returns two dictionaries:
+    Returns three dictionaries:
       - weapon.name -> average action damage (per action spent)
       - weapon.name -> opponent damage per action spent by the weapon
+      - weapon.name -> average damage received per action spent by the weapon
     """
     p_melee, p_ranged = _normalized_opponent_weights()
     sims_m = int(round(simulations * p_melee))
@@ -3125,22 +3341,26 @@ def run_vs_world_batch_action_metrics(
 
     avg_action_damage = {}
     avg_opponent_damage = {}
+    avg_received_damage = {}
     idx = 0
     for wp in test_weapons:
         total_damage = 0.0
         total_actions = 0
         total_opp_damage = 0.0
+        total_received_damage = 0.0
         if sims_m > 0:
             res = results[idx]
             total_damage += res.get("weapon1_action_damage", 0.0)
             total_actions += res.get("weapon1_actions", 0)
             total_opp_damage += res.get("weapon2_action_damage", 0.0)
+            total_received_damage += res.get("weapon1_damage_received", 0.0)
             idx += 1
         if sims_r > 0:
             res = results[idx]
             total_damage += res.get("weapon1_action_damage", 0.0)
             total_actions += res.get("weapon1_actions", 0)
             total_opp_damage += res.get("weapon2_action_damage", 0.0)
+            total_received_damage += res.get("weapon1_damage_received", 0.0)
             idx += 1
         avg_action_damage[wp.name] = (
             total_damage / total_actions if total_actions > 0 else 0.0
@@ -3148,8 +3368,11 @@ def run_vs_world_batch_action_metrics(
         avg_opponent_damage[wp.name] = (
             total_opp_damage / total_actions if total_actions > 0 else 0.0
         )
+        avg_received_damage[wp.name] = (
+            total_received_damage / total_actions if total_actions > 0 else 0.0
+        )
 
-    return avg_action_damage, avg_opponent_damage
+    return avg_action_damage, avg_opponent_damage, avg_received_damage
 
 
 def run_vs_world_batch_action_damage(
@@ -3166,7 +3389,7 @@ def run_vs_world_batch_action_damage(
     Runs a batch of simulations for multiple weapons against the 'World' (weighted mix).
     Returns a dictionary mapping weapon.name -> average action damage (per action spent).
     """
-    avg_action_damage, _ = run_vs_world_batch_action_metrics(
+    avg_action_damage, _, _ = run_vs_world_batch_action_metrics(
         test_weapons,
         baseline_melee,
         baseline_ranged,
@@ -3475,7 +3698,7 @@ def recalc_base_values_for_rank(
         f"Rank {current_rank} Baseline Win Rates",
     )
 
-    action_damage_map = run_vs_world_batch_action_damage(
+    action_damage_map, _, received_damage_map = run_vs_world_batch_action_metrics(
         all_test_weapons,
         base_melee,
         base_ranged,
@@ -3489,6 +3712,10 @@ def recalc_base_values_for_rank(
         "melee": action_damage_map.get(base_melee.name, 0.0),
         "ranged": action_damage_map.get(base_ranged.name, 0.0),
     }
+    baseline_received_damage = {
+        "melee": received_damage_map.get(base_melee.name, 0.0),
+        "ranged": received_damage_map.get(base_ranged.name, 0.0),
+    }
 
     results: Dict[str, Dict[str, object]] = {}
     for weapon_type in WEAPON_TYPES:
@@ -3496,7 +3723,9 @@ def recalc_base_values_for_rank(
         baseline_win_rate = baseline_win_rates.get(base_w_name, 0.5)
         baseline_avg_action = baseline_action_damage.get(weapon_type, 0.0)
 
+        baseline_avg_received = baseline_received_damage.get(weapon_type, 0.0)
         print(f"Baseline action damage ({weapon_type}): {baseline_avg_action:.2f}")
+        print(f"Baseline damage received ({weapon_type}): {baseline_avg_received:.2f}")
         print()
         print(f"Damage vs baseline ({weapon_type})")
         header = f"{'DMG':>4} {'ActDmg':>8} {'Diff':>7}"
@@ -3531,6 +3760,9 @@ def recalc_base_values_for_rank(
             "baseline_win_rate": baseline_win_rate,
             "average_action_damage": round(
                 baseline_action_damage.get(weapon_type, 0.0), 2
+            ),
+            "average_damage_received": round(
+                baseline_received_damage.get(weapon_type, 0.0), 2
             ),
             "damage_action_damage": damage_action_damage,
         }
@@ -3570,6 +3802,9 @@ def recalc_base_values_for_ranks(
                 ),
                 "average_action_damage": round(
                     float(stats.get("average_action_damage", 0.0)), 2
+                ),
+                "average_damage_received": round(
+                    float(stats.get("average_damage_received", 0.0)), 2
                 ),
                 "damage_action_damage": {
                     damage: round(float(value), 2)
@@ -3663,6 +3898,7 @@ def recalc_property_values_for_ranks_multi_x(
             "property_costs",
             {},
         )
+        existing_costs = filter_property_costs_for_defs(existing_costs)
         for weapon_type, type_costs in existing_costs.items():
             merged_costs[weapon_type] = dict(type_costs or {})
 

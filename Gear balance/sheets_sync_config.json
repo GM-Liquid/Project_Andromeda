@@ -3,9 +3,9 @@
   "worksheet": "Import_weapon",
   "property_values": {
     "property_values_path": "property_values.json",
-    "start_row": 17,
-    "name_col": 2,
-    "first_cost_col": 3,
+    "start_row": 3,
+    "name_col": 1,
+    "first_cost_col": 2,
     "types": ["melee", "ranged"],
     "rank_order": [1, 2, 3, 4],
     "property_name_order": "first-seen"

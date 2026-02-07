@@ -14,15 +14,16 @@
 #   Модификаторы броска: Accuracy X (+ к броску, но не выше dice),
 #   Guarantee X (поднимает бросок до X, кроме случая roll=1),
 #   Stabilization X (если не двигался в раунде),
-#   Penetration X (PENETRATION_BONUS против ранга <= X, если нет melee cover).
-# - Защита: defense модифицируется, если есть Magical (делится на
-#   MAGICAL_DEFENSE_DIVISOR, округление до 0.1). Для melee-цели вне её дальности
-#   действует MELEE_COVER_BONUS.
+#   Penetration X (bonus = cover bonus if target is in cover and target rank < X).
+# - Defense: Magical X multiplies up to X damage by 2.5 (no rounding). Splash multiplies all damage by 1.5.
+#   Melee cover adds MELEE_COVER_BONUS.
 # - Попадание: total_roll = roll + skill + stabilization + penetration;
 #   hit, если total_roll >= defense.
 # - Урон: damage = (total_roll - defense) + weapon.damage.
 #   При raw_roll == dice добавляется Escalation X. При попадании урон
 #   не ниже MIN_HIT_DAMAGE.
+# - Burst: вместо одной атаки делает 3 выстрела с помехой (2 куба, выбрать меньший) и тратит 2 действия.
+# - Assault: при стрельбе вблизи не провоцирует ответные атаки от melee.
 # - Промах: перебросы от Reroll (пока есть). Если всё равно промах и есть
 #   Armor Pierce X против ранга <= X, наносится ARMOR_PIERCE_MIN_DAMAGE.
 # - Dangerous X: если raw_roll > X, атакующий получает DANGEROUS_SELF_DAMAGE.
@@ -44,6 +45,10 @@
 # Базовые параметры бойца по рангу, от которых строится симуляция.
 # dice = базовый куб характеристик, skill = фиксированный бонус навыка,
 # hp/defense/speed = базовые хиты/защита/скорость.
+# NOTE: Magical X multiplies up to X damage by 2.5 (no rounding) and no longer affects defense.
+# NOTE: Splash multiplies all damage by 1.5.
+# NOTE: Assault prevents opportunity attacks at close range and stops ranged retreat.
+# NOTE: Penetration X applies when target is in cover and target rank < X.
 RANK_PARAMS = {
     1: {"dice": 6, "skill": 1, "hp": 15.0, "defense": 4.0, "speed": 6.0},
     2: {"dice": 8, "skill": 3, "hp": 20.0, "defense": 6.0, "speed": 9.0},
@@ -90,7 +95,8 @@ DISTANCE_MAX = 100.0
 
 # Модификаторы защиты / пробития для отдельных механик.
 MELEE_COVER_BONUS = 2.0
-MAGICAL_DEFENSE_DIVISOR = 3.0
+MAGIC_DAMAGE_MULTIPLIER = 2.5
+SPLASH_DAMAGE_MULTIPLIER = 1.5
 PENETRATION_BONUS = 2.0
 
 # Минимальные значения урона, чтобы эффекты не “проваливались” в ноль.
@@ -113,7 +119,10 @@ WEAPON_TYPES = ("melee", "ranged")
 # Список свойств и их тип значения:
 # True = флаговое свойство, 1 = свойство с числовым X (значение по умолчанию).
 PROPERTY_DEFS = [
-    ("Magical", True),
+    ("Magical", 1),
+    ("Splash", True),
+    ("Burst", True),
+    ("Assault", True),
     ("Armor Pierce X", 1),
     ("Escalation X", 1),
     ("Reload X", 1),
@@ -122,6 +131,8 @@ PROPERTY_DEFS = [
     ("Guarantee X", 1),
     ("Reroll", True),
     ("Aggressive Fire", True),
+    ("Concealed", True),
+    ("Silent", True),
     ("Stun X", 1),
     ("Slow", True),
     ("Dangerous X", 1),
@@ -141,6 +152,11 @@ CONTROL_PROPERTIES = {
     "Disorienting",
 }
 
+SELF_DAMAGE_PROPERTIES = {
+    "Dangerous X",
+    "Risk",
+}
+
 # Ключ свойства, которое даёт перебросы.
 REROLL_PROPERTY = "Reroll"
 
@@ -152,12 +168,17 @@ PROPERTY_WEAPON_RESTRICTIONS = {
     "Reload X": {"ranged"},
     "Stabilization X": {"ranged"},
     "Aggressive Fire": {"ranged"},
+    "Burst": {"ranged"},
+    "Assault": {"ranged"},
     "Reach X": {"melee"},
 }
 
 # Свойства, которые реально моделируются в бою (влияют на исход).
 SIMULATED_PROPERTIES = {
     "Magical",
+    "Splash",
+    "Burst",
+    "Assault",
     "Armor Pierce X",
     "Escalation X",
     "Reload X",
