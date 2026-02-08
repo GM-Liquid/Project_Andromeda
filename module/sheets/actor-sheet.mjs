@@ -711,7 +711,8 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     }
     const system = item.system ?? {};
     const skillKey = system.skill || '';
-    const skillValue = Number(this.actor.system?.skills?.[skillKey]?.value) || 0;
+    const skillData = this.actor.system?.skills?.[skillKey] ?? {};
+    const skillValue = Number(skillData.value) || 0;
     const parts = [];
 
     parts.push({
@@ -764,6 +765,8 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     if (item.type === 'weapon') {
       const bonusDetails = this._getSkillBonusDetails(skillKey);
       let modifier = skillValue + (bonusDetails.total || 0);
+      const abilityKey = skillData.ability;
+      const rollFormula = getAbilityDieRoll(this._getAbilityDieValue(abilityKey));
       if (bonusDetails.total) {
         if (bonusDetails.sources?.length) {
           for (const source of bonusDetails.sources) {
@@ -780,7 +783,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
         }
       }
 
-      const roll = await new Roll('1d10 + @mod', { mod: modifier }).roll({ async: true });
+      const roll = await new Roll(`${rollFormula} + @mod`, { mod: modifier }).roll({ async: true });
 
       const flavorLabel = game.i18n.format('MY_RPG.ItemRoll.Flavor', {
         item: item.name || game.i18n.localize(`TYPES.Item.${item.type}`),
@@ -804,6 +807,8 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
         actor: this.actor.uuid,
         itemId: item.id,
         type: item.type,
+        ability: abilityKey ?? null,
+        rollFormula,
         skill: skillKey,
         skillValue,
         modifier
