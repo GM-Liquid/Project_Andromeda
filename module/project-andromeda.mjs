@@ -109,6 +109,24 @@ function buildItemTypeOptions({ select, allowedTypes }) {
   }, 50);
 }
 
+function shouldCustomizeItemTypeDialog(dialog, selectElement, itemTypes) {
+  const documentName =
+    dialog?.documentName ?? dialog?.options?.documentName ?? dialog?.object?.documentName ?? '';
+  if (documentName && documentName !== 'Item') return false;
+
+  const optionValues = Array.from(selectElement.options)
+    .map((option) => option.value)
+    .filter(Boolean);
+
+  if (!optionValues.length) {
+    return documentName === 'Item';
+  }
+
+  const actorTypes = new Set(game.documentTypes?.Actor ?? []);
+  if (optionValues.some((value) => actorTypes.has(value))) return false;
+  return optionValues.some((value) => itemTypes.has(value));
+}
+
 /* -------------------------------------------- */
 /*  Init Hook                                   */
 /* -------------------------------------------- */
@@ -182,11 +200,16 @@ Hooks.on('renderDialog', (dialog, html) => {
   // Check if this is the item creation dialog by looking for type selector
   const select = html.find('select[name="type"]');
   if (!select.length) return;
-  
-  // Get the allowed types from the game
+
+  const selectElement = select.get(0);
+  if (!selectElement) return;
+
+  // Get the allowed item types from the game
   const allowedTypes = new Set(game.documentTypes?.Item ?? []);
   if (!allowedTypes.size) return;
-  
+
+  if (!shouldCustomizeItemTypeDialog(dialog, selectElement, allowedTypes)) return;
+
   buildItemTypeOptions({ select, allowedTypes });
 });
 

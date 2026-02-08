@@ -150,14 +150,14 @@ def property_label_sort_key(label: str) -> Tuple[str, int, int]:
 def filter_property_costs_for_defs(
     property_costs: Dict[str, Dict[str, object]],
 ) -> Dict[str, Dict[str, object]]:
-    x_bases = set()
-    flag_bases = set()
+    x_base_map = {}
+    flag_base_map = {}
     for prop_name, prop_value in PROPERTY_DEFS:
         if is_x_property_value(prop_value):
             base_name = prop_name[:-2].strip() if prop_name.endswith(" X") else prop_name
-            x_bases.add(base_name)
+            x_base_map[base_name] = prop_name
         else:
-            flag_bases.add(prop_name)
+            flag_base_map[prop_name] = prop_name
 
     cleaned: Dict[str, Dict[str, object]] = {}
     for weapon_type, type_costs in (property_costs or {}).items():
@@ -169,10 +169,12 @@ def filter_property_costs_for_defs(
             match = re.match(r"^(.*?)(?:\s+(-?\d+))$", label)
             if match:
                 base = match.group(1).strip()
-                if base in x_bases:
+                prop_name = x_base_map.get(base)
+                if prop_name and property_allows_weapon_type(prop_name, weapon_type):
                     filtered[label] = entry
                 continue
-            if label in flag_bases:
+            prop_name = flag_base_map.get(label)
+            if prop_name and property_allows_weapon_type(prop_name, weapon_type):
                 filtered[label] = entry
         if filtered:
             cleaned[weapon_type] = filtered
@@ -596,7 +598,7 @@ class CombatSimulator:
 
             if "Dangerous X" in attacker.weapon.properties:
                 danger_threshold = attacker.weapon.properties["Dangerous X"]
-                if raw_roll <= danger_threshold:
+                if raw_roll >= danger_threshold:
                     attacker.take_damage(DANGEROUS_SELF_DAMAGE)
 
             if "Accuracy X" in attacker.weapon.properties:
@@ -1159,7 +1161,7 @@ def round_to_half_percent(rate: float) -> float:
     return round(rate / 0.005) * 0.005
 
 
-def round_damage_delta(value: float, threshold: float = 0.2) -> float:
+def round_damage_delta(value: float, threshold: float = 0.05) -> float:
     if abs(value) <= threshold:
         return 0.0
     return round(value, 2)

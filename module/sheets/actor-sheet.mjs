@@ -554,7 +554,17 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
 
   _getItemSummary(item, config) {
     const system = item.system ?? {};
-    return system.description || '';
+    return this._formatItemDescription(system.description);
+  }
+
+  _formatItemDescription(value) {
+    const rawText = String(value ?? '')
+      .replace(/\r\n?/g, '\n')
+      .trim();
+    if (!rawText) return '';
+    const hasHtmlMarkup = /<\/?[a-z][^>]*>/i.test(rawText);
+    if (hasHtmlMarkup) return rawText;
+    return this._escapeHTML(rawText).replace(/\n/g, '<br>');
   }
 
   _escapeHTML(value) {
@@ -981,7 +991,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       lines.push(game.i18n.localize('MY_RPG.WeaponsTable.EquippedLabel'));
     }
     let html = lines.join('<br>');
-    const description = system.description ?? system.desc ?? '';
+    const description = this._formatItemDescription(system.description ?? system.desc ?? '');
     if (description) html += `<br><br>${description}`;
     return html;
   }
@@ -1016,7 +1026,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
         `${game.i18n.localize('MY_RPG.ArmorItem.BonusSpeedLabel')}: ${speed}`
       );
     let html = lines.join('<br>');
-    const description = system.description ?? system.desc ?? '';
+    const description = this._formatItemDescription(system.description ?? system.desc ?? '');
     if (description) html += `<br><br>${description}`;
     return html;
   }

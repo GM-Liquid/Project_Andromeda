@@ -25,7 +25,7 @@
 # - Assault: при стрельбе вблизи не провоцирует ответные атаки от melee.
 # - Промах: перебросы от Reroll (пока есть). Если всё равно промах и есть
 #   Armor Pierce, наносится ARMOR_PIERCE_MIN_DAMAGE (если цель не выше ранга атакующего).
-# - Dangerous X: если raw_roll <= X, атакующий получает DANGEROUS_SELF_DAMAGE.
+# - Dangerous X: если raw_roll >= X, атакующий получает DANGEROUS_SELF_DAMAGE.
 # - Risk: при промахе может вызвать реакционную атаку защитника, если есть реакция
 #   и он в дальности.
 # - Реакции: одна реакция за раунд. Aggressive Fire даёт реакционную атаку
@@ -203,15 +203,15 @@ DEFAULT_OPPONENT_TYPE_WEIGHTS = {
 
 # Набор сценариев (дистанция x множитель), используемых для усреднения.
 DEFAULT_SCENARIO_OPTIONS_DEF = [
-    {"name": "mm_1x", "matchup": "mm", "distance_mult": 1.0, "weight": 0.33},
-    {"name": "mm_2x", "matchup": "mm", "distance_mult": 2.0, "weight": 0.34},
     {"name": "mm_3x", "matchup": "mm", "distance_mult": 3.0, "weight": 0.33},
-    {"name": "rr_1x", "matchup": "rr", "distance_mult": 1.0, "weight": 0.33},
-    {"name": "rr_2x", "matchup": "rr", "distance_mult": 2.0, "weight": 0.34},
+    {"name": "mm_4x", "matchup": "mm", "distance_mult": 4.0, "weight": 0.34},
+    {"name": "mm_5x", "matchup": "mm", "distance_mult": 5.0, "weight": 0.33},
     {"name": "rr_3x", "matchup": "rr", "distance_mult": 3.0, "weight": 0.33},
-    {"name": "mr_1x", "matchup": "mr", "distance_mult": 1.0, "weight": 0.33},
-    {"name": "mr_2x", "matchup": "mr", "distance_mult": 2.0, "weight": 0.34},
+    {"name": "rr_4x", "matchup": "rr", "distance_mult": 4.0, "weight": 0.34},
+    {"name": "rr_5x", "matchup": "rr", "distance_mult": 5.0, "weight": 0.33},
     {"name": "mr_3x", "matchup": "mr", "distance_mult": 3.0, "weight": 0.33},
+    {"name": "mr_4x", "matchup": "mr", "distance_mult": 4.0, "weight": 0.34},
+    {"name": "mr_5x", "matchup": "mr", "distance_mult": 5.0, "weight": 0.33},
 ]
 
 # Базовые эталонные сценарии для “чистых” сравнений ближнего/дальнего боя.

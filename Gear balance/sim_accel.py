@@ -456,7 +456,7 @@ if NUMBA_AVAILABLE:
             roll_value = np.random.randint(1, dice + 1)
         raw_roll = roll_value
         danger = w_props[w_idx, PROP_DANGEROUS]
-        if danger > 0 and raw_roll <= danger:
+        if danger > 0 and raw_roll >= danger:
             hp[att] -= 1
             if track_action_damage != 0:
                 damage_received_total[w_idx] += 1.0
