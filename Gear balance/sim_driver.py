@@ -9,17 +9,32 @@ def prompt_action() -> int:
     print("What do you want to do?")
     print("1) Recalculate base values (damage only)")
     print("2) Recalculate 1-property values")
-    print("3) Recalculate 1-property values (X 1-10 batch)")
-    print("4) Recalculate 2-property combos")
-    print("5) Recalculate property matchups")
-    print("6) Recalculate everything")
-    print("7) Recalculate 3-property triples")
-    print("8) Run custom duel simulation")
+    print("3) Recalculate 2-property combos")
+    print("4) Recalculate property matchups")
+    print("5) Recalculate everything")
+    print("6) Recalculate 3-property triples")
+    print("7) Run custom duel simulation")
     while True:
-        raw = input("Choose 1-8: ").strip().lower()
-        if raw in ("1", "2", "3", "4", "5", "6", "7", "8"):
+        raw = input("Choose 1-7: ").strip().lower()
+        if raw in ("1", "2", "3", "4", "5", "6", "7"):
             return int(raw)
-        print("Enter 1-8.")
+        print("Enter 1-7.")
+
+
+def prompt_x_value() -> int | str:
+    while True:
+        raw = input("Value of X for properties? (number or all): ").strip().lower()
+        if raw in ("all", "a"):
+            return "all"
+        try:
+            value = int(raw)
+        except ValueError:
+            print("Enter a number or all.")
+            continue
+        if value < 1:
+            print("Minimum: 1.")
+            continue
+        return value
 
 
 def prompt_weapon_class(label: str) -> str:
@@ -70,16 +85,16 @@ def main():
     task_map = {
         1: ("base",),
         2: ("props",),
-        3: ("props_batch",),
-        4: ("pairs",),
-        5: ("matchups",),
-        6: ("base", "props", "pairs", "matchups", "triples"),
-        7: ("triples",),
-        8: ("custom",),
+        3: ("pairs",),
+        4: ("matchups",),
+        5: ("base", "props", "pairs", "matchups", "triples"),
+        6: ("triples",),
+        7: ("custom",),
     }
     tasks = task_map[action]
 
     rank_input = None
+    x_input = None
     x_value = None
     x_values = None
     needs_batch_settings = any(task != "custom" for task in tasks)
@@ -88,10 +103,20 @@ def main():
             "Character rank? (1-4 or all): ",
             allow_all=True,
         )
-        if "props_batch" in tasks:
-            x_values = list(range(1, 11))
+        needs_property_x = any(
+            task in ("props", "pairs", "matchups", "triples") for task in tasks
+        )
+        if needs_property_x:
+            x_input = prompt_x_value()
+            if x_input == "all":
+                x_values = list(range(1, 11))
+                x_value = 1
+            else:
+                x_value = int(x_input)
+                x_values = [x_value]
         else:
             x_value = ws.prompt_int("Value of X for properties? ", 1)
+            x_values = [x_value]
         accuracy_confidence = ws.prompt_accuracy(
             "Desired accuracy % (e.g., 95, 99): "
         )
@@ -119,7 +144,7 @@ def main():
     )
     if "base" in tasks:
         print("Base values ignore rerolls; using 0.")
-    if "props" in tasks or "props_batch" in tasks:
+    if "props" in tasks:
         print("Property values ignore rerolls; using 0.")
 
     show_progress = ws.prompt_yes_no("Show simulation progress? (y/n): ")
@@ -156,34 +181,24 @@ def main():
             )
 
         if "props" in tasks:
-            property_values_data = ws.recalc_property_values_v2_for_ranks(
-                ranks=ranks_to_process,
-                x_value=x_value,
-                simulations=simulations_per_scenario,
-                scenario=base_scenario,
-                show_progress=show_progress,
-                pool=pool,
-            )
-            ws.write_property_values(property_values_data)
-            print()
-            print(f"Property values saved to {ws.PROPERTY_VALUES_PATH.name}.")
-            config = sheets_sync.load_config()
-            try:
-                sheets_sync.write_property_values(config)
-            except Exception as exc:
-                print(f"Failed to write property values to Google Sheet: {exc}")
-                raise
-            print("Property values written to Google Sheet.")
-
-        if "props_batch" in tasks:
-            property_values_data = ws.recalc_property_values_v2_for_ranks_multi_x(
-                ranks=ranks_to_process,
-                x_values=x_values or list(range(1, 11)),
-                simulations=simulations_per_scenario,
-                scenario=base_scenario,
-                show_progress=show_progress,
-                pool=pool,
-            )
+            if x_input == "all":
+                property_values_data = ws.recalc_property_values_v2_for_ranks_multi_x(
+                    ranks=ranks_to_process,
+                    x_values=x_values or list(range(1, 11)),
+                    simulations=simulations_per_scenario,
+                    scenario=base_scenario,
+                    show_progress=show_progress,
+                    pool=pool,
+                )
+            else:
+                property_values_data = ws.recalc_property_values_v2_for_ranks(
+                    ranks=ranks_to_process,
+                    x_value=x_value,
+                    simulations=simulations_per_scenario,
+                    scenario=base_scenario,
+                    show_progress=show_progress,
+                    pool=pool,
+                )
             ws.write_property_values(property_values_data)
             print()
             print(f"Property values saved to {ws.PROPERTY_VALUES_PATH.name}.")
@@ -200,16 +215,28 @@ def main():
                 base_values_data = ws.load_base_values()
             if property_values_data is None:
                 property_values_data = ws.load_property_values()
-            pair_data = ws.recalc_property_pairs_for_ranks(
-                ranks=ranks_to_process,
-                x_value=x_value,
-                simulations=simulations_per_scenario,
-                scenario=base_scenario,
-                show_progress=show_progress,
-                pool=pool,
-                base_values_data=base_values_data,
-                property_values_data=property_values_data,
-            )
+            if x_input == "all":
+                pair_data = ws.recalc_property_pairs_for_ranks_multi_x(
+                    ranks=ranks_to_process,
+                    x_values=x_values or list(range(1, 11)),
+                    simulations=simulations_per_scenario,
+                    scenario=base_scenario,
+                    show_progress=show_progress,
+                    pool=pool,
+                    base_values_data=base_values_data,
+                    property_values_data=property_values_data,
+                )
+            else:
+                pair_data = ws.recalc_property_pairs_for_ranks(
+                    ranks=ranks_to_process,
+                    x_value=x_value,
+                    simulations=simulations_per_scenario,
+                    scenario=base_scenario,
+                    show_progress=show_progress,
+                    pool=pool,
+                    base_values_data=base_values_data,
+                    property_values_data=property_values_data,
+                )
             ws.write_property_combos(pair_data)
             print()
             print(f"Property pair costs saved to {ws.PROPERTY_COMBOS_PATH.name}.")
@@ -219,16 +246,28 @@ def main():
                 base_values_data = ws.load_base_values()
             if property_values_data is None:
                 property_values_data = ws.load_property_values()
-            matchup_data = ws.recalc_property_matchups_for_ranks(
-                ranks=ranks_to_process,
-                x_value=x_value,
-                simulations=simulations_per_scenario,
-                scenario=base_scenario,
-                show_progress=show_progress,
-                pool=pool,
-                base_values_data=base_values_data,
-                property_values_data=property_values_data,
-            )
+            if x_input == "all":
+                matchup_data = ws.recalc_property_matchups_for_ranks_multi_x(
+                    ranks=ranks_to_process,
+                    x_values=x_values or list(range(1, 11)),
+                    simulations=simulations_per_scenario,
+                    scenario=base_scenario,
+                    show_progress=show_progress,
+                    pool=pool,
+                    base_values_data=base_values_data,
+                    property_values_data=property_values_data,
+                )
+            else:
+                matchup_data = ws.recalc_property_matchups_for_ranks(
+                    ranks=ranks_to_process,
+                    x_value=x_value,
+                    simulations=simulations_per_scenario,
+                    scenario=base_scenario,
+                    show_progress=show_progress,
+                    pool=pool,
+                    base_values_data=base_values_data,
+                    property_values_data=property_values_data,
+                )
             ws.write_property_matchups(matchup_data)
             print()
             print(f"Property matchup data saved to {ws.PROPERTY_MATCHUPS_PATH.name}.")
@@ -238,16 +277,28 @@ def main():
                 base_values_data = ws.load_base_values()
             if property_values_data is None:
                 property_values_data = ws.load_property_values()
-            triple_data = ws.recalc_property_triples_for_ranks(
-                ranks=ranks_to_process,
-                x_value=x_value,
-                simulations=simulations_per_scenario,
-                scenario=base_scenario,
-                show_progress=show_progress,
-                pool=pool,
-                base_values_data=base_values_data,
-                property_values_data=property_values_data,
-            )
+            if x_input == "all":
+                triple_data = ws.recalc_property_triples_for_ranks_multi_x(
+                    ranks=ranks_to_process,
+                    x_values=x_values or list(range(1, 11)),
+                    simulations=simulations_per_scenario,
+                    scenario=base_scenario,
+                    show_progress=show_progress,
+                    pool=pool,
+                    base_values_data=base_values_data,
+                    property_values_data=property_values_data,
+                )
+            else:
+                triple_data = ws.recalc_property_triples_for_ranks(
+                    ranks=ranks_to_process,
+                    x_value=x_value,
+                    simulations=simulations_per_scenario,
+                    scenario=base_scenario,
+                    show_progress=show_progress,
+                    pool=pool,
+                    base_values_data=base_values_data,
+                    property_values_data=property_values_data,
+                )
             ws.write_property_triples(triple_data)
             print()
             print(f"Property triple costs saved to {ws.PROPERTY_TRIPLES_PATH.name}.")

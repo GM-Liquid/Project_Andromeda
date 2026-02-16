@@ -1800,6 +1800,54 @@ def recalc_property_pairs_for_ranks(
     return property_pairs_data
 
 
+def recalc_property_pairs_for_ranks_multi_x(
+    ranks: List[int],
+    x_values: List[int],
+    simulations: int,
+    scenario: Scenario,
+    show_progress: bool = False,
+    pool: Optional[SimulationPool] = None,
+    base_values_data: Optional[Dict[int, Dict[str, object]]] = None,
+    property_values_data: Optional[Dict[int, Dict[str, object]]] = None,
+) -> Dict[int, Dict[str, object]]:
+    if base_values_data is None:
+        base_values_data = load_base_values()
+    if property_values_data is None:
+        property_values_data = load_property_values()
+
+    property_pairs_data: Dict[int, Dict[str, object]] = {}
+    for current_rank in ranks:
+        base_data = base_values_data.get(current_rank)
+        if not base_data:
+            continue
+        baseline_map = base_data.get("baselines", {})
+        if not baseline_map:
+            continue
+        property_costs_map = property_values_data.get(current_rank, {}).get(
+            "property_costs", {}
+        )
+        merged_results: Dict[str, Dict[Tuple[str, str], Dict[str, float]]] = {}
+        for x_value in x_values:
+            pair_results = calculate_property_pairs(
+                rank=current_rank,
+                x_value=x_value,
+                simulations=simulations,
+                scenario=scenario,
+                baseline_stats=baseline_map,
+                property_costs=property_costs_map,
+                show_progress=show_progress,
+                pool=pool,
+            )
+            for weapon_type, type_pairs in pair_results.items():
+                merged_results.setdefault(weapon_type, {})
+                merged_results[weapon_type].update(type_pairs)
+        property_pairs_data[current_rank] = {
+            "rank": current_rank,
+            "pair_costs": merged_results,
+        }
+    return property_pairs_data
+
+
 def calculate_property_pairs(
     rank: int,
     x_value: int,
@@ -1931,6 +1979,56 @@ def recalc_property_matchups_for_ranks(
         property_matchups_data[current_rank] = {
             "rank": current_rank,
             "matchups": matchup_results,
+        }
+    return property_matchups_data
+
+
+def recalc_property_matchups_for_ranks_multi_x(
+    ranks: List[int],
+    x_values: List[int],
+    simulations: int,
+    scenario: Scenario,
+    show_progress: bool = False,
+    pool: Optional[SimulationPool] = None,
+    base_values_data: Optional[Dict[int, Dict[str, object]]] = None,
+    property_values_data: Optional[Dict[int, Dict[str, object]]] = None,
+) -> Dict[int, Dict[str, object]]:
+    if base_values_data is None:
+        base_values_data = load_base_values()
+    if property_values_data is None:
+        property_values_data = load_property_values()
+
+    property_matchups_data: Dict[int, Dict[str, object]] = {}
+    for current_rank in ranks:
+        base_data = base_values_data.get(current_rank)
+        if not base_data:
+            continue
+        baseline_map = base_data.get("baselines", {})
+        if not baseline_map:
+            continue
+        property_costs_map = property_values_data.get(current_rank, {}).get(
+            "property_costs", {}
+        )
+        merged_results: Dict[str, Dict[str, Dict[str, Dict[str, float]]]] = {}
+        for x_value in x_values:
+            matchup_results = calculate_property_matchups(
+                rank=current_rank,
+                x_value=x_value,
+                simulations=simulations,
+                scenario=scenario,
+                baseline_stats=baseline_map,
+                property_costs=property_costs_map,
+                show_progress=show_progress,
+                pool=pool,
+            )
+            for weapon_type, type_matchups in matchup_results.items():
+                merged_type = merged_results.setdefault(weapon_type, {})
+                for label_a, row in type_matchups.items():
+                    merged_type.setdefault(label_a, {})
+                    merged_type[label_a].update(row)
+        property_matchups_data[current_rank] = {
+            "rank": current_rank,
+            "matchups": merged_results,
         }
     return property_matchups_data
 
@@ -2067,6 +2165,54 @@ def recalc_property_triples_for_ranks(
         property_triples_data[current_rank] = {
             "rank": current_rank,
             "triple_costs": triple_results,
+        }
+    return property_triples_data
+
+
+def recalc_property_triples_for_ranks_multi_x(
+    ranks: List[int],
+    x_values: List[int],
+    simulations: int,
+    scenario: Scenario,
+    show_progress: bool = False,
+    pool: Optional[SimulationPool] = None,
+    base_values_data: Optional[Dict[int, Dict[str, object]]] = None,
+    property_values_data: Optional[Dict[int, Dict[str, object]]] = None,
+) -> Dict[int, Dict[str, object]]:
+    if base_values_data is None:
+        base_values_data = load_base_values()
+    if property_values_data is None:
+        property_values_data = load_property_values()
+
+    property_triples_data: Dict[int, Dict[str, object]] = {}
+    for current_rank in ranks:
+        base_data = base_values_data.get(current_rank)
+        if not base_data:
+            continue
+        baseline_map = base_data.get("baselines", {})
+        if not baseline_map:
+            continue
+        property_costs_map = property_values_data.get(current_rank, {}).get(
+            "property_costs", {}
+        )
+        merged_results: Dict[str, Dict[Tuple[str, str, str], Dict[str, float]]] = {}
+        for x_value in x_values:
+            triple_results = calculate_property_triples(
+                rank=current_rank,
+                x_value=x_value,
+                simulations=simulations,
+                scenario=scenario,
+                baseline_stats=baseline_map,
+                property_costs=property_costs_map,
+                show_progress=show_progress,
+                pool=pool,
+            )
+            for weapon_type, type_triples in triple_results.items():
+                merged_results.setdefault(weapon_type, {})
+                merged_results[weapon_type].update(type_triples)
+        property_triples_data[current_rank] = {
+            "rank": current_rank,
+            "triple_costs": merged_results,
         }
     return property_triples_data
 

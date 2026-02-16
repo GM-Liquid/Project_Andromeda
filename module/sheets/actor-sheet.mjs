@@ -3,7 +3,7 @@
  * @extends {ActorSheet}
  */
 
-import { MODULE_ID, debugLog } from '../config.mjs';
+import { debugLog } from '../config.mjs';
 import {
   ABILITY_DIE_STEPS,
   getAbilityDieLabel,
@@ -19,9 +19,7 @@ import {
   getItemTabLabel
 } from '../helpers/item-config.mjs';
 function getRankLabel(rank) {
-  const mode = game.settings.get(MODULE_ID, 'worldType');
-  const base = mode === 'stellar' ? 'MY_RPG.RankNumeric' : 'MY_RPG.RankGradient';
-  return game.i18n.localize(`${base}.Rank${rank}`);
+  return game.i18n.localize(`MY_RPG.RankGradient.Rank${rank}`);
 }
 
 export class ProjectAndromedaActorSheet extends ActorSheet {
@@ -175,12 +173,10 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       this._prepareCharacterData(context);
     }
 
-    const worldType = game.settings.get(MODULE_ID, 'worldType');
-
     context.rollData = context.actor.getRollData();
     context.itemTabs = ITEM_TABS.map((tab) => ({
       key: tab.key,
-      label: game.i18n.localize(getItemTabLabel(tab.key, worldType))
+      label: game.i18n.localize(getItemTabLabel(tab.key))
     }));
 
     const itemGroups = this._buildItemGroups();
@@ -545,7 +541,6 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     return builder(item, {
       t: game.i18n,
       getRankLabel,
-      worldType: game.settings.get(MODULE_ID, 'worldType'),
       skillLabel: this._skillLabel.bind(this),
       formatSkillBonus: this._formatSkillBonus.bind(this),
       formatDamage: this._formatDamage.bind(this)
@@ -765,8 +760,9 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     if (item.type === 'weapon') {
       const bonusDetails = this._getSkillBonusDetails(skillKey);
       let modifier = skillValue + (bonusDetails.total || 0);
-      const abilityKey = skillData.ability;
-      const rollFormula = getAbilityDieRoll(this._getAbilityDieValue(abilityKey));
+      const abilityKey = this._getSkillAbilityKey(skillKey);
+      const dieValue = this._getAbilityDieValue(abilityKey);
+      const rollFormula = getAbilityDieRoll(dieValue);
       if (bonusDetails.total) {
         if (bonusDetails.sources?.length) {
           for (const source of bonusDetails.sources) {
@@ -977,6 +973,34 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     return details.total;
   }
 
+  _getSkillAbilityKey(skillKey) {
+    if (!skillKey) return '';
+    const actorSkillAbility = String(this.actor.system?.skills?.[skillKey]?.ability ?? '')
+      .trim()
+      .toLowerCase();
+    if (actorSkillAbility === 'con' || actorSkillAbility === 'int' || actorSkillAbility === 'spi') {
+      return actorSkillAbility;
+    }
+
+    const skillAbilityFallback = {
+      moshch: 'con',
+      lovkost: 'con',
+      sokrytie: 'con',
+      strelba: 'con',
+      blizhniy_boy: 'con',
+      nablyudatelnost: 'int',
+      analiz: 'int',
+      programmirovanie: 'int',
+      inzheneriya: 'int',
+      dominirovanie: 'spi',
+      rezonans: 'spi',
+      bionika: 'spi',
+      obayanie: 'spi'
+    };
+
+    return skillAbilityFallback[skillKey] ?? '';
+  }
+
   _skillLabel(skillKey) {
     if (!skillKey) return game.i18n.localize('MY_RPG.WeaponsTable.SkillNone');
     const configKey = CONFIG.ProjectAndromeda.skills?.[skillKey];
@@ -992,9 +1016,6 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       )}`,
       `${game.i18n.localize('MY_RPG.WeaponsTable.DamageLabel')}: ${this._formatDamage(system.skillBonus)}`
     ];
-    if (system.equipped) {
-      lines.push(game.i18n.localize('MY_RPG.WeaponsTable.EquippedLabel'));
-    }
     let html = lines.join('<br>');
     const description = this._formatItemDescription(system.description ?? system.desc ?? '');
     if (description) html += `<br><br>${description}`;

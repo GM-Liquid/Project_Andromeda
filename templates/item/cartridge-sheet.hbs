@@ -27,16 +27,14 @@
             {{/each}}
           </select>
         </div>
-        {{#if showRuneType}}
-          <div class="item-field">
-            <label>{{localize 'MY_RPG.AbilityConfig.RuneType'}}</label>
-            <select name="system.runeType" {{#unless editable}}disabled{{/unless}}>
-              {{#each runeTypeOptions}}
-                <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
-              {{/each}}
-            </select>
-          </div>
-        {{/if}}
+        <div class="item-field">
+          <label>{{localize 'MY_RPG.AbilityConfig.RuneType'}}</label>
+          <select name="system.runeType" {{#unless editable}}disabled{{/unless}}>
+            {{#each runeTypeOptions}}
+              <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+          </select>
+        </div>
       </div>
     </div>
   </header>

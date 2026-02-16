@@ -1,5 +1,3 @@
-import { MODULE_ID } from '../config.mjs';
-
 // systems/project-andromeda/helpers/handlebars-helpers.mjs
 
 Handlebars.registerHelper('concat', (...args) => {
@@ -12,24 +10,20 @@ Handlebars.registerHelper('toPascalCase', (str) => {
   return str.charAt(0).toUpperCase() + str.slice(1);
 });
 
-// Return the rank label based on current world mode
+// Return the rank label for the single supported world mode.
 Handlebars.registerHelper('rankLabel', function (rankNum) {
   if (!rankNum) return game.i18n.localize('MY_RPG.Rank.Unspecified');
-  const mode = game.settings.get(MODULE_ID, 'worldType');
-  const base = mode === 'stellar' ? 'MY_RPG.RankNumeric' : 'MY_RPG.RankGradient';
-  return game.i18n.localize(`${base}.Rank${rankNum}`);
+  return game.i18n.localize(`MY_RPG.RankGradient.Rank${rankNum}`);
 });
 
-// Conditionally render content only for the Unity world
+// Kept for backwards compatibility; Unity is now the only mode.
 Handlebars.registerHelper('ifUnity', function (options) {
-  const mode = game.settings.get(MODULE_ID, 'worldType');
-  return mode === 'unity' ? options.fn(this) : options.inverse(this);
+  return options.fn(this);
 });
 
-// Choose localisation key based on world mode
-Handlebars.registerHelper('worldChoice', function (unityKey, stellarKey) {
-  const mode = game.settings.get(MODULE_ID, 'worldType');
-  return mode === 'unity' ? unityKey : stellarKey;
+// Kept for backwards compatibility; always resolves to the Unity key.
+Handlebars.registerHelper('worldChoice', function (unityKey) {
+  return unityKey;
 });
 
 Handlebars.registerHelper('isTab', function (value, expected, options) {

@@ -278,8 +278,8 @@ export const ITEM_GROUP_CONFIGS = [
     createKey: 'MY_RPG.ItemGroups.CreateWeapon',
     newNameKey: 'MY_RPG.ItemGroups.NewWeapon',
     showQuantity: false,
-    allowEquip: true,
-    exclusive: true,
+    allowEquip: false,
+    exclusive: false,
     canRoll: true
   },
   {
@@ -558,8 +558,7 @@ const ITEM_GROUP_CONFIG_BY_KEY = ITEM_GROUP_CONFIGS.reduce((acc, config) => {
 export const ITEM_TABS = [
   {
     key: 'abilities',
-    labelKey: 'MY_RPG.SheetLabels.AbilitiesAndMods',
-    labelKeyUnity: 'MY_RPG.SheetLabels.Tablet'
+    labelKey: 'MY_RPG.SheetLabels.AbilitiesAndMods'
   },
   {
     key: 'inventory',
@@ -590,10 +589,9 @@ export function getItemGroupConfigsByType(type) {
   return ITEM_GROUP_CONFIGS.filter((config) => config.types.includes(type));
 }
 
-export function getItemTabLabel(tabKey, worldType) {
+export function getItemTabLabel(tabKey) {
   const tab = ITEM_TABS.find((entry) => entry.key === tabKey);
   if (!tab) return tabKey;
-  if (tab.labelKeyUnity && worldType === 'unity') return tab.labelKeyUnity;
   return tab.labelKey;
 }
 

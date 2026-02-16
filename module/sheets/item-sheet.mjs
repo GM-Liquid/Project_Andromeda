@@ -2,8 +2,6 @@ import { MODULE_ID, RUNE_TYPE_KEYS, debugLog } from '../config.mjs';
 import { getItemTypeConfig } from '../helpers/item-config.mjs';
 
 function buildRankOptions(selected) {
-  const worldType = game.settings.get(MODULE_ID, 'worldType');
-  const baseKey = worldType === 'stellar' ? 'MY_RPG.RankNumeric' : 'MY_RPG.RankGradient';
   const selectedNumber = Number(selected) || 0;
   const options = [
     {
@@ -16,7 +14,7 @@ function buildRankOptions(selected) {
   for (let rank = 1; rank <= 4; rank += 1) {
     options.push({
       value: String(rank),
-      label: game.i18n.localize(`${baseKey}.Rank${rank}`),
+      label: game.i18n.localize(`MY_RPG.RankGradient.Rank${rank}`),
       selected: selectedNumber === rank
     });
   }
@@ -110,7 +108,6 @@ export class ProjectAndromedaItemSheet extends ItemSheet {
     const itemData = sheetData.item ?? sheetData.document ?? this.item;
     sheetData.system = sheetData.system ?? itemData?.system ?? {};
     sheetData.config = CONFIG.ProjectAndromeda ?? {};
-    sheetData.worldType = game.settings.get(MODULE_ID, 'worldType');
     sheetData.itemConfig = getItemTypeConfig(this.item?.type);
 
     if (game.settings.get(MODULE_ID, 'debugMode')) {
@@ -136,7 +133,6 @@ export class ProjectAndromedaCartridgeSheet extends ProjectAndromedaItemSheet {
     data.rankOptions = buildRankOptions(data.system.rank);
     data.skillOptions = buildSkillOptions(data.system.skill);
     data.runeTypeOptions = buildRuneTypeOptions(data.system.runeType);
-    data.showRuneType = data.worldType === 'unity';
     return data;
   }
 }

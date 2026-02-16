@@ -223,28 +223,4 @@ Hooks.once('ready', async function () {
 
   if (!game.user.isGM) return;
   await runLegacyItemMigration();
-  if (game.settings.get(MODULE_ID, 'worldTypeChosen')) return;
-
-  const content = `<p>${game.i18n.localize('MY_RPG.WorldMode.DialogContent')}</p>`;
-  new Dialog({
-    title: game.i18n.localize('MY_RPG.WorldMode.DialogTitle'),
-    content,
-    buttons: {
-      unity: {
-        label: game.i18n.localize('MY_RPG.WorldMode.Unity'),
-        callback: () => {
-          game.settings.set(MODULE_ID, 'worldType', 'unity');
-          game.settings.set(MODULE_ID, 'worldTypeChosen', true);
-        }
-      },
-      stellar: {
-        label: game.i18n.localize('MY_RPG.WorldMode.Stellar'),
-        callback: () => {
-          game.settings.set(MODULE_ID, 'worldType', 'stellar');
-          game.settings.set(MODULE_ID, 'worldTypeChosen', true);
-        }
-      }
-    },
-    default: 'unity'
-  }).render(true);
 });
