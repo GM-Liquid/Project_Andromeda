@@ -15,28 +15,14 @@
       "Yes": "Yes",
       "No": "No"
     },
-    "WorldMode": {
-      "SettingName": "World Mode",
-      "SettingHint": "Select which world rules are used.",
-      "Unity": "Unity",
-      "Stellar": "Stellar",
-      "DialogTitle": "Select World Mode",
-      "DialogContent": "Choose the rule set for this campaign."
-    },
     "Settings": {
       "DebugMode": {
         "Name": "Debug Mode",
         "Hint": "Enable verbose Project Andromeda diagnostics in the browser console."
       }
     },
-    "RankGradient": {
-      "Title": "Rank Gradient",
-      "Rank1": "Wood",
-      "Rank2": "Silver",
-      "Rank3": "Gold",
-      "Rank4": "Sky"
-    },
     "RankNumeric": {
+      "Title": "Rank",
       "Rank1": "Rank 1",
       "Rank2": "Rank 2",
       "Rank3": "Rank 3",
@@ -73,7 +59,6 @@
     },
     "SheetLabels": {
       "AbilitiesAndMods": "Abilities and Genomes",
-      "Tablet": "Tablet",
       "Features": "Main Sheet",
       "Abilities": "Genomes",
       "Parameters": "Parameters",
@@ -245,8 +230,7 @@
       "Skill": "Skill",
       "Bonus": "Bonus",
       "AddRow": "Add Rune",
-      "Rank": "Rank",
-      "SizeLabel": "Tablet Size"
+      "Rank": "Rank"
     },
     "ModsTable": {
       "TableHeading": "Skills and Implants",

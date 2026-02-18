@@ -14,7 +14,7 @@ function buildRankOptions(selected) {
   for (let rank = 1; rank <= 4; rank += 1) {
     options.push({
       value: String(rank),
-      label: game.i18n.localize(`MY_RPG.RankGradient.Rank${rank}`),
+      label: game.i18n.localize(`MY_RPG.RankNumeric.Rank${rank}`),
       selected: selectedNumber === rank
     });
   }

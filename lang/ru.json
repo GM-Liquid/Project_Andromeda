@@ -15,14 +15,6 @@
       "Yes": "Да",
       "No": "Нет"
     },
-    "WorldMode": {
-      "SettingName": "Мир",
-      "SettingHint": "Выберите набор правил для этой кампании.",
-      "Unity": "Единство",
-      "Stellar": "Стеллар",
-      "DialogTitle": "Выбор мира",
-      "DialogContent": "Выберите мир, правила которого будут использоваться."
-    },
     "Settings": {
       "DebugMode": {
         "Name": "Режим отладки",
@@ -34,14 +26,8 @@
       "MagicalLabel": "Магическая защита",
       "PsychicLabel": "Психическая защита"
     },
-    "RankGradient": {
-      "Title": "Градация рангов",
-      "Rank1": "Дерево",
-      "Rank2": "Серебро",
-      "Rank3": "Золото",
-      "Rank4": "Небо"
-    },
     "RankNumeric": {
+      "Title": "Ранг",
       "Rank1": "Ранг 1",
       "Rank2": "Ранг 2",
       "Rank3": "Ранг 3",
@@ -98,7 +84,6 @@
     },
     "SheetLabels": {
       "AbilitiesAndMods": "Способности и геномы",
-      "Tablet": "Скрижаль",
       "Features": "Основной лист",
       "Abilities": "Геномы",
       "Parameters": "Параметры",
@@ -252,8 +237,7 @@
       "Skill": "Навык",
       "Bonus": "Бонус",
       "AddRow": "Добавить руну",
-      "Rank": "Ранг",
-      "SizeLabel": "Размер Скрижали"
+      "Rank": "Ранг"
     },
     "ModsTable": {
       "TableHeading": "Умения и импланты",

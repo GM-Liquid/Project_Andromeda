@@ -19,7 +19,7 @@ import {
   getItemTabLabel
 } from '../helpers/item-config.mjs';
 function getRankLabel(rank) {
-  return game.i18n.localize(`MY_RPG.RankGradient.Rank${rank}`);
+  return game.i18n.localize(`MY_RPG.RankNumeric.Rank${rank}`);
 }
 
 export class ProjectAndromedaActorSheet extends ActorSheet {
