@@ -59,8 +59,10 @@
 .health-track,
 .stress-track,
 .force-shield-track {
-  display: grid;
-  grid-template-columns: repeat(8, 26px);
+  display: flex;
+  flex-wrap: wrap;
+  width: calc(26px * 8 + 6px * 7);
+  max-width: 100%;
   gap: 6px;
   justify-content: center;
 }
