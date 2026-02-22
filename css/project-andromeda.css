@@ -49,11 +49,11 @@
 }
 
 .key-info-health .health-resource--stress {
-  justify-self: start;
+  justify-self: center;
 }
 
 .key-info-health .health-resource--shield {
-  justify-self: end;
+  justify-self: center;
 }
 
 .health-track,
@@ -92,9 +92,8 @@
 }
 
 .force-shield-cell.filled {
-  background-color: #2c72a6;
-  border-color: #1d5682;
-  color: #dff2ff;
+  background-color: #673e37;
+  color: #d2d2c9;
 }
 
 .stress-cell.marked {
