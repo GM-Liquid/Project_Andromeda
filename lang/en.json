@@ -108,6 +108,10 @@
       "Label": "Stress",
       "CellAria": "Stress point {index}"
     },
+    "ForceShield": {
+      "Label": "Force Shield",
+      "CellAria": "Force shield point {index}"
+    },
     "ArmorItem": {
       "BonusPhysicalLabel": "Bonus to Physical Protection",
       "BonusMagicalLabel": "Bonus to Arcane Protection",
@@ -357,7 +361,13 @@
     },
     "ItemFields": {
       "Quantity": "Quantity",
-      "Rank": "Rank"
+      "Rank": "Rank",
+      "UsageFrequency": "Frequency of use"
+    },
+    "UsageFrequency": {
+      "AtWill": "At-will",
+      "Scene": "1/Scene",
+      "Passive": "Passive"
     },
     "RollFlavor": {
       "Modifiers": "Modifiers",

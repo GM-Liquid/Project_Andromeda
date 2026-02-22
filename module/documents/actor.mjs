@@ -16,7 +16,6 @@ export class ProjectAndromedaActor extends Actor {
     const cache = (s.cache ??= {});
     cache.itemTotals = this._computeItemTotals();
     const itemTotals = cache.itemTotals;
-    const isCharacter = this.type === 'character';
     const isNpc = this.type === 'npc';
 
     /* 1. Способности ---------------------------------------------- */
@@ -36,12 +35,28 @@ export class ProjectAndromedaActor extends Actor {
     s.speed.value = this._calcSpeed(s, itemTotals);
 
     const stress = s.stress ?? (s.stress = {});
+    const forceShield = s.forceShield ?? (s.forceShield = {});
     const calcStressMax = isNpc ? this._calcNpcStressMax : this._calcStressMax;
-    stress.max = calcStressMax.call(this, s, itemTotals);
-    const currentStress = Number(stress.value) || 0;
-    stress.value = Math.clamp
-      ? Math.clamp(currentStress, 0, stress.max)
-      : Math.min(Math.max(currentStress, 0), stress.max);
+    const calcForceShieldMax = isNpc ? this._calcNpcForceShieldMax : this._calcForceShieldMax;
+    stress.max = calcStressMax.call(this, s);
+    forceShield.max = calcForceShieldMax.call(this, itemTotals);
+    const clamp = Math.clamp
+      ? (value, min, max) => Math.clamp(value, min, max)
+      : (value, min, max) => Math.min(Math.max(value, min), max);
+    const legacyCombinedStress = Number(stress.value) || 0;
+    const storedForceShield = Number(forceShield.value);
+    const hasStoredForceShield = Number.isFinite(storedForceShield);
+    const inferredShieldFromOverflow = Math.max(legacyCombinedStress - stress.max, 0);
+    const useInferredShield =
+      inferredShieldFromOverflow > 0 && (!hasStoredForceShield || storedForceShield <= 0);
+    const currentStress = useInferredShield ? stress.max : legacyCombinedStress;
+    const currentForceShield = useInferredShield
+      ? inferredShieldFromOverflow
+      : hasStoredForceShield
+        ? storedForceShield
+        : 0;
+    stress.value = clamp(currentStress, 0, stress.max);
+    forceShield.value = clamp(currentForceShield, 0, forceShield.max);
     const marked = Array.isArray(stress.marked) ? stress.marked : [];
     stress.marked = [...new Set(marked)]
       .map((value) => Number(value))
@@ -63,63 +78,49 @@ export class ProjectAndromedaActor extends Actor {
   }
 
   /* ------------------------ Формулы ------------------------------ */
-  _calcStressMax(s, itemTotals = {}) {
+  _calcStressMax(s) {
     const rank = Math.max(Number(s.currentRank) || 0, 0);
     const tempHealth = Math.max(Number(s.temphealth) || 0, 0);
-    const shield = Number(itemTotals?.armor?.shield) || 0;
-    const forceShield = Math.max(shield, 0);
-    return Math.max(0, rank * 2 + 4 + tempHealth + forceShield);
+    return Math.max(0, rank * 2 + 4 + tempHealth);
   }
 
-  _calcNpcStressMax(s, itemTotals = {}) {
+  _calcNpcStressMax(s) {
     const rank = Math.max(Number(s.currentRank) || 0, 0);
     const tempHealth = Math.max(Number(s.temphealth) || 0, 0);
+    return Math.max(0, rank * 2 + 4 + tempHealth);
+  }
+
+  _calcForceShieldMax(itemTotals = {}) {
     const shield = Number(itemTotals?.armor?.shield) || 0;
-    const forceShield = Math.max(shield, 0);
-    return Math.max(0, rank * 2 + 4 + tempHealth + forceShield);
+    return Math.max(shield, 0);
+  }
+
+  _calcNpcForceShieldMax(itemTotals = {}) {
+    const shield = Number(itemTotals?.armor?.shield) || 0;
+    return Math.max(shield, 0);
   }
 
   _calcFlux(s) {
-    return (
-      (Number(s.currentRank) || 0) * 5 +
-      (Number(s.tempflux) || 0)
-    );
+    return (Number(s.currentRank) || 0) * 5 + (Number(s.tempflux) || 0);
   }
 
   _calcSpeed(s, itemTotals = {}) {
     const armorSpeed = Number(itemTotals?.armor?.speed) || 0;
     const rank = Math.max(Number(s.currentRank) || 0, 0);
-    return (
-      rank * 3 +
-      3 +
-      armorSpeed +
-      (Number(s.tempspeed) || 0)
-    );
+    return rank * 3 + 3 + armorSpeed + (Number(s.tempspeed) || 0);
   }
 
   _calcDefPhys(s, itemTotals = {}) {
     const phys = Number(itemTotals?.armor?.physical) || 0;
-    return (
-      this._getAbilityDefense(s.abilities?.con?.value) +
-      phys +
-      (Number(s.tempphys) || 0)
-    );
+    return this._getAbilityDefense(s.abilities?.con?.value) + phys + (Number(s.tempphys) || 0);
   }
   _calcDefAzure(s, itemTotals = {}) {
     const azure = Number(itemTotals?.armor?.azure) || 0;
-    return (
-      this._getAbilityDefense(s.abilities?.int?.value) +
-      azure +
-      (Number(s.tempazure) || 0)
-    );
+    return this._getAbilityDefense(s.abilities?.int?.value) + azure + (Number(s.tempazure) || 0);
   }
   _calcDefMent(s, itemTotals = {}) {
     const mental = Number(itemTotals?.armor?.mental) || 0;
-    return (
-      this._getAbilityDefense(s.abilities?.spi?.value) +
-      mental +
-      (Number(s.tempmental) || 0)
-    );
+    return this._getAbilityDefense(s.abilities?.spi?.value) + mental + (Number(s.tempmental) || 0);
   }
 
   _getAbilityDefense(abilityValue) {

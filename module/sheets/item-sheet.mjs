@@ -1,5 +1,5 @@
 import { MODULE_ID, RUNE_TYPE_KEYS, debugLog } from '../config.mjs';
-import { getItemTypeConfig } from '../helpers/item-config.mjs';
+import { ITEM_USAGE_FREQUENCY_LABEL_KEYS, getItemTypeConfig } from '../helpers/item-config.mjs';
 
 function buildRankOptions(selected) {
   const selectedNumber = Number(selected) || 0;
@@ -52,6 +52,15 @@ function buildSkillOptions(selected) {
   return options;
 }
 
+function buildUsageFrequencyOptions(selected) {
+  const normalized = selected || 'atWill';
+  return Object.entries(ITEM_USAGE_FREQUENCY_LABEL_KEYS).map(([value, labelKey]) => ({
+    value,
+    label: game.i18n.localize(labelKey),
+    selected: normalized === value
+  }));
+}
+
 export class ProjectAndromedaItemSheet extends ItemSheet {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
@@ -82,7 +91,8 @@ export class ProjectAndromedaItemSheet extends ItemSheet {
         if (!tagName) return;
 
         const { selectionStart, selectionEnd, value } = area;
-        if (selectionStart == null || selectionEnd == null || selectionStart === selectionEnd) return;
+        if (selectionStart == null || selectionEnd == null || selectionStart === selectionEnd)
+          return;
 
         event.preventDefault();
 
@@ -184,13 +194,17 @@ export class ProjectAndromedaGenericItemSheet extends ProjectAndromedaItemSheet 
     const data = await super.getData(options);
     const fields = Array.isArray(data.itemConfig?.fields) ? data.itemConfig.fields : [];
     data.rankOptions = buildRankOptions(data.system.rank);
+    data.usageFrequencyOptions = buildUsageFrequencyOptions(data.system.usageFrequency);
     data.itemFields = fields.map((field) => {
       const value = foundry.utils.getProperty(data.system, field.path) ?? '';
+      const isUsageFrequency = field.type === 'usageFrequency';
       return {
         ...field,
         value,
         inputType: field.type === 'number' ? 'number' : 'text',
-        isRank: field.type === 'rank'
+        isRank: field.type === 'rank',
+        isUsageFrequency,
+        options: isUsageFrequency ? data.usageFrequencyOptions : []
       };
     });
     return data;

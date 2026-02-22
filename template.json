@@ -27,6 +27,10 @@
           "max": 4,
           "marked": []
         },
+        "forceShield": {
+          "value": 0,
+          "max": 0
+        },
         "flux": {
           "value": 0
         },
@@ -161,6 +165,7 @@
         "description": "",
         "equipped": false,
         "rank": "",
+        "usageFrequency": "atWill",
         "rules": [],
         "traits": [],
         "details": {}

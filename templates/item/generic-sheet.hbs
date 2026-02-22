@@ -30,13 +30,21 @@
                   {{/each}}
                 </select>
               {{else}}
-                <input
-                  type="{{field.inputType}}"
-                  name="system.{{field.path}}"
-                  value="{{field.value}}"
-                  {{#if field.min}}min="{{field.min}}"{{/if}}
-                  {{#unless ../editable}}disabled{{/unless}}
-                />
+                {{#if field.isUsageFrequency}}
+                  <select name="system.{{field.path}}" {{#unless ../editable}}disabled{{/unless}}>
+                    {{#each field.options as |option|}}
+                      <option value="{{option.value}}" {{#if option.selected}}selected{{/if}}>{{option.label}}</option>
+                    {{/each}}
+                  </select>
+                {{else}}
+                  <input
+                    type="{{field.inputType}}"
+                    name="system.{{field.path}}"
+                    value="{{field.value}}"
+                    {{#if field.min}}min="{{field.min}}"{{/if}}
+                    {{#unless ../editable}}disabled{{/unless}}
+                  />
+                {{/if}}
               {{/if}}
             </div>
           {{/each}}

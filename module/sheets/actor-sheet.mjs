@@ -101,15 +101,14 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     }
   }
 
-
   activateListeners(html) {
     super.activateListeners(html);
     const $html = html instanceof jQuery ? html : $(html);
     $html.find('textarea.rich-editor').each((i, el) => this.initializeRichEditor(el));
-    $html
-      .find('.stress-cell')
-      .on('click', this._onStressCellClick.bind(this))
-      .on('contextmenu', this._onStressCellRightClick.bind(this));
+    $html.on('click', '.stress-cell', this._onStressCellClick.bind(this));
+    $html.on('contextmenu', '.stress-cell', this._onStressCellRightClick.bind(this));
+    $html.on('click', '.force-shield-cell', this._onForceShieldCellClick.bind(this));
+    $html.on('contextmenu', '.force-shield-cell', this._onForceShieldCellContextMenu.bind(this));
     $html.find('.rollable').on('click', this._onRoll.bind(this));
 
     $html.on('click', '.item-create', this._onItemCreate.bind(this));
@@ -120,20 +119,17 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     $html.on('click', '.item-quantity-step', this._onItemQuantityStep.bind(this));
     $html.on('change', '.item-equip-checkbox', this._onItemEquipChange.bind(this));
 
-    $html
-      .find('input[name^="system.skills."]')
-      .on('change', async (ev) => {
-        const input = ev.currentTarget;
-        const validatedValue = this.validateNumericInput(input);
-        await this.actor.update({ [input.name]: validatedValue }, { render: false });
-        const rankClass = 'rank' + getColorRank(validatedValue, 'skill');
-        input.classList.remove('rank1', 'rank2', 'rank3', 'rank4');
-        input.classList.add(rankClass);
-      });
+    $html.find('input[name^="system.skills."]').on('change', async (ev) => {
+      const input = ev.currentTarget;
+      const validatedValue = this.validateNumericInput(input);
+      await this.actor.update({ [input.name]: validatedValue }, { render: false });
+      const rankClass = 'rank' + getColorRank(validatedValue, 'skill');
+      input.classList.remove('rank1', 'rank2', 'rank3', 'rank4');
+      input.classList.add(rankClass);
+    });
 
     $html.on('click', '.ability-step', this._onAbilityStep.bind(this));
   }
-
 
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
@@ -189,7 +185,6 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     return context;
   }
 
-
   _prepareCharacterData(context) {
     const abilityOrder = ['con', 'int', 'spi'];
     context.system.skills ??= {};
@@ -219,7 +214,8 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const skillColumns = [];
     for (const abilityKey of abilityOrder) {
       const columnSkills = [];
-      const abilityLabel = game.i18n.localize(CONFIG.ProjectAndromeda.abilities[abilityKey]) ?? abilityKey;
+      const abilityLabel =
+        game.i18n.localize(CONFIG.ProjectAndromeda.abilities[abilityKey]) ?? abilityKey;
       const abilityAbbreviation =
         game.i18n.localize(CONFIG.ProjectAndromeda.abilityAbbreviations[abilityKey]) ?? abilityKey;
       for (const key of skillOrderByAbility[abilityKey] ?? []) {
@@ -242,17 +238,49 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     context.skillColumns = skillColumns;
 
     const stress = context.system.stress ?? { value: 0, max: 0 };
-    const stressValue = Number(stress.value) || 0;
-    const stressMax = Number(stress.max) || 0;
+    const stressMax = Math.max(Number(stress.max) || 0, 0);
+    const stressValue = Math.min(Math.max(Number(stress.value) || 0, 0), stressMax);
     const marked = this._normalizeStressMarked(stress.marked, stressMax);
-    context.system.stress.marked = marked;
-    context.system.stressTrack = Array.from({ length: Math.max(stressMax, 0) }, (_, index) => {
-      const isMarked = marked.includes(index);
+    context.system.stress = {
+      ...foundry.utils.duplicate(stress),
+      max: stressMax,
+      value: stressValue,
+      marked
+    };
+    context.system.stressTrack = this._buildTrackData({
+      max: stressMax,
+      value: stressValue,
+      marked,
+      ariaKey: 'MY_RPG.Stress.CellAria',
+      allowMarked: true
+    });
+
+    const forceShield = context.system.forceShield ?? { value: 0, max: 0 };
+    const forceShieldMax = Math.max(Number(forceShield.max) || 0, 0);
+    const forceShieldValue = Math.min(Math.max(Number(forceShield.value) || 0, 0), forceShieldMax);
+    context.system.forceShield = {
+      ...foundry.utils.duplicate(forceShield),
+      max: forceShieldMax,
+      value: forceShieldValue
+    };
+    context.system.forceShieldTrack = this._buildTrackData({
+      max: forceShieldMax,
+      value: forceShieldValue,
+      ariaKey: 'MY_RPG.ForceShield.CellAria'
+    });
+  }
+
+  _buildTrackData({ max, value, marked = [], ariaKey, allowMarked = false }) {
+    const boundedMax = Math.max(Number(max) || 0, 0);
+    const boundedValue = Math.min(Math.max(Number(value) || 0, 0), boundedMax);
+    const markedCells = allowMarked ? this._normalizeStressMarked(marked, boundedMax) : [];
+    return Array.from({ length: boundedMax }, (_, index) => {
+      const isMarked = allowMarked && markedCells.includes(index);
       return {
         index,
-        filled: index < stressValue && !isMarked,
+        filled: index < boundedValue && !isMarked,
         marked: isMarked,
-        ariaLabel: game.i18n.format('MY_RPG.Stress.CellAria', { index: index + 1 })
+        ariaLabel: game.i18n.format(ariaKey, { index: index + 1 })
       };
     });
   }
@@ -266,10 +294,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const stress = this.actor.system.stress || { value: 0, max: 0 };
     const max = Number(stress.max) || 0;
     const current = Number(stress.value) || 0;
-    const next =
-      index < current
-        ? index
-        : Math.min(index + 1, max);
+    const next = index < current ? index : Math.min(index + 1, max);
     await this.actor.update(
       {
         'system.stress.value': next
@@ -298,16 +323,33 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     this._updateStressTrack(this.element, { marked: marked, value: 0 });
   }
 
+  async _onForceShieldCellClick(event) {
+    event.preventDefault();
+    const index = Number(event.currentTarget.dataset.index) || 0;
+    const forceShield = this.actor.system.forceShield || { value: 0, max: 0 };
+    const max = Number(forceShield.max) || 0;
+    const current = Number(forceShield.value) || 0;
+    const next = index < current ? index : Math.min(index + 1, max);
+    await this.actor.update(
+      {
+        'system.forceShield.value': next
+      },
+      { render: false }
+    );
+    this._updateForceShieldTrack(this.element, { value: next });
+  }
+
+  _onForceShieldCellContextMenu(event) {
+    event.preventDefault();
+  }
+
   _stepAbilityDie(current, step) {
     const normalized = normalizeAbilityDie(current);
     const dieValues = ABILITY_DIE_STEPS.map((abilityStep) => abilityStep.value);
     const index = dieValues.indexOf(normalized);
     const clampedIndex = Math.max(
       0,
-      Math.min(
-        (index === -1 ? 0 : index) + Math.sign(step || 0),
-        dieValues.length - 1
-      )
+      Math.min((index === -1 ? 0 : index) + Math.sign(step || 0), dieValues.length - 1)
     );
     return dieValues[clampedIndex];
   }
@@ -347,14 +389,13 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       const rankClass = 'rank' + getColorRank(dieValue, 'ability');
       const $container = $root.find(`[data-ability-key="${key}"]`);
 
-      $container.find('.ability-die-value')
+      $container
+        .find('.ability-die-value')
         .text(getAbilityDieLabel(dieValue))
         .removeClass(rankClasses.join(' '))
         .addClass(rankClass);
 
-      $container
-        .find(`input[name="system.abilities.${key}.value"]`)
-        .val(dieValue);
+      $container.find(`input[name="system.abilities.${key}.value"]`).val(dieValue);
 
       const $header = $root.find(`th[data-ability="${key}"]`);
       $header.removeClass(rankClasses.join(' ')).addClass(rankClass);
@@ -407,7 +448,9 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       dieValue = dieValue ?? this._getAbilityDieValue(ability);
     }
 
-    const rollFormula = dieValue ? getAbilityDieRoll(dieValue) : getAbilityDieRoll(ABILITY_DIE_STEPS[0].value);
+    const rollFormula = dieValue
+      ? getAbilityDieRoll(dieValue)
+      : getAbilityDieRoll(ABILITY_DIE_STEPS[0].value);
     const roll = await new Roll(`${rollFormula} + @mod`, { mod: modifier }).roll({
       async: true
     });
@@ -420,7 +463,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
   }
 
   /**
-   * Update derived fields on the sheet (speed, defenses, stress)
+   * Update derived fields on the sheet (speed, defenses, stress, force shield)
    * after an in-place change without re-rendering the sheet.
    */
   _refreshDerived(html) {
@@ -438,29 +481,109 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     setVal('system.defenses.mental', s?.defenses?.mental);
 
     this._updateStressTrack($root);
+    this._updateForceShieldTrack($root);
   }
 
   _updateStressTrack(root, options = {}) {
     const $root = root instanceof jQuery ? root : $(root ?? this.element);
     const stress = this.actor.system.stress || { value: 0, max: 0 };
+    const max = Math.max(Number(stress.max) || 0, 0);
     const value =
       typeof options === 'number'
         ? options
         : typeof options?.value === 'number'
           ? options.value
           : Number(stress.value) || 0;
+    const boundedValue = Math.min(Math.max(Number(value) || 0, 0), max);
     const marked = Array.isArray(options?.marked)
-      ? this._normalizeStressMarked(options.marked, Number(stress.max) || 0)
-      : this._normalizeStressMarked(stress.marked, Number(stress.max) || 0);
+      ? this._normalizeStressMarked(options.marked, max)
+      : this._normalizeStressMarked(stress.marked, max);
     const $track = $root.find('.stress-track');
     if (!$track.length) return;
-    $track.find('.stress-cell').each((i, el) => {
+    const cells = this._syncStressTrackCells($track, max);
+    cells.forEach((el, i) => {
       const isMarked = marked.includes(i);
-      const filled = i < value && !isMarked;
+      const filled = i < boundedValue && !isMarked;
       el.classList.toggle('filled', filled);
       el.classList.toggle('marked', isMarked);
       el.setAttribute('aria-pressed', filled ? 'true' : 'false');
     });
+  }
+
+  _syncStressTrackCells($track, max) {
+    const track = $track?.[0];
+    if (!track) return [];
+    track.dataset.total = String(max);
+    const selector = '.stress-cell';
+    const cells = Array.from(track.querySelectorAll(selector));
+    while (cells.length > max) {
+      cells.pop()?.remove();
+    }
+    while (cells.length < max) {
+      const cell = document.createElement('button');
+      cell.type = 'button';
+      cell.className = 'stress-cell health-cell';
+      track.append(cell);
+      cells.push(cell);
+    }
+    for (let index = 0; index < cells.length; index += 1) {
+      const cell = cells[index];
+      cell.dataset.index = String(index);
+      cell.setAttribute(
+        'aria-label',
+        game.i18n.format('MY_RPG.Stress.CellAria', { index: index + 1 })
+      );
+    }
+    return cells;
+  }
+
+  _updateForceShieldTrack(root, options = {}) {
+    const $root = root instanceof jQuery ? root : $(root ?? this.element);
+    const forceShield = this.actor.system.forceShield || { value: 0, max: 0 };
+    const max = Math.max(Number(forceShield.max) || 0, 0);
+    const value =
+      typeof options === 'number'
+        ? options
+        : typeof options?.value === 'number'
+          ? options.value
+          : Number(forceShield.value) || 0;
+    const boundedValue = Math.min(Math.max(Number(value) || 0, 0), max);
+    const $track = $root.find('.force-shield-track');
+    if (!$track.length) return;
+    const cells = this._syncForceShieldTrackCells($track, max);
+    cells.forEach((el, i) => {
+      const filled = i < boundedValue;
+      el.classList.toggle('filled', filled);
+      el.classList.remove('marked');
+      el.setAttribute('aria-pressed', filled ? 'true' : 'false');
+    });
+  }
+
+  _syncForceShieldTrackCells($track, max) {
+    const track = $track?.[0];
+    if (!track) return [];
+    track.dataset.total = String(max);
+    const selector = '.force-shield-cell';
+    const cells = Array.from(track.querySelectorAll(selector));
+    while (cells.length > max) {
+      cells.pop()?.remove();
+    }
+    while (cells.length < max) {
+      const cell = document.createElement('button');
+      cell.type = 'button';
+      cell.className = 'force-shield-cell health-cell';
+      track.append(cell);
+      cells.push(cell);
+    }
+    for (let index = 0; index < cells.length; index += 1) {
+      const cell = cells[index];
+      cell.dataset.index = String(index);
+      cell.setAttribute(
+        'aria-label',
+        game.i18n.format('MY_RPG.ForceShield.CellAria', { index: index + 1 })
+      );
+    }
+    return cells;
   }
 
   _normalizeStressMarked(marked, max) {
@@ -468,8 +591,9 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const source = Array.isArray(marked) ? marked : [];
     const normalized = source
       .map((value) => Number(value))
-      .filter((value) =>
-        Number.isInteger(value) && value >= 0 && (limit === null || value < limit));
+      .filter(
+        (value) => Number.isInteger(value) && value >= 0 && (limit === null || value < limit)
+      );
     return [...new Set(normalized)];
   }
 
@@ -598,15 +722,9 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const $row = rowEl ? $(rowEl) : $target.closest('[data-item-id]');
     if (!$row?.length) return {};
     const itemId =
-      $target.data('itemId') ??
-      $row.data('itemId') ??
-      rowEl?.dataset?.itemId ??
-      undefined;
+      $target.data('itemId') ?? $row.data('itemId') ?? rowEl?.dataset?.itemId ?? undefined;
     const groupKey =
-      $target.data('groupKey') ??
-      $row.data('groupKey') ??
-      rowEl?.dataset?.groupKey ??
-      undefined;
+      $target.data('groupKey') ?? $row.data('groupKey') ?? rowEl?.dataset?.groupKey ?? undefined;
     const item = this.actor.items.get(itemId);
     const config = this._getGroupConfig(groupKey);
     return { item, $row, groupKey, config, itemId };
@@ -615,19 +733,16 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
   async _onItemCreate(event) {
     event.preventDefault();
     const $target = $(event.currentTarget);
-    const groupKey = $target.data('groupKey') || $target.closest('[data-item-group]').data('itemGroup');
+    const groupKey =
+      $target.data('groupKey') || $target.closest('[data-item-group]').data('itemGroup');
     const type = $target.data('type');
-    let config = type
-      ? getItemGroupConfigs().find((entry) => entry.types.includes(type))
-      : null;
+    let config = type ? getItemGroupConfigs().find((entry) => entry.types.includes(type)) : null;
     if (!config) config = this._getGroupConfig(groupKey);
     if (!config) return;
     const name = this._getDefaultItemName(config);
     // DEBUG-LOG
     debugLog('Actor sheet item create', { actor: this.actor.uuid, type: config.types[0] });
-    await this.actor.createEmbeddedDocuments('Item', [
-      { name, type: config.types[0], system: {} }
-    ]);
+    await this.actor.createEmbeddedDocuments('Item', [{ name, type: config.types[0], system: {} }]);
   }
 
   async _onItemEdit(event) {
@@ -664,7 +779,11 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const confirmed = await Dialog.confirm({ title, content });
     if (!confirmed) return;
     // DEBUG-LOG
-    debugLog('Actor sheet item delete', { actor: this.actor.uuid, itemId: item.id, type: item.type });
+    debugLog('Actor sheet item delete', {
+      actor: this.actor.uuid,
+      itemId: item.id,
+      type: item.type
+    });
     await item.delete();
   }
 
@@ -711,7 +830,9 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const parts = [];
 
     parts.push({
-      label: game.i18n.format('MY_RPG.RollFlavor.SkillValue', { skill: this._skillLabel(skillKey) }),
+      label: game.i18n.format('MY_RPG.RollFlavor.SkillValue', {
+        skill: this._skillLabel(skillKey)
+      }),
       value: skillValue
     });
 
@@ -824,9 +945,10 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     }
     meta.push(...this._getItemBadges(item, config));
     if (config.allowEquip && system.equipped) {
-      const equipKey = config.key === 'armor'
-        ? 'MY_RPG.ArmorTable.EquippedLabel'
-        : 'MY_RPG.WeaponsTable.EquippedLabel';
+      const equipKey =
+        config.key === 'armor'
+          ? 'MY_RPG.ArmorTable.EquippedLabel'
+          : 'MY_RPG.WeaponsTable.EquippedLabel';
       meta.push(game.i18n.localize(equipKey));
     }
     if (meta.length) lines.push(meta.join('<br>'));
@@ -847,7 +969,11 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     if (next === current) return;
     await item.update({ 'system.quantity': next }, { diff: false });
     // DEBUG-LOG
-    debugLog('Actor sheet item quantity', { actor: this.actor.uuid, itemId: item.id, quantity: next });
+    debugLog('Actor sheet item quantity', {
+      actor: this.actor.uuid,
+      itemId: item.id,
+      quantity: next
+    });
     $row.find('.item-quantity-value').text(next);
     if (config && (config.key === 'armor' || config.key === 'weapons')) {
       this.actor.prepareData();
@@ -873,7 +999,12 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     }
     await this.actor.updateEmbeddedDocuments('Item', updates, { render: false });
     // DEBUG-LOG
-    debugLog('Actor sheet item equip', { actor: this.actor.uuid, itemId: item.id, group: groupKey, equipped: checked });
+    debugLog('Actor sheet item equip', {
+      actor: this.actor.uuid,
+      itemId: item.id,
+      group: groupKey,
+      equipped: checked
+    });
     this.actor.prepareData();
     this._refreshDerived(this.element);
     const $group = $row.closest('[data-item-group]');
@@ -1011,9 +1142,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const source = item ?? {};
     const system = source.system ?? source;
     const lines = [
-      `${game.i18n.localize('MY_RPG.WeaponsTable.SkillLabel')}: ${this._skillLabel(
-        system.skill
-      )}`,
+      `${game.i18n.localize('MY_RPG.WeaponsTable.SkillLabel')}: ${this._skillLabel(system.skill)}`,
       `${game.i18n.localize('MY_RPG.WeaponsTable.DamageLabel')}: ${this._formatDamage(system.skillBonus)}`
     ];
     let html = lines.join('<br>');
@@ -1031,26 +1160,12 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const mental = Number(system.itemMental) || 0;
     const shield = Number(system.itemShield) || 0;
     const speed = Number(system.itemSpeed) || 0;
-    if (phys)
-      lines.push(
-        `${game.i18n.localize('MY_RPG.ArmorItem.BonusPhysicalLabel')}: ${phys}`
-      );
-    if (azure)
-      lines.push(
-        `${game.i18n.localize('MY_RPG.ArmorItem.BonusMagicalLabel')}: ${azure}`
-      );
+    if (phys) lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.BonusPhysicalLabel')}: ${phys}`);
+    if (azure) lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.BonusMagicalLabel')}: ${azure}`);
     if (mental)
-      lines.push(
-        `${game.i18n.localize('MY_RPG.ArmorItem.BonusPsychicLabel')}: ${mental}`
-      );
-    if (shield)
-      lines.push(
-        `${game.i18n.localize('MY_RPG.ArmorItem.ShieldLabel')}: ${shield}`
-      );
-    if (speed)
-      lines.push(
-        `${game.i18n.localize('MY_RPG.ArmorItem.BonusSpeedLabel')}: ${speed}`
-      );
+      lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.BonusPsychicLabel')}: ${mental}`);
+    if (shield) lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.ShieldLabel')}: ${shield}`);
+    if (speed) lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.BonusSpeedLabel')}: ${speed}`);
     let html = lines.join('<br>');
     const description = this._formatItemDescription(system.description ?? system.desc ?? '');
     if (description) html += `<br><br>${description}`;

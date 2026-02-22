@@ -157,6 +157,10 @@
       "Label": "Стресс",
       "CellAria": "Клетка стресса {index}"
     },
+    "ForceShield": {
+      "Label": "Силовой щит",
+      "CellAria": "Клетка силового щита {index}"
+    },
     "Speed": {
       "Label": "Скорость передвижения"
     },
@@ -364,7 +368,13 @@
     },
     "ItemFields": {
       "Quantity": "Количество",
-      "Rank": "Ранг"
+      "Rank": "Ранг",
+      "UsageFrequency": "Частота использования"
+    },
+    "UsageFrequency": {
+      "AtWill": "Неограниченно",
+      "Scene": "1/Сцену",
+      "Passive": "Пассивно"
     },
     "RollFlavor": {
       "Modifiers": "Модификаторы",

@@ -159,14 +159,30 @@
 
 
           <section class='resources grid grid-2col key-info-grid key-info-health'>
-            <div class='resource flex-group-center'>
+            <div class='resource flex-group-center health-resource health-resource--stress'>
               <label class='resource-label'>{{localize 'MY_RPG.Stress.Label'}}</label>
               <div class='resource-content flexcol'>
-                <div class='stress-track' data-total='{{system.stress.max}}'>
+                <div class='stress-track health-track' data-total='{{system.stress.max}}'>
                   {{#each system.stressTrack as |cell|}}
                     <button
                       type='button'
-                      class='stress-cell {{#if cell.filled}}filled{{/if}} {{#if cell.marked}}marked{{/if}}'
+                      class='stress-cell health-cell {{#if cell.filled}}filled{{/if}} {{#if cell.marked}}marked{{/if}}'
+                      data-index='{{cell.index}}'
+                      aria-label='{{cell.ariaLabel}}'
+                      aria-pressed='{{#if cell.filled}}true{{else}}false{{/if}}'
+                    ></button>
+                  {{/each}}
+                </div>
+              </div>
+            </div>
+            <div class='resource flex-group-center health-resource health-resource--shield'>
+              <label class='resource-label'>{{localize 'MY_RPG.ForceShield.Label'}}</label>
+              <div class='resource-content flexcol'>
+                <div class='force-shield-track health-track' data-total='{{system.forceShield.max}}'>
+                  {{#each system.forceShieldTrack as |cell|}}
+                    <button
+                      type='button'
+                      class='force-shield-cell health-cell {{#if cell.filled}}filled{{/if}}'
                       data-index='{{cell.index}}'
                       aria-label='{{cell.ariaLabel}}'
                       aria-pressed='{{#if cell.filled}}true{{else}}false{{/if}}'

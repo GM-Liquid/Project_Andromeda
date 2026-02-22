@@ -1,6 +1,7 @@
 export const ITEM_BASE_DEFAULTS = {
   description: '',
   rank: '',
+  usageFrequency: 'atWill',
   equipped: false,
   rules: [],
   traits: [],
@@ -13,6 +14,20 @@ export const ITEM_SUPERTYPE_LABELS = {
   traits: 'MY_RPG.ItemTypeGroups.Traits',
   other: 'MY_RPG.ItemTypeGroups.Other'
 };
+
+export const ITEM_USAGE_FREQUENCY_LABEL_KEYS = {
+  atWill: 'MY_RPG.UsageFrequency.AtWill',
+  scene: 'MY_RPG.UsageFrequency.Scene',
+  passive: 'MY_RPG.UsageFrequency.Passive'
+};
+
+function buildUsageFrequencyField() {
+  return {
+    path: 'usageFrequency',
+    labelKey: 'MY_RPG.ItemFields.UsageFrequency',
+    type: 'usageFrequency'
+  };
+}
 
 export const ITEM_TYPE_CONFIGS = [
   {
@@ -167,61 +182,71 @@ export const ITEM_TYPE_CONFIGS = [
     type: 'trait-flaw',
     supertype: 'traits',
     groupKey: 'traitFlaws',
-    sheet: 'generic'
+    sheet: 'generic',
+    fields: [buildUsageFrequencyField()]
   },
   {
     type: 'trait-general',
     supertype: 'traits',
     groupKey: 'traitGeneral',
-    sheet: 'generic'
+    sheet: 'generic',
+    fields: [buildUsageFrequencyField()]
   },
   {
     type: 'trait-backstory',
     supertype: 'traits',
     groupKey: 'traitBackstory',
-    sheet: 'generic'
+    sheet: 'generic',
+    fields: [buildUsageFrequencyField()]
   },
   {
     type: 'trait-social',
     supertype: 'traits',
     groupKey: 'traitSocial',
-    sheet: 'generic'
+    sheet: 'generic',
+    fields: [buildUsageFrequencyField()]
   },
   {
     type: 'trait-combat',
     supertype: 'traits',
     groupKey: 'traitCombat',
-    sheet: 'generic'
+    sheet: 'generic',
+    fields: [buildUsageFrequencyField()]
   },
   {
     type: 'trait-magical',
     supertype: 'traits',
     groupKey: 'traitMagical',
-    sheet: 'generic'
+    sheet: 'generic',
+    fields: [buildUsageFrequencyField()]
   },
   {
     type: 'trait-professional',
     supertype: 'traits',
     groupKey: 'traitProfessional',
-    sheet: 'generic'
+    sheet: 'generic',
+    fields: [buildUsageFrequencyField()]
   },
   {
     type: 'trait-technological',
     supertype: 'traits',
     groupKey: 'traitTechnological',
-    sheet: 'generic'
+    sheet: 'generic',
+    fields: [buildUsageFrequencyField()]
   },
   {
     type: 'trait-genome',
     supertype: 'traits',
     groupKey: 'genomes',
-    sheet: 'generic'
+    sheet: 'generic',
+    fields: [buildUsageFrequencyField()]
   },
   {
     type: 'trait-source-ability',
     supertype: 'traits',
     groupKey: 'sourceAbilities',
-    sheet: 'generic'
+    sheet: 'generic',
+    fields: [buildUsageFrequencyField()]
   }
 ];
 
@@ -595,6 +620,29 @@ export function getItemTabLabel(tabKey) {
   return tab.labelKey;
 }
 
+function buildUsageFrequencyBadge(item, helpers) {
+  const system = item.system ?? {};
+  const value = String(system.usageFrequency ?? '').trim();
+  const labelKey = ITEM_USAGE_FREQUENCY_LABEL_KEYS[value];
+  if (!labelKey) return [];
+  const t = helpers.t;
+  return [`${t.localize('MY_RPG.ItemFields.UsageFrequency')}: ${t.localize(labelKey)}`];
+}
+
+const USAGE_FREQUENCY_BADGE_GROUPS = [
+  'genomes',
+  'sourceAbilities',
+  'traits',
+  'traitFlaws',
+  'traitGeneral',
+  'traitBackstory',
+  'traitSocial',
+  'traitCombat',
+  'traitMagical',
+  'traitProfessional',
+  'traitTechnological'
+];
+
 export const ITEM_BADGE_BUILDERS = {
   implants: (item, helpers) => {
     const system = item.system ?? {};
@@ -633,5 +681,8 @@ export const ITEM_BADGE_BUILDERS = {
     if (shield) badges.push(`${t.localize('MY_RPG.ArmorItem.ShieldLabel')}: ${shield}`);
     if (speed) badges.push(`${t.localize('MY_RPG.ArmorItem.BonusSpeedLabel')}: ${speed}`);
     return badges;
-  }
+  },
+  ...Object.fromEntries(
+    USAGE_FREQUENCY_BADGE_GROUPS.map((groupKey) => [groupKey, buildUsageFrequencyBadge])
+  )
 };
