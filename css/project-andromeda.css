@@ -70,6 +70,7 @@
 .health-cell,
 .stress-cell,
 .force-shield-cell {
+  box-sizing: border-box;
   width: 26px;
   height: 26px;
   border-radius: 50%;
