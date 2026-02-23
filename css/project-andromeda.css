@@ -55,7 +55,7 @@
 .force-shield-track {
   display: flex;
   flex-wrap: wrap;
-  width: calc(26px * 8 + 6px * 7);
+  width: 270px;
   min-width: calc(26px * 8 + 6px * 7);
   gap: 6px;
   justify-content: center;
