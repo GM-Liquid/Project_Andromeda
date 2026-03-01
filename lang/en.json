@@ -34,7 +34,8 @@
       "Age": "Age",
       "CurrentRank": "Current Rank",
       "Name": "Name",
-      "MomentOfGlory": "Moment of Glory"
+      "MomentOfGlory": "Moment of Glory",
+      "ProgressPoints": "Progress Points"
     },
     "Inventory": {
       "TableHeading": "Inventory",

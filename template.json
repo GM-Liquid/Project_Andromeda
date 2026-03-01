@@ -8,6 +8,7 @@
         "age": "",
         "currentRank": "",
         "momentOfGlory": 0,
+        "progressPoints": 0,
         "abilities": {
           "con": {
             "value": 4

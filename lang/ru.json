@@ -80,7 +80,8 @@
       "Age": "Возраст",
       "CurrentRank": "Текущий ранг",
       "Name": "Имя",
-      "MomentOfGlory": "Миг Славы"
+      "MomentOfGlory": "Миг Славы",
+      "ProgressPoints": "Очки прогресса"
     },
     "SheetLabels": {
       "AbilitiesAndMods": "Способности и геномы",
