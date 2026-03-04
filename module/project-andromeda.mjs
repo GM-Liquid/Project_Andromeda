@@ -18,6 +18,7 @@ const ENVIRONMENT_ITEM_TYPES = new Set(
     .map((config) => config.type)
 );
 const ENVIRONMENT_ITEM_SOURCE_FLAG = 'environmentTokenSourceUuid';
+const ENVIRONMENT_PROXY_ACTOR_FLAG = 'isEnvironmentTokenProxy';
 const ENVIRONMENT_TOKEN_ACTOR_TYPE = 'npc';
 
 function buildItemTypeOptions({ select, allowedTypes }) {
@@ -158,7 +159,7 @@ function getEnvironmentItemSourceUuid(item) {
   return itemId ? `Item.${itemId}` : '';
 }
 
-function buildEnvironmentActorItemData(item, sourceUuid) {
+function buildEnvironmentTokenItemData(item, sourceUuid) {
   const itemData = {
     name: item.name,
     type: item.type,
@@ -170,72 +171,36 @@ function buildEnvironmentActorItemData(item, sourceUuid) {
   itemData.flags[MODULE_ID][ENVIRONMENT_ITEM_SOURCE_FLAG] = sourceUuid;
   const effects = Array.from(item.effects ?? []).map((effect) => effect.toObject());
   if (effects.length) itemData.effects = effects;
+  if (itemData._id) delete itemData._id;
   return itemData;
 }
 
-async function syncEnvironmentActorItem(actor, item, sourceUuid) {
-  const matchingItem =
-    actor.items.find(
-      (entry) => entry.getFlag(MODULE_ID, ENVIRONMENT_ITEM_SOURCE_FLAG) === sourceUuid
-    ) ?? null;
-  const itemData = buildEnvironmentActorItemData(item, sourceUuid);
-
-  if (!matchingItem) {
-    await actor.createEmbeddedDocuments('Item', [itemData], { render: false });
-    return;
-  }
-
-  await matchingItem.update(itemData, { diff: false, render: false });
-}
-
-async function getOrCreateEnvironmentTokenActor(item) {
-  const sourceUuid = getEnvironmentItemSourceUuid(item);
-  if (!sourceUuid) return null;
-  const actorName = item.name || game.i18n.localize('TYPES.Actor.npc');
-  const tokenImage = item.img || 'icons/svg/hazard.svg';
-
+async function getOrCreateEnvironmentProxyActor() {
   const existingActor =
     game.actors?.find(
       (actor) =>
         actor.type === ENVIRONMENT_TOKEN_ACTOR_TYPE &&
-        actor.getFlag(MODULE_ID, ENVIRONMENT_ITEM_SOURCE_FLAG) === sourceUuid
+        actor.getFlag(MODULE_ID, ENVIRONMENT_PROXY_ACTOR_FLAG)
     ) ?? null;
+  if (existingActor) return existingActor;
 
-  if (existingActor) {
-    const actorUpdates = {};
-    if (existingActor.name !== actorName) actorUpdates.name = actorName;
-    if (existingActor.prototypeToken?.name !== actorName) {
-      actorUpdates['prototypeToken.name'] = actorName;
-    }
-    if (existingActor.img !== tokenImage) {
-      actorUpdates.img = tokenImage;
-      actorUpdates['prototypeToken.texture.src'] = tokenImage;
-    }
-    if (Object.keys(actorUpdates).length) {
-      await existingActor.update(actorUpdates, { render: false });
-    }
-    await syncEnvironmentActorItem(existingActor, item, sourceUuid);
-    return existingActor;
-  }
-
-  const actor = await Actor.create({
-    name: actorName,
+  const actorName = `${game.i18n.localize('MY_RPG.ItemTypeGroups.Environment')} ${game.i18n.localize('TYPES.Actor.npc')}`.trim();
+  const tokenImage = 'icons/svg/hazard.svg';
+  return Actor.create({
+    name: actorName || game.i18n.localize('TYPES.Actor.npc'),
     type: ENVIRONMENT_TOKEN_ACTOR_TYPE,
     img: tokenImage,
     prototypeToken: {
-      name: actorName,
+      name: actorName || game.i18n.localize('TYPES.Actor.npc'),
+      actorLink: false,
       texture: { src: tokenImage }
     },
     flags: {
       [MODULE_ID]: {
-        [ENVIRONMENT_ITEM_SOURCE_FLAG]: sourceUuid
+        [ENVIRONMENT_PROXY_ACTOR_FLAG]: true
       }
     }
   });
-  if (!actor) return null;
-
-  await syncEnvironmentActorItem(actor, item, sourceUuid);
-  return actor;
 }
 
 /* -------------------------------------------- */
@@ -336,23 +301,37 @@ Hooks.on('dropCanvasData', async (droppedCanvas, data) => {
   const y = Number(data.y);
   if (!Number.isFinite(x) || !Number.isFinite(y)) return;
 
-  const actor = await getOrCreateEnvironmentTokenActor(item);
-  if (!actor) return;
+  const sourceUuid = getEnvironmentItemSourceUuid(item);
+  const proxyActor = await getOrCreateEnvironmentProxyActor();
+  if (!proxyActor) return;
+  const tokenName = item.name || game.i18n.localize(`TYPES.Item.${item.type}`);
+  const tokenImage = item.img || proxyActor.prototypeToken?.texture?.src || 'icons/svg/hazard.svg';
 
-  const tokenDocument = await actor.getTokenDocument({
+  const tokenDocument = await proxyActor.getTokenDocument({
     x,
     y,
-    hidden: Boolean(data.hidden)
+    hidden: Boolean(data.hidden),
+    actorLink: false,
+    name: tokenName,
+    texture: { src: tokenImage }
   });
   const tokenData = tokenDocument?.toObject ? tokenDocument.toObject() : tokenDocument;
   if (!tokenData) return;
+  tokenData.flags ??= {};
+  tokenData.flags[MODULE_ID] ??= {};
+  tokenData.flags[MODULE_ID][ENVIRONMENT_ITEM_SOURCE_FLAG] = sourceUuid;
+  tokenData.delta ??= {};
+  tokenData.delta.flags ??= {};
+  tokenData.delta.flags[MODULE_ID] ??= {};
+  tokenData.delta.flags[MODULE_ID][ENVIRONMENT_ITEM_SOURCE_FLAG] = sourceUuid;
+  tokenData.delta.items = [buildEnvironmentTokenItemData(item, sourceUuid)];
 
   await droppedCanvas.scene.createEmbeddedDocuments('Token', [tokenData]);
 
   // DEBUG-LOG
   debugLog('Environment item token dropped', {
     itemUuid: item.uuid,
-    actorId: actor.id,
+    proxyActorId: proxyActor.id,
     sceneId: droppedCanvas.scene.id
   });
   return false;
