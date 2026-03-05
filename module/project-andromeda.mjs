@@ -26,6 +26,90 @@ function getSessionStatsService() {
   return game.projectAndromeda?.sessionStats ?? null;
 }
 
+function getContextMessage(li) {
+  const messageId =
+    li?.data?.('messageId') ?? li?.attr?.('data-message-id') ?? li?.[0]?.dataset?.messageId ?? '';
+  if (!messageId) return null;
+  return game.messages?.get(messageId) ?? null;
+}
+
+function getMessageActor(message) {
+  const actorId = String(message?.speaker?.actor ?? '').trim();
+  if (!actorId) return null;
+  return game.actors?.get(actorId) ?? null;
+}
+
+function canUseMomentOfGloryReroll(message) {
+  if (!message) return false;
+  const hasRoll = Boolean((Array.isArray(message.rolls) && message.rolls.length) || message.roll);
+  if (!hasRoll) return false;
+  const actor = getMessageActor(message);
+  if (!actor) return false;
+  return Boolean(game.user?.isGM || actor.isOwner);
+}
+
+async function rerollMessageWithMomentOfGlory(message, actor) {
+  const sourceRolls = Array.isArray(message?.rolls)
+    ? message.rolls
+    : message?.roll
+      ? [message.roll]
+      : [];
+  if (!sourceRolls.length) {
+    throw new Error('No roll data found on the source message.');
+  }
+
+  const rerolled = [];
+  for (const roll of sourceRolls) {
+    rerolled.push(await roll.reroll({ async: true }));
+  }
+
+  const currentMoment = Math.max(Number(actor.system?.momentOfGlory) || 0, 0);
+  if (!currentMoment) return { spent: false };
+  const nextMoment = currentMoment - 1;
+  await actor.update({ 'system.momentOfGlory': nextMoment }, { render: false });
+
+  const flags = foundry.utils.deepClone(message.flags ?? {});
+  flags[MODULE_ID] ??= {};
+  flags[MODULE_ID].momentOfGlory = {
+    spent: 1,
+    actorId: actor.id,
+    sourceMessageId: message.id,
+    timestamp: Date.now()
+  };
+
+  try {
+    await ChatMessage.create({
+      user: game.user?.id,
+      speaker: foundry.utils.deepClone(message.speaker ?? {}),
+      flavor: message.flavor ?? '',
+      rolls: rerolled,
+      style: message.style,
+      type: message.type,
+      whisper: Array.from(message.whisper ?? []),
+      blind: Boolean(message.blind),
+      flags
+    });
+  } catch (error) {
+    await actor.update({ 'system.momentOfGlory': currentMoment }, { render: false });
+    throw error;
+  }
+
+  for (const app of Object.values(actor.apps ?? {})) {
+    const element = app?.element?.[0] ?? app?.element;
+    if (!element) continue;
+    if (typeof element.querySelector === 'function') {
+      const input = element.querySelector('input[name="system.momentOfGlory"]');
+      if (input) input.value = `${nextMoment}`;
+      continue;
+    }
+    if (typeof element.find === 'function') {
+      element.find('input[name="system.momentOfGlory"]').val(nextMoment);
+    }
+  }
+
+  return { spent: true, nextMoment };
+}
+
 function buildItemTypeOptions({ select, allowedTypes }) {
   const selectElement = select.get(0);
   if (!selectElement) return;
@@ -327,6 +411,57 @@ Hooks.on('getSceneControlButtons', (controls) => {
       }
     }
   );
+});
+
+Hooks.on('getChatLogEntryContext', (_html, options) => {
+  options.push({
+    name: 'MY_RPG.MomentOfGloryReroll.ContextLabel',
+    icon: '<i class="fas fa-dice"></i>',
+    condition: (li) => {
+      const message = getContextMessage(li);
+      return canUseMomentOfGloryReroll(message);
+    },
+    callback: async (li) => {
+      const message = getContextMessage(li);
+      if (!message) {
+        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoMessage'));
+        return;
+      }
+      const actor = getMessageActor(message);
+      if (!actor) {
+        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoActor'));
+        return;
+      }
+      if (!(game.user?.isGM || actor.isOwner)) {
+        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoPermission'));
+        return;
+      }
+      if ((Number(actor.system?.momentOfGlory) || 0) <= 0) {
+        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoPoints'));
+        return;
+      }
+
+      try {
+        const result = await rerollMessageWithMomentOfGlory(message, actor);
+        if (!result?.spent) {
+          ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoPoints'));
+          return;
+        }
+        ui.notifications.info(
+          game.i18n.format('MY_RPG.MomentOfGloryReroll.Success', {
+            value: result.nextMoment
+          })
+        );
+      } catch (error) {
+        debugLog('Moment of Glory reroll failed', {
+          messageId: message.id,
+          actorId: actor.id,
+          error
+        });
+        ui.notifications.error(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.Failed'));
+      }
+    }
+  });
 });
 
 Hooks.on('createChatMessage', (message) => {

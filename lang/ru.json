@@ -447,7 +447,20 @@
         "None": "Нет",
         "NotAvailable": "Н/д",
         "DurationMinutes": "{minutes}м",
-        "DurationHoursMinutes": "{hours}ч {minutes}м"
+        "DurationHoursMinutes": "{hours}ч {minutes}м",
+        "MomentOfGloryUsesTotal": "Использований Мига Славы",
+        "MomentOfGloryByActor": "Использования Мига Славы по актерам"
+      }
+    },
+    "MomentOfGloryReroll": {
+      "ContextLabel": "Переброс. Стоит Миг Славы.",
+      "Success": "Переброс выполнен. Осталось Мигов Славы: {value}.",
+      "Errors": {
+        "NoMessage": "Не удалось найти сообщение чата для переброса.",
+        "NoActor": "Этот бросок не связан с персонажем.",
+        "NoPermission": "У вас нет прав тратить Миг Славы этого персонажа.",
+        "NoPoints": "У этого персонажа не осталось Мигов Славы.",
+        "Failed": "Не удалось выполнить переброс сообщения."
       }
     }
   },

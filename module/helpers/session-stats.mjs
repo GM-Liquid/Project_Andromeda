@@ -211,6 +211,8 @@ export class SessionStatsService {
       rolls.byFormula[formula] = (Number(rolls.byFormula[formula]) || 0) + 1;
     }
 
+    this._recordMomentOfGloryUsageFromMessage(active, message);
+
     await this._setCurrentSession(active);
     this._emitStatsUpdated(active, 'roll');
   }
@@ -271,6 +273,7 @@ export class SessionStatsService {
     normalized.stats ??= this._createEmptyStats();
     normalized.stats.rolls ??= this._createEmptyStats().rolls;
     normalized.stats.combat ??= this._createEmptyStats().combat;
+    normalized.stats.momentOfGlory ??= this._createEmptyStats().momentOfGlory;
     normalized.stats.rolls.total = Math.max(Number(normalized.stats.rolls.total) || 0, 0);
     normalized.stats.rolls.byActor = normalizeCounterMap(normalized.stats.rolls.byActor);
     normalized.stats.rolls.byFormula = normalizeCounterMap(normalized.stats.rolls.byFormula);
@@ -290,6 +293,13 @@ export class SessionStatsService {
       Number(normalized.stats.combat.turnAdvances) || 0,
       0
     );
+    normalized.stats.momentOfGlory.totalUses = Math.max(
+      Number(normalized.stats.momentOfGlory.totalUses) || 0,
+      0
+    );
+    normalized.stats.momentOfGlory.byActor = normalizeCounterMap(
+      normalized.stats.momentOfGlory.byActor
+    );
     normalized.pendingAutoCloseAt = normalized.pendingAutoCloseAt
       ? Number(normalized.pendingAutoCloseAt)
       : null;
@@ -308,6 +318,10 @@ export class SessionStatsService {
         encountersEnded: 0,
         roundAdvances: 0,
         turnAdvances: 0
+      },
+      momentOfGlory: {
+        totalUses: 0,
+        byActor: {}
       }
     };
   }
@@ -378,6 +392,19 @@ export class SessionStatsService {
     return Boolean(message.isRoll);
   }
 
+  _recordMomentOfGloryUsageFromMessage(session, message) {
+    const flag =
+      message?.getFlag?.(MODULE_ID, 'momentOfGlory') ?? message?.flags?.[MODULE_ID]?.momentOfGlory;
+    if (!flag || typeof flag !== 'object') return;
+    const spent = Math.max(Math.floor(Number(flag.spent) || 0), 0);
+    if (!spent) return;
+
+    const actorKey = String(flag.actorId || '').trim() || UNKNOWN_ACTOR_KEY;
+    const stats = session.stats.momentOfGlory;
+    stats.totalUses += spent;
+    stats.byActor[actorKey] = (Number(stats.byActor[actorKey]) || 0) + spent;
+  }
+
   _emitStatsUpdated(session, source) {
     Hooks.callAll(SESSION_HOOKS.updated, {
       source,
@@ -413,6 +440,7 @@ export class SessionStatsService {
   async _postSessionSummary(session) {
     const rolls = session?.stats?.rolls ?? this._createEmptyStats().rolls;
     const combat = session?.stats?.combat ?? this._createEmptyStats().combat;
+    const momentOfGlory = session?.stats?.momentOfGlory ?? this._createEmptyStats().momentOfGlory;
     const startedAt = this._formatDateTime(session.startedAt);
     const endedAt = this._formatDateTime(session.endedAt);
     const duration = this._formatDuration(session.startedAt, session.endedAt);
@@ -421,6 +449,9 @@ export class SessionStatsService {
 
     const actorRows = this._buildCounterListItems(rolls.byActor, (key) => this._resolveActorLabel(key));
     const formulaRows = this._buildCounterListItems(rolls.byFormula, (key) => key);
+    const momentRows = this._buildCounterListItems(momentOfGlory.byActor, (key) =>
+      this._resolveActorLabel(key)
+    );
 
     const content = `
       <section class="project-andromeda-session-summary">
@@ -435,10 +466,13 @@ export class SessionStatsService {
         <p><strong>${this._escape(game.i18n.localize('MY_RPG.SessionTracker.Summary.EncountersEnded'))}:</strong> ${combat.encountersEnded}</p>
         <p><strong>${this._escape(game.i18n.localize('MY_RPG.SessionTracker.Summary.RoundAdvances'))}:</strong> ${combat.roundAdvances}</p>
         <p><strong>${this._escape(game.i18n.localize('MY_RPG.SessionTracker.Summary.TurnAdvances'))}:</strong> ${combat.turnAdvances}</p>
+        <p><strong>${this._escape(game.i18n.localize('MY_RPG.SessionTracker.Summary.MomentOfGloryUsesTotal'))}:</strong> ${momentOfGlory.totalUses}</p>
         <h3>${this._escape(game.i18n.localize('MY_RPG.SessionTracker.Summary.RollsByActor'))}</h3>
         <ul>${actorRows}</ul>
         <h3>${this._escape(game.i18n.localize('MY_RPG.SessionTracker.Summary.RollsByFormula'))}</h3>
         <ul>${formulaRows}</ul>
+        <h3>${this._escape(game.i18n.localize('MY_RPG.SessionTracker.Summary.MomentOfGloryByActor'))}</h3>
+        <ul>${momentRows}</ul>
       </section>
     `;
 

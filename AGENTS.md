@@ -96,6 +96,12 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 - Each skill is tied to an ability key in `template.json` and uses that ability’s die for rolls.
 - Skill modifiers equal the skill’s numeric value plus applicable item bonuses (cartridges/implants/weapons), and should not be capped in sheets, rolls, or UI.
 
+### 3.3 · Moment of Glory Reroll
+
+- Chat roll messages support a context-menu action to reroll by spending **1** `system.momentOfGlory`.
+- The reroll must keep the original roll context (formula, flavor/modifiers, speaker, and roll visibility mode).
+- Session tracking must count Moment of Glory usage per actor inside the active session window.
+
 ---
 
 ## 4 · Build, Deployment & Versioning
