@@ -19,6 +19,14 @@
       "DebugMode": {
         "Name": "Режим отладки",
         "Hint": "Включает расширенные диагностические сообщения Project Andromeda в консоли браузера."
+      },
+      "SessionTrackerAutoCloseMinutes": {
+        "Name": "Трекер сессии: таймаут автозавершения (минуты)",
+        "Hint": "Если последний ГМ отключится, активная сессия автоматически завершится после этого таймаута."
+      },
+      "SessionTrackerMaxHistory": {
+        "Name": "Трекер сессии: максимум сохраненных сессий",
+        "Hint": "Сколько завершенных сессий хранится в истории."
       }
     },
     "Defenses": {
@@ -403,6 +411,43 @@
         "CompleteDetailed": "Перенос завершён: обновлено {actorCount} персонажей и {itemCount} отдельных предметов.",
         "CompleteNoChanges": "Перенос устаревших предметов завершён — обновления не потребовались.",
         "Error": "Не удалось перенести устаревшие предметы: {message}"
+      }
+    },
+    "SessionTracker": {
+      "Controls": {
+        "Start": "Начать сессию",
+        "End": "Завершить сессию"
+      },
+      "Notifications": {
+        "RequireGM": "Только ГМ может управлять сессиями.",
+        "AlreadyActive": "Сессия уже активна.",
+        "NoActiveSession": "Активной сессии нет.",
+        "Started": "Сессия начата.",
+        "Ended": "Сессия завершена."
+      },
+      "EndReasons": {
+        "manual": "Завершена вручную ГМ",
+        "auto-last-gm-timeout": "Автоматически завершена после таймаута последнего ГМ"
+      },
+      "Summary": {
+        "Title": "Сводка сессии",
+        "Speaker": "Трекер сессии",
+        "StartedAt": "Начало",
+        "EndedAt": "Конец",
+        "Duration": "Длительность",
+        "EndReason": "Причина завершения",
+        "RollsTotal": "Всего бросков",
+        "EncountersStarted": "Столкновений начато",
+        "EncountersEnded": "Столкновений завершено",
+        "RoundAdvances": "Смен раундов",
+        "TurnAdvances": "Смен ходов",
+        "RollsByActor": "Броски по актерам",
+        "RollsByFormula": "Броски по формулам",
+        "UnknownActor": "Неизвестный актер",
+        "None": "Нет",
+        "NotAvailable": "Н/д",
+        "DurationMinutes": "{minutes}м",
+        "DurationHoursMinutes": "{hours}ч {minutes}м"
       }
     }
   },

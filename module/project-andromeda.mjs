@@ -9,6 +9,7 @@ import { preloadHandlebarsTemplates } from './helpers/templates.mjs';
 import { MODULE_ID, PROJECT_ANDROMEDA, debugLog, registerSystemSettings } from './config.mjs';
 import { ITEM_SUPERTYPE_LABELS, ITEM_TYPE_CONFIGS } from './helpers/item-config.mjs';
 import { runLegacyItemMigration } from './helpers/migrations.mjs';
+import { SessionStatsService } from './helpers/session-stats.mjs';
 import './helpers/handlebars-helpers.mjs';
 
 const ITEM_SUPERTYPE_ORDER = ['equipment', 'environment', 'traits', 'other'];
@@ -20,6 +21,10 @@ const ENVIRONMENT_ITEM_TYPES = new Set(
 const ENVIRONMENT_ITEM_SOURCE_FLAG = 'environmentTokenSourceUuid';
 const ENVIRONMENT_PROXY_ACTOR_FLAG = 'isEnvironmentTokenProxy';
 const ENVIRONMENT_TOKEN_ACTOR_TYPE = 'npc';
+
+function getSessionStatsService() {
+  return game.projectAndromeda?.sessionStats ?? null;
+}
 
 function buildItemTypeOptions({ select, allowedTypes }) {
   const selectElement = select.get(0);
@@ -208,12 +213,15 @@ async function getOrCreateEnvironmentProxyActor() {
 /* -------------------------------------------- */
 
 Hooks.once('init', function () {
+  const sessionStats = new SessionStatsService();
+
   // Add utility classes to the global game object so that they're more easily
   // accessible in global contexts.
   game.projectAndromeda = {
     ProjectAndromedaActor,
     ProjectAndromedaItem,
-    debugLog
+    debugLog,
+    sessionStats
   };
 
   // Add custom constants for configuration.
@@ -289,6 +297,74 @@ Hooks.on('renderDialog', (dialog, html) => {
   buildItemTypeOptions({ select, allowedTypes });
 });
 
+Hooks.on('getSceneControlButtons', (controls) => {
+  if (!game.user?.isGM) return;
+  const sessionStats = getSessionStatsService();
+  if (!sessionStats) return;
+
+  const tokenControls = controls.find((control) => control.name === 'token');
+  if (!tokenControls?.tools) return;
+
+  tokenControls.tools.push(
+    {
+      name: 'project-andromeda-session-start',
+      title: 'MY_RPG.SessionTracker.Controls.Start',
+      icon: 'fas fa-play',
+      visible: true,
+      button: true,
+      onClick: () => {
+        void sessionStats.startSession();
+      }
+    },
+    {
+      name: 'project-andromeda-session-end',
+      title: 'MY_RPG.SessionTracker.Controls.End',
+      icon: 'fas fa-flag-checkered',
+      visible: true,
+      button: true,
+      onClick: () => {
+        void sessionStats.endSession({ reason: 'manual' });
+      }
+    }
+  );
+});
+
+Hooks.on('createChatMessage', (message) => {
+  const sessionStats = getSessionStatsService();
+  if (!sessionStats) return;
+  void sessionStats.recordRoll(message);
+});
+
+Hooks.on('createCombat', () => {
+  const sessionStats = getSessionStatsService();
+  if (!sessionStats) return;
+  void sessionStats.recordCombatEvent('encounter-start');
+});
+
+Hooks.on('deleteCombat', () => {
+  const sessionStats = getSessionStatsService();
+  if (!sessionStats) return;
+  void sessionStats.recordCombatEvent('encounter-end');
+});
+
+Hooks.on('combatRound', () => {
+  const sessionStats = getSessionStatsService();
+  if (!sessionStats) return;
+  void sessionStats.recordCombatEvent('round-advance');
+});
+
+Hooks.on('combatTurn', () => {
+  const sessionStats = getSessionStatsService();
+  if (!sessionStats) return;
+  void sessionStats.recordCombatEvent('turn-advance');
+});
+
+Hooks.on('userConnected', () => {
+  const sessionStats = getSessionStatsService();
+  if (!sessionStats) return;
+  void sessionStats.handleGMConnectivity();
+});
+
 Hooks.on('dropCanvasData', async (droppedCanvas, data) => {
   if (!game.user?.isGM) return;
   if (data?.type !== 'Item') return;
@@ -344,6 +420,14 @@ Hooks.once('ready', async function () {
     userId: game.user?.id,
     isGM: game.user?.isGM ?? false
   });
+
+  const sessionStats = getSessionStatsService();
+  if (sessionStats) {
+    sessionStats.initialize();
+    if (game.user?.isGM) {
+      await sessionStats.recoverStateOnReady();
+    }
+  }
 
   if (!game.user.isGM) return;
   await runLegacyItemMigration();

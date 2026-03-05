@@ -37,6 +37,7 @@ project-andromeda/
 │   │   handlebars-helpers.mjs
 │   │   item-config.mjs
 │   │   migrations.mjs
+│   │   session-stats.mjs
 │   │   templates.mjs
 │   │   utils.mjs
 │   sheets/
@@ -173,4 +174,4 @@ Typical workflow:
 
 ---
 
-*Last updated: 2026‑01‑29*
+*Last updated: 2026‑03‑05*

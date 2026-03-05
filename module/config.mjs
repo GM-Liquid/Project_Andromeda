@@ -19,6 +19,48 @@ export function registerSystemSettings() {
     type: Boolean,
     default: false
   });
+
+  game.settings.register(MODULE_ID, 'sessionTrackerCurrent', {
+    scope: 'world',
+    config: false,
+    type: Object,
+    default: {}
+  });
+
+  game.settings.register(MODULE_ID, 'sessionTrackerHistory', {
+    scope: 'world',
+    config: false,
+    type: Object,
+    default: []
+  });
+
+  game.settings.register(MODULE_ID, 'sessionTrackerAutoCloseMinutes', {
+    name: 'MY_RPG.Settings.SessionTrackerAutoCloseMinutes.Name',
+    hint: 'MY_RPG.Settings.SessionTrackerAutoCloseMinutes.Hint',
+    scope: 'world',
+    config: true,
+    type: Number,
+    default: 10,
+    range: {
+      min: 1,
+      max: 120,
+      step: 1
+    }
+  });
+
+  game.settings.register(MODULE_ID, 'sessionTrackerMaxHistory', {
+    name: 'MY_RPG.Settings.SessionTrackerMaxHistory.Name',
+    hint: 'MY_RPG.Settings.SessionTrackerMaxHistory.Hint',
+    scope: 'world',
+    config: true,
+    type: Number,
+    default: 50,
+    range: {
+      min: 1,
+      max: 500,
+      step: 1
+    }
+  });
 }
 
 export function debugLog(message, ...args) {

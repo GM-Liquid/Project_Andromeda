@@ -19,6 +19,14 @@
       "DebugMode": {
         "Name": "Debug Mode",
         "Hint": "Enable verbose Project Andromeda diagnostics in the browser console."
+      },
+      "SessionTrackerAutoCloseMinutes": {
+        "Name": "Session Tracker: Auto-close timeout (minutes)",
+        "Hint": "If the last GM disconnects, the active session will auto-close after this timeout."
+      },
+      "SessionTrackerMaxHistory": {
+        "Name": "Session Tracker: Max stored sessions",
+        "Hint": "How many completed sessions are kept in history."
       }
     },
     "RankNumeric": {
@@ -388,6 +396,43 @@
     "ItemDialogs": {
       "DeleteTitle": "Delete {type}",
       "DeleteContent": "Are you sure you want to delete {name}? This action cannot be undone."
+    },
+    "SessionTracker": {
+      "Controls": {
+        "Start": "Start Session",
+        "End": "End Session"
+      },
+      "Notifications": {
+        "RequireGM": "Only a GM can manage sessions.",
+        "AlreadyActive": "A session is already active.",
+        "NoActiveSession": "There is no active session.",
+        "Started": "Session started.",
+        "Ended": "Session ended."
+      },
+      "EndReasons": {
+        "manual": "Ended manually by GM",
+        "auto-last-gm-timeout": "Auto-closed after last GM disconnect timeout"
+      },
+      "Summary": {
+        "Title": "Session Summary",
+        "Speaker": "Session Tracker",
+        "StartedAt": "Started",
+        "EndedAt": "Ended",
+        "Duration": "Duration",
+        "EndReason": "End reason",
+        "RollsTotal": "Total rolls",
+        "EncountersStarted": "Encounters started",
+        "EncountersEnded": "Encounters ended",
+        "RoundAdvances": "Round advances",
+        "TurnAdvances": "Turn advances",
+        "RollsByActor": "Rolls by actor",
+        "RollsByFormula": "Rolls by formula",
+        "UnknownActor": "Unknown actor",
+        "None": "None",
+        "NotAvailable": "N/A",
+        "DurationMinutes": "{minutes}m",
+        "DurationHoursMinutes": "{hours}h {minutes}m"
+      }
     },
     "Migrations": {
       "LegacyItems": {
