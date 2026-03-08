@@ -14,13 +14,14 @@ import './helpers/handlebars-helpers.mjs';
 
 const ITEM_SUPERTYPE_ORDER = ['equipment', 'environment', 'traits', 'other'];
 const ENVIRONMENT_ITEM_TYPES = new Set(
-  ITEM_TYPE_CONFIGS
-    .filter((config) => config.supertype === 'environment')
-    .map((config) => config.type)
+  ITEM_TYPE_CONFIGS.filter((config) => config.supertype === 'environment').map(
+    (config) => config.type
+  )
 );
 const ENVIRONMENT_ITEM_SOURCE_FLAG = 'environmentTokenSourceUuid';
 const ENVIRONMENT_PROXY_ACTOR_FLAG = 'isEnvironmentTokenProxy';
 const ENVIRONMENT_TOKEN_ACTOR_TYPE = 'npc';
+const HERO_POINT_INPUT_SELECTOR = 'input[name="system.momentOfGlory"]';
 
 function getSessionStatsService() {
   return game.projectAndromeda?.sessionStats ?? null;
@@ -39,9 +40,85 @@ function getMessageActor(message) {
   return game.actors?.get(actorId) ?? null;
 }
 
+function getMessageRolls(message) {
+  return Array.isArray(message?.rolls) ? message.rolls : message?.roll ? [message.roll] : [];
+}
+
+function getActorHeroPoints(actor) {
+  return Math.max(Number(actor?.system?.momentOfGlory) || 0, 0);
+}
+
+function syncHeroPointInputs(actor, nextValue = null) {
+  const value = nextValue ?? getActorHeroPoints(actor);
+  for (const app of Object.values(actor?.apps ?? {})) {
+    const element = app?.element?.[0] ?? app?.element;
+    if (!element) continue;
+    if (typeof element.querySelector === 'function') {
+      const input = element.querySelector(HERO_POINT_INPUT_SELECTOR);
+      if (input) input.value = `${value}`;
+      continue;
+    }
+    if (typeof element.find === 'function') {
+      element.find(HERO_POINT_INPUT_SELECTOR).val(value);
+    }
+  }
+}
+
+function isPrimaryActiveGM() {
+  const activeGMs = (game.users?.filter((user) => user.isGM && user.active) ?? []).sort((a, b) =>
+    String(a.id).localeCompare(String(b.id))
+  );
+  if (!activeGMs.length) return false;
+  return activeGMs[0]?.id === game.user?.id;
+}
+
+function canGrantHeroPoint(message, actor) {
+  if (!message || !actor || actor.type !== 'character') return false;
+
+  if (game.user?.isGM) {
+    return isPrimaryActiveGM();
+  }
+
+  const activeGMs = game.users?.some((user) => user.isGM && user.active) ?? false;
+  if (activeGMs) return false;
+
+  const messageUserId = String(message?.user?.id ?? message?.user ?? '').trim();
+  return Boolean(messageUserId && messageUserId === game.user?.id && actor.isOwner);
+}
+
+function rollHasExtremeResult(roll) {
+  for (const die of roll?.dice ?? []) {
+    const faces = Number(die?.faces);
+    if (!Number.isFinite(faces) || faces < 1) continue;
+
+    for (const result of die?.results ?? []) {
+      if (result?.discarded || result?.active === false) continue;
+      const value = Number(result?.result);
+      if (!Number.isFinite(value)) continue;
+      if (value === 1 || value === faces) return true;
+    }
+  }
+
+  return false;
+}
+
+function messageHasExtremeResult(message) {
+  return getMessageRolls(message).some((roll) => rollHasExtremeResult(roll));
+}
+
+async function grantHeroPointForExtremeRoll(message) {
+  const actor = getMessageActor(message);
+  if (!canGrantHeroPoint(message, actor)) return;
+  if (!messageHasExtremeResult(message)) return;
+
+  const nextHeroPoints = getActorHeroPoints(actor) + 1;
+  await actor.update({ 'system.momentOfGlory': nextHeroPoints }, { render: false });
+  syncHeroPointInputs(actor, nextHeroPoints);
+}
+
 function canUseMomentOfGloryReroll(message) {
   if (!message) return false;
-  const hasRoll = Boolean((Array.isArray(message.rolls) && message.rolls.length) || message.roll);
+  const hasRoll = Boolean(getMessageRolls(message).length);
   if (!hasRoll) return false;
   const actor = getMessageActor(message);
   if (!actor) return false;
@@ -49,11 +126,7 @@ function canUseMomentOfGloryReroll(message) {
 }
 
 async function rerollMessageWithMomentOfGlory(message, actor) {
-  const sourceRolls = Array.isArray(message?.rolls)
-    ? message.rolls
-    : message?.roll
-      ? [message.roll]
-      : [];
+  const sourceRolls = getMessageRolls(message);
   if (!sourceRolls.length) {
     throw new Error('No roll data found on the source message.');
   }
@@ -63,10 +136,10 @@ async function rerollMessageWithMomentOfGlory(message, actor) {
     rerolled.push(await roll.reroll({ async: true }));
   }
 
-  const currentMoment = Math.max(Number(actor.system?.momentOfGlory) || 0, 0);
-  if (!currentMoment) return { spent: false };
-  const nextMoment = currentMoment - 1;
-  await actor.update({ 'system.momentOfGlory': nextMoment }, { render: false });
+  const currentHeroPoints = getActorHeroPoints(actor);
+  if (!currentHeroPoints) return { spent: false };
+  const nextHeroPoints = currentHeroPoints - 1;
+  await actor.update({ 'system.momentOfGlory': nextHeroPoints }, { render: false });
 
   const flags = foundry.utils.deepClone(message.flags ?? {});
   flags[MODULE_ID] ??= {};
@@ -90,30 +163,19 @@ async function rerollMessageWithMomentOfGlory(message, actor) {
       flags
     });
   } catch (error) {
-    await actor.update({ 'system.momentOfGlory': currentMoment }, { render: false });
+    await actor.update({ 'system.momentOfGlory': currentHeroPoints }, { render: false });
     throw error;
   }
 
-  for (const app of Object.values(actor.apps ?? {})) {
-    const element = app?.element?.[0] ?? app?.element;
-    if (!element) continue;
-    if (typeof element.querySelector === 'function') {
-      const input = element.querySelector('input[name="system.momentOfGlory"]');
-      if (input) input.value = `${nextMoment}`;
-      continue;
-    }
-    if (typeof element.find === 'function') {
-      element.find('input[name="system.momentOfGlory"]').val(nextMoment);
-    }
-  }
+  syncHeroPointInputs(actor, nextHeroPoints);
 
-  return { spent: true, nextMoment };
+  return { spent: true, nextHeroPoints };
 }
 
 function buildItemTypeOptions({ select, allowedTypes }) {
   const selectElement = select.get(0);
   if (!selectElement) return;
-  
+
   const currentValue = select.val();
   const groupLabels = new Map();
   const orderedLabels = [];
@@ -166,10 +228,10 @@ function buildItemTypeOptions({ select, allowedTypes }) {
     // The group object has both a 'group' property (the label) and 'options' array
     const groupLabel = group.group || group.label;
     if (!group.options?.length) continue;
-    
+
     const groupElement = document.createElement('optgroup');
     groupElement.label = groupLabel;
-    
+
     for (const optionData of group.options) {
       const option = document.createElement('option');
       option.value = optionData.value;
@@ -273,7 +335,8 @@ async function getOrCreateEnvironmentProxyActor() {
     ) ?? null;
   if (existingActor) return existingActor;
 
-  const actorName = `${game.i18n.localize('MY_RPG.ItemTypeGroups.Environment')} ${game.i18n.localize('TYPES.Actor.npc')}`.trim();
+  const actorName =
+    `${game.i18n.localize('MY_RPG.ItemTypeGroups.Environment')} ${game.i18n.localize('TYPES.Actor.npc')}`.trim();
   const tokenImage = 'icons/svg/hazard.svg';
   return Actor.create({
     name: actorName || game.i18n.localize('TYPES.Actor.npc'),
@@ -449,7 +512,7 @@ Hooks.on('getChatLogEntryContext', (_html, options) => {
         }
         ui.notifications.info(
           game.i18n.format('MY_RPG.MomentOfGloryReroll.Success', {
-            value: result.nextMoment
+            value: result.nextHeroPoints
           })
         );
       } catch (error) {
@@ -466,8 +529,15 @@ Hooks.on('getChatLogEntryContext', (_html, options) => {
 
 Hooks.on('createChatMessage', (message) => {
   const sessionStats = getSessionStatsService();
-  if (!sessionStats) return;
-  void sessionStats.recordRoll(message);
+  if (sessionStats) {
+    void sessionStats.recordRoll(message);
+  }
+  void grantHeroPointForExtremeRoll(message);
+});
+
+Hooks.on('updateActor', (actor, changes) => {
+  if (!foundry.utils.hasProperty(changes, 'system.momentOfGlory')) return;
+  syncHeroPointInputs(actor);
 });
 
 Hooks.on('createCombat', () => {

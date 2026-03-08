@@ -8,7 +8,9 @@ import { getAbilityDieRoll, getAbilityDieNumeric, normalizeAbilityDie } from '..
 export class ProjectAndromedaActor extends Actor {
   prepareDerivedData() {
     super.prepareDerivedData();
-    if (this.type === 'character' || this.type === 'npc') this._prepareCharacterData();
+    if (this.type === 'character' || this.type === 'npc' || this.type === 'boss') {
+      this._prepareCharacterData();
+    }
   }
 
   _prepareCharacterData() {
@@ -16,7 +18,7 @@ export class ProjectAndromedaActor extends Actor {
     const cache = (s.cache ??= {});
     cache.itemTotals = this._computeItemTotals();
     const itemTotals = cache.itemTotals;
-    const isNpc = this.type === 'npc';
+    const isNpcLike = this.type === 'npc' || this.type === 'boss';
 
     /* 1. Способности ---------------------------------------------- */
     for (const a of Object.values(s.abilities ?? {})) {
@@ -36,8 +38,13 @@ export class ProjectAndromedaActor extends Actor {
 
     const stress = s.stress ?? (s.stress = {});
     const forceShield = s.forceShield ?? (s.forceShield = {});
-    const calcStressMax = isNpc ? this._calcNpcStressMax : this._calcStressMax;
-    const calcForceShieldMax = isNpc ? this._calcNpcForceShieldMax : this._calcForceShieldMax;
+    const calcStressMax =
+      this.type === 'boss'
+        ? this._calcBossStressMax
+        : isNpcLike
+          ? this._calcNpcStressMax
+          : this._calcStressMax;
+    const calcForceShieldMax = isNpcLike ? this._calcNpcForceShieldMax : this._calcForceShieldMax;
     stress.max = calcStressMax.call(this, s);
     forceShield.max = calcForceShieldMax.call(this, itemTotals);
     const clamp = Math.clamp
@@ -81,13 +88,19 @@ export class ProjectAndromedaActor extends Actor {
   _calcStressMax(s) {
     const rank = Math.max(Number(s.currentRank) || 0, 0);
     const tempHealth = Math.max(Number(s.temphealth) || 0, 0);
-    return Math.max(0, rank * 2 + 4 + tempHealth);
+    return Math.max(0, rank * 3 + tempHealth);
   }
 
   _calcNpcStressMax(s) {
     const rank = Math.max(Number(s.currentRank) || 0, 0);
     const tempHealth = Math.max(Number(s.temphealth) || 0, 0);
     return Math.max(0, rank * 2 + 4 + tempHealth);
+  }
+
+  _calcBossStressMax(s) {
+    const rank = Math.max(Number(s.currentRank) || 0, 0);
+    const tempHealth = Math.max(Number(s.temphealth) || 0, 0);
+    return Math.max(0, rank * 9 + tempHealth);
   }
 
   _calcForceShieldMax(itemTotals = {}) {

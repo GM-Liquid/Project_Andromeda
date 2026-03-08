@@ -1,7 +1,7 @@
 # Project Andromeda — **Agents.md** (AI Helper Guide)
 
 > **Spec reference:** This document follows the [agentsmd.net specification](https://agentsmd.net/#what-is-agentsmd).\
-> **Purpose:** Explain the structure, conventions, and *extra* rules an AI assistant (e.g. OpenAI Codex) **must** respect when working with this repository.
+> **Purpose:** Explain the structure, conventions, and _extra_ rules an AI assistant (e.g. OpenAI Codex) **must** respect when working with this repository.
 
 ---
 
@@ -11,67 +11,68 @@
 | ----------------------------- | --------------------------------------------------------------- |
 | **System name**               | **Project Andromeda**                                           |
 | **Foundry VTT compatibility** | v12 (verified 12)                                               |
-| **Current version (**``**)**  | `2.358` -> **auto-bumped to** `2.359` on next Foundry change    |
+| **Current version (**``**)**  | `2.373` -> **auto-bumped to** `2.374` on next Foundry change    |
 | **Languages**                 | English, Русский (full parity required)                         |
 | **Main tech**                 | ES‑module JavaScript (`*.mjs`), Handlebars (`*.hbs`), JSON, CSS |
 | **Licence**                   | CC BY-NC-SA 4.0                                                 |
 
-
 ## 2 · Repository Map
 
+```text
 project-andromeda/
-│  README.md
-│  AGENTS.md          ← you are here
-│  system.json        ← manifest (version bumped for Foundry changes only)
-│  template.json      ← data templates
-│  package.json
+│ README.md
+│ AGENTS.md ← you are here
+│ system.json ← manifest (version bumped for Foundry changes only)
+│ template.json ← data templates
+│ package.json
 │
 ├─ module/
-│   project-andromeda.mjs
-│   config.mjs
-│   documents/
-│   │   actor.mjs
-│   │   item.mjs
-│   helpers/
-│   │   config.mjs
-│   │   handlebars-helpers.mjs
-│   │   item-config.mjs
-│   │   migrations.mjs
-│   │   session-stats.mjs
-│   │   templates.mjs
-│   │   utils.mjs
-│   sheets/
-│       actor-sheet.mjs
-│       item-sheet.mjs
+│ project-andromeda.mjs
+│ config.mjs
+│ documents/
+│ │ actor.mjs
+│ │ item.mjs
+│ helpers/
+│ │ config.mjs
+│ │ handlebars-helpers.mjs
+│ │ item-config.mjs
+│ │ migrations.mjs
+│ │ session-stats.mjs
+│ │ templates.mjs
+│ │ utils.mjs
+│ sheets/
+│ actor-sheet.mjs
+│ item-sheet.mjs
 │
 ├─ templates/
-│   └─ actor/
-│       ├─ actor-character-sheet.hbs
-│       └─ actor-npc-sheet.hbs
-│   └─ item/
-│       ├─ armor-sheet.hbs
-│       ├─ cartridge-sheet.hbs
-│       ├─ gear-sheet.hbs
-│       ├─ generic-sheet.hbs
-│       ├─ implant-sheet.hbs
-│       └─ weapon-sheet.hbs
+│ └─ actor/
+│ ├─ actor-character-sheet.hbs
+│ └─ actor-npc-sheet.hbs
+│ └─ item/
+│ ├─ armor-sheet.hbs
+│ ├─ cartridge-sheet.hbs
+│ ├─ gear-sheet.hbs
+│ ├─ generic-sheet.hbs
+│ ├─ implant-sheet.hbs
+│ └─ weapon-sheet.hbs
 │
 ├─ lang/
-│   en.json   ← English strings
-│   ru.json   ← Russian strings (must mirror English keys)
+│ en.json ← English strings
+│ ru.json ← Russian strings (must mirror English keys)
 │
 ├─ Gear balance/
-│   base_values.py
-│   property_values.py
-│   property_combos.py
-│   sim_driver.py
-│   weapons_sim.py
-│   sim_accel.py
-│   weapons_tournament_all.py
-│   Андромеда_ Контент - Свойства (1).csv
+│ base*values.py
+│ property_values.py
+│ property_combos.py
+│ sim_driver.py
+│ weapons_sim.py
+│ sim_accel.py
+│ weapons_tournament_all.py
+│ Андромеда* Контент - Свойства (1).csv
 │
 └─ css/
-    project-andromeda.css
+project-andromeda.css
+
 ```
 
 ---
@@ -96,17 +97,28 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 - Each skill is tied to an ability key in `template.json` and uses that ability’s die for rolls.
 - Skill modifiers equal the skill’s numeric value plus applicable item bonuses (cartridges/implants/weapons), and should not be capped in sheets, rolls, or UI.
 
-### 3.3 · Moment of Glory Reroll
+### 3.3 · Points of Heroism
 
-- Chat roll messages support a context-menu action to reroll by spending **1** `system.momentOfGlory`.
+- `system.momentOfGlory` stores **Points of Heroism** and remains the spendable reroll resource for backwards compatibility.
+- Chat roll messages support a context-menu action to reroll by spending **1** point of heroism.
 - The reroll must keep the original roll context (formula, flavor/modifiers, speaker, and roll visibility mode).
-- Session tracking must count Moment of Glory usage per actor inside the active session window.
+- Session tracking must count points of heroism spent per actor inside the active session window.
+
+### 3.4 · Stress Formulas
+
+- Player characters use stress **3 × rank** plus any temporary health bonus.
+- Bosses are a distinct actor type and use stress **9 × rank** plus any temporary health bonus.
+- Supporting characters (`npc`) keep their existing stress progression unless explicitly changed elsewhere.
+
+### 3.5 · Extreme Roll Reward
+
+- When a player character roll contains at least one die showing its minimum or maximum face, that actor gains **1** point of heroism.
 
 ---
 
 ## 4 · Build, Deployment & Versioning
 
-- **Auto‑version bump:** Only when a change **affects the Foundry system** (e.g. `module/`, `templates/`, `css/`, `lang/`, `assets/`, `system.json`, `template.json`), increment `system.json` by **+0.001** (current baseline `2.358`, next `2.359`).  
+- **Auto‑version bump:** Only when a change **affects the Foundry system** (e.g. `module/`, `templates/`, `css/`, `lang/`, `assets/`, `system.json`, `template.json`), increment `system.json` by **+0.001** (current baseline `2.373`, next `2.374`).
   Changes that **do not** touch the Foundry system (e.g. Python tools, balance sims, docs in `/Gear balance`) **do not** require a version bump.
 - The build pipeline (GitHub Actions) simply zips the repository for Foundry distribution.
 - Releases follow Semantic‑ish numbering: `<major>.<minor><patch>` where *minor* and *patch* are three‑digit sequences (allows CI bumping).
@@ -136,9 +148,9 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 
   // ru.json
   "MY_RPG.RollTitle": "Проверка Силы"
-  ```
+```
 
-- **Naming**: camelCase for JS variables, kebab‑case for file names, UPPER\_SNAKE for Handlebars helpers.
+- **Naming**: camelCase for JS variables, kebab‑case for file names, UPPER_SNAKE for Handlebars helpers.
 
 - **Sheets**: built with plain HTML+Handlebars; keep markup semantic for accessibility.
 
@@ -157,6 +169,7 @@ The `Gear balance/` folder is **not** part of the Foundry build. It is a local t
 - **Simulation rules mirror:** If you change the base simulation rules (rolls, actions, reactions, statuses, movement, damage), update the rules description in `Gear balance/sim_rules.py` in the same change.
 
 Typical workflow:
+
 1. Edit the CSV to change/add/remove a property.
 2. Update `PROPERTY_DEFS` and any related logic in `weapons_sim.py`.
 3. Run quick validation (e.g. `python -m py_compile "Gear balance/weapons_sim.py"`).
@@ -180,4 +193,4 @@ Typical workflow:
 
 ---
 
-*Last updated: 2026‑03‑05*
+_Last updated: 2026‑03‑08_

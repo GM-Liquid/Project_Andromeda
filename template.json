@@ -1,6 +1,6 @@
 {
   "Actor": {
-    "types": ["character", "npc"],
+    "types": ["character", "npc", "boss"],
     "templates": {
       "base": {
         "calling": "",
@@ -123,6 +123,19 @@
       "attributes": {}
     },
     "npc": {
+      "templates": ["base"],
+      "biography": {
+        "weight": "",
+        "height": "",
+        "eyeColor": "",
+        "hairColor": "",
+        "appearance": "",
+        "story": "",
+        "notes": ""
+      },
+      "attributes": {}
+    },
+    "boss": {
       "templates": ["base"],
       "biography": {
         "weight": "",

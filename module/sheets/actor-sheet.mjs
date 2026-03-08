@@ -22,6 +22,14 @@ function getRankLabel(rank) {
   return game.i18n.localize(`MY_RPG.RankNumeric.Rank${rank}`);
 }
 
+function isNpcSheetActorType(actorType) {
+  return actorType === 'npc' || actorType === 'boss';
+}
+
+function isSupportedCharacterActorType(actorType) {
+  return actorType === 'character' || isNpcSheetActorType(actorType);
+}
+
 export class ProjectAndromedaActorSheet extends ActorSheet {
   /** @override */
   async _render(force = false, options = {}) {
@@ -150,7 +158,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
 
   /** @override */
   get template() {
-    if (this.actor.type === 'npc') {
+    if (isNpcSheetActorType(this.actor.type)) {
       return `systems/project-andromeda/templates/actor/actor-npc-sheet.hbs`;
     }
     return `systems/project-andromeda/templates/actor/actor-${this.actor.type}-sheet.hbs`;
@@ -163,9 +171,10 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     context.system = foundry.utils.duplicate(actorData.system ?? {});
     context.flags = actorData.flags;
     context.isCharacter = actorData.type === 'character';
-    context.isNpc = actorData.type === 'npc';
+    context.isNpc = isNpcSheetActorType(actorData.type);
+    context.isBoss = actorData.type === 'boss';
 
-    if (context.isCharacter || context.isNpc) {
+    if (isSupportedCharacterActorType(actorData.type)) {
       this._prepareCharacterData(context);
     }
 

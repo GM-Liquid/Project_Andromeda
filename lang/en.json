@@ -42,7 +42,7 @@
       "Age": "Age",
       "CurrentRank": "Current Rank",
       "Name": "Name",
-      "MomentOfGlory": "Moment of Glory",
+      "MomentOfGlory": "Points of Heroism",
       "ProgressPoints": "Progress Points"
     },
     "Inventory": {
@@ -398,13 +398,13 @@
       "DeleteContent": "Are you sure you want to delete {name}? This action cannot be undone."
     },
     "MomentOfGloryReroll": {
-      "ContextLabel": "Reroll. Worth a moment of glory.",
-      "Success": "Rerolled. Moment of Glory remaining: {value}.",
+      "ContextLabel": "Reroll. Costs 1 point of heroism.",
+      "Success": "Rerolled. Points of Heroism remaining: {value}.",
       "Errors": {
         "NoMessage": "Could not find the chat message to reroll.",
         "NoActor": "This roll is not linked to a character.",
-        "NoPermission": "You do not have permission to spend this character's Moment of Glory.",
-        "NoPoints": "This character has no Moment of Glory left.",
+        "NoPermission": "You do not have permission to spend this character's Points of Heroism.",
+        "NoPoints": "This character has no Points of Heroism left.",
         "Failed": "Failed to reroll the message."
       }
     },
@@ -436,10 +436,10 @@
         "EncountersEnded": "Encounters ended",
         "RoundAdvances": "Round advances",
         "TurnAdvances": "Turn advances",
-        "MomentOfGloryUsesTotal": "Moment of Glory uses",
+        "MomentOfGloryUsesTotal": "Points of Heroism spent",
         "RollsByActor": "Rolls by actor",
         "RollsByFormula": "Rolls by formula",
-        "MomentOfGloryByActor": "Moment of Glory uses by actor",
+        "MomentOfGloryByActor": "Points of Heroism spent by actor",
         "UnknownActor": "Unknown actor",
         "None": "None",
         "NotAvailable": "N/A",
@@ -460,7 +460,8 @@
   "TYPES": {
     "Actor": {
       "character": "Character",
-      "npc": "Supporting Character"
+      "npc": "Supporting Character",
+      "boss": "Boss"
     },
     "Item": {
       "item": "Item",

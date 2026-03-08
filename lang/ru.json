@@ -88,7 +88,7 @@
       "Age": "Возраст",
       "CurrentRank": "Текущий ранг",
       "Name": "Имя",
-      "MomentOfGlory": "Миг Славы",
+      "MomentOfGlory": "Очки героизма",
       "ProgressPoints": "Очки прогресса"
     },
     "SheetLabels": {
@@ -448,18 +448,18 @@
         "NotAvailable": "Н/д",
         "DurationMinutes": "{minutes}м",
         "DurationHoursMinutes": "{hours}ч {minutes}м",
-        "MomentOfGloryUsesTotal": "Использований Мига Славы",
-        "MomentOfGloryByActor": "Использования Мига Славы по актерам"
+        "MomentOfGloryUsesTotal": "Потрачено очков героизма",
+        "MomentOfGloryByActor": "Потраченные очки героизма по актерам"
       }
     },
     "MomentOfGloryReroll": {
-      "ContextLabel": "Переброс. Стоит Миг Славы.",
-      "Success": "Переброс выполнен. Осталось Мигов Славы: {value}.",
+      "ContextLabel": "Переброс. Стоит 1 очко героизма.",
+      "Success": "Переброс выполнен. Осталось очков героизма: {value}.",
       "Errors": {
         "NoMessage": "Не удалось найти сообщение чата для переброса.",
         "NoActor": "Этот бросок не связан с персонажем.",
-        "NoPermission": "У вас нет прав тратить Миг Славы этого персонажа.",
-        "NoPoints": "У этого персонажа не осталось Мигов Славы.",
+        "NoPermission": "У вас нет прав тратить очки героизма этого персонажа.",
+        "NoPoints": "У этого персонажа не осталось очков героизма.",
         "Failed": "Не удалось выполнить переброс сообщения."
       }
     }
@@ -467,7 +467,8 @@
   "TYPES": {
     "Actor": {
       "character": "Персонаж",
-      "npc": "Второстепенный персонаж"
+      "npc": "Второстепенный персонаж",
+      "boss": "Босс"
     },
     "Item": {
       "item": "Предмет",
