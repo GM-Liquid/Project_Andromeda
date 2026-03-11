@@ -27,6 +27,12 @@ function getSessionStatsService() {
   return game.projectAndromeda?.sessionStats ?? null;
 }
 
+function scheduleSessionPresenceEvaluation(delayMs = 250) {
+  const sessionStats = getSessionStatsService();
+  if (!sessionStats) return;
+  sessionStats.schedulePresenceEvaluation(delayMs);
+}
+
 function getContextMessage(li) {
   const messageId =
     li?.data?.('messageId') ?? li?.attr?.('data-message-id') ?? li?.[0]?.dataset?.messageId ?? '';
@@ -497,38 +503,6 @@ Hooks.on('renderDialog', (dialog, html) => {
   buildItemTypeOptions({ select, allowedTypes });
 });
 
-Hooks.on('getSceneControlButtons', (controls) => {
-  if (!game.user?.isGM) return;
-  const sessionStats = getSessionStatsService();
-  if (!sessionStats) return;
-
-  const tokenControls = controls.find((control) => control.name === 'token');
-  if (!tokenControls?.tools) return;
-
-  tokenControls.tools.push(
-    {
-      name: 'project-andromeda-session-start',
-      title: 'MY_RPG.SessionTracker.Controls.Start',
-      icon: 'fas fa-play',
-      visible: true,
-      button: true,
-      onClick: () => {
-        void sessionStats.startSession();
-      }
-    },
-    {
-      name: 'project-andromeda-session-end',
-      title: 'MY_RPG.SessionTracker.Controls.End',
-      icon: 'fas fa-flag-checkered',
-      visible: true,
-      button: true,
-      onClick: () => {
-        void sessionStats.endSession({ reason: 'manual' });
-      }
-    }
-  );
-});
-
 Hooks.on('getChatLogEntryContext', (_html, options) => {
   options.push({
     name: 'MY_RPG.MomentOfGloryReroll.ContextLabel',
@@ -618,9 +592,18 @@ Hooks.on('combatTurn', () => {
 });
 
 Hooks.on('userConnected', () => {
-  const sessionStats = getSessionStatsService();
-  if (!sessionStats) return;
-  void sessionStats.handleGMConnectivity();
+  scheduleSessionPresenceEvaluation();
+});
+
+Hooks.on('userDisconnected', () => {
+  scheduleSessionPresenceEvaluation();
+});
+
+Hooks.on('updateUser', (_user, changes) => {
+  const changedActive = foundry.utils.hasProperty(changes, 'active');
+  const changedRole = foundry.utils.hasProperty(changes, 'role');
+  if (!changedActive && !changedRole) return;
+  scheduleSessionPresenceEvaluation();
 });
 
 Hooks.on('dropCanvasData', async (droppedCanvas, data) => {

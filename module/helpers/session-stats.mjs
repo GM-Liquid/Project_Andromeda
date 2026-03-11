@@ -3,13 +3,12 @@ import { MODULE_ID, debugLog } from '../config.mjs';
 const SETTING_KEYS = Object.freeze({
   current: 'sessionTrackerCurrent',
   history: 'sessionTrackerHistory',
-  autoCloseMinutes: 'sessionTrackerAutoCloseMinutes',
   maxHistory: 'sessionTrackerMaxHistory'
 });
 
 const SESSION_STATUS_ACTIVE = 'active';
 const END_REASON_MANUAL = 'manual';
-const END_REASON_AUTO_TIMEOUT = 'auto-last-gm-timeout';
+const END_REASON_AUTO_PARTICIPANT_TIMEOUT = 'auto-participant-timeout';
 const SESSION_HOOKS = Object.freeze({
   started: 'projectAndromeda.sessionStarted',
   ended: 'projectAndromeda.sessionEnded',
@@ -18,6 +17,9 @@ const SESSION_HOOKS = Object.freeze({
 const UNKNOWN_ACTOR_KEY = 'unknown';
 const UNKNOWN_FORMULA_KEY = 'unknown';
 const MINUTES_TO_MS = 60_000;
+const PARTICIPANT_TIMEOUT_MINUTES = 15;
+const PARTICIPANT_TIMEOUT_MS = PARTICIPANT_TIMEOUT_MINUTES * MINUTES_TO_MS;
+const PRESENCE_EVALUATION_DELAY_MS = 250;
 
 function duplicateData(value) {
   return foundry.utils.deepClone(value);
@@ -41,24 +43,66 @@ function normalizeCounterMap(value) {
   return normalized;
 }
 
+function normalizeIdArray(value) {
+  const source = Array.isArray(value) ? value : [];
+  return [...new Set(source.map((entry) => String(entry || '').trim()).filter(Boolean))].sort(
+    (left, right) => left.localeCompare(right)
+  );
+}
+
+function normalizeTimestampMap(value) {
+  const source = value && typeof value === 'object' ? value : {};
+  const normalized = {};
+  for (const [key, amount] of Object.entries(source)) {
+    const name = String(key || '').trim();
+    if (!name) continue;
+    const timestamp = Number(amount);
+    if (!Number.isFinite(timestamp) || timestamp <= 0) continue;
+    normalized[name] = Math.floor(timestamp);
+  }
+  return normalized;
+}
+
+function areArraysEqual(left, right) {
+  if (left.length !== right.length) return false;
+  return left.every((value, index) => value === right[index]);
+}
+
+function areTimestampMapsEqual(left, right) {
+  const leftKeys = Object.keys(left ?? {}).sort((a, b) => a.localeCompare(b));
+  const rightKeys = Object.keys(right ?? {}).sort((a, b) => a.localeCompare(b));
+  if (!areArraysEqual(leftKeys, rightKeys)) return false;
+  return leftKeys.every((key) => Number(left[key]) === Number(right[key]));
+}
+
+function getActiveGMIds() {
+  return (game.users?.filter((user) => user.isGM && user.active) ?? [])
+    .map((user) => String(user.id || '').trim())
+    .filter(Boolean)
+    .sort((left, right) => left.localeCompare(right));
+}
+
+function getTrackedPlayerUsers() {
+  const minimumRole = CONST.USER_ROLES?.PLAYER ?? 1;
+  return (game.users?.filter(
+    (user) => !user.isGM && Number(user.role ?? 0) >= minimumRole
+  ) ?? [])
+    .slice()
+    .sort((left, right) => String(left.id).localeCompare(String(right.id)));
+}
+
 function hasWritePermission() {
   return Boolean(game.user?.isGM);
 }
 
 export class SessionStatsService {
   constructor() {
-    this._beforeUnloadHandler = null;
+    this._presenceEvaluationTimer = null;
   }
 
   initialize() {
     if (!game.user?.isGM) return;
-    if (this._beforeUnloadHandler) return;
-    this._beforeUnloadHandler = () => {
-      void this._markPendingAutoCloseOnBeforeUnload();
-    };
-    if (typeof globalThis.addEventListener === 'function') {
-      globalThis.addEventListener('beforeunload', this._beforeUnloadHandler);
-    }
+    this._clearPresenceEvaluationTimer();
   }
 
   getActiveSession() {
@@ -74,7 +118,23 @@ export class SessionStatsService {
     return this._normalizeSession(history[0]);
   }
 
-  async startSession({ startedBy } = {}) {
+  schedulePresenceEvaluation(delayMs = PRESENCE_EVALUATION_DELAY_MS) {
+    if (!game.user?.isGM) return;
+    this._clearPresenceEvaluationTimer();
+
+    const delay = Math.max(Math.floor(Number(delayMs) || 0), 0);
+    if (typeof globalThis.setTimeout !== 'function') {
+      void this.evaluatePresence();
+      return;
+    }
+
+    this._presenceEvaluationTimer = globalThis.setTimeout(() => {
+      this._presenceEvaluationTimer = null;
+      void this.evaluatePresence();
+    }, delay);
+  }
+
+  async startSession({ startedBy, requiredPlayerIds = null } = {}) {
     if (!hasWritePermission()) {
       ui.notifications.warn(game.i18n.localize('MY_RPG.SessionTracker.Notifications.RequireGM'));
       return null;
@@ -87,9 +147,11 @@ export class SessionStatsService {
     }
 
     const session = this._createSession({
-      startedBy: startedBy ?? game.user?.id ?? null
+      startedBy: startedBy ?? game.user?.id ?? null,
+      requiredPlayerIds: requiredPlayerIds ?? this._getDefaultRequiredPlayerIds()
     });
     await this._setCurrentSession(session);
+    this._clearPresenceEvaluationTimer();
 
     ui.notifications.info(game.i18n.localize('MY_RPG.SessionTracker.Notifications.Started'));
     Hooks.callAll(SESSION_HOOKS.started, duplicateData(session));
@@ -133,6 +195,7 @@ export class SessionStatsService {
 
     await this._setCurrentSession({});
     await this._setHistory(trimmedHistory);
+    this._clearPresenceEvaluationTimer();
 
     if (postSummary) {
       await this._postSessionSummary(finalized);
@@ -153,43 +216,46 @@ export class SessionStatsService {
 
   async recoverStateOnReady() {
     if (!game.user?.isGM) return;
-    const active = this.getActiveSession();
-    if (!active) return;
-
-    const pendingAutoCloseAt = Number(active.pendingAutoCloseAt) || 0;
-    if (pendingAutoCloseAt && Date.now() >= pendingAutoCloseAt) {
-      await this.endSession({
-        reason: END_REASON_AUTO_TIMEOUT,
-        postSummary: true,
-        silent: true
-      });
-      return;
-    }
-
-    await this.handleGMConnectivity();
+    await this.evaluatePresence();
   }
 
-  async handleGMConnectivity() {
-    const active = this.getActiveSession();
-    if (!active) return;
+  async evaluatePresence() {
     if (!hasWritePermission()) return;
-    if (!this._isTrackingAuthority()) return;
+    if (!this._isTrackingAuthority()) {
+      this._clearPresenceEvaluationTimer();
+      return null;
+    }
 
-    const pendingAutoCloseAt = Number(active.pendingAutoCloseAt) || 0;
-    if (!pendingAutoCloseAt) return;
+    const active = this.getActiveSession();
+    const presence = this._getPresenceState(active);
 
-    if (Date.now() >= pendingAutoCloseAt) {
+    if (!active) {
+      this._clearPresenceEvaluationTimer();
+      if (!presence.canStart) return null;
+      return this.startSession({
+        startedBy: game.user?.id ?? null,
+        requiredPlayerIds: presence.requiredPlayerIds
+      });
+    }
+
+    const nextState = this._applyPresenceState(active, presence);
+    if (nextState.shouldEnd) {
+      this._clearPresenceEvaluationTimer();
       await this.endSession({
-        reason: END_REASON_AUTO_TIMEOUT,
+        reason: END_REASON_AUTO_PARTICIPANT_TIMEOUT,
         postSummary: true,
         silent: true
       });
-      return;
+      return null;
     }
 
-    active.pendingAutoCloseAt = null;
-    await this._setCurrentSession(active);
-    this._emitStatsUpdated(active, 'connectivity');
+    if (nextState.changed) {
+      await this._setCurrentSession(nextState.session);
+      this._emitStatsUpdated(nextState.session, 'presence');
+    }
+
+    this._schedulePresenceEvaluationAt(nextState.session.pendingAutoCloseAt);
+    return nextState.session;
   }
 
   async recordRoll(message) {
@@ -244,7 +310,7 @@ export class SessionStatsService {
     this._emitStatsUpdated(active, 'combat');
   }
 
-  _createSession({ startedBy }) {
+  _createSession({ startedBy, requiredPlayerIds }) {
     return {
       id: foundry.utils.randomID(16),
       status: SESSION_STATUS_ACTIVE,
@@ -254,6 +320,7 @@ export class SessionStatsService {
       endedBy: null,
       endReason: null,
       pendingAutoCloseAt: null,
+      presence: this._createPresenceState(requiredPlayerIds),
       stats: this._createEmptyStats()
     };
   }
@@ -265,11 +332,17 @@ export class SessionStatsService {
     normalized.endedBy = endedBy ?? null;
     normalized.endReason = reason ?? END_REASON_MANUAL;
     normalized.pendingAutoCloseAt = null;
+    normalized.presence.offlineSinceByParticipant = {};
     return normalized;
   }
 
   _normalizeSession(session) {
     const normalized = duplicateData(session ?? {});
+    normalized.presence ??= this._createPresenceState();
+    normalized.presence.requiredPlayerIds = normalizeIdArray(normalized.presence.requiredPlayerIds);
+    normalized.presence.offlineSinceByParticipant = normalizeTimestampMap(
+      normalized.presence.offlineSinceByParticipant
+    );
     normalized.stats ??= this._createEmptyStats();
     normalized.stats.rolls ??= this._createEmptyStats().rolls;
     normalized.stats.combat ??= this._createEmptyStats().combat;
@@ -306,6 +379,13 @@ export class SessionStatsService {
     return normalized;
   }
 
+  _createPresenceState(requiredPlayerIds = []) {
+    return {
+      requiredPlayerIds: normalizeIdArray(requiredPlayerIds),
+      offlineSinceByParticipant: {}
+    };
+  }
+
   _createEmptyStats() {
     return {
       rolls: {
@@ -338,10 +418,6 @@ export class SessionStatsService {
     return duplicateData(value);
   }
 
-  _getAutoCloseMinutes() {
-    return clampPositiveInteger(game.settings.get(MODULE_ID, SETTING_KEYS.autoCloseMinutes), 10);
-  }
-
   _getMaxHistory() {
     return clampPositiveInteger(game.settings.get(MODULE_ID, SETTING_KEYS.maxHistory), 50);
   }
@@ -356,11 +432,67 @@ export class SessionStatsService {
 
   _isTrackingAuthority() {
     if (!game.user?.isGM) return false;
-    const activeGMs = (game.users?.filter((user) => user.isGM && user.active) ?? []).sort((a, b) =>
-      String(a.id).localeCompare(String(b.id))
-    );
-    const authorityId = activeGMs[0]?.id ?? game.user.id;
+    const activeGMs = getActiveGMIds();
+    const authorityId = activeGMs[0] ?? game.user.id;
     return authorityId === game.user.id;
+  }
+
+  _getDefaultRequiredPlayerIds() {
+    return getTrackedPlayerUsers().map((user) => String(user.id));
+  }
+
+  _getRequiredPlayerIds(session) {
+    const current = normalizeIdArray(session?.presence?.requiredPlayerIds);
+    if (current.length) return current;
+    return this._getDefaultRequiredPlayerIds();
+  }
+
+  _getPresenceState(session = null) {
+    const requiredPlayerIds = this._getRequiredPlayerIds(session);
+    const activeGMIds = getActiveGMIds();
+    const offlineParticipantIds = [];
+
+    for (const userId of requiredPlayerIds) {
+      if (game.users?.get(userId)?.active) continue;
+      offlineParticipantIds.push(userId);
+    }
+
+    return {
+      requiredPlayerIds,
+      offlineParticipantIds,
+      canStart: Boolean(activeGMIds.length) && Boolean(requiredPlayerIds.length) && !offlineParticipantIds.length
+    };
+  }
+
+  _applyPresenceState(session, presence) {
+    const normalized = this._normalizeSession(session);
+    const previousRequiredPlayerIds = normalized.presence.requiredPlayerIds;
+    const previousOfflineSince = normalized.presence.offlineSinceByParticipant;
+    const previousPendingAutoCloseAt = Number(normalized.pendingAutoCloseAt) || 0;
+    const nextOfflineSince = {};
+    const now = Date.now();
+
+    for (const participantId of presence.offlineParticipantIds) {
+      nextOfflineSince[participantId] = Number(previousOfflineSince[participantId]) || now;
+    }
+
+    const deadlines = Object.values(nextOfflineSince)
+      .map((startedAt) => startedAt + PARTICIPANT_TIMEOUT_MS)
+      .sort((left, right) => left - right);
+    const pendingAutoCloseAt = deadlines[0] ?? null;
+
+    normalized.presence.requiredPlayerIds = presence.requiredPlayerIds;
+    normalized.presence.offlineSinceByParticipant = nextOfflineSince;
+    normalized.pendingAutoCloseAt = pendingAutoCloseAt;
+
+    return {
+      session: normalized,
+      changed:
+        !areArraysEqual(previousRequiredPlayerIds, presence.requiredPlayerIds) ||
+        !areTimestampMapsEqual(previousOfflineSince, nextOfflineSince) ||
+        previousPendingAutoCloseAt !== Number(pendingAutoCloseAt || 0),
+      shouldEnd: Boolean(pendingAutoCloseAt && now >= pendingAutoCloseAt)
+    };
   }
 
   _extractActorKey(message) {
@@ -413,28 +545,20 @@ export class SessionStatsService {
     });
   }
 
-  async _markPendingAutoCloseOnBeforeUnload() {
-    if (!hasWritePermission()) return;
-    const active = this.getActiveSession();
-    if (!active) return;
-
-    const activeGMs = game.users?.filter((user) => user.isGM && user.active) ?? [];
-    if (activeGMs.length > 1) return;
-
-    const timeoutMinutes = this._getAutoCloseMinutes();
-    active.pendingAutoCloseAt = Date.now() + timeoutMinutes * MINUTES_TO_MS;
-    try {
-      await this._setCurrentSession(active);
-      debugLog('Session tracker queued pending auto-close on unload', {
-        sessionId: active.id,
-        pendingAutoCloseAt: active.pendingAutoCloseAt
-      });
-    } catch (error) {
-      debugLog('Session tracker failed to queue pending auto-close on unload', {
-        sessionId: active.id,
-        error
-      });
+  _schedulePresenceEvaluationAt(timestamp) {
+    if (!timestamp) {
+      this._clearPresenceEvaluationTimer();
+      return;
     }
+    this.schedulePresenceEvaluation(Math.max(Number(timestamp) - Date.now(), 0));
+  }
+
+  _clearPresenceEvaluationTimer() {
+    if (!this._presenceEvaluationTimer) return;
+    if (typeof globalThis.clearTimeout === 'function') {
+      globalThis.clearTimeout(this._presenceEvaluationTimer);
+    }
+    this._presenceEvaluationTimer = null;
   }
 
   async _postSessionSummary(session) {

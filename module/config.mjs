@@ -26,20 +26,6 @@ export function registerSystemSettings() {
     default: []
   });
 
-  game.settings.register(MODULE_ID, 'sessionTrackerAutoCloseMinutes', {
-    name: 'MY_RPG.Settings.SessionTrackerAutoCloseMinutes.Name',
-    hint: 'MY_RPG.Settings.SessionTrackerAutoCloseMinutes.Hint',
-    scope: 'world',
-    config: true,
-    type: Number,
-    default: 10,
-    range: {
-      min: 1,
-      max: 120,
-      step: 1
-    }
-  });
-
   game.settings.register(MODULE_ID, 'sessionTrackerMaxHistory', {
     name: 'MY_RPG.Settings.SessionTrackerMaxHistory.Name',
     hint: 'MY_RPG.Settings.SessionTrackerMaxHistory.Hint',
