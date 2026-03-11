@@ -217,7 +217,15 @@
             <div class='resource flex-group-center'>
               <label class='resource-label'>{{localize 'MY_RPG.KeyInfo.CurrentRank'}}</label>
               <div class='resource-content flexcol'>
-                <input type='text' class='key-info-input' name='system.currentRank' value='{{system.currentRank}}'/>
+                  <input
+                    type='number'
+                    class='key-info-input'
+                    name='system.currentRank'
+                    value='{{system.currentRank}}'
+                    step='1'
+                    min='0'
+                    inputmode='numeric'
+                  />
               </div>
             </div>
 

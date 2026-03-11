@@ -92,6 +92,7 @@
       "ProgressPoints": "Очки прогресса"
     },
     "SheetLabels": {
+      "Actor": "Лист персонажа",
       "AbilitiesAndMods": "Способности и геномы",
       "Features": "Основной лист",
       "Abilities": "Геномы",

@@ -67,6 +67,7 @@
       "PsychicLabel": "Mental Protection"
     },
     "SheetLabels": {
+      "Actor": "Character Sheet",
       "AbilitiesAndMods": "Abilities and Genomes",
       "Features": "Main Sheet",
       "Abilities": "Genomes",

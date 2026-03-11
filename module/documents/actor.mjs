@@ -198,7 +198,6 @@ export class ProjectAndromedaActor extends Actor {
     const cartridgeItems = this.itemTypes?.cartridge ?? [];
     for (const cartridge of cartridgeItems) {
       const system = cartridge.system ?? {};
-      if (system.equipped === false) continue;
       const skill = String(system.skill || '');
       if (!skill) continue;
       const bonus = Number(system.skillBonus) || 0;
@@ -213,7 +212,6 @@ export class ProjectAndromedaActor extends Actor {
     const implantItems = this.itemTypes?.implant ?? [];
     for (const implant of implantItems) {
       const system = implant.system ?? {};
-      if (system.equipped === false) continue;
       const skill = String(system.skill || '');
       if (!skill) continue;
       const bonus = Number(system.skillBonus) || 0;

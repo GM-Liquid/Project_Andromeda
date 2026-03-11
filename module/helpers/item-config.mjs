@@ -252,6 +252,20 @@ export const ITEM_TYPE_CONFIGS = [
 
 export const ITEM_GROUP_CONFIGS = [
   {
+    key: 'cartridges',
+    types: ['cartridge'],
+    tab: 'inventory',
+    icon: 'fas fa-box',
+    labelKey: 'MY_RPG.ItemGroups.Cartridges',
+    emptyKey: 'MY_RPG.ItemGroups.EmptyCartridges',
+    createKey: 'MY_RPG.ItemGroups.CreateCartridge',
+    newNameKey: 'MY_RPG.ItemGroups.NewCartridge',
+    showQuantity: false,
+    allowEquip: false,
+    exclusive: false,
+    canRoll: true
+  },
+  {
     key: 'implants',
     types: ['implant'],
     tab: 'inventory',
@@ -644,6 +658,26 @@ const USAGE_FREQUENCY_BADGE_GROUPS = [
 ];
 
 export const ITEM_BADGE_BUILDERS = {
+  cartridges: (item, helpers) => {
+    const system = item.system ?? {};
+    const badges = [];
+    const t = helpers.t;
+    const rank = Number(system.rank) || 0;
+    const runeType = String(system.runeType ?? '').trim();
+    if (rank) {
+      badges.push(`${t.localize('MY_RPG.AbilityConfig.Rank')}: ${helpers.getRankLabel(rank)}`);
+    }
+    if (runeType) {
+      badges.push(
+        `${t.localize('MY_RPG.AbilityConfig.RuneType')}: ${t.localize(`MY_RPG.RuneTypes.${runeType}`)}`
+      );
+    }
+    badges.push(`${t.localize('MY_RPG.AbilityConfig.Skill')}: ${helpers.skillLabel(system.skill)}`);
+    badges.push(
+      `${t.localize('MY_RPG.AbilityConfig.SkillBonus')}: ${helpers.formatSkillBonus(system.skillBonus)}`
+    );
+    return badges;
+  },
   implants: (item, helpers) => {
     const system = item.system ?? {};
     const badges = [];

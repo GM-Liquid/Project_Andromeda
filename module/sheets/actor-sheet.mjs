@@ -112,6 +112,14 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
   activateListeners(html) {
     super.activateListeners(html);
     const $html = html instanceof jQuery ? html : $(html);
+    const derivedInputSelector = [
+      "input[name='system.currentRank']",
+      "input[name='system.temphealth']",
+      "input[name='system.tempphys']",
+      "input[name='system.tempazure']",
+      "input[name='system.tempmental']",
+      "input[name='system.tempspeed']"
+    ].join(', ');
     $html.find('textarea.rich-editor').each((i, el) => this.initializeRichEditor(el));
     $html.on('click', '.stress-cell', this._onStressCellClick.bind(this));
     $html.on('contextmenu', '.stress-cell', this._onStressCellRightClick.bind(this));
@@ -136,6 +144,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       input.classList.add(rankClass);
     });
 
+    $html.find(derivedInputSelector).on('change', this._onDerivedInputChange.bind(this));
     $html.on('click', '.ability-step', this._onAbilityStep.bind(this));
   }
 
@@ -388,6 +397,23 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     this._refreshDerived(this.element);
   }
 
+  _coerceNonNegativeIntegerInput(input) {
+    let value = parseInt(input?.value, 10);
+    if (Number.isNaN(value) || value < 0) value = 0;
+    if (input) input.value = value;
+    return value;
+  }
+
+  async _onDerivedInputChange(event) {
+    const input = event.currentTarget;
+    if (!input?.name) return;
+
+    const nextValue = this._coerceNonNegativeIntegerInput(input);
+    await this.actor.update({ [input.name]: nextValue }, { render: false });
+    this.actor.prepareData();
+    this._refreshDerived(this.element);
+  }
+
   _updateAbilityDisplays(root, abilityKey) {
     const $root = root instanceof jQuery ? root : $(root ?? this.element);
     const abilityKeys = abilityKey ? [abilityKey] : Object.keys(this.actor.system?.abilities ?? {});
@@ -438,21 +464,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       }
       const bonusDetails = this._getSkillBonusDetails(skill);
       modifier += bonusDetails.total;
-      if (bonusDetails.total) {
-        if (bonusDetails.sources?.length) {
-          for (const source of bonusDetails.sources) {
-            parts.push({
-              label: this._formatBonusSourceLabel(source),
-              value: source.bonus
-            });
-          }
-        } else {
-          parts.push({
-            label: game.i18n.localize('MY_RPG.RollFlavor.EquipmentBonus'),
-            value: bonusDetails.total
-          });
-        }
-      }
+      this._appendBonusParts(parts, bonusDetails);
     } else if (ability) {
       dieValue = dieValue ?? this._getAbilityDieValue(ability);
     }
@@ -719,6 +731,14 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     return game.i18n.format('MY_RPG.ItemControls.NewItemFallback', { type: typeLabel });
   }
 
+  _getDefaultItemNameForType(type, fallbackConfig = null) {
+    const groupConfig =
+      getItemGroupConfigs().find(
+        (config) => config.types.length === 1 && config.types[0] === type
+      ) ?? fallbackConfig;
+    return this._getDefaultItemName(groupConfig);
+  }
+
   _getGroupConfig(groupKey) {
     if (!groupKey) return null;
     return getItemGroupConfigByKey(groupKey);
@@ -739,6 +759,55 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     return { item, $row, groupKey, config, itemId };
   }
 
+  async _promptForItemType(config) {
+    const types = Array.isArray(config?.types) ? config.types.filter(Boolean) : [];
+    if (types.length <= 1) return types[0] ?? '';
+
+    const options = types
+      .map((type) => {
+        const value = this._escapeHTML(type);
+        const label = this._escapeHTML(game.i18n.localize(`TYPES.Item.${type}`));
+        return `<option value="${value}">${label}</option>`;
+      })
+      .join('');
+
+    const content = `
+      <form>
+        <div class="form-group">
+          <select name="item-type">${options}</select>
+        </div>
+      </form>
+    `;
+
+    return new Promise((resolve) => {
+      let settled = false;
+      const finish = (value) => {
+        if (settled) return;
+        settled = true;
+        resolve(value);
+      };
+
+      new Dialog({
+        title: game.i18n.localize(config.createKey),
+        content,
+        buttons: {
+          create: {
+            icon: '<i class="fas fa-plus"></i>',
+            label: game.i18n.localize('MY_RPG.AbilityConfig.Save'),
+            callback: (html) => finish(String(html.find('[name="item-type"]').val() || '').trim())
+          },
+          cancel: {
+            icon: '<i class="fas fa-times"></i>',
+            label: game.i18n.localize('MY_RPG.AbilityConfig.Cancel'),
+            callback: () => finish(null)
+          }
+        },
+        default: 'create',
+        close: () => finish(null)
+      }).render(true);
+    });
+  }
+
   async _onItemCreate(event) {
     event.preventDefault();
     const $target = $(event.currentTarget);
@@ -748,10 +817,12 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     let config = type ? getItemGroupConfigs().find((entry) => entry.types.includes(type)) : null;
     if (!config) config = this._getGroupConfig(groupKey);
     if (!config) return;
-    const name = this._getDefaultItemName(config);
+    const selectedType = await this._promptForItemType(config);
+    if (!selectedType) return;
+    const name = this._getDefaultItemNameForType(selectedType, config);
     // DEBUG-LOG
-    debugLog('Actor sheet item create', { actor: this.actor.uuid, type: config.types[0] });
-    await this.actor.createEmbeddedDocuments('Item', [{ name, type: config.types[0], system: {} }]);
+    debugLog('Actor sheet item create', { actor: this.actor.uuid, type: selectedType });
+    await this.actor.createEmbeddedDocuments('Item', [{ name, type: selectedType, system: {} }]);
   }
 
   async _onItemEdit(event) {
@@ -846,21 +917,15 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     });
 
     if (item.type === 'cartridge' || item.type === 'implant') {
-      const itemBonus = Number(system.skillBonus) || 0;
-      if (itemBonus) {
-        parts.push({
-          label: this._formatBonusSourceLabel({
-            type: item.type,
-            name: item.name || game.i18n.localize(`TYPES.Item.${item.type}`),
-            quantity: Number(system.quantity) || 0
-          }),
-          value: itemBonus
-        });
-      }
+      const bonusDetails = this._getSkillBonusDetails(skillKey);
+      const modifier = skillValue + (bonusDetails.total || 0);
+      const abilityKey = this._getSkillAbilityKey(skillKey);
+      const dieValue = this._getAbilityDieValue(abilityKey);
+      const rollFormula = getAbilityDieRoll(dieValue);
+      this._appendBonusParts(parts, bonusDetails);
 
-      const roll = await new Roll('1d10 + @skill + @itemBonus', {
-        skill: skillValue,
-        itemBonus
+      const roll = await new Roll(`${rollFormula} + @mod`, {
+        mod: modifier
       }).roll({ async: true });
 
       const flavorLabel = game.i18n.format('MY_RPG.ItemRoll.Flavor', {
@@ -880,34 +945,22 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
         actor: this.actor.uuid,
         itemId: item.id,
         type: item.type,
+        ability: abilityKey ?? null,
+        rollFormula,
         skill: skillKey,
         skillValue,
-        itemBonus
+        modifier
       });
       return;
     }
 
     if (item.type === 'weapon') {
       const bonusDetails = this._getSkillBonusDetails(skillKey);
-      let modifier = skillValue + (bonusDetails.total || 0);
+      const modifier = skillValue + (bonusDetails.total || 0);
       const abilityKey = this._getSkillAbilityKey(skillKey);
       const dieValue = this._getAbilityDieValue(abilityKey);
       const rollFormula = getAbilityDieRoll(dieValue);
-      if (bonusDetails.total) {
-        if (bonusDetails.sources?.length) {
-          for (const source of bonusDetails.sources) {
-            parts.push({
-              label: this._formatBonusSourceLabel(source),
-              value: source.bonus
-            });
-          }
-        } else {
-          parts.push({
-            label: game.i18n.localize('MY_RPG.RollFlavor.EquipmentBonus'),
-            value: bonusDetails.total
-          });
-        }
-      }
+      this._appendBonusParts(parts, bonusDetails);
 
       const roll = await new Roll(`${rollFormula} + @mod`, { mod: modifier }).roll({ async: true });
 
@@ -1046,6 +1099,24 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const damage = Number(value);
     if (!Number.isFinite(damage)) return '0';
     return `${damage}`;
+  }
+
+  _appendBonusParts(parts, bonusDetails) {
+    if (!bonusDetails?.total) return;
+    if (bonusDetails.sources?.length) {
+      for (const source of bonusDetails.sources) {
+        parts.push({
+          label: this._formatBonusSourceLabel(source),
+          value: source.bonus
+        });
+      }
+      return;
+    }
+
+    parts.push({
+      label: game.i18n.localize('MY_RPG.RollFlavor.EquipmentBonus'),
+      value: bonusDetails.total
+    });
   }
 
   _getSkillBonusDetails(skillKey) {
