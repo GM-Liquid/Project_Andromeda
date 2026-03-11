@@ -20,9 +20,6 @@
             "value": 4
           }
         },
-        "cartridgesList": [],
-        "implantsList": [],
-        "inventoryList": [],
         "stress": {
           "value": 0,
           "max": 4,
@@ -35,8 +32,6 @@
         "flux": {
           "value": 0
         },
-        "armorList": [],
-        "weaponList": [],
         "supplies": 0,
         "money": 0,
         "steadfast": {

@@ -8,7 +8,6 @@ import { ITEM_SHEET_CLASSES } from './sheets/item-sheet.mjs';
 import { preloadHandlebarsTemplates } from './helpers/templates.mjs';
 import { MODULE_ID, PROJECT_ANDROMEDA, debugLog, registerSystemSettings } from './config.mjs';
 import { ITEM_SUPERTYPE_LABELS, ITEM_TYPE_CONFIGS } from './helpers/item-config.mjs';
-import { runLegacyItemMigration } from './helpers/migrations.mjs';
 import { SessionStatsService } from './helpers/session-stats.mjs';
 import './helpers/handlebars-helpers.mjs';
 
@@ -633,7 +632,4 @@ Hooks.once('ready', async function () {
       await sessionStats.recoverStateOnReady();
     }
   }
-
-  if (!game.user.isGM) return;
-  await runLegacyItemMigration();
 });

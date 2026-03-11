@@ -4,13 +4,6 @@ export const MODULE_ID = 'project-andromeda';
 export const RUNE_TYPE_KEYS = ['Spell', 'Creature', 'Item', 'Portal', 'Domain', 'Saga'];
 
 export function registerSystemSettings() {
-  game.settings.register(MODULE_ID, 'legacyItemMigrationComplete', {
-    scope: 'world',
-    config: false,
-    type: Boolean,
-    default: false
-  });
-
   game.settings.register(MODULE_ID, 'debugMode', {
     name: 'MY_RPG.Settings.DebugMode.Name',
     hint: 'MY_RPG.Settings.DebugMode.Hint',

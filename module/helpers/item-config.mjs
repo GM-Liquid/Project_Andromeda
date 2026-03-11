@@ -123,7 +123,7 @@ export const ITEM_TYPE_CONFIGS = [
   {
     type: 'environment-consumable',
     supertype: 'environment',
-    groupKey: 'environmentConsumables',
+    groupKey: 'environment',
     sheet: 'generic',
     defaults: {
       quantity: 1
@@ -140,19 +140,19 @@ export const ITEM_TYPE_CONFIGS = [
   {
     type: 'environment-interactive',
     supertype: 'environment',
-    groupKey: 'environmentInteractive',
+    groupKey: 'environment',
     sheet: 'generic'
   },
   {
     type: 'environment-narrative',
     supertype: 'environment',
-    groupKey: 'environmentNarrative',
+    groupKey: 'environment',
     sheet: 'generic'
   },
   {
     type: 'environment-resource',
     supertype: 'environment',
-    groupKey: 'environmentResources',
+    groupKey: 'environment',
     sheet: 'generic',
     defaults: {
       quantity: 1
@@ -169,68 +169,68 @@ export const ITEM_TYPE_CONFIGS = [
   {
     type: 'environment-trigger',
     supertype: 'environment',
-    groupKey: 'environmentTriggers',
+    groupKey: 'environment',
     sheet: 'generic'
   },
   {
     type: 'environment-danger',
     supertype: 'environment',
-    groupKey: 'environmentDanger',
+    groupKey: 'environment',
     sheet: 'generic'
   },
   {
     type: 'trait-flaw',
     supertype: 'traits',
-    groupKey: 'traitFlaws',
+    groupKey: 'traits',
     sheet: 'generic',
     fields: [buildUsageFrequencyField()]
   },
   {
     type: 'trait-general',
     supertype: 'traits',
-    groupKey: 'traitGeneral',
+    groupKey: 'traits',
     sheet: 'generic',
     fields: [buildUsageFrequencyField()]
   },
   {
     type: 'trait-backstory',
     supertype: 'traits',
-    groupKey: 'traitBackstory',
+    groupKey: 'traits',
     sheet: 'generic',
     fields: [buildUsageFrequencyField()]
   },
   {
     type: 'trait-social',
     supertype: 'traits',
-    groupKey: 'traitSocial',
+    groupKey: 'traits',
     sheet: 'generic',
     fields: [buildUsageFrequencyField()]
   },
   {
     type: 'trait-combat',
     supertype: 'traits',
-    groupKey: 'traitCombat',
+    groupKey: 'traits',
     sheet: 'generic',
     fields: [buildUsageFrequencyField()]
   },
   {
     type: 'trait-magical',
     supertype: 'traits',
-    groupKey: 'traitMagical',
+    groupKey: 'traits',
     sheet: 'generic',
     fields: [buildUsageFrequencyField()]
   },
   {
     type: 'trait-professional',
     supertype: 'traits',
-    groupKey: 'traitProfessional',
+    groupKey: 'traits',
     sheet: 'generic',
     fields: [buildUsageFrequencyField()]
   },
   {
     type: 'trait-technological',
     supertype: 'traits',
-    groupKey: 'traitTechnological',
+    groupKey: 'traits',
     sheet: 'generic',
     fields: [buildUsageFrequencyField()]
   },
@@ -364,90 +364,6 @@ export const ITEM_GROUP_CONFIGS = [
     canRoll: false
   },
   {
-    key: 'environmentConsumables',
-    types: ['environment-consumable'],
-    tab: 'environment',
-    icon: 'fas fa-flask',
-    labelKey: 'MY_RPG.ItemGroups.EnvironmentConsumables',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyEnvironmentConsumables',
-    createKey: 'MY_RPG.ItemGroups.CreateEnvironmentConsumable',
-    newNameKey: 'MY_RPG.ItemGroups.NewEnvironmentConsumable',
-    showQuantity: true,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: false
-  },
-  {
-    key: 'environmentInteractive',
-    types: ['environment-interactive'],
-    tab: 'environment',
-    icon: 'fas fa-hand-pointer',
-    labelKey: 'MY_RPG.ItemGroups.EnvironmentInteractive',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyEnvironmentInteractive',
-    createKey: 'MY_RPG.ItemGroups.CreateEnvironmentInteractive',
-    newNameKey: 'MY_RPG.ItemGroups.NewEnvironmentInteractive',
-    showQuantity: false,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: false
-  },
-  {
-    key: 'environmentNarrative',
-    types: ['environment-narrative'],
-    tab: 'environment',
-    icon: 'fas fa-book',
-    labelKey: 'MY_RPG.ItemGroups.EnvironmentNarrative',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyEnvironmentNarrative',
-    createKey: 'MY_RPG.ItemGroups.CreateEnvironmentNarrative',
-    newNameKey: 'MY_RPG.ItemGroups.NewEnvironmentNarrative',
-    showQuantity: false,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: false
-  },
-  {
-    key: 'environmentResources',
-    types: ['environment-resource'],
-    tab: 'environment',
-    icon: 'fas fa-leaf',
-    labelKey: 'MY_RPG.ItemGroups.EnvironmentResources',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyEnvironmentResources',
-    createKey: 'MY_RPG.ItemGroups.CreateEnvironmentResource',
-    newNameKey: 'MY_RPG.ItemGroups.NewEnvironmentResource',
-    showQuantity: true,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: false
-  },
-  {
-    key: 'environmentTriggers',
-    types: ['environment-trigger'],
-    tab: 'environment',
-    icon: 'fas fa-bell',
-    labelKey: 'MY_RPG.ItemGroups.EnvironmentTriggers',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyEnvironmentTriggers',
-    createKey: 'MY_RPG.ItemGroups.CreateEnvironmentTrigger',
-    newNameKey: 'MY_RPG.ItemGroups.NewEnvironmentTrigger',
-    showQuantity: false,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: false
-  },
-  {
-    key: 'environmentDanger',
-    types: ['environment-danger'],
-    tab: 'environment',
-    icon: 'fas fa-skull',
-    labelKey: 'MY_RPG.ItemGroups.EnvironmentDanger',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyEnvironmentDanger',
-    createKey: 'MY_RPG.ItemGroups.CreateEnvironmentDanger',
-    newNameKey: 'MY_RPG.ItemGroups.NewEnvironmentDanger',
-    showQuantity: false,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: false
-  },
-  {
     key: 'traits',
     types: [
       'trait-flaw',
@@ -465,118 +381,6 @@ export const ITEM_GROUP_CONFIGS = [
     emptyKey: 'MY_RPG.ItemGroups.EmptyTraits',
     createKey: 'MY_RPG.ItemGroups.CreateTrait',
     newNameKey: 'MY_RPG.ItemGroups.NewTrait',
-    showQuantity: false,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: false
-  },
-  {
-    key: 'traitFlaws',
-    types: ['trait-flaw'],
-    tab: 'traits',
-    icon: 'fas fa-exclamation-triangle',
-    labelKey: 'MY_RPG.ItemGroups.TraitFlaws',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyTraitFlaws',
-    createKey: 'MY_RPG.ItemGroups.CreateTraitFlaw',
-    newNameKey: 'MY_RPG.ItemGroups.NewTraitFlaw',
-    showQuantity: false,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: false
-  },
-  {
-    key: 'traitGeneral',
-    types: ['trait-general'],
-    tab: 'traits',
-    icon: 'fas fa-feather',
-    labelKey: 'MY_RPG.ItemGroups.TraitGeneral',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyTraitGeneral',
-    createKey: 'MY_RPG.ItemGroups.CreateTraitGeneral',
-    newNameKey: 'MY_RPG.ItemGroups.NewTraitGeneral',
-    showQuantity: false,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: false
-  },
-  {
-    key: 'traitBackstory',
-    types: ['trait-backstory'],
-    tab: 'traits',
-    icon: 'fas fa-scroll',
-    labelKey: 'MY_RPG.ItemGroups.TraitBackstory',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyTraitBackstory',
-    createKey: 'MY_RPG.ItemGroups.CreateTraitBackstory',
-    newNameKey: 'MY_RPG.ItemGroups.NewTraitBackstory',
-    showQuantity: false,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: false
-  },
-  {
-    key: 'traitSocial',
-    types: ['trait-social'],
-    tab: 'traits',
-    icon: 'fas fa-users',
-    labelKey: 'MY_RPG.ItemGroups.TraitSocial',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyTraitSocial',
-    createKey: 'MY_RPG.ItemGroups.CreateTraitSocial',
-    newNameKey: 'MY_RPG.ItemGroups.NewTraitSocial',
-    showQuantity: false,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: false
-  },
-  {
-    key: 'traitCombat',
-    types: ['trait-combat'],
-    tab: 'traits',
-    icon: 'fas fa-fist-raised',
-    labelKey: 'MY_RPG.ItemGroups.TraitCombat',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyTraitCombat',
-    createKey: 'MY_RPG.ItemGroups.CreateTraitCombat',
-    newNameKey: 'MY_RPG.ItemGroups.NewTraitCombat',
-    showQuantity: false,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: false
-  },
-  {
-    key: 'traitMagical',
-    types: ['trait-magical'],
-    tab: 'traits',
-    icon: 'fas fa-hat-wizard',
-    labelKey: 'MY_RPG.ItemGroups.TraitMagical',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyTraitMagical',
-    createKey: 'MY_RPG.ItemGroups.CreateTraitMagical',
-    newNameKey: 'MY_RPG.ItemGroups.NewTraitMagical',
-    showQuantity: false,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: false
-  },
-  {
-    key: 'traitProfessional',
-    types: ['trait-professional'],
-    tab: 'traits',
-    icon: 'fas fa-briefcase',
-    labelKey: 'MY_RPG.ItemGroups.TraitProfessional',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyTraitProfessional',
-    createKey: 'MY_RPG.ItemGroups.CreateTraitProfessional',
-    newNameKey: 'MY_RPG.ItemGroups.NewTraitProfessional',
-    showQuantity: false,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: false
-  },
-  {
-    key: 'traitTechnological',
-    types: ['trait-technological'],
-    tab: 'traits',
-    icon: 'fas fa-microchip',
-    labelKey: 'MY_RPG.ItemGroups.TraitTechnological',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyTraitTechnological',
-    createKey: 'MY_RPG.ItemGroups.CreateTraitTechnological',
-    newNameKey: 'MY_RPG.ItemGroups.NewTraitTechnological',
     showQuantity: false,
     allowEquip: false,
     exclusive: false,
@@ -646,15 +450,7 @@ function buildUsageFrequencyBadge(item, helpers) {
 const USAGE_FREQUENCY_BADGE_GROUPS = [
   'genomes',
   'sourceAbilities',
-  'traits',
-  'traitFlaws',
-  'traitGeneral',
-  'traitBackstory',
-  'traitSocial',
-  'traitCombat',
-  'traitMagical',
-  'traitProfessional',
-  'traitTechnological'
+  'traits'
 ];
 
 export const ITEM_BADGE_BUILDERS = {

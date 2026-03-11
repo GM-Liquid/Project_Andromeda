@@ -11,7 +11,7 @@
 | ----------------------------- | --------------------------------------------------------------- |
 | **System name**               | **Project Andromeda**                                           |
 | **Foundry VTT compatibility** | v12 (verified 12)                                               |
-| **Current version (**``**)**  | `2.373` -> **auto-bumped to** `2.374` on next Foundry change    |
+| **Current version (**``**)**  | `2.376` -> **auto-bumped to** `2.377` on next Foundry change    |
 | **Languages**                 | English, Русский (full parity required)                         |
 | **Main tech**                 | ES‑module JavaScript (`*.mjs`), Handlebars (`*.hbs`), JSON, CSS |
 | **Licence**                   | CC BY-NC-SA 4.0                                                 |
@@ -36,7 +36,6 @@ project-andromeda/
 │ │ config.mjs
 │ │ handlebars-helpers.mjs
 │ │ item-config.mjs
-│ │ migrations.mjs
 │ │ session-stats.mjs
 │ │ templates.mjs
 │ │ utils.mjs
@@ -51,7 +50,6 @@ project-andromeda/
 │ └─ item/
 │ ├─ armor-sheet.hbs
 │ ├─ cartridge-sheet.hbs
-│ ├─ gear-sheet.hbs
 │ ├─ generic-sheet.hbs
 │ ├─ implant-sheet.hbs
 │ └─ weapon-sheet.hbs
@@ -118,7 +116,7 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 
 ## 4 · Build, Deployment & Versioning
 
-- **Auto‑version bump:** Only when a change **affects the Foundry system** (e.g. `module/`, `templates/`, `css/`, `lang/`, `assets/`, `system.json`, `template.json`), increment `system.json` by **+0.001** (current baseline `2.373`, next `2.374`).
+- **Auto‑version bump:** Only when a change **affects the Foundry system** (e.g. `module/`, `templates/`, `css/`, `lang/`, `assets/`, `system.json`, `template.json`), increment `system.json` by **+0.001** (current baseline `2.376`, next `2.377`).
   Changes that **do not** touch the Foundry system (e.g. Python tools, balance sims, docs in `/Gear balance`) **do not** require a version bump.
 - The build pipeline (GitHub Actions) simply zips the repository for Foundry distribution.
 - Releases follow Semantic‑ish numbering: `<major>.<minor><patch>` where *minor* and *patch* are three‑digit sequences (allows CI bumping).
@@ -193,4 +191,4 @@ Typical workflow:
 
 ---
 
-_Last updated: 2026‑03‑08_
+_Last updated: 2026‑03‑11_
