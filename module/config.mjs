@@ -1,7 +1,6 @@
 import { PROJECT_ANDROMEDA } from './helpers/config.mjs';
 
 export const MODULE_ID = 'project-andromeda';
-export const RUNE_TYPE_KEYS = ['Spell', 'Creature', 'Item', 'Portal', 'Domain', 'Saga'];
 
 export function registerSystemSettings() {
   game.settings.register(MODULE_ID, 'debugMode', {

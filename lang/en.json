@@ -101,18 +101,9 @@
       "Name": "Name",
       "Rank": "Rank",
       "Cost": "Cost",
-      "RuneType": "Rune Type",
       "Skill": "Linked Skill",
       "SkillBonus": "Skill Bonus",
       "AlreadyEditing": "An edit dialog is already open. Please close it before opening another."
-    },
-    "RuneTypes": {
-      "Spell": "Spell",
-      "Creature": "Creature",
-      "Item": "Item",
-      "Portal": "Portal",
-      "Domain": "Domain",
-      "Saga": "Saga"
     },
     "Stress": {
       "Label": "Stress",
@@ -233,17 +224,6 @@
       "Skill": "Skill",
       "Bonus": "Bonus",
       "AddRow": "Add Row",
-      "Rank": "Rank"
-    },
-    "RunesTable": {
-      "TableHeading": "Runes",
-      "PrimaryHeader": "Runes",
-      "Name": "Name",
-      "Cost": "Cost",
-      "RuneType": "Rune Type",
-      "Skill": "Skill",
-      "Bonus": "Bonus",
-      "AddRow": "Add Rune",
       "Rank": "Rank"
     },
     "ModsTable": {

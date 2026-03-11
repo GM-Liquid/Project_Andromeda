@@ -21,6 +21,7 @@ const ENVIRONMENT_ITEM_SOURCE_FLAG = 'environmentTokenSourceUuid';
 const ENVIRONMENT_PROXY_ACTOR_FLAG = 'isEnvironmentTokenProxy';
 const ENVIRONMENT_TOKEN_ACTOR_TYPE = 'npc';
 const HERO_POINT_INPUT_SELECTOR = 'input[name="system.momentOfGlory"]';
+const OBSOLETE_CARTRIDGE_ITEM_FIELDS = ['runeType'];
 
 function getSessionStatsService() {
   return game.projectAndromeda?.sessionStats ?? null;
@@ -354,6 +355,59 @@ async function getOrCreateEnvironmentProxyActor() {
   });
 }
 
+function hasObsoleteCartridgeData(item) {
+  return Boolean(
+    item?.type === 'cartridge' &&
+      OBSOLETE_CARTRIDGE_ITEM_FIELDS.some((field) =>
+        foundry.utils.hasProperty(item.system ?? {}, field)
+      )
+  );
+}
+
+function buildObsoleteCartridgeFieldRemoval(item) {
+  const update = { _id: item.id };
+  for (const field of OBSOLETE_CARTRIDGE_ITEM_FIELDS) {
+    if (!foundry.utils.hasProperty(item.system ?? {}, field)) continue;
+    update[`system.-=${field}`] = null;
+  }
+  return update;
+}
+
+async function purgeObsoleteCartridgeData() {
+  if (!game.user?.isGM) return;
+
+  const worldUpdates = [];
+  for (const item of game.items ?? []) {
+    if (!hasObsoleteCartridgeData(item)) continue;
+    worldUpdates.push(buildObsoleteCartridgeFieldRemoval(item));
+  }
+
+  const actorUpdates = new Map();
+  for (const actor of game.actors ?? []) {
+    const updates = [];
+    for (const item of actor.items ?? []) {
+      if (!hasObsoleteCartridgeData(item)) continue;
+      updates.push(buildObsoleteCartridgeFieldRemoval(item));
+    }
+    if (updates.length) actorUpdates.set(actor, updates);
+  }
+
+  const totalUpdates =
+    worldUpdates.length +
+    Array.from(actorUpdates.values()).reduce((sum, updates) => sum + updates.length, 0);
+  if (!totalUpdates) return;
+
+  debugLog('Purging obsolete cartridge data', { totalUpdates });
+
+  if (worldUpdates.length) {
+    await Item.updateDocuments(worldUpdates, { render: false });
+  }
+
+  for (const [actor, updates] of actorUpdates.entries()) {
+    await actor.updateEmbeddedDocuments('Item', updates, { render: false });
+  }
+}
+
 /* -------------------------------------------- */
 /*  Init Hook                                   */
 /* -------------------------------------------- */
@@ -632,4 +686,6 @@ Hooks.once('ready', async function () {
       await sessionStats.recoverStateOnReady();
     }
   }
+
+  await purgeObsoleteCartridgeData();
 });

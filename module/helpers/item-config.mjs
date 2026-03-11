@@ -36,7 +36,6 @@ export const ITEM_TYPE_CONFIGS = [
     groupKey: 'cartridges',
     sheet: 'cartridge',
     defaults: {
-      runeType: 'Spell',
       skill: '',
       skillBonus: 0
     }
@@ -459,14 +458,8 @@ export const ITEM_BADGE_BUILDERS = {
     const badges = [];
     const t = helpers.t;
     const rank = Number(system.rank) || 0;
-    const runeType = String(system.runeType ?? '').trim();
     if (rank) {
       badges.push(`${t.localize('MY_RPG.AbilityConfig.Rank')}: ${helpers.getRankLabel(rank)}`);
-    }
-    if (runeType) {
-      badges.push(
-        `${t.localize('MY_RPG.AbilityConfig.RuneType')}: ${t.localize(`MY_RPG.RuneTypes.${runeType}`)}`
-      );
     }
     badges.push(`${t.localize('MY_RPG.AbilityConfig.Skill')}: ${helpers.skillLabel(system.skill)}`);
     badges.push(

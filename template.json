@@ -178,19 +178,19 @@
         "rules": [],
         "traits": [],
         "details": {}
-      },
-      "rune": {
-        "rank": "",
-        "skill": "",
-        "skillBonus": 0
       }
     },
     "cartridge": {
-      "templates": ["base", "rune"],
-      "runeType": "Spell"
+      "templates": ["base"],
+      "rank": "",
+      "skill": "",
+      "skillBonus": 0
     },
     "implant": {
-      "templates": ["base", "rune"]
+      "templates": ["base"],
+      "rank": "",
+      "skill": "",
+      "skillBonus": 0
     },
     "armor": {
       "templates": ["base"],

@@ -1,4 +1,4 @@
-import { MODULE_ID, RUNE_TYPE_KEYS, debugLog } from '../config.mjs';
+import { MODULE_ID, debugLog } from '../config.mjs';
 import { ITEM_USAGE_FREQUENCY_LABEL_KEYS, getItemTypeConfig } from '../helpers/item-config.mjs';
 
 function buildRankOptions(selected) {
@@ -20,15 +20,6 @@ function buildRankOptions(selected) {
   }
 
   return options;
-}
-
-function buildRuneTypeOptions(selected) {
-  const normalized = selected || 'Spell';
-  return RUNE_TYPE_KEYS.map((value) => ({
-    value,
-    label: game.i18n.localize(`MY_RPG.RuneTypes.${value}`),
-    selected: normalized === value
-  }));
 }
 
 function buildSkillOptions(selected) {
@@ -142,7 +133,6 @@ export class ProjectAndromedaCartridgeSheet extends ProjectAndromedaItemSheet {
     const data = await super.getData(options);
     data.rankOptions = buildRankOptions(data.system.rank);
     data.skillOptions = buildSkillOptions(data.system.skill);
-    data.runeTypeOptions = buildRuneTypeOptions(data.system.runeType);
     return data;
   }
 }

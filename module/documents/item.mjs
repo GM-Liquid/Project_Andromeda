@@ -62,10 +62,9 @@ export class ProjectAndromedaItem extends Item {
 
   get cartridgeData() {
     if (!this.isCartridge) return undefined;
-    const { rank = '', runeType = 'Spell', skill = '', skillBonus = 0 } = this.system;
+    const { rank = '', skill = '', skillBonus = 0 } = this.system;
     return {
       rank: String(rank ?? ''),
-      runeType: String(runeType ?? 'Spell'),
       skill: String(skill ?? ''),
       skillBonus: Number(skillBonus ?? 0) || 0
     };

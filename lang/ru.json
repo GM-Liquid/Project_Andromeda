@@ -142,18 +142,9 @@
       "Name": "Название",
       "Rank": "Ранг",
       "Cost": "Стоимость",
-      "RuneType": "Тип руны",
       "Skill": "Связанный навык",
       "SkillBonus": "Бонус к навыку",
       "AlreadyEditing": "Диалог редактирования уже открыт. Сначала закройте его."
-    },
-    "RuneTypes": {
-      "Spell": "Заклинание",
-      "Creature": "Существо",
-      "Item": "Предмет",
-      "Portal": "Портал",
-      "Domain": "Домен",
-      "Saga": "Сага"
     },
     "Initiative": "Инициатива",
     "Stress": {
@@ -233,17 +224,6 @@
       "Skill": "Навык",
       "Bonus": "Бонус",
       "AddRow": "Добавить строку",
-      "Rank": "Ранг"
-    },
-    "RunesTable": {
-      "TableHeading": "Руны",
-      "PrimaryHeader": "Руны",
-      "Name": "Название",
-      "Cost": "Стоимость",
-      "RuneType": "Тип руны",
-      "Skill": "Навык",
-      "Bonus": "Бонус",
-      "AddRow": "Добавить руну",
       "Rank": "Ранг"
     },
     "ModsTable": {
