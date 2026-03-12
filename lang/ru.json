@@ -84,7 +84,7 @@
       "Age": "Возраст",
       "CurrentRank": "Текущий ранг",
       "Name": "Имя",
-      "MomentOfGlory": "Очки Героя",
+      "MomentOfGlory": "Пункты Героя",
       "ProgressPoints": "Очки прогресса"
     },
     "SheetLabels": {
@@ -349,18 +349,18 @@
         "NotAvailable": "Н/д",
         "DurationMinutes": "{minutes}м",
         "DurationHoursMinutes": "{hours}ч {minutes}м",
-        "MomentOfGloryUsesTotal": "Потрачено Очков Героя",
-        "MomentOfGloryByActor": "Потраченные Очки Героя по актерам"
+        "MomentOfGloryUsesTotal": "Потрачено Пунктов Героя",
+        "MomentOfGloryByActor": "Потраченные Пункты Героя по актерам"
       }
     },
     "MomentOfGloryReroll": {
-      "ContextLabel": "Переброс. Стоит 1 Очко Героя.",
-      "Success": "Переброс выполнен. Осталось Очков Героя: {value}.",
+      "ContextLabel": "Переброс. Стоит 1 Пункт Героя.",
+      "Success": "Переброс выполнен. Осталось Пунктов Героя: {value}.",
       "Errors": {
         "NoMessage": "Не удалось найти сообщение чата для переброса.",
         "NoActor": "Этот бросок не связан с персонажем.",
-        "NoPermission": "У вас нет прав тратить Очки Героя этого персонажа.",
-        "NoPoints": "У этого персонажа не осталось Очков Героя.",
+        "NoPermission": "У вас нет прав тратить Пункты Героя этого персонажа.",
+        "NoPoints": "У этого персонажа не осталось Пунктов Героя.",
         "Failed": "Не удалось выполнить переброс сообщения."
       }
     }
