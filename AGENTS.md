@@ -11,7 +11,7 @@
 | ----------------------------- | --------------------------------------------------------------- |
 | **System name**               | **Project Andromeda**                                           |
 | **Foundry VTT compatibility** | v12 (verified 12)                                               |
-| **Current version (**``**)**  | `2.380` -> **auto-bumped to** `2.381` on next Foundry change    |
+| **Current version (**``**)**  | `2.381` -> **auto-bumped to** `2.382` on next Foundry change    |
 | **Languages**                 | English, Русский (full parity required)                         |
 | **Main tech**                 | ES‑module JavaScript (`*.mjs`), Handlebars (`*.hbs`), JSON, CSS |
 | **Licence**                   | CC BY-NC-SA 4.0                                                 |
@@ -97,9 +97,9 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 
 ### 3.3 · Points of Heroism
 
-- `system.momentOfGlory` stores **Points of Heroism** and remains the spendable reroll resource for backwards compatibility.
-- Chat roll messages support a context-menu action to reroll by spending **1** point of heroism.
-- The reroll must keep the original roll context (formula, flavor/modifiers, speaker, and roll visibility mode).
+- `system.momentOfGlory` stores **Points of Heroism** and remains the spendable heroism resource for backwards compatibility.
+- Chat roll messages support a context-menu action to spend **1** point of heroism and add a bonus equal to **half the highest die maximum** in that roll.
+- Spending a point of heroism must keep the original roll context (dice results, flavor/modifiers, speaker, and roll visibility mode) without rerolling the dice.
 - Session tracking must count points of heroism spent per actor inside the active session window.
 - A session starts automatically when at least one GM and all player users in the world are connected.
 - An active session ends automatically after any required participant stays offline for more than **15 minutes**.
@@ -119,7 +119,7 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 
 ## 4 · Build, Deployment & Versioning
 
-- **Auto‑version bump:** Only when a change **affects the Foundry system** (e.g. `module/`, `templates/`, `css/`, `lang/`, `assets/`, `system.json`, `template.json`), increment `system.json` by **+0.001** (current baseline `2.380`, next `2.381`).
+- **Auto‑version bump:** Only when a change **affects the Foundry system** (e.g. `module/`, `templates/`, `css/`, `lang/`, `assets/`, `system.json`, `template.json`), increment `system.json` by **+0.001** (current baseline `2.381`, next `2.382`).
   Changes that **do not** touch the Foundry system (e.g. Python tools, balance sims, docs in `/Gear balance`) **do not** require a version bump.
 - The build pipeline (GitHub Actions) simply zips the repository for Foundry distribution.
 - Releases follow Semantic‑ish numbering: `<major>.<minor><patch>` where *minor* and *patch* are three‑digit sequences (allows CI bumping).

@@ -318,15 +318,16 @@
       "DeleteTitle": "Delete {type}",
       "DeleteContent": "Are you sure you want to delete {name}? This action cannot be undone."
     },
-    "MomentOfGloryReroll": {
-      "ContextLabel": "Reroll. Costs 1 point of heroism.",
-      "Success": "Rerolled. Points of Heroism remaining: {value}.",
+    "MomentOfGloryBonus": {
+      "ContextLabel": "Heroism bonus. Costs 1 point of heroism.",
+      "Success": "Heroism bonus applied (+{bonus}). Points of Heroism remaining: {value}.",
       "Errors": {
-        "NoMessage": "Could not find the chat message to reroll.",
+        "NoMessage": "Could not find the chat message to enhance.",
         "NoActor": "This roll is not linked to a character.",
         "NoPermission": "You do not have permission to spend this character's Points of Heroism.",
         "NoPoints": "This character has no Points of Heroism left.",
-        "Failed": "Failed to reroll the message."
+        "NoDice": "This roll has no dice to base a heroism bonus on.",
+        "Failed": "Failed to apply the heroism bonus."
       }
     },
     "SessionTracker": {

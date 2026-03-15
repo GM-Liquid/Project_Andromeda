@@ -54,6 +54,12 @@ function getActorHeroPoints(actor) {
   return Math.max(Number(actor?.system?.momentOfGlory) || 0, 0);
 }
 
+function getMomentOfGloryFlag(message) {
+  return (
+    message?.getFlag?.(MODULE_ID, 'momentOfGlory') ?? message?.flags?.[MODULE_ID]?.momentOfGlory
+  );
+}
+
 function syncHeroPointInputs(actor, nextValue = null) {
   const value = nextValue ?? getActorHeroPoints(actor);
   for (const app of Object.values(actor?.apps ?? {})) {
@@ -115,6 +121,8 @@ function messageHasExtremeResult(message) {
 async function grantHeroPointForExtremeRoll(message) {
   const actor = getMessageActor(message);
   if (!canGrantHeroPoint(message, actor)) return;
+  const momentOfGloryFlag = getMomentOfGloryFlag(message);
+  if (Number(momentOfGloryFlag?.spent) > 0) return;
   if (!messageHasExtremeResult(message)) return;
 
   const nextHeroPoints = getActorHeroPoints(actor) + 1;
@@ -122,25 +130,70 @@ async function grantHeroPointForExtremeRoll(message) {
   syncHeroPointInputs(actor, nextHeroPoints);
 }
 
-function canUseMomentOfGloryReroll(message) {
+function getRollMomentOfGloryBonus(roll) {
+  let maxFaces = 0;
+  for (const die of roll?.dice ?? []) {
+    const faces = Number(die?.faces);
+    if (!Number.isFinite(faces) || faces < 1) continue;
+    maxFaces = Math.max(maxFaces, faces);
+  }
+  return maxFaces > 0 ? maxFaces / 2 : 0;
+}
+
+function formatMomentOfGloryBonus(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return '0';
+  if (Number.isInteger(numeric)) return `${numeric}`;
+  return `${Number(numeric.toFixed(2))}`;
+}
+
+function cloneRollWithMomentOfGloryBonus(sourceRoll, bonus) {
+  const rollData =
+    typeof sourceRoll?.toJSON === 'function'
+      ? foundry.utils.deepClone(sourceRoll.toJSON())
+      : foundry.utils.deepClone(sourceRoll);
+  const RollClass = sourceRoll?.constructor?.fromData ? sourceRoll.constructor : Roll;
+  const clonedRoll = RollClass.fromData(rollData);
+  if (!bonus) return clonedRoll;
+
+  const operatorTerm = new foundry.dice.terms.OperatorTerm({ operator: '+' });
+  operatorTerm._evaluated = true;
+  const numericTerm = new foundry.dice.terms.NumericTerm({ number: bonus });
+  numericTerm._evaluated = true;
+
+  clonedRoll.terms.push(operatorTerm, numericTerm);
+  clonedRoll.resetFormula();
+  clonedRoll._evaluated = true;
+  clonedRoll._total = (Number(sourceRoll?.total) || 0) + bonus;
+  return clonedRoll;
+}
+
+function canUseMomentOfGloryBonus(message) {
   if (!message) return false;
-  const hasRoll = Boolean(getMessageRolls(message).length);
+  const rolls = getMessageRolls(message);
+  const hasRoll = Boolean(rolls.length);
   if (!hasRoll) return false;
+  const hasEligibleDice = rolls.some((roll) => getRollMomentOfGloryBonus(roll) > 0);
+  if (!hasEligibleDice) return false;
   const actor = getMessageActor(message);
   if (!actor) return false;
   return Boolean(game.user?.isGM || actor.isOwner);
 }
 
-async function rerollMessageWithMomentOfGlory(message, actor) {
+async function applyMomentOfGloryBonusToMessage(message, actor) {
   const sourceRolls = getMessageRolls(message);
   if (!sourceRolls.length) {
     throw new Error('No roll data found on the source message.');
   }
 
-  const rerolled = [];
+  const enhancedRolls = [];
+  let totalBonus = 0;
   for (const roll of sourceRolls) {
-    rerolled.push(await roll.reroll({ async: true }));
+    const bonus = getRollMomentOfGloryBonus(roll);
+    totalBonus += bonus;
+    enhancedRolls.push(cloneRollWithMomentOfGloryBonus(roll, bonus));
   }
+  if (totalBonus <= 0) return { spent: false, totalBonus: 0 };
 
   const currentHeroPoints = getActorHeroPoints(actor);
   if (!currentHeroPoints) return { spent: false };
@@ -151,6 +204,7 @@ async function rerollMessageWithMomentOfGlory(message, actor) {
   flags[MODULE_ID] ??= {};
   flags[MODULE_ID].momentOfGlory = {
     spent: 1,
+    bonus: totalBonus,
     actorId: actor.id,
     sourceMessageId: message.id,
     timestamp: Date.now()
@@ -161,7 +215,7 @@ async function rerollMessageWithMomentOfGlory(message, actor) {
       user: game.user?.id,
       speaker: foundry.utils.deepClone(message.speaker ?? {}),
       flavor: message.flavor ?? '',
-      rolls: rerolled,
+      rolls: enhancedRolls,
       style: message.style,
       type: message.type,
       whisper: Array.from(message.whisper ?? []),
@@ -175,7 +229,7 @@ async function rerollMessageWithMomentOfGlory(message, actor) {
 
   syncHeroPointInputs(actor, nextHeroPoints);
 
-  return { spent: true, nextHeroPoints };
+  return { spent: true, nextHeroPoints, totalBonus };
 }
 
 function buildItemTypeOptions({ select, allowedTypes }) {
@@ -505,50 +559,56 @@ Hooks.on('renderDialog', (dialog, html) => {
 
 Hooks.on('getChatLogEntryContext', (_html, options) => {
   options.push({
-    name: 'MY_RPG.MomentOfGloryReroll.ContextLabel',
+    name: 'MY_RPG.MomentOfGloryBonus.ContextLabel',
     icon: '<i class="fas fa-dice"></i>',
     condition: (li) => {
       const message = getContextMessage(li);
-      return canUseMomentOfGloryReroll(message);
+      return canUseMomentOfGloryBonus(message);
     },
     callback: async (li) => {
       const message = getContextMessage(li);
       if (!message) {
-        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoMessage'));
+        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.NoMessage'));
         return;
       }
       const actor = getMessageActor(message);
       if (!actor) {
-        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoActor'));
+        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.NoActor'));
         return;
       }
       if (!(game.user?.isGM || actor.isOwner)) {
-        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoPermission'));
+        ui.notifications.warn(
+          game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.NoPermission')
+        );
         return;
       }
       if ((Number(actor.system?.momentOfGlory) || 0) <= 0) {
-        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoPoints'));
+        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.NoPoints'));
         return;
       }
 
       try {
-        const result = await rerollMessageWithMomentOfGlory(message, actor);
+        const result = await applyMomentOfGloryBonusToMessage(message, actor);
         if (!result?.spent) {
-          ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoPoints'));
+          const errorKey = result?.totalBonus === 0 ? 'NoDice' : 'NoPoints';
+          ui.notifications.warn(
+            game.i18n.localize(`MY_RPG.MomentOfGloryBonus.Errors.${errorKey}`)
+          );
           return;
         }
         ui.notifications.info(
-          game.i18n.format('MY_RPG.MomentOfGloryReroll.Success', {
+          game.i18n.format('MY_RPG.MomentOfGloryBonus.Success', {
+            bonus: formatMomentOfGloryBonus(result.totalBonus),
             value: result.nextHeroPoints
           })
         );
       } catch (error) {
-        debugLog('Moment of Glory reroll failed', {
+        debugLog('Moment of Glory bonus failed', {
           messageId: message.id,
           actorId: actor.id,
           error
         });
-        ui.notifications.error(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.Failed'));
+        ui.notifications.error(game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.Failed'));
       }
     }
   });
