@@ -152,8 +152,8 @@
     "TempBonus": {
       "Label": "Temporary Bonuses"
     },
-    "TempHealth": {
-      "Label": "Temp. HP"
+    "TempStress": {
+      "Label": "Temp. Stress"
     },
     "Temp": {
       "BonusPhysicalLabel": "Temp. Phys. Protection",

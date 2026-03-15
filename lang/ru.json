@@ -157,8 +157,8 @@
     "TempBonus": {
       "Label": "Временные бонусы"
     },
-    "TempHealth": {
-      "Label": "Врем. ОЗ"
+    "TempStress": {
+      "Label": "Врем. стресс"
     },
     "TempSpeed": {
       "Label": "Врем. скорость"

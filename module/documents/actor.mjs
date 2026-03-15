@@ -46,7 +46,7 @@ export class ProjectAndromedaActor extends Actor {
           : this._calcStressMax;
     const calcForceShieldMax = isNpcLike ? this._calcNpcForceShieldMax : this._calcForceShieldMax;
     stress.max = calcStressMax.call(this, s);
-    forceShield.max = calcForceShieldMax.call(this, itemTotals);
+    forceShield.max = calcForceShieldMax.call(this, s, itemTotals);
     const clamp = Math.clamp
       ? (value, min, max) => Math.clamp(value, min, max)
       : (value, min, max) => Math.min(Math.max(value, min), max);
@@ -87,30 +87,29 @@ export class ProjectAndromedaActor extends Actor {
   /* ------------------------ Формулы ------------------------------ */
   _calcStressMax(s) {
     const rank = Math.max(Number(s.currentRank) || 0, 0);
-    const tempHealth = Math.max(Number(s.temphealth) || 0, 0);
-    return Math.max(0, rank * 3 + tempHealth);
+    return Math.max(0, rank * 3);
   }
 
   _calcNpcStressMax(s) {
     const rank = Math.max(Number(s.currentRank) || 0, 0);
-    const tempHealth = Math.max(Number(s.temphealth) || 0, 0);
-    return Math.max(0, rank * 2 + 4 + tempHealth);
+    return Math.max(0, rank * 2 + 4);
   }
 
   _calcBossStressMax(s) {
     const rank = Math.max(Number(s.currentRank) || 0, 0);
-    const tempHealth = Math.max(Number(s.temphealth) || 0, 0);
-    return Math.max(0, rank * 9 + tempHealth);
+    return Math.max(0, rank * 9);
   }
 
-  _calcForceShieldMax(itemTotals = {}) {
+  _calcForceShieldMax(s, itemTotals = {}) {
     const shield = Number(itemTotals?.armor?.shield) || 0;
-    return Math.max(shield, 0);
+    const tempStress = Math.max(Number(s?.temphealth) || 0, 0);
+    return Math.max(shield + tempStress, 0);
   }
 
-  _calcNpcForceShieldMax(itemTotals = {}) {
+  _calcNpcForceShieldMax(s, itemTotals = {}) {
     const shield = Number(itemTotals?.armor?.shield) || 0;
-    return Math.max(shield, 0);
+    const tempStress = Math.max(Number(s?.temphealth) || 0, 0);
+    return Math.max(shield + tempStress, 0);
   }
 
   _calcFlux(s) {
