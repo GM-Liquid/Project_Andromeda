@@ -79,13 +79,13 @@ project-andromeda.css
 
 ### 3.1 Core Characteristics
 
-Project Andromeda uses **three** primary abilities; no *Dexterity* characteristic is present.
+Project Andromeda uses **three** primary abilities; no _Dexterity_ characteristic is present.
 
-| Abbreviation | Name (EN / RU)     | Range      |
-| ------------ | ------------------ | ---------- |
-| **CON**      | Body / Тело        | **d4 → d20 (incl. 2d8)** |
-| **INT**      | Mind / Разум       | **d4 → d20 (incl. 2d8)** |
-| **SPI**      | Spirit / Дух       | **d4 → d20 (incl. 2d8)** |
+| Abbreviation | Name (EN / RU) | Range                    |
+| ------------ | -------------- | ------------------------ |
+| **CON**      | Body / Тело    | **d4 → d20 (incl. 2d8)** |
+| **INT**      | Mind / Разум   | **d4 → d20 (incl. 2d8)** |
+| **SPI**      | Spirit / Дух   | **d4 → d20 (incl. 2d8)** |
 
 Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normalized via helper utilities; derived stats and in‑game effects are computed in `module/documents/actor.mjs`.
 
@@ -122,7 +122,7 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 - **Auto‑version bump:** Only when a change **affects the Foundry system** (e.g. `module/`, `templates/`, `css/`, `lang/`, `assets/`, `system.json`, `template.json`), increment `system.json` by **+0.001** (current baseline `2.381`, next `2.382`).
   Changes that **do not** touch the Foundry system (e.g. Python tools, balance sims, docs in `/Gear balance`) **do not** require a version bump.
 - The build pipeline (GitHub Actions) simply zips the repository for Foundry distribution.
-- Releases follow Semantic‑ish numbering: `<major>.<minor><patch>` where *minor* and *patch* are three‑digit sequences (allows CI bumping).
+- Releases follow Semantic‑ish numbering: `<major>.<minor><patch>` where _minor_ and _patch_ are three‑digit sequences (allows CI bumping).
 
 ---
 
@@ -141,7 +141,7 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 
 - **Copy‑paste‑ready code** — avoid line numbers or decorations that break direct copy.
 
-- **Dual‑language localisation**: **any** new string **must** be added **simultaneously** to `en.json` *and* `ru.json` with identical keys.
+- **Dual‑language localisation**: **any** new string **must** be added **simultaneously** to `en.json` _and_ `ru.json` with identical keys.
 
   ```json
   // en.json
@@ -149,13 +149,15 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 
   // ru.json
   "MY_RPG.RollTitle": "Проверка Силы"
-```
+  ```
 
 - **Naming**: camelCase for JS variables, kebab‑case for file names, UPPER_SNAKE for Handlebars helpers.
 
 - **Sheets**: built with plain HTML+Handlebars; keep markup semantic for accessibility.
 
 - **No full re-render on edits**: Any change made through the character sheet (PC or NPC) should update the UI and derived values without triggering a full sheet re-render, unless a structural reflow is required. Prefer in-place DOM updates tied to `actor.update(..., { render: false })`, and refresh only the affected inputs/labels and computed fields (speed, defenses, health, etc.).
+
+- **Item library sync**: Character-sheet items that represent abilities, genomes, traits, or equipment must stay linked to a corresponding world-level Foundry item in the Items directory. Changes to shared library data should propagate to linked actor items, while actor-local state such as `quantity` and `equipped` remains local unless explicitly redesigned.
 
 ---
 
@@ -194,4 +196,4 @@ Typical workflow:
 
 ---
 
-_Last updated: 2026‑03‑15_
+_Last updated: 2026‑03‑17_

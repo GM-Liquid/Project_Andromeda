@@ -9,9 +9,21 @@ import { preloadHandlebarsTemplates } from './helpers/templates.mjs';
 import { MODULE_ID, PROJECT_ANDROMEDA, debugLog, registerSystemSettings } from './config.mjs';
 import { ITEM_SUPERTYPE_LABELS, ITEM_TYPE_CONFIGS } from './helpers/item-config.mjs';
 import { SessionStatsService } from './helpers/session-stats.mjs';
+import {
+  ensureActorItemLibraryLink,
+  getLibrarySyncOptionKey,
+  hasOnlyLocalItemChanges,
+  isLibrarySyncManagedType,
+  migrateActorItemsToLibrary,
+  runItemLibraryMigrationIfNeeded,
+  syncActorItemToLibrary,
+  syncLibraryItemToActors,
+  unlinkLibraryItemFromActors
+} from './helpers/item-library-sync.mjs';
 import './helpers/handlebars-helpers.mjs';
 
 const ITEM_SUPERTYPE_ORDER = ['equipment', 'environment', 'traits', 'other'];
+const ITEM_LIBRARY_SYNC_OPTION_KEY = getLibrarySyncOptionKey();
 const ENVIRONMENT_ITEM_TYPES = new Set(
   ITEM_TYPE_CONFIGS.filter((config) => config.supertype === 'environment').map(
     (config) => config.type
@@ -350,6 +362,56 @@ function isEnvironmentItem(item) {
   return Boolean(item?.type && ENVIRONMENT_ITEM_TYPES.has(item.type));
 }
 
+function hasItemLibrarySyncOption(options = {}) {
+  return Boolean(options?.[ITEM_LIBRARY_SYNC_OPTION_KEY]);
+}
+
+async function handleActorOwnedItemCreate(item, options = {}) {
+  if (hasItemLibrarySyncOption(options) || !isLibrarySyncManagedType(item?.type)) return;
+
+  const result = await ensureActorItemLibraryLink(item);
+  debugLog('Actor item linked to library', {
+    actor: item?.parent?.uuid ?? null,
+    itemId: item?.id ?? null,
+    libraryItemId: result.libraryItem?.id ?? null,
+    createdLibraryItem: result.created,
+    linked: result.linked
+  });
+}
+
+async function handleActorOwnedItemUpdate(item, changed, options = {}) {
+  if (hasItemLibrarySyncOption(options) || !isLibrarySyncManagedType(item?.type)) return;
+  if (hasOnlyLocalItemChanges(changed)) return;
+
+  const libraryItem = await syncActorItemToLibrary(item);
+  debugLog('Actor item synced to library', {
+    actor: item?.parent?.uuid ?? null,
+    itemId: item?.id ?? null,
+    libraryItemId: libraryItem?.id ?? null
+  });
+}
+
+async function handleWorldItemUpdate(item, changed, options = {}) {
+  if (hasItemLibrarySyncOption(options) || !isLibrarySyncManagedType(item?.type)) return;
+  if (hasOnlyLocalItemChanges(changed)) return;
+
+  const updatedCopies = await syncLibraryItemToActors(item);
+  debugLog('Library item synced to actor items', {
+    itemId: item?.id ?? null,
+    updatedCopies
+  });
+}
+
+async function handleWorldItemDelete(item, options = {}) {
+  if (hasItemLibrarySyncOption(options) || !isLibrarySyncManagedType(item?.type)) return;
+
+  const unlinkedCopies = await unlinkLibraryItemFromActors(item);
+  debugLog('Library item unlinked from actor items', {
+    itemId: item?.id ?? null,
+    unlinkedCopies
+  });
+}
+
 async function resolveDroppedItem(data) {
   const itemClass = CONFIG.Item?.documentClass;
   if (!itemClass?.fromDropData) return null;
@@ -481,6 +543,7 @@ Hooks.once('init', function () {
     ProjectAndromedaActor,
     ProjectAndromedaItem,
     debugLog,
+    migrateActorItemsToLibrary,
     sessionStats
   };
 
@@ -577,9 +640,7 @@ Hooks.on('getChatLogEntryContext', (_html, options) => {
         return;
       }
       if (!(game.user?.isGM || actor.isOwner)) {
-        ui.notifications.warn(
-          game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.NoPermission')
-        );
+        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.NoPermission'));
         return;
       }
       if ((Number(actor.system?.momentOfGlory) || 0) <= 0) {
@@ -591,9 +652,7 @@ Hooks.on('getChatLogEntryContext', (_html, options) => {
         const result = await applyMomentOfGloryBonusToMessage(message, actor);
         if (!result?.spent) {
           const errorKey = result?.totalBonus === 0 ? 'NoDice' : 'NoPoints';
-          ui.notifications.warn(
-            game.i18n.localize(`MY_RPG.MomentOfGloryBonus.Errors.${errorKey}`)
-          );
+          ui.notifications.warn(game.i18n.localize(`MY_RPG.MomentOfGloryBonus.Errors.${errorKey}`));
           return;
         }
         ui.notifications.info(
@@ -666,6 +725,55 @@ Hooks.on('updateUser', (_user, changes) => {
   scheduleSessionPresenceEvaluation();
 });
 
+Hooks.on('createItem', (item, options) => {
+  if (!isPrimaryActiveGM()) return;
+  if (item?.parent?.documentName !== 'Actor') return;
+
+  void handleActorOwnedItemCreate(item, options).catch((error) => {
+    debugLog('Actor item library link failed on create', {
+      actor: item?.parent?.uuid ?? null,
+      itemId: item?.id ?? null,
+      error
+    });
+  });
+});
+
+Hooks.on('updateItem', (item, changed, options) => {
+  if (!isPrimaryActiveGM()) return;
+
+  if (item?.parent?.documentName === 'Actor') {
+    void handleActorOwnedItemUpdate(item, changed, options).catch((error) => {
+      debugLog('Actor item library sync failed on update', {
+        actor: item?.parent?.uuid ?? null,
+        itemId: item?.id ?? null,
+        error
+      });
+    });
+    return;
+  }
+
+  if (item?.parent) return;
+
+  void handleWorldItemUpdate(item, changed, options).catch((error) => {
+    debugLog('Library item sync to actors failed on update', {
+      itemId: item?.id ?? null,
+      error
+    });
+  });
+});
+
+Hooks.on('deleteItem', (item, options) => {
+  if (!isPrimaryActiveGM()) return;
+  if (item?.parent) return;
+
+  void handleWorldItemDelete(item, options).catch((error) => {
+    debugLog('Library item unlink failed on delete', {
+      itemId: item?.id ?? null,
+      error
+    });
+  });
+});
+
 Hooks.on('dropCanvasData', async (droppedCanvas, data) => {
   if (!game.user?.isGM) return;
   if (data?.type !== 'Item') return;
@@ -731,4 +839,8 @@ Hooks.once('ready', async function () {
   }
 
   await purgeObsoleteCartridgeData();
+
+  if (isPrimaryActiveGM()) {
+    await runItemLibraryMigrationIfNeeded();
+  }
 });

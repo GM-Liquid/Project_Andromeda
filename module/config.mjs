@@ -1,6 +1,8 @@
 import { PROJECT_ANDROMEDA } from './helpers/config.mjs';
 
 export const MODULE_ID = 'project-andromeda';
+export const ITEM_LIBRARY_SYNC_MIGRATION_SETTING = 'itemLibrarySyncMigrationVersion';
+export const ITEM_LIBRARY_SYNC_MIGRATION_VERSION = 1;
 
 export function registerSystemSettings() {
   game.settings.register(MODULE_ID, 'debugMode', {
@@ -39,13 +41,20 @@ export function registerSystemSettings() {
       step: 1
     }
   });
+
+  game.settings.register(MODULE_ID, ITEM_LIBRARY_SYNC_MIGRATION_SETTING, {
+    scope: 'world',
+    config: false,
+    type: Number,
+    default: 0
+  });
 }
 
 export function debugLog(message, ...args) {
   try {
     const enabled = game?.settings?.get?.(MODULE_ID, 'debugMode');
     if (!enabled) return;
-  } catch (error) {
+  } catch {
     return;
   }
 
