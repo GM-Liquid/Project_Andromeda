@@ -19,6 +19,7 @@ export default [
         ChatMessage: 'readonly',
         CONFIG: 'readonly',
         Dialog: 'readonly',
+        Folder: 'readonly',
         FormData: 'readonly',
         Handlebars: 'readonly',
         Hooks: 'readonly',

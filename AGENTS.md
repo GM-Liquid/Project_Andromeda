@@ -157,7 +157,7 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 
 - **No full re-render on edits**: Any change made through the character sheet (PC or NPC) should update the UI and derived values without triggering a full sheet re-render, unless a structural reflow is required. Prefer in-place DOM updates tied to `actor.update(..., { render: false })`, and refresh only the affected inputs/labels and computed fields (speed, defenses, health, etc.).
 
-- **Item library sync**: Character-sheet items that represent abilities, genomes, traits, or equipment must stay linked to a corresponding world-level Foundry item in the Items directory. Changes to shared library data should propagate to linked actor items, while actor-local state such as `quantity` and `equipped` remains local unless explicitly redesigned.
+- **Item library sync**: Character-sheet items that represent abilities, genomes, traits, or equipment must stay linked to a corresponding world-level Foundry item in the Items directory. These library items are organized into actor-specific item folders and should inherit the same ownership as their source actor. Changes to shared library data should propagate to linked actor items, while actor-local state such as `quantity` and `equipped` remains local unless explicitly redesigned.
 
 ---
 

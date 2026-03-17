@@ -2,7 +2,7 @@ import { PROJECT_ANDROMEDA } from './helpers/config.mjs';
 
 export const MODULE_ID = 'project-andromeda';
 export const ITEM_LIBRARY_SYNC_MIGRATION_SETTING = 'itemLibrarySyncMigrationVersion';
-export const ITEM_LIBRARY_SYNC_MIGRATION_VERSION = 1;
+export const ITEM_LIBRARY_SYNC_MIGRATION_VERSION = 2;
 
 export function registerSystemSettings() {
   game.settings.register(MODULE_ID, 'debugMode', {

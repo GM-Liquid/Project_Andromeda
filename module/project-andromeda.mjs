@@ -17,6 +17,7 @@ import {
   migrateActorItemsToLibrary,
   runItemLibraryMigrationIfNeeded,
   syncActorItemToLibrary,
+  syncActorLibraryStructure,
   syncLibraryItemToActors,
   unlinkLibraryItemFromActors
 } from './helpers/item-library-sync.mjs';
@@ -684,6 +685,22 @@ Hooks.on('createChatMessage', (message) => {
 Hooks.on('updateActor', (actor, changes) => {
   if (!foundry.utils.hasProperty(changes, 'system.momentOfGlory')) return;
   syncHeroPointInputs(actor);
+});
+
+Hooks.on('updateActor', (actor, changes, options) => {
+  if (!isPrimaryActiveGM()) return;
+  if (hasItemLibrarySyncOption(options)) return;
+
+  const changedName = foundry.utils.hasProperty(changes, 'name');
+  const changedOwnership = foundry.utils.hasProperty(changes, 'ownership');
+  if (!changedName && !changedOwnership) return;
+
+  void syncActorLibraryStructure(actor).catch((error) => {
+    debugLog('Actor library folder sync failed on actor update', {
+      actor: actor?.uuid ?? null,
+      error
+    });
+  });
 });
 
 Hooks.on('createCombat', () => {
