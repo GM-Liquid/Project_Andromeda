@@ -292,6 +292,7 @@
     "ItemFields": {
       "Quantity": "Quantity",
       "Rank": "Rank",
+      "RequiresRoll": "Requires Roll",
       "EquipmentSubtype": "Equipment Type",
       "UsageFrequency": "Frequency of use"
     },

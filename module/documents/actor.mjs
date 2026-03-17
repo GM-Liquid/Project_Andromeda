@@ -156,32 +156,6 @@ export class ProjectAndromedaActor extends Actor {
       skillBonuses: {}
     };
 
-    const ensureSkillBonusEntry = (skillKey) => {
-      const existing = totals.skillBonuses[skillKey];
-      if (existing && typeof existing === 'object') return existing;
-      const entry = { total: 0, sources: [] };
-      totals.skillBonuses[skillKey] = entry;
-      return entry;
-    };
-
-    const addSkillBonus = (skill, bonus, source) => {
-      const skillKey = String(skill || '');
-      const numericBonus = Number(bonus) || 0;
-      if (!skillKey || !numericBonus) return;
-      const entry = ensureSkillBonusEntry(skillKey);
-      entry.total += numericBonus;
-      if (source) {
-        entry.sources.push({
-          type: source.type,
-          name: source.name,
-          quantity: source.quantity,
-          bonus: numericBonus
-        });
-      }
-    };
-
-    const itemName = (item, type) => item?.name || game.i18n.localize(`TYPES.Item.${type}`);
-
     const armorItems = this.itemTypes?.armor ?? [];
     for (const armor of armorItems) {
       const system = armor.system ?? {};
@@ -192,34 +166,6 @@ export class ProjectAndromedaActor extends Actor {
       totals.armor.mental += (Number(system.itemMental) || 0) * quantity;
       totals.armor.shield += (Number(system.itemShield) || 0) * quantity;
       totals.armor.speed += (Number(system.itemSpeed) || 0) * quantity;
-    }
-
-    const cartridgeItems = Array.from(this.items ?? []).filter((item) => item.isCartridge);
-    for (const cartridge of cartridgeItems) {
-      const system = cartridge.system ?? {};
-      const skill = String(system.skill || '');
-      if (!skill) continue;
-      const bonus = Number(system.skillBonus) || 0;
-      if (!bonus) continue;
-      addSkillBonus(skill, bonus, {
-        type: 'cartridge',
-        name: itemName(cartridge, 'cartridge'),
-        quantity: 1
-      });
-    }
-
-    const implantItems = Array.from(this.items ?? []).filter((item) => item.isImplant);
-    for (const implant of implantItems) {
-      const system = implant.system ?? {};
-      const skill = String(system.skill || '');
-      if (!skill) continue;
-      const bonus = Number(system.skillBonus) || 0;
-      if (!bonus) continue;
-      addSkillBonus(skill, bonus, {
-        type: 'implant',
-        name: itemName(implant, 'implant'),
-        quantity: 1
-      });
     }
 
     return totals;

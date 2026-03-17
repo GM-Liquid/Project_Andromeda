@@ -11,7 +11,7 @@
 | ----------------------------- | --------------------------------------------------------------- |
 | **System name**               | **Project Andromeda**                                           |
 | **Foundry VTT compatibility** | v12 (verified 12)                                               |
-| **Current version (**``**)**  | `2.384` -> **auto-bumped to** `2.385` on next Foundry change    |
+| **Current version (**``**)**  | `2.385` -> **auto-bumped to** `2.386` on next Foundry change    |
 | **Languages**                 | English, Русский (full parity required)                         |
 | **Main tech**                 | ES‑module JavaScript (`*.mjs`), Handlebars (`*.hbs`), JSON, CSS |
 | **Licence**                   | CC BY-NC-SA 4.0                                                 |
@@ -159,7 +159,7 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 
 - **Item library sync**: Character-sheet items that represent abilities, genomes, traits, or equipment must stay linked to a corresponding world-level Foundry item in the Items directory. These library items are organized into actor-specific item folders and should inherit the same ownership as their source actor. Changes to shared library data should propagate to linked actor items, while actor-local state such as `quantity` and `equipped` remains local unless explicitly redesigned.
 
-- **Unified equipment type**: `equipment`, `equipment-consumable`, `implant`, and `cartridge` are treated as a unified equipment model. New content should use the `equipment` item type with `system.equipmentSubtype` set to `gear`, `consumable`, `implant`, or `cartridge`; legacy types are migration-only compatibility paths.
+- **Unified equipment type**: `equipment`, `equipment-consumable`, `implant`, and `cartridge` are treated as a unified equipment model. New content should use the `equipment` item type with `system.requiresRoll` and optional `system.skill`; legacy types are migration-only compatibility paths and are normalized during migration.
 
 ---
 

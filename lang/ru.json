@@ -292,6 +292,7 @@
     "ItemFields": {
       "Quantity": "Количество",
       "Rank": "Ранг",
+      "RequiresRoll": "Требует броска",
       "EquipmentSubtype": "Тип экипировки",
       "UsageFrequency": "Частота использования"
     },

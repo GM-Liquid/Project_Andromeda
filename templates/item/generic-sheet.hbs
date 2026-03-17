@@ -18,44 +18,33 @@
           {{#unless editable}}disabled{{/unless}}
         />
       </h1>
-      {{#if equipmentSubtypeOptions.length}}
-        <div class="item-meta-grid">
-          <div class="item-field">
-            <label>{{localize 'MY_RPG.ItemFields.EquipmentSubtype'}}</label>
-            <select name="system.equipmentSubtype" {{#unless editable}}disabled{{/unless}}>
-              {{#each equipmentSubtypeOptions as |option|}}
-                <option value="{{option.value}}" {{#if option.selected}}selected{{/if}}>
-                  {{option.label}}
-                </option>
-              {{/each}}
-            </select>
-          </div>
-        </div>
-      {{/if}}
       {{#if itemFields.length}}
         <div class="item-meta-grid">
           {{#each itemFields as |field|}}
             <div class="item-field">
-              <label>{{localize field.labelKey}}</label>
-              {{#if field.isRank}}
-                <select name="system.rank" {{#unless ../editable}}disabled{{/unless}}>
-                  {{#each ../rankOptions}}
-                    <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>
-                      {{this.label}}
-                    </option>
-                  {{/each}}
-                </select>
+              {{#if field.isCheckbox}}
+                <label>
+                  <input
+                    type="checkbox"
+                    name="system.{{field.path}}"
+                    data-dtype="Boolean"
+                    {{#if field.checked}}checked{{/if}}
+                    {{#unless ../editable}}disabled{{/unless}}
+                  />
+                  {{localize field.labelKey}}
+                </label>
               {{else}}
-                {{#if field.isUsageFrequency}}
-                  <select name="system.{{field.path}}" {{#unless ../editable}}disabled{{/unless}}>
-                    {{#each field.options as |option|}}
-                      <option value="{{option.value}}" {{#if option.selected}}selected{{/if}}>
-                        {{option.label}}
+                <label>{{localize field.labelKey}}</label>
+                {{#if field.isRank}}
+                  <select name="system.rank" {{#unless ../editable}}disabled{{/unless}}>
+                    {{#each ../rankOptions}}
+                      <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>
+                        {{this.label}}
                       </option>
                     {{/each}}
                   </select>
                 {{else}}
-                  {{#if field.isSkill}}
+                  {{#if field.isUsageFrequency}}
                     <select name="system.{{field.path}}" {{#unless ../editable}}disabled{{/unless}}>
                       {{#each field.options as |option|}}
                         <option value="{{option.value}}" {{#if option.selected}}selected{{/if}}>
@@ -64,13 +53,23 @@
                       {{/each}}
                     </select>
                   {{else}}
-                    <input
-                      type="{{field.inputType}}"
-                      name="system.{{field.path}}"
-                      value="{{field.value}}"
-                      {{#if field.hasMin}}min="{{field.min}}"{{/if}}
-                      {{#unless ../editable}}disabled{{/unless}}
-                    />
+                    {{#if field.isSkill}}
+                      <select name="system.{{field.path}}" {{#unless ../editable}}disabled{{/unless}}>
+                        {{#each field.options as |option|}}
+                          <option value="{{option.value}}" {{#if option.selected}}selected{{/if}}>
+                            {{option.label}}
+                          </option>
+                        {{/each}}
+                      </select>
+                    {{else}}
+                      <input
+                        type="{{field.inputType}}"
+                        name="system.{{field.path}}"
+                        value="{{field.value}}"
+                        {{#if field.hasMin}}min="{{field.min}}"{{/if}}
+                        {{#unless ../editable}}disabled{{/unless}}
+                      />
+                    {{/if}}
                   {{/if}}
                 {{/if}}
               {{/if}}

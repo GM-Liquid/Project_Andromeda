@@ -12,14 +12,11 @@ import {
   normalizeAbilityDie
 } from '../helpers/utils.mjs';
 import {
-  getEquipmentSubtypeConfig,
   ITEM_TABS,
   ITEM_BADGE_BUILDERS,
   getItemGroupConfigByKey,
   getItemGroupConfigs,
   getItemTypeConfig,
-  isEquipmentLikeType,
-  normalizeEquipmentSubtype,
   getItemTabLabel
 } from '../helpers/item-config.mjs';
 function getRankLabel(rank) {
@@ -695,51 +692,30 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
 
   _getItemDisplayConfig(item, groupConfig = null) {
     const typeConfig = getItemTypeConfig(item?.type) ?? {};
-    const equipmentSubtypeConfig = isEquipmentLikeType(item?.type)
-      ? getEquipmentSubtypeConfig(item?.system?.equipmentSubtype, item?.type)
-      : null;
+    const system = item?.system ?? {};
     return {
       ...(groupConfig ?? {}),
-      badgeGroupKey:
-        equipmentSubtypeConfig?.badgeGroupKey ??
-        typeConfig.badgeGroupKey ??
-        groupConfig?.key ??
-        typeConfig.groupKey ??
-        '',
-      showQuantity:
-        equipmentSubtypeConfig?.showQuantity ??
-        typeConfig.showQuantity ??
-        groupConfig?.showQuantity ??
-        false,
-      allowEquip:
-        equipmentSubtypeConfig?.allowEquip ??
-        typeConfig.allowEquip ??
-        groupConfig?.allowEquip ??
-        false,
-      exclusive:
-        equipmentSubtypeConfig?.exclusive ??
-        typeConfig.exclusive ??
-        groupConfig?.exclusive ??
-        false,
+      badgeGroupKey: typeConfig.badgeGroupKey ?? groupConfig?.key ?? typeConfig.groupKey ?? '',
+      showQuantity: typeConfig.showQuantity ?? groupConfig?.showQuantity ?? false,
+      allowEquip: typeConfig.allowEquip ?? groupConfig?.allowEquip ?? false,
+      exclusive: typeConfig.exclusive ?? groupConfig?.exclusive ?? false,
       canRoll:
-        equipmentSubtypeConfig?.canRoll ?? typeConfig.canRoll ?? groupConfig?.canRoll ?? false,
+        item?.type === 'equipment'
+          ? Boolean(system.requiresRoll)
+          : (typeConfig.canRoll ?? groupConfig?.canRoll ?? false),
       isMixedGroup: (groupConfig?.types?.length ?? 0) > 1
     };
   }
 
   _getItemKindBadgeLabel(item) {
-    if (isEquipmentLikeType(item?.type)) {
-      const subtypeConfig = getEquipmentSubtypeConfig(item?.system?.equipmentSubtype, item?.type);
-      if (subtypeConfig?.labelKey) return game.i18n.localize(subtypeConfig.labelKey);
-    }
-
     return game.i18n.localize(`TYPES.Item.${item.type}`);
   }
 
   _getItemBadges(item, config) {
     const badges = [];
-    if (config?.isMixedGroup) {
-      badges.push(this._getItemKindBadgeLabel(item));
+    if (config?.isMixedGroup && config?.key !== 'equipment') {
+      const kindBadge = this._getItemKindBadgeLabel(item);
+      if (kindBadge) badges.push(kindBadge);
     }
 
     const builder = ITEM_BADGE_BUILDERS[config?.badgeGroupKey ?? config?.key];
@@ -890,15 +866,9 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const selectedType = await this._promptForItemType(config);
     if (!selectedType) return;
     const name = this._getDefaultItemNameForType(selectedType, config);
-    const systemData = {};
-    if (selectedType === 'equipment') {
-      systemData.equipmentSubtype = normalizeEquipmentSubtype('gear', selectedType);
-    }
     // DEBUG-LOG
     debugLog('Actor sheet item create', { actor: this.actor.uuid, type: selectedType });
-    await this.actor.createEmbeddedDocuments('Item', [
-      { name, type: selectedType, system: systemData }
-    ]);
+    await this.actor.createEmbeddedDocuments('Item', [{ name, type: selectedType, system: {} }]);
   }
 
   async _onItemEdit(event) {
@@ -981,6 +951,10 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     }
     const system = item.system ?? {};
     const skillKey = system.skill || '';
+    if (item.type === 'equipment' && system.requiresRoll && !skillKey) {
+      ui.notifications.warn(game.i18n.localize('MY_RPG.WeaponsTable.SkillNone'));
+      return;
+    }
     const skillData = this.actor.system?.skills?.[skillKey] ?? {};
     const skillValue = Number(skillData.value) || 0;
     const parts = [];
@@ -992,13 +966,11 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       value: skillValue
     });
 
-    if (item.isCartridge || item.isImplant) {
-      const bonusDetails = this._getSkillBonusDetails(skillKey);
-      const modifier = skillValue + (bonusDetails.total || 0);
+    if (item.type === 'equipment' && system.requiresRoll) {
+      const modifier = skillValue;
       const abilityKey = this._getSkillAbilityKey(skillKey);
       const dieValue = this._getAbilityDieValue(abilityKey);
       const rollFormula = getAbilityDieRoll(dieValue);
-      this._appendBonusParts(parts, bonusDetails);
 
       const roll = await new Roll(`${rollFormula} + @mod`, {
         mod: modifier

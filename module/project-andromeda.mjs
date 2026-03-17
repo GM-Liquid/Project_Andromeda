@@ -502,14 +502,25 @@ function isLegacyEquipmentType(type) {
 
 function getMigratedEquipmentSystemData(item) {
   const systemData = foundry.utils.deepClone(item?.system ?? {});
-  systemData.equipmentSubtype = normalizeEquipmentSubtype(
+  const legacySubtype = normalizeEquipmentSubtype(
     systemData.equipmentSubtype,
     item?.type ?? 'equipment'
   );
+  const hasStoredRequiresRoll = typeof systemData.requiresRoll === 'boolean';
+  const hasConfiguredSkill = Boolean(String(systemData.skill ?? '').trim());
+  const requiresRoll = hasStoredRequiresRoll
+    ? systemData.requiresRoll
+    : legacySubtype === 'cartridge' || legacySubtype === 'implant' || hasConfiguredSkill;
+
   systemData.rank = String(systemData.rank ?? '');
-  systemData.quantity = Math.max(Number(systemData.quantity) || 1, 0);
+  systemData.requiresRoll = Boolean(requiresRoll);
   systemData.skill = String(systemData.skill ?? '');
-  systemData.skillBonus = Number(systemData.skillBonus ?? 0) || 0;
+  if (!systemData.requiresRoll) {
+    systemData.skill = '';
+  }
+
+  delete systemData.equipmentSubtype;
+  delete systemData.skillBonus;
   return systemData;
 }
 

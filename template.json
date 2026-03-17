@@ -183,6 +183,7 @@
     "cartridge": {
       "templates": ["base"],
       "equipmentSubtype": "cartridge",
+      "requiresRoll": true,
       "rank": "",
       "skill": "",
       "skillBonus": 0
@@ -190,6 +191,7 @@
     "implant": {
       "templates": ["base"],
       "equipmentSubtype": "implant",
+      "requiresRoll": true,
       "rank": "",
       "skill": "",
       "skillBonus": 0
@@ -213,16 +215,14 @@
     },
     "equipment": {
       "templates": ["base"],
-      "quantity": 1,
       "rank": "",
-      "equipmentSubtype": "gear",
-      "skill": "",
-      "skillBonus": 0
+      "requiresRoll": false,
+      "skill": ""
     },
     "equipment-consumable": {
       "templates": ["base"],
-      "quantity": 1,
       "rank": "",
+      "requiresRoll": false,
       "equipmentSubtype": "consumable",
       "skill": "",
       "skillBonus": 0
