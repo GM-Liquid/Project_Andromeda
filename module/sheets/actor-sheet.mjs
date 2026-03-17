@@ -12,10 +12,14 @@ import {
   normalizeAbilityDie
 } from '../helpers/utils.mjs';
 import {
+  getEquipmentSubtypeConfig,
   ITEM_TABS,
   ITEM_BADGE_BUILDERS,
   getItemGroupConfigByKey,
   getItemGroupConfigs,
+  getItemTypeConfig,
+  isEquipmentLikeType,
+  normalizeEquipmentSubtype,
   getItemTabLabel
 } from '../helpers/item-config.mjs';
 function getRankLabel(rank) {
@@ -96,7 +100,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
               e.preventDefault();
               editor.insertContent(text.replace(/\n/g, '<br>'));
               dispatch();
-            } catch (_) {
+            } catch {
               // Fall back to default paste if anything goes wrong
             }
           });
@@ -635,7 +639,14 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
   _buildItemGroups() {
     const groupConfigs = getItemGroupConfigs();
     return groupConfigs.map((config) => {
-      const items = config.types.flatMap((type) => this.actor.itemTypes?.[type] ?? []);
+      const items = config.types
+        .flatMap((type) => this.actor.itemTypes?.[type] ?? [])
+        .sort((left, right) => {
+          const leftSort = Number(left?.sort) || 0;
+          const rightSort = Number(right?.sort) || 0;
+          if (leftSort !== rightSort) return leftSort - rightSort;
+          return String(left?.name ?? '').localeCompare(String(right?.name ?? ''));
+        });
       const preparedItems = items.map((item) => this._prepareItemForDisplay(item, config));
       return {
         key: config.key,
@@ -658,41 +669,94 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
 
   _prepareItemForDisplay(item, config) {
     const system = item.system ?? {};
-    const quantity = config.showQuantity ? Math.max(Number(system.quantity) || 0, 0) : 1;
-    const badges = this._getItemBadges(item, config);
-    const summary = this._getItemSummary(item, config);
+    const displayConfig = this._getItemDisplayConfig(item, config);
+    const quantity = displayConfig.showQuantity ? Math.max(Number(system.quantity) || 0, 0) : 1;
+    const badges = this._getItemBadges(item, displayConfig);
+    const summary = this._getItemSummary(item, displayConfig);
     return {
       id: item.id,
       uuid: item.uuid,
       name: item.name || game.i18n.localize('MY_RPG.ItemGroups.Unnamed'),
       img: item.img || 'icons/svg/item-bag.svg',
       groupKey: config.key,
-      showQuantity: Boolean(config.showQuantity),
+      typeLabel: game.i18n.localize(`TYPES.Item.${item.type}`),
+      showQuantity: Boolean(displayConfig.showQuantity),
       quantity,
-      showEquip: Boolean(config.allowEquip),
-      exclusive: Boolean(config.exclusive),
-      equipped: config.allowEquip ? Boolean(system.equipped) : false,
+      showEquip: Boolean(displayConfig.allowEquip),
+      exclusive: Boolean(displayConfig.exclusive),
+      equipped: displayConfig.allowEquip ? Boolean(system.equipped) : false,
       badges,
       summary,
       hasBadges: badges.length > 0,
       hasSummary: Boolean(summary),
-      canRoll: Boolean(config.canRoll)
+      canRoll: Boolean(displayConfig.canRoll)
     };
   }
 
-  _getItemBadges(item, config) {
-    const builder = ITEM_BADGE_BUILDERS[config.key];
-    if (!builder) return [];
-    return builder(item, {
-      t: game.i18n,
-      getRankLabel,
-      skillLabel: this._skillLabel.bind(this),
-      formatSkillBonus: this._formatSkillBonus.bind(this),
-      formatDamage: this._formatDamage.bind(this)
-    });
+  _getItemDisplayConfig(item, groupConfig = null) {
+    const typeConfig = getItemTypeConfig(item?.type) ?? {};
+    const equipmentSubtypeConfig = isEquipmentLikeType(item?.type)
+      ? getEquipmentSubtypeConfig(item?.system?.equipmentSubtype, item?.type)
+      : null;
+    return {
+      ...(groupConfig ?? {}),
+      badgeGroupKey:
+        equipmentSubtypeConfig?.badgeGroupKey ??
+        typeConfig.badgeGroupKey ??
+        groupConfig?.key ??
+        typeConfig.groupKey ??
+        '',
+      showQuantity:
+        equipmentSubtypeConfig?.showQuantity ??
+        typeConfig.showQuantity ??
+        groupConfig?.showQuantity ??
+        false,
+      allowEquip:
+        equipmentSubtypeConfig?.allowEquip ??
+        typeConfig.allowEquip ??
+        groupConfig?.allowEquip ??
+        false,
+      exclusive:
+        equipmentSubtypeConfig?.exclusive ??
+        typeConfig.exclusive ??
+        groupConfig?.exclusive ??
+        false,
+      canRoll:
+        equipmentSubtypeConfig?.canRoll ?? typeConfig.canRoll ?? groupConfig?.canRoll ?? false,
+      isMixedGroup: (groupConfig?.types?.length ?? 0) > 1
+    };
   }
 
-  _getItemSummary(item, config) {
+  _getItemKindBadgeLabel(item) {
+    if (isEquipmentLikeType(item?.type)) {
+      const subtypeConfig = getEquipmentSubtypeConfig(item?.system?.equipmentSubtype, item?.type);
+      if (subtypeConfig?.labelKey) return game.i18n.localize(subtypeConfig.labelKey);
+    }
+
+    return game.i18n.localize(`TYPES.Item.${item.type}`);
+  }
+
+  _getItemBadges(item, config) {
+    const badges = [];
+    if (config?.isMixedGroup) {
+      badges.push(this._getItemKindBadgeLabel(item));
+    }
+
+    const builder = ITEM_BADGE_BUILDERS[config?.badgeGroupKey ?? config?.key];
+    if (!builder) return badges;
+
+    return badges.concat(
+      builder(item, {
+        t: game.i18n,
+        getRankLabel,
+        skillLabel: this._skillLabel.bind(this),
+        formatSkillBonus: this._formatSkillBonus.bind(this),
+        formatDamage: this._formatDamage.bind(this)
+      })
+    );
+  }
+
+  _getItemSummary(item) {
     const system = item.system ?? {};
     return this._formatItemDescription(system.description);
   }
@@ -732,11 +796,12 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
   }
 
   _getDefaultItemNameForType(type, fallbackConfig = null) {
-    const groupConfig =
-      getItemGroupConfigs().find(
-        (config) => config.types.length === 1 && config.types[0] === type
-      ) ?? fallbackConfig;
-    return this._getDefaultItemName(groupConfig);
+    const groupConfig = getItemGroupConfigs().find(
+      (config) => config.types.length === 1 && config.types[0] === type
+    );
+    if (groupConfig) return this._getDefaultItemName(groupConfig);
+    if (type) return this._getDefaultItemName({ type });
+    return this._getDefaultItemName(fallbackConfig);
   }
 
   _getGroupConfig(groupKey) {
@@ -756,11 +821,16 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       $target.data('groupKey') ?? $row.data('groupKey') ?? rowEl?.dataset?.groupKey ?? undefined;
     const item = this.actor.items.get(itemId);
     const config = this._getGroupConfig(groupKey);
-    return { item, $row, groupKey, config, itemId };
+    const displayConfig = item ? this._getItemDisplayConfig(item, config) : config;
+    return { item, $row, groupKey, config, displayConfig, itemId };
   }
 
   async _promptForItemType(config) {
-    const types = Array.isArray(config?.types) ? config.types.filter(Boolean) : [];
+    const types = Array.isArray(config?.createTypes)
+      ? config.createTypes.filter(Boolean)
+      : Array.isArray(config?.types)
+        ? config.types.filter(Boolean)
+        : [];
     if (types.length <= 1) return types[0] ?? '';
 
     const options = types
@@ -820,9 +890,15 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const selectedType = await this._promptForItemType(config);
     if (!selectedType) return;
     const name = this._getDefaultItemNameForType(selectedType, config);
+    const systemData = {};
+    if (selectedType === 'equipment') {
+      systemData.equipmentSubtype = normalizeEquipmentSubtype('gear', selectedType);
+    }
     // DEBUG-LOG
     debugLog('Actor sheet item create', { actor: this.actor.uuid, type: selectedType });
-    await this.actor.createEmbeddedDocuments('Item', [{ name, type: selectedType, system: {} }]);
+    await this.actor.createEmbeddedDocuments('Item', [
+      { name, type: selectedType, system: systemData }
+    ]);
   }
 
   async _onItemEdit(event) {
@@ -916,7 +992,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       value: skillValue
     });
 
-    if (item.type === 'cartridge' || item.type === 'implant') {
+    if (item.isCartridge || item.isImplant) {
       const bonusDetails = this._getSkillBonusDetails(skillKey);
       const modifier = skillValue + (bonusDetails.total || 0);
       const abilityKey = this._getSkillAbilityKey(skillKey);
@@ -996,17 +1072,18 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
   }
 
   _buildItemChatContent(item, config) {
+    const displayConfig = this._getItemDisplayConfig(item, config);
     const system = item.system ?? {};
     const lines = [];
     const name = this._escapeHTML(item.name || game.i18n.localize(`TYPES.Item.${item.type}`));
     lines.push(`<strong>${name}</strong>`);
     const meta = [];
-    if (config.showQuantity) {
+    if (displayConfig.showQuantity) {
       const quantity = Math.max(Number(system.quantity) || 0, 0);
       meta.push(`${game.i18n.localize('MY_RPG.Inventory.Quantity')}: ${quantity}`);
     }
-    meta.push(...this._getItemBadges(item, config));
-    if (config.allowEquip && system.equipped) {
+    meta.push(...this._getItemBadges(item, displayConfig));
+    if (displayConfig.allowEquip && system.equipped) {
       const equipKey =
         config.key === 'armor'
           ? 'MY_RPG.ArmorTable.EquippedLabel'
@@ -1014,7 +1091,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       meta.push(game.i18n.localize(equipKey));
     }
     if (meta.length) lines.push(meta.join('<br>'));
-    const summary = this._getItemSummary(item, config);
+    const summary = this._getItemSummary(item, displayConfig);
     if (summary) lines.push(summary);
     return lines.filter(Boolean).join('<br><br>');
   }
@@ -1023,8 +1100,8 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     event.preventDefault();
     const step = Number(event.currentTarget.dataset.step) || 0;
     if (!step) return;
-    const { item, $row, config } = this._getItemContextFromEvent(event);
-    if (!item || !$row || !config?.showQuantity) return;
+    const { item, $row, config, displayConfig } = this._getItemContextFromEvent(event);
+    if (!item || !$row || !displayConfig?.showQuantity) return;
     const system = item.system ?? {};
     const current = Math.max(Number(system.quantity) || 0, 0);
     const next = Math.max(current + step, 0);
@@ -1045,12 +1122,12 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
 
   async _onItemEquipChange(event) {
     const checkbox = event.currentTarget;
-    const { item, $row, groupKey, config } = this._getItemContextFromEvent(event);
-    if (!item || !$row || !config?.allowEquip) return;
+    const { item, $row, groupKey, displayConfig } = this._getItemContextFromEvent(event);
+    if (!item || !$row || !displayConfig?.allowEquip) return;
     const checked = Boolean(checkbox.checked);
     const updates = [{ _id: item.id, 'system.equipped': checked }];
-    if (config.exclusive && checked) {
-      const groupType = config.types?.[0] ?? item.type;
+    if (displayConfig.exclusive && checked) {
+      const groupType = item.type;
       const others = this.actor.itemTypes?.[groupType] ?? [];
       for (const other of others) {
         if (other.id === item.id) continue;
@@ -1070,7 +1147,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     this.actor.prepareData();
     this._refreshDerived(this.element);
     const $group = $row.closest('[data-item-group]');
-    if (config.exclusive && $group.length) {
+    if (displayConfig.exclusive && $group.length) {
       $group.find('.item-row').each((_, el) => {
         const id = el.dataset.itemId;
         const doc = this.actor.items.get(id);

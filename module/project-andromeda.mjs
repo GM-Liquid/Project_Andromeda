@@ -6,11 +6,24 @@ import { ProjectAndromedaActorSheet } from './sheets/actor-sheet.mjs';
 import { ITEM_SHEET_CLASSES } from './sheets/item-sheet.mjs';
 // Import helper/utility classes and constants.
 import { preloadHandlebarsTemplates } from './helpers/templates.mjs';
-import { MODULE_ID, PROJECT_ANDROMEDA, debugLog, registerSystemSettings } from './config.mjs';
-import { ITEM_SUPERTYPE_LABELS, ITEM_TYPE_CONFIGS } from './helpers/item-config.mjs';
+import {
+  LEGACY_EQUIPMENT_TYPE_MIGRATION_SETTING,
+  LEGACY_EQUIPMENT_TYPE_MIGRATION_VERSION,
+  MODULE_ID,
+  PROJECT_ANDROMEDA,
+  debugLog,
+  registerSystemSettings
+} from './config.mjs';
+import {
+  ITEM_SUPERTYPE_LABELS,
+  ITEM_TYPE_CONFIGS,
+  isEquipmentLikeType,
+  normalizeEquipmentSubtype
+} from './helpers/item-config.mjs';
 import { SessionStatsService } from './helpers/session-stats.mjs';
 import {
   ensureActorItemLibraryLink,
+  getLibraryItemUuid,
   getLibrarySyncOptionKey,
   hasOnlyLocalItemChanges,
   isLibrarySyncManagedType,
@@ -35,6 +48,10 @@ const ENVIRONMENT_PROXY_ACTOR_FLAG = 'isEnvironmentTokenProxy';
 const ENVIRONMENT_TOKEN_ACTOR_TYPE = 'npc';
 const HERO_POINT_INPUT_SELECTOR = 'input[name="system.momentOfGlory"]';
 const OBSOLETE_CARTRIDGE_ITEM_FIELDS = ['runeType'];
+const LEGACY_EQUIPMENT_TYPES = new Set(['cartridge', 'implant', 'equipment-consumable']);
+const LIBRARY_ITEM_UUID_FLAG = 'libraryItemUuid';
+const LIBRARY_ACTOR_ID_FLAG = 'libraryActorId';
+const LIBRARY_ACTOR_ITEM_ID_FLAG = 'libraryActorItemId';
 
 function getSessionStatsService() {
   return game.projectAndromeda?.sessionStats ?? null;
@@ -266,6 +283,7 @@ function buildItemTypeOptions({ select, allowedTypes }) {
   for (const config of ITEM_TYPE_CONFIGS) {
     if (!allowedTypes.has(config.type)) continue;
     unknownTypes.delete(config.type);
+    if (config.legacy) continue;
     const groupKey = config.supertype ?? 'other';
     const groupLabel = groupLabels.get(groupKey) ?? groupLabels.get('other') ?? groupKey;
     options.push({
@@ -478,9 +496,259 @@ async function getOrCreateEnvironmentProxyActor() {
   });
 }
 
+function isLegacyEquipmentType(type) {
+  return LEGACY_EQUIPMENT_TYPES.has(String(type ?? '').trim());
+}
+
+function getMigratedEquipmentSystemData(item) {
+  const systemData = foundry.utils.deepClone(item?.system ?? {});
+  systemData.equipmentSubtype = normalizeEquipmentSubtype(
+    systemData.equipmentSubtype,
+    item?.type ?? 'equipment'
+  );
+  systemData.rank = String(systemData.rank ?? '');
+  systemData.quantity = Math.max(Number(systemData.quantity) || 1, 0);
+  systemData.skill = String(systemData.skill ?? '');
+  systemData.skillBonus = Number(systemData.skillBonus ?? 0) || 0;
+  return systemData;
+}
+
+function needsEquipmentSystemNormalization(item) {
+  if (!isEquipmentLikeType(item?.type)) return false;
+
+  const nextSystemData = getMigratedEquipmentSystemData(item);
+  return !foundry.utils.isEmpty(foundry.utils.diffObject(item?.system ?? {}, nextSystemData));
+}
+
+function buildEquipmentSystemNormalizationUpdate(item) {
+  return {
+    _id: item.id,
+    system: getMigratedEquipmentSystemData(item)
+  };
+}
+
+function buildLegacyEquipmentCreateData(item, { mappedLibraryUuid = '' } = {}) {
+  const data = foundry.utils.deepClone(item?.toObject?.() ?? {});
+  delete data._id;
+  data.type = 'equipment';
+  data.system = getMigratedEquipmentSystemData(item);
+
+  if (mappedLibraryUuid) {
+    foundry.utils.setProperty(
+      data,
+      `flags.${MODULE_ID}.${LIBRARY_ITEM_UUID_FLAG}`,
+      mappedLibraryUuid
+    );
+  }
+
+  return data;
+}
+
+function buildActorItemMigrationMapKey(actorId, itemId) {
+  return `${String(actorId ?? '').trim()}:${String(itemId ?? '').trim()}`;
+}
+
+function getWorldItemMigrationMapKey(item) {
+  return String(item?.uuid ?? '').trim();
+}
+
+function getMappedLibraryUuid(item, worldUuidMap) {
+  const currentLibraryUuid = getLibraryItemUuid(item);
+  if (!currentLibraryUuid) return '';
+  return worldUuidMap.get(currentLibraryUuid) ?? currentLibraryUuid;
+}
+
+function getLibraryActorId(item) {
+  return String(item?.getFlag?.(MODULE_ID, LIBRARY_ACTOR_ID_FLAG) ?? '').trim();
+}
+
+function getLibraryActorItemId(item) {
+  return String(item?.getFlag?.(MODULE_ID, LIBRARY_ACTOR_ITEM_ID_FLAG) ?? '').trim();
+}
+
+async function migrateLegacyEquipmentTypes() {
+  if (!game.user?.isGM) return null;
+
+  const migrationContext = {
+    source: 'legacy-equipment-type-migration'
+  };
+  const createDeleteOptions = {
+    render: false,
+    [ITEM_LIBRARY_SYNC_OPTION_KEY]: migrationContext
+  };
+  const updateOptions = {
+    diff: false,
+    ...createDeleteOptions
+  };
+
+  const worldItemsSnapshot = Array.from(game.items ?? []);
+  const legacyWorldItems = worldItemsSnapshot.filter((item) => isLegacyEquipmentType(item.type));
+  const normalizedWorldUpdates = worldItemsSnapshot
+    .filter((item) => item.type === 'equipment' && needsEquipmentSystemNormalization(item))
+    .map((item) => buildEquipmentSystemNormalizationUpdate(item));
+
+  const worldUuidMap = new Map();
+  const migratedLegacyWorldItemIds = [];
+  let worldItemsRecreated = 0;
+  for (const item of legacyWorldItems) {
+    const createdItem = await Item.create(
+      buildLegacyEquipmentCreateData(item),
+      createDeleteOptions
+    );
+    if (!createdItem) continue;
+    worldUuidMap.set(getWorldItemMigrationMapKey(item), createdItem.uuid);
+    migratedLegacyWorldItemIds.push(item.id);
+    worldItemsRecreated += 1;
+  }
+
+  if (normalizedWorldUpdates.length) {
+    await Item.updateDocuments(normalizedWorldUpdates, updateOptions);
+  }
+
+  const actorItemIdMap = new Map();
+  let actorItemsRecreated = 0;
+  let actorItemsDeleted = 0;
+  let actorItemsNormalized = 0;
+
+  for (const actor of game.actors ?? []) {
+    const actorItemsSnapshot = Array.from(actor.items ?? []);
+    const legacyActorItems = actorItemsSnapshot.filter((item) => isLegacyEquipmentType(item.type));
+    const normalizedActorUpdates = actorItemsSnapshot
+      .filter((item) => item.type === 'equipment' && needsEquipmentSystemNormalization(item))
+      .map((item) => buildEquipmentSystemNormalizationUpdate(item));
+
+    if (legacyActorItems.length) {
+      const createdItems = await actor.createEmbeddedDocuments(
+        'Item',
+        legacyActorItems.map((item) =>
+          buildLegacyEquipmentCreateData(item, {
+            mappedLibraryUuid: getMappedLibraryUuid(item, worldUuidMap)
+          })
+        ),
+        createDeleteOptions
+      );
+
+      createdItems.forEach((createdItem, index) => {
+        const sourceItem = legacyActorItems[index];
+        if (!createdItem || !sourceItem) return;
+        actorItemIdMap.set(
+          buildActorItemMigrationMapKey(actor.id, sourceItem.id),
+          String(createdItem.id ?? '').trim()
+        );
+      });
+
+      actorItemsRecreated += createdItems.length;
+      const migratedLegacyActorItemIds = legacyActorItems
+        .slice(0, createdItems.length)
+        .map((item) => item.id);
+      actorItemsDeleted += migratedLegacyActorItemIds.length;
+
+      await actor.deleteEmbeddedDocuments('Item', migratedLegacyActorItemIds, createDeleteOptions);
+    }
+
+    if (normalizedActorUpdates.length) {
+      await actor.updateEmbeddedDocuments('Item', normalizedActorUpdates, updateOptions);
+      actorItemsNormalized += normalizedActorUpdates.length;
+    }
+  }
+
+  let actorLibraryLinksUpdated = 0;
+  if (worldUuidMap.size) {
+    for (const actor of game.actors ?? []) {
+      const linkUpdates = [];
+      for (const item of actor.items ?? []) {
+        const currentLibraryUuid = getLibraryItemUuid(item);
+        if (!currentLibraryUuid) continue;
+
+        const mappedLibraryUuid = worldUuidMap.get(currentLibraryUuid);
+        if (!mappedLibraryUuid || mappedLibraryUuid === currentLibraryUuid) continue;
+
+        linkUpdates.push({
+          _id: item.id,
+          [`flags.${MODULE_ID}.${LIBRARY_ITEM_UUID_FLAG}`]: mappedLibraryUuid
+        });
+      }
+
+      if (!linkUpdates.length) continue;
+      await actor.updateEmbeddedDocuments('Item', linkUpdates, createDeleteOptions);
+      actorLibraryLinksUpdated += linkUpdates.length;
+    }
+  }
+
+  const libraryMetadataUpdates = [];
+  if (actorItemIdMap.size) {
+    for (const item of game.items ?? []) {
+      const actorId = getLibraryActorId(item);
+      const actorItemId = getLibraryActorItemId(item);
+      if (!actorId || !actorItemId) continue;
+
+      const migratedActorItemId = actorItemIdMap.get(
+        buildActorItemMigrationMapKey(actorId, actorItemId)
+      );
+      if (!migratedActorItemId || migratedActorItemId === actorItemId) continue;
+
+      libraryMetadataUpdates.push({
+        _id: item.id,
+        [`flags.${MODULE_ID}.${LIBRARY_ACTOR_ID_FLAG}`]: actorId,
+        [`flags.${MODULE_ID}.${LIBRARY_ACTOR_ITEM_ID_FLAG}`]: migratedActorItemId
+      });
+    }
+  }
+
+  if (libraryMetadataUpdates.length) {
+    await Item.updateDocuments(libraryMetadataUpdates, createDeleteOptions);
+  }
+
+  if (migratedLegacyWorldItemIds.length) {
+    await Item.deleteDocuments(migratedLegacyWorldItemIds, createDeleteOptions);
+  }
+
+  const totalUpdates =
+    worldItemsRecreated +
+    normalizedWorldUpdates.length +
+    actorItemsRecreated +
+    actorItemsNormalized +
+    actorLibraryLinksUpdated +
+    libraryMetadataUpdates.length;
+
+  const summary = {
+    worldItemsRecreated,
+    worldItemsDeleted: migratedLegacyWorldItemIds.length,
+    worldItemsNormalized: normalizedWorldUpdates.length,
+    actorItemsRecreated,
+    actorItemsDeleted,
+    actorItemsNormalized,
+    actorLibraryLinksUpdated,
+    libraryMetadataUpdated: libraryMetadataUpdates.length,
+    totalUpdates
+  };
+
+  if (totalUpdates > 0) {
+    debugLog('Migrating legacy equipment item types', summary);
+  }
+
+  return summary;
+}
+
+async function runLegacyEquipmentTypeMigrationIfNeeded() {
+  const currentVersion =
+    Number(game.settings.get(MODULE_ID, LEGACY_EQUIPMENT_TYPE_MIGRATION_SETTING)) || 0;
+  if (currentVersion >= LEGACY_EQUIPMENT_TYPE_MIGRATION_VERSION) return null;
+
+  const summary = await migrateLegacyEquipmentTypes();
+  await game.settings.set(
+    MODULE_ID,
+    LEGACY_EQUIPMENT_TYPE_MIGRATION_SETTING,
+    LEGACY_EQUIPMENT_TYPE_MIGRATION_VERSION
+  );
+  return summary;
+}
+
 function hasObsoleteCartridgeData(item) {
   return Boolean(
-    item?.type === 'cartridge' &&
+    (item?.isCartridge ||
+      (isEquipmentLikeType(item?.type) &&
+        normalizeEquipmentSubtype(item?.system?.equipmentSubtype, item?.type) === 'cartridge')) &&
       OBSOLETE_CARTRIDGE_ITEM_FIELDS.some((field) =>
         foundry.utils.hasProperty(item.system ?? {}, field)
       )
@@ -544,6 +812,7 @@ Hooks.once('init', function () {
     ProjectAndromedaActor,
     ProjectAndromedaItem,
     debugLog,
+    migrateLegacyEquipmentTypes,
     migrateActorItemsToLibrary,
     sessionStats
   };
@@ -855,9 +1124,11 @@ Hooks.once('ready', async function () {
     }
   }
 
-  await purgeObsoleteCartridgeData();
-
   if (isPrimaryActiveGM()) {
+    await runLegacyEquipmentTypeMigrationIfNeeded();
+    await purgeObsoleteCartridgeData();
     await runItemLibraryMigrationIfNeeded();
+  } else {
+    await purgeObsoleteCartridgeData();
   }
 });

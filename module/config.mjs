@@ -2,7 +2,9 @@ import { PROJECT_ANDROMEDA } from './helpers/config.mjs';
 
 export const MODULE_ID = 'project-andromeda';
 export const ITEM_LIBRARY_SYNC_MIGRATION_SETTING = 'itemLibrarySyncMigrationVersion';
-export const ITEM_LIBRARY_SYNC_MIGRATION_VERSION = 2;
+export const ITEM_LIBRARY_SYNC_MIGRATION_VERSION = 3;
+export const LEGACY_EQUIPMENT_TYPE_MIGRATION_SETTING = 'legacyEquipmentTypeMigrationVersion';
+export const LEGACY_EQUIPMENT_TYPE_MIGRATION_VERSION = 2;
 
 export function registerSystemSettings() {
   game.settings.register(MODULE_ID, 'debugMode', {
@@ -43,6 +45,13 @@ export function registerSystemSettings() {
   });
 
   game.settings.register(MODULE_ID, ITEM_LIBRARY_SYNC_MIGRATION_SETTING, {
+    scope: 'world',
+    config: false,
+    type: Number,
+    default: 0
+  });
+
+  game.settings.register(MODULE_ID, LEGACY_EQUIPMENT_TYPE_MIGRATION_SETTING, {
     scope: 'world',
     config: false,
     type: Number,

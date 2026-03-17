@@ -292,7 +292,14 @@
     "ItemFields": {
       "Quantity": "Количество",
       "Rank": "Ранг",
+      "EquipmentSubtype": "Тип экипировки",
       "UsageFrequency": "Частота использования"
+    },
+    "EquipmentSubtypes": {
+      "Gear": "Экипировка",
+      "Consumable": "Расходник",
+      "Cartridge": "Картридж",
+      "Implant": "Имплант"
     },
     "UsageFrequency": {
       "AtWill": "Неограниченно",

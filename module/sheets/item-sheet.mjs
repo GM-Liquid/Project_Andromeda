@@ -1,5 +1,12 @@
 import { MODULE_ID, debugLog } from '../config.mjs';
-import { ITEM_USAGE_FREQUENCY_LABEL_KEYS, getItemTypeConfig } from '../helpers/item-config.mjs';
+import {
+  EQUIPMENT_SUBTYPE_CONFIGS,
+  ITEM_USAGE_FREQUENCY_LABEL_KEYS,
+  getEquipmentSubtypeConfig,
+  getItemTypeConfig,
+  isEquipmentLikeType,
+  normalizeEquipmentSubtype
+} from '../helpers/item-config.mjs';
 
 function buildRankOptions(selected) {
   const selectedNumber = Number(selected) || 0;
@@ -49,6 +56,15 @@ function buildUsageFrequencyOptions(selected) {
     value,
     label: game.i18n.localize(labelKey),
     selected: normalized === value
+  }));
+}
+
+function buildEquipmentSubtypeOptions(selected, itemType) {
+  const normalized = normalizeEquipmentSubtype(selected, itemType);
+  return Object.entries(EQUIPMENT_SUBTYPE_CONFIGS).map(([value, config]) => ({
+    value,
+    label: game.i18n.localize(config.labelKey),
+    selected: value === normalized
   }));
 }
 
@@ -182,19 +198,40 @@ export class ProjectAndromedaGenericItemSheet extends ProjectAndromedaItemSheet 
 
   async getData(options) {
     const data = await super.getData(options);
-    const fields = Array.isArray(data.itemConfig?.fields) ? data.itemConfig.fields : [];
     data.rankOptions = buildRankOptions(data.system.rank);
+    data.skillOptions = buildSkillOptions(data.system.skill);
     data.usageFrequencyOptions = buildUsageFrequencyOptions(data.system.usageFrequency);
+    const isEquipmentItem = isEquipmentLikeType(this.item?.type);
+    const normalizedEquipmentSubtype = isEquipmentItem
+      ? normalizeEquipmentSubtype(data.system.equipmentSubtype, this.item?.type)
+      : '';
+    if (isEquipmentItem) {
+      data.system.equipmentSubtype = normalizedEquipmentSubtype;
+      data.equipmentSubtypeOptions = buildEquipmentSubtypeOptions(
+        normalizedEquipmentSubtype,
+        this.item?.type
+      );
+    } else {
+      data.equipmentSubtypeOptions = [];
+    }
+    const fields = isEquipmentItem
+      ? (getEquipmentSubtypeConfig(normalizedEquipmentSubtype, this.item?.type)?.fields ?? [])
+      : Array.isArray(data.itemConfig?.fields)
+        ? data.itemConfig.fields
+        : [];
     data.itemFields = fields.map((field) => {
       const value = foundry.utils.getProperty(data.system, field.path) ?? '';
       const isUsageFrequency = field.type === 'usageFrequency';
+      const isSkill = field.type === 'skill';
       return {
         ...field,
         value,
+        hasMin: field.min !== undefined && field.min !== null,
         inputType: field.type === 'number' ? 'number' : 'text',
         isRank: field.type === 'rank',
         isUsageFrequency,
-        options: isUsageFrequency ? data.usageFrequencyOptions : []
+        isSkill,
+        options: isUsageFrequency ? data.usageFrequencyOptions : isSkill ? data.skillOptions : []
       };
     });
     return data;

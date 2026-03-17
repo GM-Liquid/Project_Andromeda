@@ -182,12 +182,14 @@
     },
     "cartridge": {
       "templates": ["base"],
+      "equipmentSubtype": "cartridge",
       "rank": "",
       "skill": "",
       "skillBonus": 0
     },
     "implant": {
       "templates": ["base"],
+      "equipmentSubtype": "implant",
       "rank": "",
       "skill": "",
       "skillBonus": 0
@@ -211,11 +213,19 @@
     },
     "equipment": {
       "templates": ["base"],
-      "quantity": 1
+      "quantity": 1,
+      "rank": "",
+      "equipmentSubtype": "gear",
+      "skill": "",
+      "skillBonus": 0
     },
     "equipment-consumable": {
       "templates": ["base"],
-      "quantity": 1
+      "quantity": 1,
+      "rank": "",
+      "equipmentSubtype": "consumable",
+      "skill": "",
+      "skillBonus": 0
     },
     "environment-consumable": {
       "templates": ["base"],

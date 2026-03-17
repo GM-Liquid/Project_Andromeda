@@ -29,13 +29,99 @@ function buildUsageFrequencyField() {
   };
 }
 
+function buildQuantityField() {
+  return {
+    path: 'quantity',
+    labelKey: 'MY_RPG.ItemFields.Quantity',
+    type: 'number',
+    min: 0
+  };
+}
+
+function buildRankField() {
+  return {
+    path: 'rank',
+    labelKey: 'MY_RPG.ItemFields.Rank',
+    type: 'rank'
+  };
+}
+
+function buildSkillField() {
+  return {
+    path: 'skill',
+    labelKey: 'MY_RPG.AbilityConfig.Skill',
+    type: 'skill'
+  };
+}
+
+function buildSkillBonusField() {
+  return {
+    path: 'skillBonus',
+    labelKey: 'MY_RPG.AbilityConfig.SkillBonus',
+    type: 'number'
+  };
+}
+
+const EQUIPMENT_SUBTYPE_FALLBACK_BY_TYPE = {
+  equipment: 'gear',
+  'equipment-consumable': 'consumable',
+  cartridge: 'cartridge',
+  implant: 'implant'
+};
+
+export const EQUIPMENT_SUBTYPE_CONFIGS = {
+  gear: {
+    labelKey: 'MY_RPG.EquipmentSubtypes.Gear',
+    badgeGroupKey: 'equipment',
+    showQuantity: true,
+    allowEquip: false,
+    exclusive: false,
+    canRoll: false,
+    fields: [buildQuantityField(), buildRankField()]
+  },
+  consumable: {
+    labelKey: 'MY_RPG.EquipmentSubtypes.Consumable',
+    badgeGroupKey: 'equipmentConsumables',
+    showQuantity: true,
+    allowEquip: false,
+    exclusive: false,
+    canRoll: false,
+    fields: [buildQuantityField(), buildRankField()]
+  },
+  cartridge: {
+    labelKey: 'MY_RPG.EquipmentSubtypes.Cartridge',
+    badgeGroupKey: 'cartridges',
+    showQuantity: false,
+    allowEquip: false,
+    exclusive: false,
+    canRoll: true,
+    fields: [buildRankField(), buildSkillField(), buildSkillBonusField()]
+  },
+  implant: {
+    labelKey: 'MY_RPG.EquipmentSubtypes.Implant',
+    badgeGroupKey: 'implants',
+    showQuantity: false,
+    allowEquip: false,
+    exclusive: false,
+    canRoll: true,
+    fields: [buildRankField(), buildSkillField(), buildSkillBonusField()]
+  }
+};
+
 export const ITEM_TYPE_CONFIGS = [
   {
     type: 'cartridge',
     supertype: 'equipment',
-    groupKey: 'cartridges',
-    sheet: 'cartridge',
+    groupKey: 'equipment',
+    sheet: 'generic',
+    legacy: true,
+    badgeGroupKey: 'cartridges',
+    showQuantity: false,
+    allowEquip: false,
+    exclusive: false,
+    canRoll: true,
     defaults: {
+      equipmentSubtype: 'cartridge',
       skill: '',
       skillBonus: 0
     }
@@ -43,9 +129,16 @@ export const ITEM_TYPE_CONFIGS = [
   {
     type: 'implant',
     supertype: 'equipment',
-    groupKey: 'implants',
-    sheet: 'implant',
+    groupKey: 'equipment',
+    sheet: 'generic',
+    legacy: true,
+    badgeGroupKey: 'implants',
+    showQuantity: false,
+    allowEquip: false,
+    exclusive: false,
+    canRoll: true,
     defaults: {
+      equipmentSubtype: 'implant',
       skill: '',
       skillBonus: 0
     }
@@ -55,6 +148,11 @@ export const ITEM_TYPE_CONFIGS = [
     supertype: 'equipment',
     groupKey: 'weapons',
     sheet: 'weapon',
+    badgeGroupKey: 'weapons',
+    showQuantity: false,
+    allowEquip: false,
+    exclusive: false,
+    canRoll: true,
     defaults: {
       quantity: 1,
       skill: '',
@@ -66,6 +164,11 @@ export const ITEM_TYPE_CONFIGS = [
     supertype: 'equipment',
     groupKey: 'armor',
     sheet: 'armor',
+    badgeGroupKey: 'armor',
+    showQuantity: false,
+    allowEquip: true,
+    exclusive: true,
+    canRoll: false,
     defaults: {
       quantity: 1,
       itemPhys: 0,
@@ -81,43 +184,26 @@ export const ITEM_TYPE_CONFIGS = [
     groupKey: 'equipment',
     sheet: 'generic',
     defaults: {
-      quantity: 1
-    },
-    fields: [
-      {
-        path: 'quantity',
-        labelKey: 'MY_RPG.ItemFields.Quantity',
-        type: 'number',
-        min: 0
-      },
-      {
-        path: 'rank',
-        labelKey: 'MY_RPG.ItemFields.Rank',
-        type: 'rank'
-      }
-    ]
+      quantity: 1,
+      rank: '',
+      equipmentSubtype: 'gear',
+      skill: '',
+      skillBonus: 0
+    }
   },
   {
     type: 'equipment-consumable',
     supertype: 'equipment',
-    groupKey: 'equipmentConsumables',
+    groupKey: 'equipment',
     sheet: 'generic',
+    legacy: true,
     defaults: {
-      quantity: 1
-    },
-    fields: [
-      {
-        path: 'quantity',
-        labelKey: 'MY_RPG.ItemFields.Quantity',
-        type: 'number',
-        min: 0
-      },
-      {
-        path: 'rank',
-        labelKey: 'MY_RPG.ItemFields.Rank',
-        type: 'rank'
-      }
-    ]
+      quantity: 1,
+      rank: '',
+      equipmentSubtype: 'consumable',
+      skill: '',
+      skillBonus: 0
+    }
   },
   {
     type: 'environment-consumable',
@@ -251,34 +337,6 @@ export const ITEM_TYPE_CONFIGS = [
 
 export const ITEM_GROUP_CONFIGS = [
   {
-    key: 'cartridges',
-    types: ['cartridge'],
-    tab: 'inventory',
-    icon: 'fas fa-box',
-    labelKey: 'MY_RPG.ItemGroups.Cartridges',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyCartridges',
-    createKey: 'MY_RPG.ItemGroups.CreateCartridge',
-    newNameKey: 'MY_RPG.ItemGroups.NewCartridge',
-    showQuantity: false,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: true
-  },
-  {
-    key: 'implants',
-    types: ['implant'],
-    tab: 'inventory',
-    icon: 'fas fa-cogs',
-    labelKey: 'MY_RPG.ItemGroups.Implants',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyImplants',
-    createKey: 'MY_RPG.ItemGroups.CreateImplant',
-    newNameKey: 'MY_RPG.ItemGroups.NewImplant',
-    showQuantity: false,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: true
-  },
-  {
     key: 'genomes',
     types: ['trait-genome'],
     tab: 'abilities',
@@ -335,29 +393,16 @@ export const ITEM_GROUP_CONFIGS = [
     canRoll: false
   },
   {
-    key: 'equipmentConsumables',
-    types: ['equipment-consumable'],
-    tab: 'inventory',
-    icon: 'fas fa-flask',
-    labelKey: 'MY_RPG.ItemGroups.EquipmentConsumables',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyEquipmentConsumables',
-    createKey: 'MY_RPG.ItemGroups.CreateEquipmentConsumable',
-    newNameKey: 'MY_RPG.ItemGroups.NewEquipmentConsumable',
-    showQuantity: true,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: false
-  },
-  {
     key: 'equipment',
-    types: ['equipment'],
+    types: ['equipment', 'equipment-consumable', 'implant', 'cartridge'],
+    createTypes: ['equipment'],
     tab: 'inventory',
     icon: 'fas fa-toolbox',
     labelKey: 'MY_RPG.ItemGroups.Equipment',
     emptyKey: 'MY_RPG.ItemGroups.EmptyEquipment',
     createKey: 'MY_RPG.ItemGroups.CreateEquipment',
     newNameKey: 'MY_RPG.ItemGroups.NewEquipment',
-    showQuantity: true,
+    showQuantity: false,
     allowEquip: false,
     exclusive: false,
     canRoll: false
@@ -418,6 +463,25 @@ export function getItemTypeDefaults(type) {
   return config?.defaults ?? null;
 }
 
+export function isEquipmentLikeType(type) {
+  return Object.hasOwn(EQUIPMENT_SUBTYPE_FALLBACK_BY_TYPE, String(type ?? ''));
+}
+
+export function normalizeEquipmentSubtype(subtype, itemType = 'equipment') {
+  const normalizedSubtype = String(subtype ?? '')
+    .trim()
+    .toLowerCase();
+  if (Object.hasOwn(EQUIPMENT_SUBTYPE_CONFIGS, normalizedSubtype)) {
+    return normalizedSubtype;
+  }
+  return EQUIPMENT_SUBTYPE_FALLBACK_BY_TYPE[String(itemType ?? '')] ?? 'gear';
+}
+
+export function getEquipmentSubtypeConfig(subtype, itemType = 'equipment') {
+  const normalizedSubtype = normalizeEquipmentSubtype(subtype, itemType);
+  return EQUIPMENT_SUBTYPE_CONFIGS[normalizedSubtype] ?? EQUIPMENT_SUBTYPE_CONFIGS.gear;
+}
+
 export function getItemGroupConfigByKey(key) {
   if (!key) return null;
   return ITEM_GROUP_CONFIG_BY_KEY[key] ?? null;
@@ -446,11 +510,7 @@ function buildUsageFrequencyBadge(item, helpers) {
   return [`${t.localize('MY_RPG.ItemFields.UsageFrequency')}: ${t.localize(labelKey)}`];
 }
 
-const USAGE_FREQUENCY_BADGE_GROUPS = [
-  'genomes',
-  'sourceAbilities',
-  'traits'
-];
+const USAGE_FREQUENCY_BADGE_GROUPS = ['genomes', 'sourceAbilities', 'traits'];
 
 export const ITEM_BADGE_BUILDERS = {
   cartridges: (item, helpers) => {
@@ -504,6 +564,16 @@ export const ITEM_BADGE_BUILDERS = {
     if (shield) badges.push(`${t.localize('MY_RPG.ArmorItem.ShieldLabel')}: ${shield}`);
     if (speed) badges.push(`${t.localize('MY_RPG.ArmorItem.BonusSpeedLabel')}: ${speed}`);
     return badges;
+  },
+  equipment: (item, helpers) => {
+    const rank = Number(item?.system?.rank) || 0;
+    if (!rank) return [];
+    return [`${helpers.t.localize('MY_RPG.ItemFields.Rank')}: ${helpers.getRankLabel(rank)}`];
+  },
+  equipmentConsumables: (item, helpers) => {
+    const rank = Number(item?.system?.rank) || 0;
+    if (!rank) return [];
+    return [`${helpers.t.localize('MY_RPG.ItemFields.Rank')}: ${helpers.getRankLabel(rank)}`];
   },
   ...Object.fromEntries(
     USAGE_FREQUENCY_BADGE_GROUPS.map((groupKey) => [groupKey, buildUsageFrequencyBadge])

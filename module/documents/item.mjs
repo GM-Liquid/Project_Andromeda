@@ -1,5 +1,11 @@
 import { debugLog } from '../config.mjs';
-import { ITEM_BASE_DEFAULTS, getItemTypeConfig, getItemTypeDefaults } from '../helpers/item-config.mjs';
+import {
+  ITEM_BASE_DEFAULTS,
+  getItemTypeConfig,
+  getItemTypeDefaults,
+  isEquipmentLikeType,
+  normalizeEquipmentSubtype
+} from '../helpers/item-config.mjs';
 
 function cloneDefaults(data) {
   return foundry.utils.deepClone(data);
@@ -33,11 +39,11 @@ export class ProjectAndromedaItem extends Item {
   }
 
   get isCartridge() {
-    return this.type === 'cartridge';
+    return this.equipmentSubtype === 'cartridge';
   }
 
   get isImplant() {
-    return this.type === 'implant';
+    return this.equipmentSubtype === 'implant';
   }
 
   get isArmor() {
@@ -46,6 +52,11 @@ export class ProjectAndromedaItem extends Item {
 
   get isWeapon() {
     return this.type === 'weapon';
+  }
+
+  get equipmentSubtype() {
+    if (!isEquipmentLikeType(this.type)) return '';
+    return normalizeEquipmentSubtype(this.system?.equipmentSubtype, this.type);
   }
 
   get supertype() {

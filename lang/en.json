@@ -292,7 +292,14 @@
     "ItemFields": {
       "Quantity": "Quantity",
       "Rank": "Rank",
+      "EquipmentSubtype": "Equipment Type",
       "UsageFrequency": "Frequency of use"
+    },
+    "EquipmentSubtypes": {
+      "Gear": "Equipment",
+      "Consumable": "Consumable",
+      "Cartridge": "Cartridge",
+      "Implant": "Implant"
     },
     "UsageFrequency": {
       "AtWill": "At-will",
