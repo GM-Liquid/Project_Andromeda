@@ -1,46 +1,60 @@
-name: Build & Publish Release (every push)
+name: Build & Publish Release (Foundry changes)
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
+    paths:
+      - "module/**"
+      - "templates/**"
+      - "css/**"
+      - "lang/**"
+      - "assets/**"
+      - "system.json"
+      - "template.json"
 
 permissions:
-  contents: write        # нужно для создания тегов/релизов
+  contents: write
 
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
     steps:
-      # 1. Исходники
       - uses: actions/checkout@v4
 
-      # 2. Дистрибутивная папка
+      - name: Read release version
+        id: version
+        run: |
+          VERSION=$(python -c "import json; print(json.load(open('system.json', encoding='utf-8'))['version'])")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag_name=v$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Ensure version tag is new
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/${{ steps.version.outputs.tag_name }}" >/dev/null 2>&1; then
+            echo "Tag ${{ steps.version.outputs.tag_name }} already exists. Bump system.json before pushing another Foundry release."
+            exit 1
+          fi
+
       - name: Prepare dist
         run: |
           rm -rf dist && mkdir dist
           cp -R module templates css lang assets dist/ 2>/dev/null || true
           cp system.json template.json README.md LICENSE dist/ 2>/dev/null || true
 
-      # 3. ZIP (фиксированное имя для Foundry)
       - name: Zip package
         run: |
           cd dist && zip -r ../project-andromeda.zip .
 
-      # 4. Формируем уникальный тег — выводим как output
-      - name: Generate release tag
-        id: tag
-        run: echo "tag_name= ${{ github.run_number }}" >> $GITHUB_OUTPUT
-
-      # 5. Публикуем новый релиз (используем output)
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.tag.outputs.tag_name }}      # ← здесь
-          name: "Build ${{ steps.tag.outputs.tag_name }}"  # ← и здесь
+          tag_name: ${{ steps.version.outputs.tag_name }}
+          name: Project Andromeda ${{ steps.version.outputs.tag_name }}
           body: |
-            🛠️ Автоматическая сборка с коммита ${{ github.sha }}.
-            * `project-andromeda.zip` — пакет системы
-            * `system.json` — манифест
+            Automated Project Andromeda release for commit ${{ github.sha }}.
+            * Version: `${{ steps.version.outputs.tag_name }}`
+            * `project-andromeda.zip` - system package
+            * `system.json` - manifest
           files: |
             project-andromeda.zip
             system.json
@@ -49,5 +63,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 6. Уборка за собой
-      - run: rm -rf dist project-andromeda.zip
+      - name: Cleanup
+        run: rm -rf dist project-andromeda.zip

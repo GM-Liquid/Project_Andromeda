@@ -23,6 +23,7 @@ build/
 coverage/
 *.tgz
 *.zip
+Microsoft/Windows/PowerShell/
 
 # Foundry (optional)
 packs/
