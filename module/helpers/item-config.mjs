@@ -1,7 +1,7 @@
 export const ITEM_BASE_DEFAULTS = {
   description: '',
   rank: '',
-  usageFrequency: 'atWill',
+  usageFrequency: 'passive',
   equipped: false,
   rules: [],
   traits: [],
@@ -16,10 +16,47 @@ export const ITEM_SUPERTYPE_LABELS = {
 };
 
 export const ITEM_USAGE_FREQUENCY_LABEL_KEYS = {
-  atWill: 'MY_RPG.UsageFrequency.AtWill',
   scene: 'MY_RPG.UsageFrequency.Scene',
+  twoPerScene: 'MY_RPG.UsageFrequency.TwoPerScene',
   passive: 'MY_RPG.UsageFrequency.Passive'
 };
+
+export const DEFAULT_ITEM_USAGE_FREQUENCY = 'passive';
+export const PERSONALITY_ITEM_ROLE_VALUE = 'value';
+
+export const ITEM_ACTIVATION_TYPE_LABEL_KEYS = {
+  passive: 'MY_RPG.ActivationTypes.Passive',
+  action: 'MY_RPG.ActivationTypes.Action',
+  maneuver: 'MY_RPG.ActivationTypes.Maneuver',
+  reaction: 'MY_RPG.ActivationTypes.Reaction'
+};
+
+export function normalizeUsageFrequency(value) {
+  const normalized = String(value ?? '').trim();
+  if (!normalized || normalized === 'atWill') {
+    return DEFAULT_ITEM_USAGE_FREQUENCY;
+  }
+
+  if (Object.hasOwn(ITEM_USAGE_FREQUENCY_LABEL_KEYS, normalized)) {
+    return normalized;
+  }
+
+  return DEFAULT_ITEM_USAGE_FREQUENCY;
+}
+
+export function getItemPersonalityRole(source) {
+  return String(source?.system?.details?.personalityRole ?? source?.details?.personalityRole ?? '')
+    .trim()
+    .toLowerCase();
+}
+
+export function isPersonalityValueItem(source) {
+  return getItemPersonalityRole(source) === PERSONALITY_ITEM_ROLE_VALUE;
+}
+
+function isStandardTraitItem(source) {
+  return !isPersonalityValueItem(source);
+}
 
 function buildUsageFrequencyField() {
   return {
@@ -45,6 +82,22 @@ function buildRequiresRollField() {
   };
 }
 
+function buildActivationTypeField() {
+  return {
+    path: 'activationType',
+    labelKey: 'MY_RPG.ItemFields.ActivationType',
+    type: 'activationType'
+  };
+}
+
+function buildRangeField() {
+  return {
+    path: 'range',
+    labelKey: 'MY_RPG.ItemFields.Range',
+    type: 'text'
+  };
+}
+
 function buildSkillField(options = {}) {
   return {
     path: 'skill',
@@ -54,14 +107,15 @@ function buildSkillField(options = {}) {
   };
 }
 
-const EQUIPMENT_SUBTYPE_FALLBACK_BY_TYPE = {
-  equipment: 'gear',
-  'equipment-consumable': 'consumable',
-  cartridge: 'cartridge',
-  implant: 'implant'
-};
 const EQUIPMENT_ITEM_FIELDS = [
   buildRankField(),
+  buildRequiresRollField(),
+  buildSkillField({ showWhenPath: 'requiresRoll' })
+];
+const TRAIT_ITEM_FIELDS = [
+  buildUsageFrequencyField(),
+  buildActivationTypeField(),
+  buildRangeField(),
   buildRequiresRollField(),
   buildSkillField({ showWhenPath: 'requiresRoll' })
 ];
@@ -79,8 +133,7 @@ export const ITEM_TYPE_CONFIGS = [
     canRoll: true,
     defaults: {
       requiresRoll: true,
-      skill: '',
-      equipmentSubtype: 'cartridge'
+      skill: ''
     },
     fields: EQUIPMENT_ITEM_FIELDS
   },
@@ -96,8 +149,7 @@ export const ITEM_TYPE_CONFIGS = [
     canRoll: true,
     defaults: {
       requiresRoll: true,
-      skill: '',
-      equipmentSubtype: 'implant'
+      skill: ''
     },
     fields: EQUIPMENT_ITEM_FIELDS
   },
@@ -157,8 +209,7 @@ export const ITEM_TYPE_CONFIGS = [
     defaults: {
       rank: '',
       requiresRoll: false,
-      skill: '',
-      equipmentSubtype: 'consumable'
+      skill: ''
     },
     fields: EQUIPMENT_ITEM_FIELDS
   },
@@ -221,74 +272,155 @@ export const ITEM_TYPE_CONFIGS = [
     sheet: 'generic'
   },
   {
+    type: 'trait',
+    supertype: 'traits',
+    groupKey: 'traits',
+    sheet: 'generic',
+    defaults: {
+      activationType: 'passive',
+      range: '',
+      requiresRoll: false,
+      skill: ''
+    },
+    fields: TRAIT_ITEM_FIELDS
+  },
+  {
     type: 'trait-flaw',
     supertype: 'traits',
     groupKey: 'traits',
     sheet: 'generic',
-    fields: [buildUsageFrequencyField()]
+    legacy: true,
+    defaults: {
+      activationType: 'passive',
+      range: '',
+      requiresRoll: false,
+      skill: ''
+    },
+    fields: TRAIT_ITEM_FIELDS
   },
   {
     type: 'trait-general',
     supertype: 'traits',
     groupKey: 'traits',
     sheet: 'generic',
-    fields: [buildUsageFrequencyField()]
+    legacy: true,
+    defaults: {
+      activationType: 'passive',
+      range: '',
+      requiresRoll: false,
+      skill: ''
+    },
+    fields: TRAIT_ITEM_FIELDS
   },
   {
     type: 'trait-backstory',
     supertype: 'traits',
     groupKey: 'traits',
     sheet: 'generic',
-    fields: [buildUsageFrequencyField()]
+    legacy: true,
+    defaults: {
+      activationType: 'passive',
+      range: '',
+      requiresRoll: false,
+      skill: ''
+    },
+    fields: TRAIT_ITEM_FIELDS
   },
   {
     type: 'trait-social',
     supertype: 'traits',
     groupKey: 'traits',
     sheet: 'generic',
-    fields: [buildUsageFrequencyField()]
+    legacy: true,
+    defaults: {
+      activationType: 'passive',
+      range: '',
+      requiresRoll: false,
+      skill: ''
+    },
+    fields: TRAIT_ITEM_FIELDS
   },
   {
     type: 'trait-combat',
     supertype: 'traits',
     groupKey: 'traits',
     sheet: 'generic',
-    fields: [buildUsageFrequencyField()]
+    legacy: true,
+    defaults: {
+      activationType: 'passive',
+      range: '',
+      requiresRoll: false,
+      skill: ''
+    },
+    fields: TRAIT_ITEM_FIELDS
   },
   {
     type: 'trait-magical',
     supertype: 'traits',
     groupKey: 'traits',
     sheet: 'generic',
-    fields: [buildUsageFrequencyField()]
+    legacy: true,
+    defaults: {
+      activationType: 'passive',
+      range: '',
+      requiresRoll: false,
+      skill: ''
+    },
+    fields: TRAIT_ITEM_FIELDS
   },
   {
     type: 'trait-professional',
     supertype: 'traits',
     groupKey: 'traits',
     sheet: 'generic',
-    fields: [buildUsageFrequencyField()]
+    legacy: true,
+    defaults: {
+      activationType: 'passive',
+      range: '',
+      requiresRoll: false,
+      skill: ''
+    },
+    fields: TRAIT_ITEM_FIELDS
   },
   {
     type: 'trait-technological',
     supertype: 'traits',
     groupKey: 'traits',
     sheet: 'generic',
-    fields: [buildUsageFrequencyField()]
+    legacy: true,
+    defaults: {
+      activationType: 'passive',
+      range: '',
+      requiresRoll: false,
+      skill: ''
+    },
+    fields: TRAIT_ITEM_FIELDS
   },
   {
     type: 'trait-genome',
     supertype: 'traits',
     groupKey: 'genomes',
     sheet: 'generic',
-    fields: [buildUsageFrequencyField()]
+    defaults: {
+      activationType: 'passive',
+      range: '',
+      requiresRoll: false,
+      skill: ''
+    },
+    fields: TRAIT_ITEM_FIELDS
   },
   {
     type: 'trait-source-ability',
     supertype: 'traits',
     groupKey: 'sourceAbilities',
     sheet: 'generic',
-    fields: [buildUsageFrequencyField()]
+    defaults: {
+      activationType: 'passive',
+      range: '',
+      requiresRoll: false,
+      skill: ''
+    },
+    fields: TRAIT_ITEM_FIELDS
   }
 ];
 
@@ -365,8 +497,30 @@ export const ITEM_GROUP_CONFIGS = [
     canRoll: false
   },
   {
+    key: 'personalityValues',
+    types: ['trait'],
+    createTypes: ['trait'],
+    createData: {
+      details: {
+        personalityRole: PERSONALITY_ITEM_ROLE_VALUE
+      }
+    },
+    filter: isPersonalityValueItem,
+    tab: 'personality',
+    icon: 'fas fa-heart',
+    labelKey: 'MY_RPG.ItemGroups.Values',
+    emptyKey: 'MY_RPG.ItemGroups.EmptyValues',
+    createKey: 'MY_RPG.ItemGroups.CreateValue',
+    newNameKey: 'MY_RPG.ItemGroups.NewValue',
+    showQuantity: false,
+    allowEquip: false,
+    exclusive: false,
+    canRoll: false
+  },
+  {
     key: 'traits',
     types: [
+      'trait',
       'trait-flaw',
       'trait-general',
       'trait-backstory',
@@ -376,6 +530,8 @@ export const ITEM_GROUP_CONFIGS = [
       'trait-professional',
       'trait-technological'
     ],
+    createTypes: ['trait'],
+    filter: isStandardTraitItem,
     tab: 'abilities',
     icon: 'fas fa-tags',
     labelKey: 'MY_RPG.ItemGroups.Traits',
@@ -421,17 +577,9 @@ export function getItemTypeDefaults(type) {
 }
 
 export function isEquipmentLikeType(type) {
-  return Object.hasOwn(EQUIPMENT_SUBTYPE_FALLBACK_BY_TYPE, String(type ?? ''));
-}
-
-export function normalizeEquipmentSubtype(subtype, itemType = 'equipment') {
-  const normalizedSubtype = String(subtype ?? '')
-    .trim()
-    .toLowerCase();
-  if (Object.values(EQUIPMENT_SUBTYPE_FALLBACK_BY_TYPE).includes(normalizedSubtype)) {
-    return normalizedSubtype;
-  }
-  return EQUIPMENT_SUBTYPE_FALLBACK_BY_TYPE[String(itemType ?? '')] ?? 'gear';
+  return ['equipment', 'equipment-consumable', 'cartridge', 'implant'].includes(
+    String(type ?? '').trim()
+  );
 }
 
 export function getItemGroupConfigByKey(key) {
@@ -455,14 +603,45 @@ export function getItemTabLabel(tabKey) {
 
 function buildUsageFrequencyBadge(item, helpers) {
   const system = item.system ?? {};
-  const value = String(system.usageFrequency ?? '').trim();
+  const value = normalizeUsageFrequency(system.usageFrequency);
   const labelKey = ITEM_USAGE_FREQUENCY_LABEL_KEYS[value];
   if (!labelKey) return [];
   const t = helpers.t;
   return [`${t.localize('MY_RPG.ItemFields.UsageFrequency')}: ${t.localize(labelKey)}`];
 }
 
-const USAGE_FREQUENCY_BADGE_GROUPS = ['genomes', 'sourceAbilities', 'traits'];
+function buildTraitBadges(item, helpers) {
+  const system = item.system ?? {};
+  const t = helpers.t;
+  const badges = [];
+  const activationType = String(system.activationType ?? '').trim();
+  const activationLabelKey = ITEM_ACTIVATION_TYPE_LABEL_KEYS[activationType];
+  if (activationLabelKey) {
+    badges.push(
+      `${t.localize('MY_RPG.ItemFields.ActivationType')}: ${t.localize(activationLabelKey)}`
+    );
+  }
+
+  const range = String(system.range ?? '').trim();
+  if (range) {
+    badges.push(`${t.localize('MY_RPG.ItemFields.Range')}: ${range}`);
+  }
+
+  badges.push(...buildUsageFrequencyBadge(item, helpers));
+
+  if (system.requiresRoll) {
+    badges.push(t.localize('MY_RPG.ItemFields.RequiresRoll'));
+    if (system.skill) {
+      badges.push(
+        `${t.localize('MY_RPG.AbilityConfig.Skill')}: ${helpers.skillLabel(system.skill)}`
+      );
+    }
+  }
+
+  return badges;
+}
+
+const TRAIT_BADGE_GROUPS = ['genomes', 'sourceAbilities', 'traits'];
 
 export const ITEM_BADGE_BUILDERS = {
   weapons: (item, helpers) => {
@@ -503,7 +682,5 @@ export const ITEM_BADGE_BUILDERS = {
     }
     return badges;
   },
-  ...Object.fromEntries(
-    USAGE_FREQUENCY_BADGE_GROUPS.map((groupKey) => [groupKey, buildUsageFrequencyBadge])
-  )
+  ...Object.fromEntries(TRAIT_BADGE_GROUPS.map((groupKey) => [groupKey, buildTraitBadges]))
 };

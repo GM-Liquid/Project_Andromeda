@@ -5,7 +5,8 @@
 #   сбрасывают действия/реакцию, применяют ДОТ (Bleeding), затем происходит движение.
 # - Экономика: ACTIONS_PER_ROUND действий в раунд, одна реакция (REACTION_AVAILABLE_DEFAULT).
 # - Движение: melee сокращает дистанцию, ranged отступает от melee (не только в контакте).
-#   Могут быть "рывки" с тратой действий для сближения. Дистанция ограничена
+#   Базовая скорость в симуляции фиксированная и не растёт от ранга; её меняют только
+#   явные модификаторы/эффекты. Могут быть "рывки" с тратой действий для сближения. Дистанция ограничена
 #   DISTANCE_MIN..DISTANCE_MAX. С вероятностью OPPORTUNITY_LEAVE_CHANCE возможна
 #   реакционная атака при выходе melee из зоны угрозы.
 # - Дальность атаки: дистанция должна быть <= range оружия (MELEE_BASE_RANGE /
@@ -45,16 +46,16 @@
 
 # Базовые параметры бойца по рангу, от которых строится симуляция.
 # dice = базовый куб характеристик, skill = фиксированный бонус навыка,
-# hp/defense/speed = базовые хиты/защита/скорость.
+# hp/defense/speed = базовые хиты/защита/скорость; speed здесь фиксирована и не скейлится от ранга.
 # NOTE: Magical X multiplies up to X damage by 2.5 (no rounding) and no longer affects defense.
 # NOTE: Splash multiplies all damage by 1.5.
 # NOTE: Assault prevents opportunity attacks at close range.
 # NOTE: Penetration applies only for ranged attacks, when target is in cover and target rank <= attacker rank.
 RANK_PARAMS = {
-    1: {"dice": 6, "skill": 1, "hp": 15.0, "defense": 4.0, "speed": 6.0},
-    2: {"dice": 8, "skill": 3, "hp": 20.0, "defense": 6.0, "speed": 9.0},
-    3: {"dice": 10, "skill": 6, "hp": 25.0, "defense": 9.0, "speed": 12.0},
-    4: {"dice": 12, "skill": 10, "hp": 30.0, "defense": 13.0, "speed": 15.0},
+    1: {"dice": 6, "skill": 1, "hp": 15.0, "defense": 4.0, "speed": 1.0},
+    2: {"dice": 8, "skill": 3, "hp": 20.0, "defense": 6.0, "speed": 1.0},
+    3: {"dice": 10, "skill": 6, "hp": 25.0, "defense": 9.0, "speed": 1.0},
+    4: {"dice": 12, "skill": 10, "hp": 30.0, "defense": 13.0, "speed": 1.0},
 }
 
 # Базовый урон “голого” оружия по рангу (без свойств).

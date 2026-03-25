@@ -20,6 +20,11 @@
         "Name": "Debug Mode",
         "Hint": "Enable verbose Project Andromeda diagnostics in the browser console."
       },
+      "GoogleSheetsSync": {
+        "Name": "Google Sheets Item Sync",
+        "Hint": "Configure export/import of world items through a Google Sheets Apps Script endpoint.",
+        "Label": "Open Sync Tool"
+      },
       "SessionTrackerMaxHistory": {
         "Name": "Session Tracker: Max stored sessions",
         "Hint": "How many completed sessions are kept in history."
@@ -38,7 +43,9 @@
       "Age": "Age",
       "CurrentRank": "Current Rank",
       "Name": "Name",
+      "ActorType": "Character Type",
       "MomentOfGlory": "Points of Heroism",
+      "SharedMomentOfGlory": "GM Heroism Pool",
       "ProgressPoints": "Progress Points"
     },
     "Inventory": {
@@ -71,7 +78,8 @@
       "Attributes": "Attributes",
       "Skills": "Skills",
       "KeyInfo": "Key Information",
-      "Biography": "Biography & Notes",
+      "Biography": "Personality",
+      "Personality": "Personality",
       "Inventory": "Inventory",
       "Traits": "Traits",
       "ItemAbility": "Genome Sheet",
@@ -204,13 +212,15 @@
       "Obayanie": "Charm"
     },
     "Biography": {
-      "Weight": "Weight",
-      "Height": "Height",
-      "EyeColor": "Eye Color",
-      "HairColor": "Hair Color",
       "Appearance": "Appearance",
       "Story": "Biography",
       "Notes": "Notes"
+    },
+    "Personality": {
+      "Feature": "Feature",
+      "Archetype": "Archetype",
+      "Appearance": "Appearance",
+      "Backstory": "Backstory"
     },
     "AbilitiesTable": {
       "TableHeading": "Cartridges",
@@ -265,6 +275,10 @@
       "EmptyEquipmentConsumables": "No consumables yet.",
       "CreateEquipmentConsumable": "Add consumable",
       "NewEquipmentConsumable": "New Consumable",
+      "Values": "Values",
+      "EmptyValues": "No values yet.",
+      "CreateValue": "Add value",
+      "NewValue": "New Value",
       "Traits": "Traits",
       "EmptyTraits": "No traits yet.",
       "CreateTrait": "Add trait",
@@ -293,6 +307,8 @@
       "Quantity": "Quantity",
       "Rank": "Rank",
       "RequiresRoll": "Requires Roll",
+      "ActivationType": "Activation",
+      "Range": "Range",
       "EquipmentSubtype": "Equipment Type",
       "UsageFrequency": "Frequency of use"
     },
@@ -303,9 +319,15 @@
       "Implant": "Implant"
     },
     "UsageFrequency": {
-      "AtWill": "At-will",
       "Scene": "1/Scene",
-      "Passive": "Passive"
+      "TwoPerScene": "2/Scene",
+      "Passive": "Unlimited"
+    },
+    "ActivationTypes": {
+      "Passive": "Passive",
+      "Action": "Action",
+      "Maneuver": "Maneuver",
+      "Reaction": "Reaction"
     },
     "RollFlavor": {
       "Modifiers": "Modifiers",
@@ -326,6 +348,119 @@
       "DeleteTitle": "Delete {type}",
       "DeleteContent": "Are you sure you want to delete {name}? This action cannot be undone."
     },
+    "GoogleSheetsSync": {
+      "Title": "Google Sheets Item Sync",
+      "Intro": "Use this window to export all world items into Google Sheets and import them back without recreating items.",
+      "IntroNote": "The MVP updates only world Items. Linked actor items are refreshed through the existing library sync, so links stay intact as long as imported rows update items in place.",
+      "SheetLayoutTitle": "Sheet Layout",
+      "AllowedTypes": "Allowed item types",
+      "Columns": "Columns",
+      "ResultSummary": "Summary",
+      "PerSheet": "Per Sheet",
+      "RemoteMeta": "Remote Metadata",
+      "Warnings": "Warnings",
+      "ErrorsTitle": "Errors",
+      "Details": "Details",
+      "Fields": {
+        "EndpointUrl": "Apps Script Web App URL",
+        "Token": "Shared token",
+        "TimeoutMs": "Request timeout (ms)"
+      },
+      "Actions": {
+        "SaveSettings": "Save Settings",
+        "Export": "Export to Sheets",
+        "Preview": "Preview Import",
+        "Apply": "Apply Import",
+        "Clear": "Clear Report"
+      },
+      "Table": {
+        "Sheet": "Sheet",
+        "Create": "Create",
+        "Update": "Update",
+        "Skip": "Skip",
+        "Error": "Error"
+      },
+      "Sheets": {
+        "Weapons": "Weapons",
+        "Armor": "Armor",
+        "Equipment": "Equipment",
+        "Traits": "Traits",
+        "Environment": "Environment"
+      },
+      "Headers": {
+        "Type": "Type",
+        "Name": "Name",
+        "OwnerName": "Owned By",
+        "Rank": "Rank",
+        "Skill": "Skill",
+        "SkillBonus": "Damage",
+        "Description": "Description",
+        "ItemPhys": "Physical Protection",
+        "ItemAzure": "Magical Protection",
+        "ItemMental": "Mental Protection",
+        "ItemShield": "Power Shield",
+        "ItemSpeed": "Speed Bonus",
+        "UsageFrequency": "Usage Frequency",
+        "ActivationType": "Activation",
+        "Range": "Range",
+        "Quantity": "Quantity"
+      },
+      "Messages": {
+        "Working": "Working...",
+        "SettingsSaved": "Google Sheets sync settings saved.",
+        "ExportComplete": "Export completed.",
+        "PreviewReady": "Import preview is ready.",
+        "ApplyComplete": "Import completed.",
+        "LastRun": "Last Run",
+        "Failed": "The last operation failed.",
+        "BlankRowSkipped": "Blank row skipped.",
+        "DeleteSkipped": "Rows marked as delete are skipped in the MVP.",
+        "NoChanges": "No changes detected."
+      },
+      "Summary": {
+        "Create": "Rows to create: {count}",
+        "Update": "Rows to update: {count}",
+        "Skip": "Rows skipped: {count}",
+        "Error": "Rows with errors: {count}",
+        "FolderCreate": "Folders to create: {count}"
+      },
+      "Meta": {
+        "WorldTitle": "World: {value}",
+        "ExportedAt": "Exported at: {value}",
+        "ModuleVersion": "Module version: {value}"
+      },
+      "Export": {
+        "EnsuredSyncIds": "Items that received a new syncId before export: {count}",
+        "SheetCount": "{sheet}: {count} rows exported"
+      },
+      "Apply": {
+        "Created": "World items created: {count}",
+        "Updated": "World items updated: {count}",
+        "RefreshedActors": "Actor sheets refreshed: {count}"
+      },
+      "Errors": {
+        "RequirePrimaryGM": "Only the primary active GM can run Google Sheets import/export.",
+        "MissingEndpoint": "Set the Apps Script Web App URL before using the sync tool.",
+        "RequestTimeout": "The request timed out after {seconds} seconds.",
+        "HttpError": "The Google Sheets endpoint returned HTTP {status}.",
+        "InvalidResponse": "The endpoint returned an unreadable JSON response: {error}",
+        "RemoteError": "The Google Sheets endpoint returned an error.",
+        "MissingSheetsPayload": "The endpoint response does not contain a sheets payload.",
+        "InvalidJson": "{field} contains invalid JSON: {error}",
+        "UnsupportedItemType": "Unsupported item type: {type}",
+        "TypeDoesNotMatchSheet": "Item type {type} does not belong to sheet {sheet}.",
+        "InvalidRank": "{field} must be empty or a rank between 1 and 4.",
+        "InvalidSkill": "{field} contains an unknown skill key: {value}",
+        "InvalidEnumValue": "{field} contains an unsupported value: {value}",
+        "ExpectedArray": "{field} must contain a JSON array.",
+        "ExpectedObject": "{field} must contain a JSON object.",
+        "InvalidStatus": "Unsupported row status: {status}",
+        "ActorLinkedCreateBlocked": "New actor-linked library items cannot be created from Google Sheets in the MVP.",
+        "TypeChangeBlocked": "Changing item type during import is blocked. Current type: {currentType}. Requested type: {requestedType}.",
+        "UnknownFolderId": "Unknown Item folder id: {id}",
+        "DuplicateSyncIds": "Duplicate syncId values were found in the import data: {ids}"
+      }
+    },
     "MomentOfGloryBonus": {
       "ContextLabel": "Heroism bonus. Costs 1 point of heroism.",
       "Success": "Heroism bonus applied (+{bonus}). Points of Heroism remaining: {value}.",
@@ -337,6 +472,15 @@
         "NoDice": "This roll has no dice to base a heroism bonus on.",
         "Failed": "Failed to apply the heroism bonus."
       }
+    },
+    "ActorTypeChange": {
+      "Button": "Change Type",
+      "Context": "Change Character Type",
+      "Title": "Change Character Type",
+      "TitleWithName": "{name}: Change Character Type",
+      "Label": "Character Type",
+      "Save": "Save",
+      "Cancel": "Cancel"
     },
     "SessionTracker": {
       "Notifications": {
@@ -376,9 +520,10 @@
   },
   "TYPES": {
     "Actor": {
-      "character": "Character",
-      "npc": "Supporting Character",
-      "boss": "Boss"
+      "playerCharacter": "Player Character",
+      "minion": "Minion",
+      "rankAndFile": "Rank-and-File",
+      "elite": "Elite"
     },
     "Item": {
       "item": "Item",
@@ -395,6 +540,7 @@
       "environment-resource": "Resource",
       "environment-trigger": "Trigger",
       "environment-danger": "Danger Zone",
+      "trait": "Trait",
       "trait-flaw": "Flaw",
       "trait-general": "General Trait",
       "trait-backstory": "Backstory Trait",

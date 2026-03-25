@@ -1,4 +1,10 @@
 import { debugLog } from '../config.mjs';
+import {
+  isEliteActorType,
+  isGmCharacterActorType,
+  isSupportedCharacterActorType,
+  supportsAzureStress
+} from '../helpers/actor-types.mjs';
 import { getAbilityDieRoll, getAbilityDieNumeric, normalizeAbilityDie } from '../helpers/utils.mjs';
 
 /**
@@ -8,7 +14,7 @@ import { getAbilityDieRoll, getAbilityDieNumeric, normalizeAbilityDie } from '..
 export class ProjectAndromedaActor extends Actor {
   prepareDerivedData() {
     super.prepareDerivedData();
-    if (this.type === 'character' || this.type === 'npc' || this.type === 'boss') {
+    if (isSupportedCharacterActorType(this.type)) {
       this._prepareCharacterData();
     }
   }
@@ -18,7 +24,8 @@ export class ProjectAndromedaActor extends Actor {
     const cache = (s.cache ??= {});
     cache.itemTotals = this._computeItemTotals();
     const itemTotals = cache.itemTotals;
-    const isNpcLike = this.type === 'npc' || this.type === 'boss';
+    const isGmCharacter = isGmCharacterActorType(this.type);
+    const usesAzureStress = supportsAzureStress(this.type);
 
     /* 1. Способности ---------------------------------------------- */
     for (const a of Object.values(s.abilities ?? {})) {
@@ -39,12 +46,12 @@ export class ProjectAndromedaActor extends Actor {
     const stress = s.stress ?? (s.stress = {});
     const forceShield = s.forceShield ?? (s.forceShield = {});
     const calcStressMax =
-      this.type === 'boss'
-        ? this._calcBossStressMax
-        : isNpcLike
-          ? this._calcNpcStressMax
+      isEliteActorType(this.type)
+        ? this._calcEliteStressMax
+        : isGmCharacter
+          ? this._calcGmStressMax
           : this._calcStressMax;
-    const calcForceShieldMax = isNpcLike ? this._calcNpcForceShieldMax : this._calcForceShieldMax;
+    const calcForceShieldMax = isGmCharacter ? this._calcGmForceShieldMax : this._calcForceShieldMax;
     stress.max = calcStressMax.call(this, s);
     forceShield.max = calcForceShieldMax.call(this, s, itemTotals);
     const clamp = Math.clamp
@@ -65,9 +72,11 @@ export class ProjectAndromedaActor extends Actor {
     stress.value = clamp(currentStress, 0, stress.max);
     forceShield.value = clamp(currentForceShield, 0, forceShield.max);
     const marked = Array.isArray(stress.marked) ? stress.marked : [];
-    stress.marked = [...new Set(marked)]
-      .map((value) => Number(value))
-      .filter((value) => Number.isInteger(value) && value >= 0 && value < stress.max);
+    stress.marked = usesAzureStress
+      ? [...new Set(marked)]
+          .map((value) => Number(value))
+          .filter((value) => Number.isInteger(value) && value >= 0 && value < stress.max)
+      : [];
 
     s.flux ??= {};
     s.flux.value = this._calcFlux(s);
@@ -90,12 +99,12 @@ export class ProjectAndromedaActor extends Actor {
     return Math.max(0, rank * 3);
   }
 
-  _calcNpcStressMax(s) {
+  _calcGmStressMax(s) {
     const rank = Math.max(Number(s.currentRank) || 0, 0);
-    return Math.max(0, rank * 2 + 4);
+    return Math.max(0, rank * 3);
   }
 
-  _calcBossStressMax(s) {
+  _calcEliteStressMax(s) {
     const rank = Math.max(Number(s.currentRank) || 0, 0);
     return Math.max(0, rank * 9);
   }
@@ -106,7 +115,7 @@ export class ProjectAndromedaActor extends Actor {
     return Math.max(shield + tempStress, 0);
   }
 
-  _calcNpcForceShieldMax(s, itemTotals = {}) {
+  _calcGmForceShieldMax(s, itemTotals = {}) {
     const shield = Number(itemTotals?.armor?.shield) || 0;
     const tempStress = Math.max(Number(s?.temphealth) || 0, 0);
     return Math.max(shield + tempStress, 0);
@@ -118,8 +127,7 @@ export class ProjectAndromedaActor extends Actor {
 
   _calcSpeed(s, itemTotals = {}) {
     const armorSpeed = Number(itemTotals?.armor?.speed) || 0;
-    const rank = Math.max(Number(s.currentRank) || 0, 0);
-    return rank * 3 + 3 + armorSpeed + (Number(s.tempspeed) || 0);
+    return 1 + armorSpeed + (Number(s.tempspeed) || 0);
   }
 
   _calcDefPhys(s, itemTotals = {}) {

@@ -1,0 +1,180 @@
+<form class='google-sheets-sync'>
+  <section class='google-sheets-sync__intro'>
+    <p>{{localize 'MY_RPG.GoogleSheetsSync.Intro'}}</p>
+    <p class='google-sheets-sync__note'>{{localize 'MY_RPG.GoogleSheetsSync.IntroNote'}}</p>
+  </section>
+
+  <section class='google-sheets-sync__settings'>
+    <div class='form-group'>
+      <label for='google-sheets-sync-endpoint'>{{localize
+          'MY_RPG.GoogleSheetsSync.Fields.EndpointUrl'
+        }}</label>
+      <input
+        id='google-sheets-sync-endpoint'
+        name='endpointUrl'
+        type='url'
+        value='{{settings.endpointUrl}}'
+        placeholder='https://script.google.com/macros/s/...'
+      />
+    </div>
+
+    <div class='form-group'>
+      <label for='google-sheets-sync-token'>{{localize
+          'MY_RPG.GoogleSheetsSync.Fields.Token'
+        }}</label>
+      <input
+        id='google-sheets-sync-token'
+        name='token'
+        type='password'
+        value='{{settings.token}}'
+        autocomplete='off'
+      />
+    </div>
+
+    <div class='form-group'>
+      <label for='google-sheets-sync-timeout'>{{localize
+          'MY_RPG.GoogleSheetsSync.Fields.TimeoutMs'
+        }}</label>
+      <input
+        id='google-sheets-sync-timeout'
+        name='timeoutMs'
+        type='number'
+        min='1000'
+        step='1000'
+        value='{{settings.timeoutMs}}'
+      />
+    </div>
+  </section>
+
+  <section class='google-sheets-sync__actions'>
+    <button type='submit' class='google-sheets-sync__button'>
+      <i class='fas fa-save'></i>
+      {{localize 'MY_RPG.GoogleSheetsSync.Actions.SaveSettings'}}
+    </button>
+    <button type='button' class='google-sheets-sync__button' data-action='export'>
+      <i class='fas fa-file-export'></i>
+      {{localize 'MY_RPG.GoogleSheetsSync.Actions.Export'}}
+    </button>
+    <button type='button' class='google-sheets-sync__button' data-action='preview'>
+      <i class='fas fa-search'></i>
+      {{localize 'MY_RPG.GoogleSheetsSync.Actions.Preview'}}
+    </button>
+    <button
+      type='button'
+      class='google-sheets-sync__button google-sheets-sync__button--primary'
+      data-action='apply'
+    >
+      <i class='fas fa-download'></i>
+      {{localize 'MY_RPG.GoogleSheetsSync.Actions.Apply'}}
+    </button>
+    <button type='button' class='google-sheets-sync__button' data-action='clear'>
+      <i class='fas fa-eraser'></i>
+      {{localize 'MY_RPG.GoogleSheetsSync.Actions.Clear'}}
+    </button>
+  </section>
+
+  <section class='google-sheets-sync__layout'>
+    <h2>{{localize 'MY_RPG.GoogleSheetsSync.SheetLayoutTitle'}}</h2>
+    <div class='google-sheets-sync__cards'>
+      {{#each sheetConfigs}}
+        <article class='google-sheets-sync__card'>
+          <h3>{{this.label}}</h3>
+          <p><strong>{{localize 'MY_RPG.GoogleSheetsSync.AllowedTypes'}}:</strong>
+            {{this.typeLabels}}</p>
+          <p><strong>{{localize 'MY_RPG.GoogleSheetsSync.Columns'}}:</strong></p>
+          <ul class='google-sheets-sync__columns'>
+            {{#each this.columns}}
+              <li><code>{{this}}</code></li>
+            {{/each}}
+          </ul>
+        </article>
+      {{/each}}
+    </div>
+  </section>
+
+  {{#if state.hasContent}}
+    <section class='google-sheets-sync__results'>
+      <h2>{{state.title}}</h2>
+      <p class='google-sheets-sync__status'>{{state.status}}</p>
+
+      {{#if state.summaryLines.length}}
+        <div class='google-sheets-sync__block'>
+          <h3>{{localize 'MY_RPG.GoogleSheetsSync.ResultSummary'}}</h3>
+          <ul>
+            {{#each state.summaryLines}}
+              <li>{{this}}</li>
+            {{/each}}
+          </ul>
+        </div>
+      {{/if}}
+
+      {{#if state.sheetStats.length}}
+        <div class='google-sheets-sync__block'>
+          <h3>{{localize 'MY_RPG.GoogleSheetsSync.PerSheet'}}</h3>
+          <table class='google-sheets-sync__table'>
+            <thead>
+              <tr>
+                <th>{{localize 'MY_RPG.GoogleSheetsSync.Table.Sheet'}}</th>
+                <th>{{localize 'MY_RPG.GoogleSheetsSync.Table.Create'}}</th>
+                <th>{{localize 'MY_RPG.GoogleSheetsSync.Table.Update'}}</th>
+                <th>{{localize 'MY_RPG.GoogleSheetsSync.Table.Skip'}}</th>
+                <th>{{localize 'MY_RPG.GoogleSheetsSync.Table.Error'}}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each state.sheetStats}}
+                <tr>
+                  <td>{{this.label}}</td>
+                  <td>{{this.create}}</td>
+                  <td>{{this.update}}</td>
+                  <td>{{this.skip}}</td>
+                  <td>{{this.error}}</td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+      {{/if}}
+
+      {{#if state.metaLines.length}}
+        <div class='google-sheets-sync__block'>
+          <h3>{{localize 'MY_RPG.GoogleSheetsSync.RemoteMeta'}}</h3>
+          <ul>
+            {{#each state.metaLines}}
+              <li>{{this}}</li>
+            {{/each}}
+          </ul>
+        </div>
+      {{/if}}
+
+      {{#if state.warnings.length}}
+        <div class='google-sheets-sync__block google-sheets-sync__block--warning'>
+          <h3>{{localize 'MY_RPG.GoogleSheetsSync.Warnings'}}</h3>
+          <ul>
+            {{#each state.warnings}}
+              <li>{{this}}</li>
+            {{/each}}
+          </ul>
+        </div>
+      {{/if}}
+
+      {{#if state.errors.length}}
+        <div class='google-sheets-sync__block google-sheets-sync__block--error'>
+          <h3>{{localize 'MY_RPG.GoogleSheetsSync.ErrorsTitle'}}</h3>
+          <ul>
+            {{#each state.errors}}
+              <li>{{this}}</li>
+            {{/each}}
+          </ul>
+        </div>
+      {{/if}}
+
+      {{#if state.details}}
+        <div class='google-sheets-sync__block'>
+          <h3>{{localize 'MY_RPG.GoogleSheetsSync.Details'}}</h3>
+          <p>{{state.details}}</p>
+        </div>
+      {{/if}}
+    </section>
+  {{/if}}
+</form>

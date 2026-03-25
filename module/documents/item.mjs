@@ -2,9 +2,7 @@ import { debugLog } from '../config.mjs';
 import {
   ITEM_BASE_DEFAULTS,
   getItemTypeConfig,
-  getItemTypeDefaults,
-  isEquipmentLikeType,
-  normalizeEquipmentSubtype
+  getItemTypeDefaults
 } from '../helpers/item-config.mjs';
 
 function cloneDefaults(data) {
@@ -39,11 +37,11 @@ export class ProjectAndromedaItem extends Item {
   }
 
   get isCartridge() {
-    return this.equipmentSubtype === 'cartridge';
+    return this.type === 'cartridge';
   }
 
   get isImplant() {
-    return this.equipmentSubtype === 'implant';
+    return this.type === 'implant';
   }
 
   get isArmor() {
@@ -52,11 +50,6 @@ export class ProjectAndromedaItem extends Item {
 
   get isWeapon() {
     return this.type === 'weapon';
-  }
-
-  get equipmentSubtype() {
-    if (!isEquipmentLikeType(this.type)) return '';
-    return normalizeEquipmentSubtype(this.system?.equipmentSubtype, this.type);
   }
 
   get supertype() {

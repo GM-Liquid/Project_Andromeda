@@ -1,6 +1,6 @@
 {
   "Actor": {
-    "types": ["character", "npc", "boss"],
+    "types": ["playerCharacter", "minion", "rankAndFile", "elite"],
     "templates": {
       "base": {
         "calling": "",
@@ -38,7 +38,7 @@
           "result": 0
         },
         "speed": {
-          "value": 10
+          "value": 1
         },
         "temphealth": 0,
         "tempphys": 0,
@@ -104,42 +104,43 @@
         }
       }
     },
-    "character": {
+    "playerCharacter": {
       "templates": ["base"],
       "biography": {
-        "weight": "",
-        "height": "",
-        "eyeColor": "",
-        "hairColor": "",
+        "feature": "",
+        "archetype": "",
         "appearance": "",
-        "story": "",
-        "notes": ""
+        "backstory": ""
       },
       "attributes": {}
     },
-    "npc": {
+    "minion": {
       "templates": ["base"],
       "biography": {
-        "weight": "",
-        "height": "",
-        "eyeColor": "",
-        "hairColor": "",
+        "feature": "",
+        "archetype": "",
         "appearance": "",
-        "story": "",
-        "notes": ""
+        "backstory": ""
       },
       "attributes": {}
     },
-    "boss": {
+    "rankAndFile": {
       "templates": ["base"],
       "biography": {
-        "weight": "",
-        "height": "",
-        "eyeColor": "",
-        "hairColor": "",
+        "feature": "",
+        "archetype": "",
         "appearance": "",
-        "story": "",
-        "notes": ""
+        "backstory": ""
+      },
+      "attributes": {}
+    },
+    "elite": {
+      "templates": ["base"],
+      "biography": {
+        "feature": "",
+        "archetype": "",
+        "appearance": "",
+        "backstory": ""
       },
       "attributes": {}
     }
@@ -158,6 +159,7 @@
       "environment-resource",
       "environment-trigger",
       "environment-danger",
+      "trait",
       "trait-flaw",
       "trait-general",
       "trait-backstory",
@@ -174,7 +176,7 @@
         "description": "",
         "equipped": false,
         "rank": "",
-        "usageFrequency": "atWill",
+        "usageFrequency": "passive",
         "rules": [],
         "traits": [],
         "details": {}
@@ -182,7 +184,6 @@
     },
     "cartridge": {
       "templates": ["base"],
-      "equipmentSubtype": "cartridge",
       "requiresRoll": true,
       "rank": "",
       "skill": "",
@@ -190,7 +191,6 @@
     },
     "implant": {
       "templates": ["base"],
-      "equipmentSubtype": "implant",
       "requiresRoll": true,
       "rank": "",
       "skill": "",
@@ -223,7 +223,6 @@
       "templates": ["base"],
       "rank": "",
       "requiresRoll": false,
-      "equipmentSubtype": "consumable",
       "skill": "",
       "skillBonus": 0
     },
@@ -247,35 +246,82 @@
     "environment-danger": {
       "templates": ["base"]
     },
+    "trait": {
+      "templates": ["base"],
+      "activationType": "passive",
+      "range": "",
+      "requiresRoll": false,
+      "skill": ""
+    },
     "trait-flaw": {
-      "templates": ["base"]
+      "templates": ["base"],
+      "activationType": "passive",
+      "range": "",
+      "requiresRoll": false,
+      "skill": ""
     },
     "trait-general": {
-      "templates": ["base"]
+      "templates": ["base"],
+      "activationType": "passive",
+      "range": "",
+      "requiresRoll": false,
+      "skill": ""
     },
     "trait-backstory": {
-      "templates": ["base"]
+      "templates": ["base"],
+      "activationType": "passive",
+      "range": "",
+      "requiresRoll": false,
+      "skill": ""
     },
     "trait-social": {
-      "templates": ["base"]
+      "templates": ["base"],
+      "activationType": "passive",
+      "range": "",
+      "requiresRoll": false,
+      "skill": ""
     },
     "trait-combat": {
-      "templates": ["base"]
+      "templates": ["base"],
+      "activationType": "passive",
+      "range": "",
+      "requiresRoll": false,
+      "skill": ""
     },
     "trait-magical": {
-      "templates": ["base"]
+      "templates": ["base"],
+      "activationType": "passive",
+      "range": "",
+      "requiresRoll": false,
+      "skill": ""
     },
     "trait-professional": {
-      "templates": ["base"]
+      "templates": ["base"],
+      "activationType": "passive",
+      "range": "",
+      "requiresRoll": false,
+      "skill": ""
     },
     "trait-technological": {
-      "templates": ["base"]
+      "templates": ["base"],
+      "activationType": "passive",
+      "range": "",
+      "requiresRoll": false,
+      "skill": ""
     },
     "trait-genome": {
-      "templates": ["base"]
+      "templates": ["base"],
+      "activationType": "passive",
+      "range": "",
+      "requiresRoll": false,
+      "skill": ""
     },
     "trait-source-ability": {
-      "templates": ["base"]
+      "templates": ["base"],
+      "activationType": "passive",
+      "range": "",
+      "requiresRoll": false,
+      "skill": ""
     }
   }
 }

@@ -20,6 +20,11 @@
         "Name": "Режим отладки",
         "Hint": "Включает расширенные диагностические сообщения Project Andromeda в консоли браузера."
       },
+      "GoogleSheetsSync": {
+        "Name": "Синхронизация предметов с Google Sheets",
+        "Hint": "Настраивает экспорт и импорт world Items через endpoint Google Apps Script.",
+        "Label": "Открыть инструмент синхронизации"
+      },
       "SessionTrackerMaxHistory": {
         "Name": "Трекер сессии: максимум сохраненных сессий",
         "Hint": "Сколько завершенных сессий хранится в истории."
@@ -84,7 +89,9 @@
       "Age": "Возраст",
       "CurrentRank": "Текущий ранг",
       "Name": "Имя",
+      "ActorType": "Тип персонажа",
       "MomentOfGlory": "Пункты Героя",
+      "SharedMomentOfGlory": "Общий запас Пунктов Героя",
       "ProgressPoints": "Очки прогресса"
     },
     "SheetLabels": {
@@ -96,7 +103,8 @@
       "Attributes": "Характеристики",
       "Skills": "Навыки",
       "KeyInfo": "Ключевая информация",
-      "Biography": "Биография и заметки",
+      "Biography": "Личность",
+      "Personality": "Личность",
       "Inventory": "Инвентарь",
       "Traits": "Черты",
       "ItemAbility": "Лист генома",
@@ -204,13 +212,15 @@
       "Obayanie": "Обаяние"
     },
     "Biography": {
-      "Weight": "Вес",
-      "Height": "Рост",
-      "EyeColor": "Цвет глаз",
-      "HairColor": "Цвет волос",
       "Appearance": "Внешность",
       "Story": "Биография",
       "Notes": "Заметки"
+    },
+    "Personality": {
+      "Feature": "Особенность",
+      "Archetype": "Архетип",
+      "Appearance": "Внешний вид",
+      "Backstory": "Предыстория"
     },
     "AbilitiesTable": {
       "TableHeading": "Картриджи",
@@ -265,6 +275,10 @@
       "EmptyEquipmentConsumables": "Пока нет расходников.",
       "CreateEquipmentConsumable": "Добавить расходник",
       "NewEquipmentConsumable": "Новый расходник",
+      "Values": "Ценности",
+      "EmptyValues": "Пока нет ценностей.",
+      "CreateValue": "Добавить ценность",
+      "NewValue": "Новая ценность",
       "Traits": "Черты",
       "EmptyTraits": "Пока нет черт.",
       "CreateTrait": "Добавить черту",
@@ -293,6 +307,8 @@
       "Quantity": "Количество",
       "Rank": "Ранг",
       "RequiresRoll": "Требует броска",
+      "ActivationType": "Активация",
+      "Range": "Дальность",
       "EquipmentSubtype": "Тип экипировки",
       "UsageFrequency": "Частота использования"
     },
@@ -303,9 +319,15 @@
       "Implant": "Имплант"
     },
     "UsageFrequency": {
-      "AtWill": "Неограниченно",
       "Scene": "1/Сцену",
-      "Passive": "Пассивно"
+      "TwoPerScene": "2/Сцену",
+      "Passive": "Неограниченно"
+    },
+    "ActivationTypes": {
+      "Passive": "Пассивно",
+      "Action": "Действие",
+      "Maneuver": "Маневр",
+      "Reaction": "Реакция"
     },
     "RollFlavor": {
       "Modifiers": "Модификаторы",
@@ -325,6 +347,119 @@
     "ItemDialogs": {
       "DeleteTitle": "Удалить {type}",
       "DeleteContent": "Вы уверены, что хотите удалить {name}? Это действие нельзя отменить."
+    },
+    "GoogleSheetsSync": {
+      "Title": "Синхронизация предметов с Google Sheets",
+      "Intro": "Это окно экспортирует все world Items в Google Sheets и импортирует их обратно без пересоздания предметов.",
+      "IntroNote": "Первая версия работает только с world Items. Связанные предметы на листах персонажей обновляются через существующую library-sync, поэтому links не рвутся, пока импорт обновляет предметы на месте.",
+      "SheetLayoutTitle": "Структура листов",
+      "AllowedTypes": "Разрешённые типы предметов",
+      "Columns": "Колонки",
+      "ResultSummary": "Сводка",
+      "PerSheet": "По листам",
+      "RemoteMeta": "Метаданные удалённой таблицы",
+      "Warnings": "Предупреждения",
+      "ErrorsTitle": "Ошибки",
+      "Details": "Подробности",
+      "Fields": {
+        "EndpointUrl": "URL веб-приложения Apps Script",
+        "Token": "Общий токен",
+        "TimeoutMs": "Таймаут запроса (мс)"
+      },
+      "Actions": {
+        "SaveSettings": "Сохранить настройки",
+        "Export": "Экспорт в Sheets",
+        "Preview": "Предпросмотр импорта",
+        "Apply": "Применить импорт",
+        "Clear": "Очистить отчёт"
+      },
+      "Table": {
+        "Sheet": "Лист",
+        "Create": "Создать",
+        "Update": "Обновить",
+        "Skip": "Пропустить",
+        "Error": "Ошибка"
+      },
+      "Sheets": {
+        "Weapons": "Оружие",
+        "Armor": "Броня",
+        "Equipment": "Экипировка",
+        "Traits": "Черты",
+        "Environment": "Окружение"
+      },
+      "Headers": {
+        "Type": "Тип",
+        "Name": "Название",
+        "OwnerName": "Кому принадлежит",
+        "Rank": "Ранг",
+        "Skill": "Навык",
+        "SkillBonus": "Урон",
+        "Description": "Описание",
+        "ItemPhys": "Физ. защита",
+        "ItemAzure": "Маг. защита",
+        "ItemMental": "Псих. защита",
+        "ItemShield": "Сил. щит",
+        "ItemSpeed": "Бонус к скорости",
+        "UsageFrequency": "Частота использования",
+        "ActivationType": "Активация",
+        "Range": "Дальность",
+        "Quantity": "Количество"
+      },
+      "Messages": {
+        "Working": "Идёт выполнение...",
+        "SettingsSaved": "Настройки синхронизации с Google Sheets сохранены.",
+        "ExportComplete": "Экспорт завершён.",
+        "PreviewReady": "Предпросмотр импорта готов.",
+        "ApplyComplete": "Импорт завершён.",
+        "LastRun": "Последний запуск",
+        "Failed": "Последняя операция завершилась ошибкой.",
+        "BlankRowSkipped": "Пустая строка пропущена.",
+        "DeleteSkipped": "Строки со статусом delete в первой версии пропускаются.",
+        "NoChanges": "Изменений не найдено."
+      },
+      "Summary": {
+        "Create": "Строк к созданию: {count}",
+        "Update": "Строк к обновлению: {count}",
+        "Skip": "Строк пропущено: {count}",
+        "Error": "Строк с ошибками: {count}",
+        "FolderCreate": "Папок к созданию: {count}"
+      },
+      "Meta": {
+        "WorldTitle": "Мир: {value}",
+        "ExportedAt": "Экспортировано: {value}",
+        "ModuleVersion": "Версия модуля: {value}"
+      },
+      "Export": {
+        "EnsuredSyncIds": "Предметов, которым перед экспортом был выдан новый syncId: {count}",
+        "SheetCount": "{sheet}: экспортировано строк {count}"
+      },
+      "Apply": {
+        "Created": "Создано world Items: {count}",
+        "Updated": "Обновлено world Items: {count}",
+        "RefreshedActors": "Обновлено листов персонажей: {count}"
+      },
+      "Errors": {
+        "RequirePrimaryGM": "Импорт и экспорт Google Sheets может запускать только основной активный ГМ.",
+        "MissingEndpoint": "Перед использованием синхронизации укажите URL веб-приложения Apps Script.",
+        "RequestTimeout": "Запрос превысил таймаут в {seconds} сек.",
+        "HttpError": "Endpoint Google Sheets вернул HTTP {status}.",
+        "InvalidResponse": "Endpoint вернул некорректный JSON-ответ: {error}",
+        "RemoteError": "Endpoint Google Sheets вернул ошибку.",
+        "MissingSheetsPayload": "В ответе endpoint отсутствует payload с листами.",
+        "InvalidJson": "В поле {field} находится некорректный JSON: {error}",
+        "UnsupportedItemType": "Неподдерживаемый тип предмета: {type}",
+        "TypeDoesNotMatchSheet": "Тип предмета {type} не относится к листу {sheet}.",
+        "InvalidRank": "Поле {field} должно быть пустым или содержать ранг от 1 до 4.",
+        "InvalidSkill": "В поле {field} указан неизвестный ключ навыка: {value}",
+        "InvalidEnumValue": "В поле {field} указано неподдерживаемое значение: {value}",
+        "ExpectedArray": "Поле {field} должно содержать JSON-массив.",
+        "ExpectedObject": "Поле {field} должно содержать JSON-объект.",
+        "InvalidStatus": "Неподдерживаемый статус строки: {status}",
+        "ActorLinkedCreateBlocked": "В первой версии нельзя создавать actor-linked library items напрямую из Google Sheets.",
+        "TypeChangeBlocked": "Менять тип предмета во время импорта нельзя. Текущий тип: {currentType}. Запрошенный тип: {requestedType}.",
+        "UnknownFolderId": "Неизвестный id папки Item: {id}",
+        "DuplicateSyncIds": "В импортируемых данных найдены повторяющиеся значения syncId: {ids}"
+      }
     },
     "SessionTracker": {
       "Notifications": {
@@ -372,13 +507,23 @@
         "NoDice": "В этом броске нет кубов, от которых можно взять бонус Героизма.",
         "Failed": "Не удалось применить бонус Героизма."
       }
+    },
+    "ActorTypeChange": {
+      "Button": "Сменить тип",
+      "Context": "Сменить тип персонажа",
+      "Title": "Смена типа персонажа",
+      "TitleWithName": "{name}: Смена типа персонажа",
+      "Label": "Тип персонажа",
+      "Save": "Сохранить",
+      "Cancel": "Отмена"
     }
   },
   "TYPES": {
     "Actor": {
-      "character": "Персонаж",
-      "npc": "Второстепенный персонаж",
-      "boss": "Босс"
+      "playerCharacter": "Персонаж игрока",
+      "minion": "Миньон",
+      "rankAndFile": "Рядовой",
+      "elite": "Элита"
     },
     "Item": {
       "item": "Предмет",
@@ -395,6 +540,7 @@
       "environment-resource": "Ресурс",
       "environment-trigger": "Триггер",
       "environment-danger": "Опасная зона",
+      "trait": "Черта",
       "trait-flaw": "Недостаток",
       "trait-general": "Общая черта",
       "trait-backstory": "Черта прошлого",

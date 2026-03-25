@@ -3,7 +3,16 @@
  * @extends {ActorSheet}
  */
 
-import { debugLog } from '../config.mjs';
+import { GM_HERO_POOL_SETTING, MODULE_ID, debugLog } from '../config.mjs';
+import {
+  isEliteActorType,
+  isGmCharacterActorType,
+  isPlayerCharacterActorType,
+  isSupportedCharacterActorType,
+  normalizeActorType,
+  SUPPORTED_ACTOR_TYPES,
+  supportsAzureStress
+} from '../helpers/actor-types.mjs';
 import {
   ABILITY_DIE_STEPS,
   getAbilityDieLabel,
@@ -23,15 +32,91 @@ function getRankLabel(rank) {
   return game.i18n.localize(`MY_RPG.RankNumeric.Rank${rank}`);
 }
 
-function isNpcSheetActorType(actorType) {
-  return actorType === 'npc' || actorType === 'boss';
+function getSharedGmHeroPool() {
+  return Math.max(Number(game.settings.get(MODULE_ID, GM_HERO_POOL_SETTING)) || 0, 0);
 }
 
-function isSupportedCharacterActorType(actorType) {
-  return actorType === 'character' || isNpcSheetActorType(actorType);
+function getActorTypeOptions(selectedType = '') {
+  return SUPPORTED_ACTOR_TYPES.map((type) => ({
+    value: type,
+    label: game.i18n.localize(`TYPES.Actor.${type}`),
+    selected: type === selectedType
+  }));
+}
+
+export async function promptForActorTypeSelection(actor, { title } = {}) {
+  const currentType = normalizeActorType(actor?.type);
+  const options = getActorTypeOptions(currentType)
+    .map(
+      (option) =>
+        `<option value="${option.value}" ${option.selected ? 'selected' : ''}>${option.label}</option>`
+    )
+    .join('');
+
+  const content = `
+    <form>
+      <div class="form-group">
+        <label>${game.i18n.localize('MY_RPG.ActorTypeChange.Label')}</label>
+        <select name="actor-type">${options}</select>
+      </div>
+    </form>
+  `;
+
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (value) => {
+      if (settled) return;
+      settled = true;
+      resolve(value);
+    };
+
+    new Dialog({
+      title: title ?? game.i18n.localize('MY_RPG.ActorTypeChange.Title'),
+      content,
+      buttons: {
+        save: {
+          icon: '<i class="fas fa-check"></i>',
+          label: game.i18n.localize('MY_RPG.ActorTypeChange.Save'),
+          callback: (html) => finish(String(html.find('[name="actor-type"]').val() || '').trim())
+        },
+        cancel: {
+          icon: '<i class="fas fa-times"></i>',
+          label: game.i18n.localize('MY_RPG.ActorTypeChange.Cancel'),
+          callback: () => finish(null)
+        }
+      },
+      default: 'save',
+      close: () => finish(null)
+    }).render(true);
+  });
+}
+
+export async function updateActorDocumentType(actor, nextType) {
+  const normalizedType = String(nextType ?? '').trim();
+  if (!actor || !SUPPORTED_ACTOR_TYPES.includes(normalizedType) || actor.type === normalizedType) {
+    return false;
+  }
+
+  await actor.update({ type: normalizedType }, { diff: false });
+  return true;
 }
 
 export class ProjectAndromedaActorSheet extends ActorSheet {
+  /** @override */
+  _getHeaderButtons() {
+    const buttons = super._getHeaderButtons();
+    if (!game.user?.isGM) return buttons;
+
+    buttons.unshift({
+      class: 'change-actor-type',
+      icon: 'fas fa-shapes',
+      label: game.i18n.localize('MY_RPG.ActorTypeChange.Button'),
+      onclick: () => this._onChangeActorTypeClick()
+    });
+
+    return buttons;
+  }
+
   /** @override */
   async _render(force = false, options = {}) {
     const scrollContainer = this.element.find('.sheet-scrollable');
@@ -110,6 +195,23 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     }
   }
 
+  initializeAutoResizeTextarea(element) {
+    if (!(element instanceof HTMLTextAreaElement)) return;
+
+    const resize = () => {
+      element.style.height = 'auto';
+      const minHeight = Number.parseFloat(window.getComputedStyle(element).minHeight) || 0;
+      element.style.height = `${Math.max(element.scrollHeight, minHeight)}px`;
+    };
+
+    resize();
+
+    if (!element.dataset.hasAutoResizeHandler) {
+      element.dataset.hasAutoResizeHandler = 'true';
+      element.addEventListener('input', resize);
+    }
+  }
+
   activateListeners(html) {
     super.activateListeners(html);
     const $html = html instanceof jQuery ? html : $(html);
@@ -122,6 +224,9 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       "input[name='system.tempspeed']"
     ].join(', ');
     $html.find('textarea.rich-editor').each((i, el) => this.initializeRichEditor(el));
+    $html
+      .find('textarea.auto-resize-textarea')
+      .each((i, el) => this.initializeAutoResizeTextarea(el));
     $html.on('click', '.stress-cell', this._onStressCellClick.bind(this));
     $html.on('contextmenu', '.stress-cell', this._onStressCellRightClick.bind(this));
     $html.on('click', '.force-shield-cell', this._onForceShieldCellClick.bind(this));
@@ -147,6 +252,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
 
     $html.find(derivedInputSelector).on('change', this._onDerivedInputChange.bind(this));
     $html.on('click', '.ability-step', this._onAbilityStep.bind(this));
+    $html.on('change', '.shared-hero-pool-input', this._onSharedHeroPoolChange.bind(this));
   }
 
   static get defaultOptions() {
@@ -168,10 +274,19 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
 
   /** @override */
   get template() {
-    if (isNpcSheetActorType(this.actor.type)) {
-      return `systems/project-andromeda/templates/actor/actor-npc-sheet.hbs`;
-    }
-    return `systems/project-andromeda/templates/actor/actor-${this.actor.type}-sheet.hbs`;
+    const templateByType = {
+      playerCharacter: 'actor-player-character-sheet.hbs',
+      minion: 'actor-minion-sheet.hbs',
+      rankAndFile: 'actor-rank-and-file-sheet.hbs',
+      elite: 'actor-elite-sheet.hbs'
+    };
+    const normalizedType = normalizeActorType(this.actor.type);
+    const templateName =
+      templateByType[normalizedType] ??
+      (isGmCharacterActorType(normalizedType)
+        ? 'actor-minion-sheet.hbs'
+        : 'actor-player-character-sheet.hbs');
+    return `systems/project-andromeda/templates/actor/${templateName}`;
   }
 
   /** @override */
@@ -180,13 +295,17 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const actorData = context.data;
     context.system = foundry.utils.duplicate(actorData.system ?? {});
     context.flags = actorData.flags;
-    context.isCharacter = actorData.type === 'character';
-    context.isNpc = isNpcSheetActorType(actorData.type);
-    context.isBoss = actorData.type === 'boss';
+    context.isPlayerCharacter = isPlayerCharacterActorType(actorData.type);
+    context.isGmCharacter = isGmCharacterActorType(actorData.type);
+    context.isElite = isEliteActorType(actorData.type);
+    context.canUseAzureStress = supportsAzureStress(actorData.type);
+    context.sharedHeroPool = context.isGmCharacter ? getSharedGmHeroPool() : 0;
 
     if (isSupportedCharacterActorType(actorData.type)) {
       this._prepareCharacterData(context);
     }
+
+    this._preparePersonalityData(context);
 
     context.rollData = context.actor.getRollData();
     context.itemTabs = ITEM_TABS.map((tab) => ({
@@ -195,13 +314,32 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     }));
 
     const itemGroups = this._buildItemGroups();
-    context.itemGroups = itemGroups.reduce((acc, group) => {
+    context.personalityValueGroup =
+      itemGroups.find((group) => group.key === 'personalityValues') ?? null;
+    context.itemGroups = itemGroups
+      .filter((group) => group.key !== 'personalityValues')
+      .reduce((acc, group) => {
       (acc[group.tab] ??= []).push(group);
       return acc;
-    }, {});
+      }, {});
     context.itemControls = this._getItemControlLabels();
 
     return context;
+  }
+
+  _preparePersonalityData(context) {
+    const rawBiography =
+      context.system?.biography && typeof context.system.biography === 'object'
+        ? foundry.utils.duplicate(context.system.biography)
+        : {};
+
+    context.system.biography = {
+      ...rawBiography,
+      feature: String(rawBiography.feature ?? ''),
+      archetype: String(rawBiography.archetype ?? ''),
+      appearance: String(rawBiography.appearance ?? ''),
+      backstory: String(rawBiography.backstory ?? rawBiography.story ?? '')
+    };
   }
 
   _prepareCharacterData(context) {
@@ -271,7 +409,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       value: stressValue,
       marked,
       ariaKey: 'MY_RPG.Stress.CellAria',
-      allowMarked: true
+      allowMarked: context.canUseAzureStress
     });
 
     const forceShield = context.system.forceShield ?? { value: 0, max: 0 };
@@ -325,6 +463,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
 
   async _onStressCellRightClick(event) {
     event.preventDefault();
+    if (!supportsAzureStress(this.actor.type)) return;
     const index = Number(event.currentTarget.dataset.index) || 0;
     const stress = this.actor.system.stress || { value: 0, max: 0 };
     const max = Number(stress.max) || 0;
@@ -413,6 +552,25 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     await this.actor.update({ [input.name]: nextValue }, { render: false });
     this.actor.prepareData();
     this._refreshDerived(this.element);
+  }
+
+  async _onSharedHeroPoolChange(event) {
+    if (!isGmCharacterActorType(this.actor.type)) return;
+    const input = event.currentTarget;
+    const nextValue = this._coerceNonNegativeIntegerInput(input);
+    await game.settings.set(MODULE_ID, GM_HERO_POOL_SETTING, nextValue);
+    game.projectAndromeda?.syncSharedHeroPointInputs?.(nextValue);
+  }
+
+  async _onChangeActorTypeClick() {
+    if (!game.user?.isGM) return;
+    const nextType = await promptForActorTypeSelection(this.actor, {
+      title: game.i18n.format('MY_RPG.ActorTypeChange.TitleWithName', {
+        name: this.actor.name || game.i18n.localize('MY_RPG.KeyInfo.Name')
+      })
+    });
+    if (!nextType) return;
+    await updateActorDocumentType(this.actor, nextType);
   }
 
   _updateAbilityDisplays(root, abilityKey) {
@@ -510,6 +668,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const $root = root instanceof jQuery ? root : $(root ?? this.element);
     const stress = this.actor.system.stress || { value: 0, max: 0 };
     const max = Math.max(Number(stress.max) || 0, 0);
+    const allowMarked = supportsAzureStress(this.actor.type);
     const value =
       typeof options === 'number'
         ? options
@@ -517,9 +676,11 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
           ? options.value
           : Number(stress.value) || 0;
     const boundedValue = Math.min(Math.max(Number(value) || 0, 0), max);
-    const marked = Array.isArray(options?.marked)
-      ? this._normalizeStressMarked(options.marked, max)
-      : this._normalizeStressMarked(stress.marked, max);
+    const marked = allowMarked
+      ? Array.isArray(options?.marked)
+        ? this._normalizeStressMarked(options.marked, max)
+        : this._normalizeStressMarked(stress.marked, max)
+      : [];
     const $track = $root.find('.stress-track');
     if (!$track.length) return;
     const cells = this._syncStressTrackCells($track, max);
@@ -638,6 +799,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     return groupConfigs.map((config) => {
       const items = config.types
         .flatMap((type) => this.actor.itemTypes?.[type] ?? [])
+        .filter((item) => (typeof config.filter === 'function' ? config.filter(item) : true))
         .sort((left, right) => {
           const leftSort = Number(left?.sort) || 0;
           const rightSort = Number(right?.sort) || 0;
@@ -690,9 +852,16 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     };
   }
 
+  _isSkillRollItem(item, typeConfig = null) {
+    const config = typeConfig ?? getItemTypeConfig(item?.type) ?? {};
+    return (
+      Boolean(item?.system?.requiresRoll) &&
+      (item?.type === 'equipment' || config.supertype === 'traits')
+    );
+  }
+
   _getItemDisplayConfig(item, groupConfig = null) {
     const typeConfig = getItemTypeConfig(item?.type) ?? {};
-    const system = item?.system ?? {};
     return {
       ...(groupConfig ?? {}),
       badgeGroupKey: typeConfig.badgeGroupKey ?? groupConfig?.key ?? typeConfig.groupKey ?? '',
@@ -700,9 +869,8 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       allowEquip: typeConfig.allowEquip ?? groupConfig?.allowEquip ?? false,
       exclusive: typeConfig.exclusive ?? groupConfig?.exclusive ?? false,
       canRoll:
-        item?.type === 'equipment'
-          ? Boolean(system.requiresRoll)
-          : (typeConfig.canRoll ?? groupConfig?.canRoll ?? false),
+        this._isSkillRollItem(item, typeConfig) ||
+        (typeConfig.canRoll ?? groupConfig?.canRoll ?? false),
       isMixedGroup: (groupConfig?.types?.length ?? 0) > 1
     };
   }
@@ -735,6 +903,13 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
   _getItemSummary(item) {
     const system = item.system ?? {};
     return this._formatItemDescription(system.description);
+  }
+
+  _getTraitRollNote(item, typeConfig = null) {
+    const config = typeConfig ?? getItemTypeConfig(item?.type) ?? {};
+    if (config.supertype !== 'traits') return '';
+    const system = item?.system ?? {};
+    return this._formatItemDescription(system.description ?? system.desc ?? '');
   }
 
   _formatItemDescription(value) {
@@ -866,9 +1041,12 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const selectedType = await this._promptForItemType(config);
     if (!selectedType) return;
     const name = this._getDefaultItemNameForType(selectedType, config);
+    const systemData = foundry.utils.deepClone(config.createData ?? {});
     // DEBUG-LOG
     debugLog('Actor sheet item create', { actor: this.actor.uuid, type: selectedType });
-    await this.actor.createEmbeddedDocuments('Item', [{ name, type: selectedType, system: {} }]);
+    await this.actor.createEmbeddedDocuments('Item', [
+      { name, type: selectedType, system: systemData }
+    ]);
   }
 
   async _onItemEdit(event) {
@@ -949,9 +1127,10 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       });
       return;
     }
+    const typeConfig = getItemTypeConfig(item.type);
     const system = item.system ?? {};
     const skillKey = system.skill || '';
-    if (item.type === 'equipment' && system.requiresRoll && !skillKey) {
+    if (this._isSkillRollItem(item, typeConfig) && !skillKey) {
       ui.notifications.warn(game.i18n.localize('MY_RPG.WeaponsTable.SkillNone'));
       return;
     }
@@ -966,7 +1145,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       value: skillValue
     });
 
-    if (item.type === 'equipment' && system.requiresRoll) {
+    if (this._isSkillRollItem(item, typeConfig)) {
       const modifier = skillValue;
       const abilityKey = this._getSkillAbilityKey(skillKey);
       const dieValue = this._getAbilityDieValue(abilityKey);
@@ -980,7 +1159,11 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
         item: item.name || game.i18n.localize(`TYPES.Item.${item.type}`),
         skill: this._skillLabel(skillKey)
       });
-      const flavor = this._buildRollFlavor(flavorLabel, parts);
+      let flavor = this._buildRollFlavor(flavorLabel, parts);
+      const traitRollNote = this._getTraitRollNote(item, typeConfig);
+      if (traitRollNote) {
+        flavor += `<div class="myrpg-roll-note">${traitRollNote}</div>`;
+      }
 
       roll.toMessage({
         speaker: ChatMessage.getSpeaker({ actor: this.actor }),

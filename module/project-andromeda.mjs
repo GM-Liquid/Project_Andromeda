@@ -1,25 +1,40 @@
 // Import document classes.
+import { GoogleSheetsSyncApp } from './apps/google-sheets-sync-app.mjs';
 import { ProjectAndromedaActor } from './documents/actor.mjs';
 import { ProjectAndromedaItem } from './documents/item.mjs';
 // Import sheet classes.
-import { ProjectAndromedaActorSheet } from './sheets/actor-sheet.mjs';
+import {
+  ProjectAndromedaActorSheet,
+  promptForActorTypeSelection,
+  updateActorDocumentType
+} from './sheets/actor-sheet.mjs';
 import { ITEM_SHEET_CLASSES } from './sheets/item-sheet.mjs';
 // Import helper/utility classes and constants.
 import { preloadHandlebarsTemplates } from './helpers/templates.mjs';
 import {
+  GM_HERO_POOL_SETTING,
   LEGACY_EQUIPMENT_TYPE_MIGRATION_SETTING,
   LEGACY_EQUIPMENT_TYPE_MIGRATION_VERSION,
+  LEGACY_TRAIT_TYPE_MIGRATION_SETTING,
+  LEGACY_TRAIT_TYPE_MIGRATION_VERSION,
   MODULE_ID,
   PROJECT_ANDROMEDA,
   debugLog,
   registerSystemSettings
 } from './config.mjs';
 import {
+  DEFAULT_ITEM_USAGE_FREQUENCY,
   ITEM_SUPERTYPE_LABELS,
   ITEM_TYPE_CONFIGS,
   isEquipmentLikeType,
-  normalizeEquipmentSubtype
+  normalizeUsageFrequency
 } from './helpers/item-config.mjs';
+import {
+  MINION_ACTOR_TYPE,
+  SUPPORTED_ACTOR_TYPES,
+  isGmCharacterActorType,
+  isPlayerCharacterActorType
+} from './helpers/actor-types.mjs';
 import { SessionStatsService } from './helpers/session-stats.mjs';
 import {
   ensureActorItemLibraryLink,
@@ -27,10 +42,12 @@ import {
   getLibrarySyncOptionKey,
   hasOnlyLocalItemChanges,
   isLibrarySyncManagedType,
+  mergeDuplicateLibraryItems,
   migrateActorItemsToLibrary,
   runItemLibraryMigrationIfNeeded,
   syncActorItemToLibrary,
   syncActorLibraryStructure,
+  syncLinkedLibraryItemStructure,
   syncLibraryItemToActors,
   unlinkLibraryItemFromActors
 } from './helpers/item-library-sync.mjs';
@@ -45,10 +62,21 @@ const ENVIRONMENT_ITEM_TYPES = new Set(
 );
 const ENVIRONMENT_ITEM_SOURCE_FLAG = 'environmentTokenSourceUuid';
 const ENVIRONMENT_PROXY_ACTOR_FLAG = 'isEnvironmentTokenProxy';
-const ENVIRONMENT_TOKEN_ACTOR_TYPE = 'npc';
+const ENVIRONMENT_TOKEN_ACTOR_TYPE = MINION_ACTOR_TYPE;
 const HERO_POINT_INPUT_SELECTOR = 'input[name="system.momentOfGlory"]';
+const SHARED_HERO_POOL_INPUT_SELECTOR = '.shared-hero-pool-input';
 const OBSOLETE_CARTRIDGE_ITEM_FIELDS = ['runeType'];
 const LEGACY_EQUIPMENT_TYPES = new Set(['cartridge', 'implant', 'equipment-consumable']);
+const LEGACY_TRAIT_TYPES = new Set([
+  'trait-flaw',
+  'trait-general',
+  'trait-backstory',
+  'trait-social',
+  'trait-combat',
+  'trait-magical',
+  'trait-professional',
+  'trait-technological'
+]);
 const LIBRARY_ITEM_UUID_FLAG = 'libraryItemUuid';
 const LIBRARY_ACTOR_ID_FLAG = 'libraryActorId';
 const LIBRARY_ACTOR_ITEM_ID_FLAG = 'libraryActorItemId';
@@ -80,7 +108,14 @@ function getMessageRolls(message) {
   return Array.isArray(message?.rolls) ? message.rolls : message?.roll ? [message.roll] : [];
 }
 
+function getSharedGmHeroPool() {
+  return Math.max(Number(game.settings.get(MODULE_ID, GM_HERO_POOL_SETTING)) || 0, 0);
+}
+
 function getActorHeroPoints(actor) {
+  if (isGmCharacterActorType(actor?.type)) {
+    return getSharedGmHeroPool();
+  }
   return Math.max(Number(actor?.system?.momentOfGlory) || 0, 0);
 }
 
@@ -91,6 +126,10 @@ function getMomentOfGloryFlag(message) {
 }
 
 function syncHeroPointInputs(actor, nextValue = null) {
+  if (isGmCharacterActorType(actor?.type)) {
+    syncSharedHeroPointInputs(nextValue);
+    return;
+  }
   const value = nextValue ?? getActorHeroPoints(actor);
   for (const app of Object.values(actor?.apps ?? {})) {
     const element = app?.element?.[0] ?? app?.element;
@@ -106,6 +145,38 @@ function syncHeroPointInputs(actor, nextValue = null) {
   }
 }
 
+function syncSharedHeroPointInputs(nextValue = null) {
+  const value = nextValue ?? getSharedGmHeroPool();
+  for (const actor of game.actors ?? []) {
+    if (!isGmCharacterActorType(actor?.type)) continue;
+    for (const app of Object.values(actor?.apps ?? {})) {
+      const element = app?.element?.[0] ?? app?.element;
+      if (!element) continue;
+      if (typeof element.querySelector === 'function') {
+        const input = element.querySelector(SHARED_HERO_POOL_INPUT_SELECTOR);
+        if (input) input.value = `${value}`;
+        continue;
+      }
+      if (typeof element.find === 'function') {
+        element.find(SHARED_HERO_POOL_INPUT_SELECTOR).val(value);
+      }
+    }
+  }
+}
+
+async function updateActorHeroPoints(actor, nextValue) {
+  const value = Math.max(Number(nextValue) || 0, 0);
+  if (isGmCharacterActorType(actor?.type)) {
+    await game.settings.set(MODULE_ID, GM_HERO_POOL_SETTING, value);
+    syncSharedHeroPointInputs(value);
+    return value;
+  }
+
+  await actor.update({ 'system.momentOfGlory': value }, { render: false });
+  syncHeroPointInputs(actor, value);
+  return value;
+}
+
 function isPrimaryActiveGM() {
   const activeGMs = (game.users?.filter((user) => user.isGM && user.active) ?? []).sort((a, b) =>
     String(a.id).localeCompare(String(b.id))
@@ -115,7 +186,7 @@ function isPrimaryActiveGM() {
 }
 
 function canGrantHeroPoint(message, actor) {
-  if (!message || !actor || actor.type !== 'character') return false;
+  if (!message || !actor || !isPlayerCharacterActorType(actor.type)) return false;
 
   if (game.user?.isGM) {
     return isPrimaryActiveGM();
@@ -126,6 +197,14 @@ function canGrantHeroPoint(message, actor) {
 
   const messageUserId = String(message?.user?.id ?? message?.user ?? '').trim();
   return Boolean(messageUserId && messageUserId === game.user?.id && actor.isOwner);
+}
+
+function canSpendHeroPoints(actor) {
+  if (!actor) return false;
+  if (isGmCharacterActorType(actor.type)) {
+    return Boolean(game.user?.isGM);
+  }
+  return Boolean(game.user?.isGM || actor.isOwner);
 }
 
 function rollHasExtremeResult(roll) {
@@ -156,8 +235,7 @@ async function grantHeroPointForExtremeRoll(message) {
   if (!messageHasExtremeResult(message)) return;
 
   const nextHeroPoints = getActorHeroPoints(actor) + 1;
-  await actor.update({ 'system.momentOfGlory': nextHeroPoints }, { render: false });
-  syncHeroPointInputs(actor, nextHeroPoints);
+  await updateActorHeroPoints(actor, nextHeroPoints);
 }
 
 function getRollMomentOfGloryBonus(roll) {
@@ -207,7 +285,7 @@ function canUseMomentOfGloryBonus(message) {
   if (!hasEligibleDice) return false;
   const actor = getMessageActor(message);
   if (!actor) return false;
-  return Boolean(game.user?.isGM || actor.isOwner);
+  return canSpendHeroPoints(actor);
 }
 
 async function applyMomentOfGloryBonusToMessage(message, actor) {
@@ -228,7 +306,7 @@ async function applyMomentOfGloryBonusToMessage(message, actor) {
   const currentHeroPoints = getActorHeroPoints(actor);
   if (!currentHeroPoints) return { spent: false };
   const nextHeroPoints = currentHeroPoints - 1;
-  await actor.update({ 'system.momentOfGlory': nextHeroPoints }, { render: false });
+  await updateActorHeroPoints(actor, nextHeroPoints);
 
   const flags = foundry.utils.deepClone(message.flags ?? {});
   flags[MODULE_ID] ??= {};
@@ -253,11 +331,9 @@ async function applyMomentOfGloryBonusToMessage(message, actor) {
       flags
     });
   } catch (error) {
-    await actor.update({ 'system.momentOfGlory': currentHeroPoints }, { render: false });
+    await updateActorHeroPoints(actor, currentHeroPoints);
     throw error;
   }
-
-  syncHeroPointInputs(actor, nextHeroPoints);
 
   return { spent: true, nextHeroPoints, totalBonus };
 }
@@ -359,6 +435,39 @@ function buildItemTypeOptions({ select, allowedTypes }) {
   }, 50);
 }
 
+function buildActorTypeOptions({ select, allowedTypes }) {
+  const selectElement = select.get(0);
+  if (!selectElement) return;
+
+  const currentValue = select.val();
+  const availableTypes = SUPPORTED_ACTOR_TYPES.filter((type) => allowedTypes.has(type));
+  if (!availableTypes.length) return;
+
+  const fragment = document.createDocumentFragment();
+
+  for (const type of availableTypes) {
+    const option = document.createElement('option');
+    option.value = type;
+    option.textContent = game.i18n.localize(`TYPES.Actor.${type}`);
+    if (type === currentValue) option.selected = true;
+    fragment.append(option);
+  }
+
+  selectElement.replaceChildren(fragment);
+
+  setTimeout(() => {
+    if (currentValue && availableTypes.includes(currentValue)) {
+      select.val(currentValue);
+      return;
+    }
+
+    const firstType = availableTypes[0];
+    if (firstType) {
+      select.val(firstType);
+    }
+  }, 50);
+}
+
 function shouldCustomizeItemTypeDialog(dialog, selectElement, itemTypes) {
   const documentName =
     dialog?.documentName ?? dialog?.options?.documentName ?? dialog?.object?.documentName ?? '';
@@ -375,6 +484,22 @@ function shouldCustomizeItemTypeDialog(dialog, selectElement, itemTypes) {
   const actorTypes = new Set(game.documentTypes?.Actor ?? []);
   if (optionValues.some((value) => actorTypes.has(value))) return false;
   return optionValues.some((value) => itemTypes.has(value));
+}
+
+function shouldCustomizeActorTypeDialog(dialog, selectElement, actorTypes) {
+  const documentName =
+    dialog?.documentName ?? dialog?.options?.documentName ?? dialog?.object?.documentName ?? '';
+  if (documentName && documentName !== 'Actor') return false;
+
+  const optionValues = Array.from(selectElement.options)
+    .map((option) => option.value)
+    .filter(Boolean);
+
+  if (!optionValues.length) {
+    return documentName === 'Actor';
+  }
+
+  return optionValues.some((value) => actorTypes.has(value));
 }
 
 function isEnvironmentItem(item) {
@@ -407,6 +532,17 @@ async function handleActorOwnedItemUpdate(item, changed, options = {}) {
     actor: item?.parent?.uuid ?? null,
     itemId: item?.id ?? null,
     libraryItemId: libraryItem?.id ?? null
+  });
+}
+
+async function handleActorOwnedItemDelete(item, options = {}) {
+  if (hasItemLibrarySyncOption(options) || !isLibrarySyncManagedType(item?.type)) return;
+
+  const result = await syncLinkedLibraryItemStructure(item);
+  debugLog('Actor item library structure synced on delete', {
+    actor: item?.parent?.uuid ?? null,
+    itemId: item?.id ?? null,
+    updated: result?.updated ?? false
   });
 }
 
@@ -469,22 +605,18 @@ function buildEnvironmentTokenItemData(item, sourceUuid) {
 
 async function getOrCreateEnvironmentProxyActor() {
   const existingActor =
-    game.actors?.find(
-      (actor) =>
-        actor.type === ENVIRONMENT_TOKEN_ACTOR_TYPE &&
-        actor.getFlag(MODULE_ID, ENVIRONMENT_PROXY_ACTOR_FLAG)
-    ) ?? null;
+    game.actors?.find((actor) => actor.getFlag(MODULE_ID, ENVIRONMENT_PROXY_ACTOR_FLAG)) ?? null;
   if (existingActor) return existingActor;
 
   const actorName =
-    `${game.i18n.localize('MY_RPG.ItemTypeGroups.Environment')} ${game.i18n.localize('TYPES.Actor.npc')}`.trim();
+    `${game.i18n.localize('MY_RPG.ItemTypeGroups.Environment')} ${game.i18n.localize(`TYPES.Actor.${ENVIRONMENT_TOKEN_ACTOR_TYPE}`)}`.trim();
   const tokenImage = 'icons/svg/hazard.svg';
   return Actor.create({
-    name: actorName || game.i18n.localize('TYPES.Actor.npc'),
+    name: actorName || game.i18n.localize(`TYPES.Actor.${ENVIRONMENT_TOKEN_ACTOR_TYPE}`),
     type: ENVIRONMENT_TOKEN_ACTOR_TYPE,
     img: tokenImage,
     prototypeToken: {
-      name: actorName || game.i18n.localize('TYPES.Actor.npc'),
+      name: actorName || game.i18n.localize(`TYPES.Actor.${ENVIRONMENT_TOKEN_ACTOR_TYPE}`),
       actorLink: false,
       texture: { src: tokenImage }
     },
@@ -500,17 +632,23 @@ function isLegacyEquipmentType(type) {
   return LEGACY_EQUIPMENT_TYPES.has(String(type ?? '').trim());
 }
 
+function isLegacyTraitType(type) {
+  return LEGACY_TRAIT_TYPES.has(String(type ?? '').trim());
+}
+
+function isCurrentTraitType(type) {
+  const normalizedType = String(type ?? '').trim();
+  return normalizedType.startsWith('trait') && !isLegacyTraitType(normalizedType);
+}
+
 function getMigratedEquipmentSystemData(item) {
   const systemData = foundry.utils.deepClone(item?.system ?? {});
-  const legacySubtype = normalizeEquipmentSubtype(
-    systemData.equipmentSubtype,
-    item?.type ?? 'equipment'
-  );
+  const itemType = String(item?.type ?? '').trim();
   const hasStoredRequiresRoll = typeof systemData.requiresRoll === 'boolean';
   const hasConfiguredSkill = Boolean(String(systemData.skill ?? '').trim());
   const requiresRoll = hasStoredRequiresRoll
     ? systemData.requiresRoll
-    : legacySubtype === 'cartridge' || legacySubtype === 'implant' || hasConfiguredSkill;
+    : itemType === 'cartridge' || itemType === 'implant' || hasConfiguredSkill;
 
   systemData.rank = String(systemData.rank ?? '');
   systemData.requiresRoll = Boolean(requiresRoll);
@@ -543,6 +681,52 @@ function buildLegacyEquipmentCreateData(item, { mappedLibraryUuid = '' } = {}) {
   delete data._id;
   data.type = 'equipment';
   data.system = getMigratedEquipmentSystemData(item);
+
+  if (mappedLibraryUuid) {
+    foundry.utils.setProperty(
+      data,
+      `flags.${MODULE_ID}.${LIBRARY_ITEM_UUID_FLAG}`,
+      mappedLibraryUuid
+    );
+  }
+
+  return data;
+}
+
+function getMigratedTraitSystemData(item) {
+  const systemData = foundry.utils.deepClone(item?.system ?? {});
+  systemData.usageFrequency = normalizeUsageFrequency(
+    systemData.usageFrequency ?? DEFAULT_ITEM_USAGE_FREQUENCY
+  );
+  systemData.activationType = String(systemData.activationType ?? 'passive') || 'passive';
+  systemData.range = String(systemData.range ?? '');
+  systemData.requiresRoll = Boolean(systemData.requiresRoll);
+  systemData.skill = String(systemData.skill ?? '');
+  if (!systemData.requiresRoll) {
+    systemData.skill = '';
+  }
+  return systemData;
+}
+
+function needsTraitSystemNormalization(item) {
+  if (!isCurrentTraitType(item?.type)) return false;
+
+  const nextSystemData = getMigratedTraitSystemData(item);
+  return !foundry.utils.isEmpty(foundry.utils.diffObject(item?.system ?? {}, nextSystemData));
+}
+
+function buildTraitSystemNormalizationUpdate(item) {
+  return {
+    _id: item.id,
+    system: getMigratedTraitSystemData(item)
+  };
+}
+
+function buildLegacyTraitCreateData(item, { mappedLibraryUuid = '' } = {}) {
+  const data = foundry.utils.deepClone(item?.toObject?.() ?? {});
+  delete data._id;
+  data.type = 'trait';
+  data.system = getMigratedTraitSystemData(item);
 
   if (mappedLibraryUuid) {
     foundry.utils.setProperty(
@@ -755,11 +939,184 @@ async function runLegacyEquipmentTypeMigrationIfNeeded() {
   return summary;
 }
 
+async function migrateLegacyTraitTypes() {
+  if (!game.user?.isGM) return null;
+
+  const migrationContext = {
+    source: 'legacy-trait-type-migration'
+  };
+  const createDeleteOptions = {
+    render: false,
+    [ITEM_LIBRARY_SYNC_OPTION_KEY]: migrationContext
+  };
+  const updateOptions = {
+    diff: false,
+    ...createDeleteOptions
+  };
+
+  const worldItemsSnapshot = Array.from(game.items ?? []);
+  const legacyWorldItems = worldItemsSnapshot.filter((item) => isLegacyTraitType(item.type));
+  const normalizedWorldUpdates = worldItemsSnapshot
+    .filter((item) => isCurrentTraitType(item.type) && needsTraitSystemNormalization(item))
+    .map((item) => buildTraitSystemNormalizationUpdate(item));
+  const worldUuidMap = new Map();
+  const migratedLegacyWorldItemIds = [];
+  let worldItemsRecreated = 0;
+
+  for (const item of legacyWorldItems) {
+    const createdItem = await Item.create(buildLegacyTraitCreateData(item), createDeleteOptions);
+    if (!createdItem) continue;
+    worldUuidMap.set(getWorldItemMigrationMapKey(item), createdItem.uuid);
+    migratedLegacyWorldItemIds.push(item.id);
+    worldItemsRecreated += 1;
+  }
+
+  if (normalizedWorldUpdates.length) {
+    await Item.updateDocuments(normalizedWorldUpdates, updateOptions);
+  }
+
+  const actorItemIdMap = new Map();
+  let actorItemsRecreated = 0;
+  let actorItemsDeleted = 0;
+  let actorItemsNormalized = 0;
+
+  for (const actor of game.actors ?? []) {
+    const actorItemsSnapshot = Array.from(actor.items ?? []);
+    const legacyActorItems = actorItemsSnapshot.filter((item) => isLegacyTraitType(item.type));
+    const normalizedActorUpdates = actorItemsSnapshot
+      .filter((item) => isCurrentTraitType(item.type) && needsTraitSystemNormalization(item))
+      .map((item) => buildTraitSystemNormalizationUpdate(item));
+
+    if (legacyActorItems.length) {
+      const createdItems = await actor.createEmbeddedDocuments(
+        'Item',
+        legacyActorItems.map((item) =>
+          buildLegacyTraitCreateData(item, {
+            mappedLibraryUuid: getMappedLibraryUuid(item, worldUuidMap)
+          })
+        ),
+        createDeleteOptions
+      );
+
+      createdItems.forEach((createdItem, index) => {
+        const sourceItem = legacyActorItems[index];
+        if (!createdItem || !sourceItem) return;
+        actorItemIdMap.set(
+          buildActorItemMigrationMapKey(actor.id, sourceItem.id),
+          String(createdItem.id ?? '').trim()
+        );
+      });
+
+      actorItemsRecreated += createdItems.length;
+      const migratedLegacyActorItemIds = legacyActorItems
+        .slice(0, createdItems.length)
+        .map((item) => item.id);
+      actorItemsDeleted += migratedLegacyActorItemIds.length;
+
+      await actor.deleteEmbeddedDocuments('Item', migratedLegacyActorItemIds, createDeleteOptions);
+    }
+
+    if (normalizedActorUpdates.length) {
+      await actor.updateEmbeddedDocuments('Item', normalizedActorUpdates, updateOptions);
+      actorItemsNormalized += normalizedActorUpdates.length;
+    }
+  }
+
+  let actorLibraryLinksUpdated = 0;
+  if (worldUuidMap.size) {
+    for (const actor of game.actors ?? []) {
+      const linkUpdates = [];
+      for (const item of actor.items ?? []) {
+        const currentLibraryUuid = getLibraryItemUuid(item);
+        if (!currentLibraryUuid) continue;
+
+        const mappedLibraryUuid = worldUuidMap.get(currentLibraryUuid);
+        if (!mappedLibraryUuid || mappedLibraryUuid === currentLibraryUuid) continue;
+
+        linkUpdates.push({
+          _id: item.id,
+          [`flags.${MODULE_ID}.${LIBRARY_ITEM_UUID_FLAG}`]: mappedLibraryUuid
+        });
+      }
+
+      if (!linkUpdates.length) continue;
+      await actor.updateEmbeddedDocuments('Item', linkUpdates, createDeleteOptions);
+      actorLibraryLinksUpdated += linkUpdates.length;
+    }
+  }
+
+  const libraryMetadataUpdates = [];
+  if (actorItemIdMap.size) {
+    for (const item of game.items ?? []) {
+      const actorId = getLibraryActorId(item);
+      const actorItemId = getLibraryActorItemId(item);
+      if (!actorId || !actorItemId) continue;
+
+      const migratedActorItemId = actorItemIdMap.get(
+        buildActorItemMigrationMapKey(actorId, actorItemId)
+      );
+      if (!migratedActorItemId || migratedActorItemId === actorItemId) continue;
+
+      libraryMetadataUpdates.push({
+        _id: item.id,
+        [`flags.${MODULE_ID}.${LIBRARY_ACTOR_ID_FLAG}`]: actorId,
+        [`flags.${MODULE_ID}.${LIBRARY_ACTOR_ITEM_ID_FLAG}`]: migratedActorItemId
+      });
+    }
+  }
+
+  if (libraryMetadataUpdates.length) {
+    await Item.updateDocuments(libraryMetadataUpdates, createDeleteOptions);
+  }
+
+  if (migratedLegacyWorldItemIds.length) {
+    await Item.deleteDocuments(migratedLegacyWorldItemIds, createDeleteOptions);
+  }
+
+  const totalUpdates =
+    worldItemsRecreated +
+    normalizedWorldUpdates.length +
+    actorItemsRecreated +
+    actorItemsNormalized +
+    actorLibraryLinksUpdated +
+    libraryMetadataUpdates.length;
+
+  const summary = {
+    worldItemsRecreated,
+    worldItemsDeleted: migratedLegacyWorldItemIds.length,
+    worldItemsNormalized: normalizedWorldUpdates.length,
+    actorItemsRecreated,
+    actorItemsDeleted,
+    actorItemsNormalized,
+    actorLibraryLinksUpdated,
+    libraryMetadataUpdated: libraryMetadataUpdates.length,
+    totalUpdates
+  };
+
+  if (totalUpdates > 0) {
+    debugLog('Migrating legacy trait item types', summary);
+  }
+
+  return summary;
+}
+
+async function runLegacyTraitTypeMigrationIfNeeded() {
+  const currentVersion =
+    Number(game.settings.get(MODULE_ID, LEGACY_TRAIT_TYPE_MIGRATION_SETTING)) || 0;
+  if (currentVersion >= LEGACY_TRAIT_TYPE_MIGRATION_VERSION) return null;
+
+  const summary = await migrateLegacyTraitTypes();
+  await game.settings.set(
+    MODULE_ID,
+    LEGACY_TRAIT_TYPE_MIGRATION_SETTING,
+    LEGACY_TRAIT_TYPE_MIGRATION_VERSION
+  );
+  return summary;
+}
+
 function hasObsoleteCartridgeData(item) {
   return Boolean(
-    (item?.isCartridge ||
-      (isEquipmentLikeType(item?.type) &&
-        normalizeEquipmentSubtype(item?.system?.equipmentSubtype, item?.type) === 'cartridge')) &&
+    (item?.isCartridge || item?.type === 'cartridge') &&
       OBSOLETE_CARTRIDGE_ITEM_FIELDS.some((field) =>
         foundry.utils.hasProperty(item.system ?? {}, field)
       )
@@ -824,14 +1181,25 @@ Hooks.once('init', function () {
     ProjectAndromedaItem,
     debugLog,
     migrateLegacyEquipmentTypes,
+    migrateLegacyTraitTypes,
+    mergeDuplicateLibraryItems,
     migrateActorItemsToLibrary,
-    sessionStats
+    sessionStats,
+    syncSharedHeroPointInputs
   };
 
   // Add custom constants for configuration.
   CONFIG.ProjectAndromeda = PROJECT_ANDROMEDA;
 
   registerSystemSettings();
+  game.settings.registerMenu(MODULE_ID, 'googleSheetsSyncMenu', {
+    name: 'MY_RPG.Settings.GoogleSheetsSync.Name',
+    hint: 'MY_RPG.Settings.GoogleSheetsSync.Hint',
+    label: 'MY_RPG.Settings.GoogleSheetsSync.Label',
+    icon: 'fas fa-table',
+    type: GoogleSheetsSyncApp,
+    restricted: true
+  });
 
   // Define custom Document classes
   CONFIG.Actor.documentClass = ProjectAndromedaActor;
@@ -892,6 +1260,12 @@ Hooks.on('renderDialog', (dialog, html) => {
   const selectElement = select.get(0);
   if (!selectElement) return;
 
+  const allowedActorTypes = new Set(game.documentTypes?.Actor ?? []);
+  if (allowedActorTypes.size && shouldCustomizeActorTypeDialog(dialog, selectElement, allowedActorTypes)) {
+    buildActorTypeOptions({ select, allowedTypes: allowedActorTypes });
+    return;
+  }
+
   // Get the allowed item types from the game
   const allowedTypes = new Set(game.documentTypes?.Item ?? []);
   if (!allowedTypes.size) return;
@@ -899,6 +1273,43 @@ Hooks.on('renderDialog', (dialog, html) => {
   if (!shouldCustomizeItemTypeDialog(dialog, selectElement, allowedTypes)) return;
 
   buildItemTypeOptions({ select, allowedTypes });
+});
+
+Hooks.on('getActorDirectoryEntryContext', (_html, options) => {
+  options.push({
+    name: 'MY_RPG.ActorTypeChange.Context',
+    icon: '<i class="fas fa-shapes"></i>',
+    condition: (li) => {
+      if (!game.user?.isGM) return false;
+      const actorId =
+        li?.data?.('documentId') ??
+        li?.data?.('entryId') ??
+        li?.attr?.('data-document-id') ??
+        li?.attr?.('data-entry-id') ??
+        li?.[0]?.dataset?.documentId ??
+        li?.[0]?.dataset?.entryId;
+      return Boolean(actorId && game.actors?.get(actorId));
+    },
+    callback: async (li) => {
+      const actorId =
+        li?.data?.('documentId') ??
+        li?.data?.('entryId') ??
+        li?.attr?.('data-document-id') ??
+        li?.attr?.('data-entry-id') ??
+        li?.[0]?.dataset?.documentId ??
+        li?.[0]?.dataset?.entryId;
+      const actor = actorId ? (game.actors?.get(actorId) ?? null) : null;
+      if (!actor) return;
+
+      const nextType = await promptForActorTypeSelection(actor, {
+        title: game.i18n.format('MY_RPG.ActorTypeChange.TitleWithName', {
+          name: actor.name || game.i18n.localize('MY_RPG.KeyInfo.Name')
+        })
+      });
+      if (!nextType) return;
+      await updateActorDocumentType(actor, nextType);
+    }
+  });
 });
 
 Hooks.on('getChatLogEntryContext', (_html, options) => {
@@ -920,11 +1331,11 @@ Hooks.on('getChatLogEntryContext', (_html, options) => {
         ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.NoActor'));
         return;
       }
-      if (!(game.user?.isGM || actor.isOwner)) {
+      if (!canSpendHeroPoints(actor)) {
         ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.NoPermission'));
         return;
       }
-      if ((Number(actor.system?.momentOfGlory) || 0) <= 0) {
+      if (getActorHeroPoints(actor) <= 0) {
         ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.NoPoints'));
         return;
       }
@@ -964,6 +1375,7 @@ Hooks.on('createChatMessage', (message) => {
 
 Hooks.on('updateActor', (actor, changes) => {
   if (!foundry.utils.hasProperty(changes, 'system.momentOfGlory')) return;
+  if (isGmCharacterActorType(actor?.type)) return;
   syncHeroPointInputs(actor);
 });
 
@@ -971,12 +1383,11 @@ Hooks.on('updateActor', (actor, changes, options) => {
   if (!isPrimaryActiveGM()) return;
   if (hasItemLibrarySyncOption(options)) return;
 
-  const changedName = foundry.utils.hasProperty(changes, 'name');
   const changedOwnership = foundry.utils.hasProperty(changes, 'ownership');
-  if (!changedName && !changedOwnership) return;
+  if (!changedOwnership) return;
 
   void syncActorLibraryStructure(actor).catch((error) => {
-    debugLog('Actor library folder sync failed on actor update', {
+    debugLog('Actor library sync failed on actor update', {
       actor: actor?.uuid ?? null,
       error
     });
@@ -1061,6 +1472,16 @@ Hooks.on('updateItem', (item, changed, options) => {
 
 Hooks.on('deleteItem', (item, options) => {
   if (!isPrimaryActiveGM()) return;
+  if (item?.parent?.documentName === 'Actor') {
+    void handleActorOwnedItemDelete(item, options).catch((error) => {
+      debugLog('Actor item library sync failed on delete', {
+        actor: item?.parent?.uuid ?? null,
+        itemId: item?.id ?? null,
+        error
+      });
+    });
+    return;
+  }
   if (item?.parent) return;
 
   void handleWorldItemDelete(item, options).catch((error) => {
@@ -1137,9 +1558,11 @@ Hooks.once('ready', async function () {
 
   if (isPrimaryActiveGM()) {
     await runLegacyEquipmentTypeMigrationIfNeeded();
+    await runLegacyTraitTypeMigrationIfNeeded();
     await purgeObsoleteCartridgeData();
     await runItemLibraryMigrationIfNeeded();
   } else {
     await purgeObsoleteCartridgeData();
   }
 });
+

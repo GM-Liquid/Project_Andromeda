@@ -1,5 +1,12 @@
 import { MODULE_ID, debugLog } from '../config.mjs';
-import { ITEM_USAGE_FREQUENCY_LABEL_KEYS, getItemTypeConfig } from '../helpers/item-config.mjs';
+import {
+  DEFAULT_ITEM_USAGE_FREQUENCY,
+  ITEM_ACTIVATION_TYPE_LABEL_KEYS,
+  ITEM_USAGE_FREQUENCY_LABEL_KEYS,
+  getItemTypeConfig,
+  isPersonalityValueItem,
+  normalizeUsageFrequency
+} from '../helpers/item-config.mjs';
 
 function buildRankOptions(selected) {
   const selectedNumber = Number(selected) || 0;
@@ -44,7 +51,7 @@ function buildSkillOptions(selected) {
 }
 
 function buildUsageFrequencyOptions(selected) {
-  const normalized = selected || 'atWill';
+  const normalized = normalizeUsageFrequency(selected || DEFAULT_ITEM_USAGE_FREQUENCY);
   return Object.entries(ITEM_USAGE_FREQUENCY_LABEL_KEYS).map(([value, labelKey]) => ({
     value,
     label: game.i18n.localize(labelKey),
@@ -52,9 +59,40 @@ function buildUsageFrequencyOptions(selected) {
   }));
 }
 
+function buildActivationTypeOptions(selected) {
+  const normalized = selected || 'passive';
+  return Object.entries(ITEM_ACTIVATION_TYPE_LABEL_KEYS).map(([value, labelKey]) => ({
+    value,
+    label: game.i18n.localize(labelKey),
+    selected: normalized === value
+  }));
+}
+
+function getFieldOptions(field, data) {
+  if (field.type === 'usageFrequency') {
+    return data.usageFrequencyOptions;
+  }
+  if (field.type === 'activationType') {
+    return data.activationTypeOptions;
+  }
+  if (field.type === 'skill') {
+    return data.skillOptions;
+  }
+  return [];
+}
+
 function shouldDisplayField(field, systemData) {
   if (!field?.showWhenPath) return true;
   return Boolean(foundry.utils.getProperty(systemData, field.showWhenPath));
+}
+
+function autoResizeDescriptionArea(area) {
+  if (!(area instanceof HTMLTextAreaElement)) return;
+
+  area.style.height = 'auto';
+
+  const minHeight = Number.parseFloat(window.getComputedStyle(area).minHeight) || 0;
+  area.style.height = `${Math.max(area.scrollHeight, minHeight)}px`;
 }
 
 export class ProjectAndromedaItemSheet extends ItemSheet {
@@ -75,7 +113,16 @@ export class ProjectAndromedaItemSheet extends ItemSheet {
     const descriptionAreas = root.querySelectorAll('[data-description-editor]');
 
     for (const area of descriptionAreas) {
-      if (!(area instanceof HTMLTextAreaElement) || area.dataset.hasShortcutHandler) continue;
+      if (!(area instanceof HTMLTextAreaElement)) continue;
+
+      autoResizeDescriptionArea(area);
+
+      if (!area.dataset.hasAutoResizeHandler) {
+        area.dataset.hasAutoResizeHandler = 'true';
+        area.addEventListener('input', () => autoResizeDescriptionArea(area));
+      }
+
+      if (area.dataset.hasShortcutHandler) continue;
 
       area.dataset.hasShortcutHandler = 'true';
 
@@ -107,6 +154,12 @@ export class ProjectAndromedaItemSheet extends ItemSheet {
         area.dispatchEvent(new Event('input', { bubbles: true }));
       });
     }
+
+    setTimeout(() => {
+      for (const area of descriptionAreas) {
+        autoResizeDescriptionArea(area);
+      }
+    }, 0);
   }
 
   async getData(options) {
@@ -190,13 +243,17 @@ export class ProjectAndromedaGenericItemSheet extends ProjectAndromedaItemSheet 
     data.rankOptions = buildRankOptions(data.system.rank);
     data.skillOptions = buildSkillOptions(data.system.skill);
     data.usageFrequencyOptions = buildUsageFrequencyOptions(data.system.usageFrequency);
-    const fields = Array.isArray(data.itemConfig?.fields) ? data.itemConfig.fields : [];
+    data.activationTypeOptions = buildActivationTypeOptions(data.system.activationType);
+    const fields = isPersonalityValueItem(this.item)
+      ? []
+      : Array.isArray(data.itemConfig?.fields)
+        ? data.itemConfig.fields
+        : [];
     data.itemFields = fields
       .filter((field) => shouldDisplayField(field, data.system))
       .map((field) => {
         const value = foundry.utils.getProperty(data.system, field.path) ?? '';
-        const isUsageFrequency = field.type === 'usageFrequency';
-        const isSkill = field.type === 'skill';
+        const hasOptions = ['usageFrequency', 'activationType', 'skill'].includes(field.type);
         return {
           ...field,
           value,
@@ -205,9 +262,8 @@ export class ProjectAndromedaGenericItemSheet extends ProjectAndromedaItemSheet 
           inputType: field.type === 'number' ? 'number' : 'text',
           isRank: field.type === 'rank',
           isCheckbox: field.type === 'checkbox',
-          isUsageFrequency,
-          isSkill,
-          options: isUsageFrequency ? data.usageFrequencyOptions : isSkill ? data.skillOptions : []
+          hasOptions,
+          options: getFieldOptions(field, data)
         };
       });
     return data;

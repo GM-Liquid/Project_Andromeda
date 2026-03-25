@@ -1,0 +1,130 @@
+<section class='item-group' data-item-group='{{group.key}}'>
+  <header class='item-group__header'>
+    <h3>
+      {{#if group.icon}}<i class='{{group.icon}}'></i>{{/if}}
+      <span class='item-group__title'>{{group.label}}</span>
+      {{#if group.capacity}}
+        <span class='item-group__capacity'>{{group.capacity.value}} / {{group.capacity.max}}</span>
+      {{/if}}
+    </h3>
+    <button
+      type='button'
+      class='item-create item-control'
+      data-type='{{group.type}}'
+      data-group-key='{{group.key}}'
+      title='{{group.createLabel}}'
+    >
+      <i class='fa-solid fa-plus'></i>
+      <span class='sr-only'>{{group.createLabel}}</span>
+    </button>
+  </header>
+  {{#if group.items.length}}
+    <ol class='item-list'>
+      {{#each group.items as |item|}}
+        <li
+          class='item-row {{#if item.equipped}}item-row--equipped{{/if}}'
+          data-item-id='{{item.id}}'
+          data-group-key='{{item.groupKey}}'
+        >
+          <div class='item-row__header'>
+            <div class='item-row__name'>
+              <img src='{{item.img}}' alt='' />
+              <span class='item-row__label'>{{item.name}}</span>
+            </div>
+            {{#if item.hasBadges}}
+              <ul class='item-row__badges'>
+                {{#each item.badges as |badge|}}
+                  <li class='item-badge'>{{badge}}</li>
+                {{/each}}
+              </ul>
+            {{/if}}
+            <div class='item-row__actions' data-item-id='{{item.id}}' data-group-key='{{item.groupKey}}'>
+              {{#if item.showQuantity}}
+                <div class='item-quantity-control' aria-label='{{@root.itemControls.quantity}}'>
+                  <button
+                    type='button'
+                    class='item-quantity-step'
+                    data-step='-1'
+                    title='{{@root.itemControls.quantityDecrease}}'
+                  >
+                    <i class='fa-solid fa-minus'></i>
+                    <span class='sr-only'>{{@root.itemControls.quantityDecrease}}</span>
+                  </button>
+                  <span class='item-quantity-value'>{{item.quantity}}</span>
+                  <button
+                    type='button'
+                    class='item-quantity-step'
+                    data-step='1'
+                    title='{{@root.itemControls.quantityIncrease}}'
+                  >
+                    <i class='fa-solid fa-plus'></i>
+                    <span class='sr-only'>{{@root.itemControls.quantityIncrease}}</span>
+                  </button>
+                </div>
+              {{/if}}
+              {{#if item.showEquip}}
+                <label class='item-equip-toggle' title='{{@root.itemControls.equip}}'>
+                  <input
+                    type='checkbox'
+                    class='item-equip-checkbox'
+                    {{#if item.equipped}}checked{{/if}}
+                    aria-label='{{@root.itemControls.equipAria}}'
+                  />
+                </label>
+              {{/if}}
+              {{#if item.canRoll}}
+                <button
+                  type='button'
+                  class='item-roll item-control'
+                  data-item-id='{{item.id}}'
+                  data-group-key='{{item.groupKey}}'
+                  title='{{@root.itemControls.roll}}'
+                >
+                  <i class='fa-solid fa-dice-d10'></i>
+                  <span class='sr-only'>{{@root.itemControls.roll}}</span>
+                </button>
+              {{/if}}
+              <button
+                type='button'
+                class='item-chat item-control'
+                data-item-id='{{item.id}}'
+                data-group-key='{{item.groupKey}}'
+                title='{{@root.itemControls.chat}}'
+              >
+                <i class='fa-solid fa-comment-dots'></i>
+                <span class='sr-only'>{{@root.itemControls.chat}}</span>
+              </button>
+              <button
+                type='button'
+                class='item-edit item-control'
+                data-item-id='{{item.id}}'
+                data-group-key='{{item.groupKey}}'
+                title='{{@root.itemControls.edit}}'
+              >
+                <i class='fa-solid fa-pen'></i>
+                <span class='sr-only'>{{@root.itemControls.edit}}</span>
+              </button>
+              <button
+                type='button'
+                class='item-delete item-control'
+                data-item-id='{{item.id}}'
+                data-group-key='{{item.groupKey}}'
+                title='{{@root.itemControls.delete}}'
+              >
+                <i class='fa-solid fa-trash'></i>
+                <span class='sr-only'>{{@root.itemControls.delete}}</span>
+              </button>
+            </div>
+          </div>
+          {{#if item.hasSummary}}
+            <div class='item-row__summary'>
+              {{{item.summary}}}
+            </div>
+          {{/if}}
+        </li>
+      {{/each}}
+    </ol>
+  {{else}}
+    <p class='item-group__empty'>{{group.empty}}</p>
+  {{/if}}
+</section>

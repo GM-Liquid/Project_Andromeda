@@ -1,7 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap");
 /* Global styles */
 .window-app {
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
 }
 
 /* Rank colors -------------------------------------------------- */
@@ -312,9 +312,32 @@ textarea[disabled] {
   color: var(--item-sheet-label);
 }
 
+.project-andromeda.item-sheet .item-field--checkbox {
+  justify-content: flex-end;
+}
+
+.project-andromeda.item-sheet .item-field--checkbox .checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 24px;
+  margin: 0;
+}
+
+.project-andromeda.item-sheet .item-field--checkbox input[type="checkbox"] {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+.project-andromeda.item-sheet .item-field--checkbox .checkbox-label span {
+  line-height: 1.2;
+}
+
 .project-andromeda.item-sheet textarea,
-.project-andromeda.item-sheet input[type='text'],
-.project-andromeda.item-sheet input[type='number'],
+.project-andromeda.item-sheet input[type="text"],
+.project-andromeda.item-sheet input[type="number"],
 .project-andromeda.item-sheet select {
   width: 100%;
   box-sizing: border-box;
@@ -470,8 +493,8 @@ textarea[disabled] {
 }
 
 form textarea,
-form input[type='text'],
-form input[type='number'] {
+form input[type="text"],
+form input[type="number"] {
   border: 2px solid #1b1210; /*            */
   background-color: #f8f8f8; /*                                         */
   color: #1b1210; /*                          */
@@ -482,7 +505,8 @@ form input[type='number'] {
   box-sizing: border-box;
 }
 
-.project-andromeda .biography .form-group {
+.project-andromeda .biography .form-group,
+.project-andromeda .personality .form-group {
   margin-bottom: 5px;
 }
 
@@ -591,9 +615,9 @@ td.col-name:hover {
 
 .project-andromeda
   .abilities-table
-  tr:nth-child(even):not(.ability-effect-row):not(.mod-effect-row):not(.inventory-effect-row):not(
-    .armor-effect-row
-  ):not(.weapon-effect-row) {
+  tr:nth-child(even):not(.ability-effect-row):not(.mod-effect-row):not(
+    .inventory-effect-row
+  ):not(.armor-effect-row):not(.weapon-effect-row) {
   background-color: #c1b1aa !important;
 }
 
@@ -644,7 +668,9 @@ td.col-name:hover {
   width: 21% !important;
 }
 
-.tab.abilities table.abilities-table:not(.abilities-table--unity) th.col-delete {
+.tab.abilities
+  table.abilities-table:not(.abilities-table--unity)
+  th.col-delete {
   width: 10% !important;
 }
 
@@ -743,18 +769,30 @@ td.col-name:hover {
   text-align: center;
 }
 
-.tab.inventory table.abilities-table:not(.armor-table):not(.weapon-table) th.col-name,
-.tab.inventory table.abilities-table:not(.armor-table):not(.weapon-table) td.col-name {
+.tab.inventory
+  table.abilities-table:not(.armor-table):not(.weapon-table)
+  th.col-name,
+.tab.inventory
+  table.abilities-table:not(.armor-table):not(.weapon-table)
+  td.col-name {
   width: 55%;
 }
 
-.tab.inventory table.abilities-table:not(.armor-table):not(.weapon-table) th.col-cost,
-.tab.inventory table.abilities-table:not(.armor-table):not(.weapon-table) td.col-cost {
+.tab.inventory
+  table.abilities-table:not(.armor-table):not(.weapon-table)
+  th.col-cost,
+.tab.inventory
+  table.abilities-table:not(.armor-table):not(.weapon-table)
+  td.col-cost {
   width: 30%;
 }
 
-.tab.inventory table.abilities-table:not(.armor-table):not(.weapon-table) th.col-delete,
-.tab.inventory table.abilities-table:not(.armor-table):not(.weapon-table) td.col-delete {
+.tab.inventory
+  table.abilities-table:not(.armor-table):not(.weapon-table)
+  th.col-delete,
+.tab.inventory
+  table.abilities-table:not(.armor-table):not(.weapon-table)
+  td.col-delete {
   width: 15%;
 }
 
@@ -853,6 +891,8 @@ td.col-name:hover {
 
 .tab.biography h1,
 .tab.biography h2,
+.tab.personality h1,
+.tab.personality h2,
 .tab.abilities h1,
 .tab.abilities h2 {
   text-align: center; /*                      */
@@ -886,14 +926,40 @@ td.col-name:hover {
   3)                              (label)             
                  ,                         input/textarea
  *******************************************************/
-.tab.biography .form-group label {
+.tab.biography .form-group label,
+.tab.personality .form-group label {
   text-align: center;
   display: block;
 }
 
 .tab.biography .form-group input,
-.tab.biography .form-group textarea {
+.tab.biography .form-group textarea,
+.tab.personality .form-group input,
+.tab.personality .form-group textarea {
   text-align: center;
+}
+
+.project-andromeda .personality-sheet-box {
+  margin-bottom: 1rem;
+}
+
+.project-andromeda .personality-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+.project-andromeda .personality-field--full {
+  grid-column: 1 / -1;
+}
+
+.project-andromeda .personality-grid textarea.auto-resize-textarea {
+  min-height: 52px;
+  height: auto;
+}
+
+.project-andromeda .personality-item-groups {
+  margin-bottom: 1rem;
 }
 
 /*******************************************************
@@ -922,8 +988,10 @@ td.col-name:hover {
 
 .project-andromeda.sheet.item textarea.description-input {
   width: 100%;
+  height: auto;
   min-height: 160px;
-  resize: vertical;
+  resize: none;
+  overflow: hidden;
   line-height: 1.4;
 }
 
@@ -937,8 +1005,8 @@ td.col-name:hover {
 }
 
 /*                                             */
-.project-andromeda.sheet.actor form input[type='text'],
-.project-andromeda.sheet.actor form input[type='number'],
+.project-andromeda.sheet.actor form input[type="text"],
+.project-andromeda.sheet.actor form input[type="number"],
 .project-andromeda.sheet.actor form textarea {
   text-align: center;
 }
@@ -1028,8 +1096,8 @@ td.col-name:hover {
   margin-right: 10px;
 }
 
-.window-app.dialog .form-group input[type='text'],
-.window-app.dialog .form-group input[type='number'],
+.window-app.dialog .form-group input[type="text"],
+.window-app.dialog .form-group input[type="number"],
 .window-app.dialog .form-group textarea {
   width: 250px;
   box-sizing: border-box;
@@ -1374,8 +1442,126 @@ input.rank4 {
   font-weight: 600;
 }
 
-select[name='type'] optgroup {
+select[name="type"] optgroup {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
+}
+
+/* Google Sheets sync ---------------------------------------------------- */
+.google-sheets-sync-app .window-content {
+  background: linear-gradient(180deg, #f7f1e6 0%, #efe5d4 100%);
+}
+
+.google-sheets-sync {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.google-sheets-sync__intro,
+.google-sheets-sync__settings,
+.google-sheets-sync__layout,
+.google-sheets-sync__results {
+  padding: 12px;
+  border: 1px solid #bcae9c;
+  border-radius: 10px;
+  background: rgba(255, 250, 242, 0.92);
+}
+
+.google-sheets-sync__intro p,
+.google-sheets-sync__results p,
+.google-sheets-sync__layout p {
+  margin: 0;
+}
+
+.google-sheets-sync__note,
+.google-sheets-sync__status {
+  color: #5a4436;
+}
+
+.google-sheets-sync__settings {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.google-sheets-sync__settings .form-group {
+  margin: 0;
+}
+
+.google-sheets-sync__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.google-sheets-sync__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
+
+.google-sheets-sync__button--primary {
+  background: #673e37;
+  color: #f6ede0;
+}
+
+.google-sheets-sync__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.google-sheets-sync__card,
+.google-sheets-sync__block {
+  padding: 12px;
+  border: 1px solid #d4cbc0;
+  border-radius: 10px;
+  background: #fffdf9;
+}
+
+.google-sheets-sync__block + .google-sheets-sync__block {
+  margin-top: 10px;
+}
+
+.google-sheets-sync__block--warning {
+  border-color: #c69804;
+  background: #fff7dc;
+}
+
+.google-sheets-sync__block--error {
+  border-color: #8d3c2f;
+  background: #fff0ea;
+}
+
+.google-sheets-sync__columns {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  max-height: 220px;
+  overflow: auto;
+}
+
+.google-sheets-sync__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.google-sheets-sync__table th,
+.google-sheets-sync__table td {
+  padding: 6px 8px;
+  border: 1px solid #d4cbc0;
+  text-align: left;
+}
+
+.google-sheets-sync__table thead th {
+  background: #673e37;
+  color: #f6ede0;
+}
+
+@media (max-width: 720px) {
+  .google-sheets-sync__settings {
+    grid-template-columns: 1fr;
+  }
 }

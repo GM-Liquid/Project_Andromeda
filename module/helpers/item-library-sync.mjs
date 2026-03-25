@@ -51,16 +51,22 @@ function getWorldItems() {
   return game.items?.contents ?? [];
 }
 
-function getItemFolders() {
-  return (game.folders?.contents ?? []).filter((folder) => folder.type === 'Item');
-}
-
-function getDocumentFolderId(document) {
-  return String(document?.folder?.id ?? document?.folder ?? '').trim();
-}
-
 function buildActorOwnership(actor) {
   return deepClone(actor?.ownership ?? {});
+}
+
+function buildMergedOwnership(actors = []) {
+  const mergedOwnership = {};
+
+  for (const actor of actors) {
+    for (const [userId, level] of Object.entries(actor?.ownership ?? {})) {
+      const numericLevel = Number(level) || 0;
+      const existingLevel = Number(mergedOwnership[userId]) || 0;
+      mergedOwnership[userId] = Math.max(existingLevel, numericLevel);
+    }
+  }
+
+  return mergedOwnership;
 }
 
 function stripLocalSystemFields(systemData = {}) {
@@ -89,11 +95,20 @@ function buildSharedItemPayload(item) {
   };
 }
 
+function buildSharedPayloadKey(item) {
+  return JSON.stringify(sortValue(buildSharedItemPayload(item)));
+}
+
 function getWorldItemFromUuid(uuid) {
   const normalized = String(uuid ?? '').trim();
   const match = /^Item\.([^.\s]+)$/.exec(normalized);
   if (!match) return null;
   return game.items?.get(match[1]) ?? null;
+}
+
+function getSourceWorldItem(item) {
+  const sourceUuid = String(foundry.utils.getProperty(item, 'flags.core.sourceId') ?? '').trim();
+  return getWorldItemFromUuid(sourceUuid);
 }
 
 function getLibraryActorId(document) {
@@ -112,10 +127,10 @@ function getLibraryActorItemId(document) {
   return String(value ?? '').trim();
 }
 
-function getActorLibraryFolder(actor) {
-  const actorId = String(actor?.id ?? '').trim();
-  if (!actorId) return null;
-  return getItemFolders().find((folder) => getLibraryActorId(folder) === actorId) ?? null;
+function hasLibrarySyncMetadata(document) {
+  return Boolean(
+    getLibraryActorId(document) || getLibraryActorItemId(document) || getLibraryItemUuid(document)
+  );
 }
 
 function getActorSpecificWorldItem(actorItem) {
@@ -133,94 +148,59 @@ function getActorSpecificWorldItem(actorItem) {
   );
 }
 
-function isLibraryItemOwnedByActorItem(libraryItem, actorItem) {
+function getWorldItemFromInheritedLibraryMetadata(item) {
+  const actorId = getLibraryActorId(item);
+  const actorItemId = getLibraryActorItemId(item);
+  if (!actorId || !actorItemId) return null;
+
   return (
-    getLibraryActorId(libraryItem) === String(actorItem?.parent?.id ?? '').trim() &&
-    getLibraryActorItemId(libraryItem) === String(actorItem?.id ?? '').trim()
+    getWorldItems().find(
+      (worldItem) =>
+        worldItem.type === item?.type &&
+        getLibraryActorId(worldItem) === actorId &&
+        getLibraryActorItemId(worldItem) === actorItemId
+    ) ?? null
   );
 }
 
-function countLinkedActorItems(libraryUuid) {
+function getLinkedActorItems(libraryUuid) {
   const normalizedUuid = String(libraryUuid ?? '').trim();
-  if (!normalizedUuid) return 0;
+  if (!normalizedUuid) return [];
 
-  let count = 0;
+  const linkedItems = [];
   for (const actor of getActors()) {
     for (const item of actor.items ?? []) {
-      if (getLibraryItemUuid(item) === normalizedUuid) count += 1;
+      if (getLibraryItemUuid(item) !== normalizedUuid) continue;
+      linkedItems.push(item);
     }
   }
 
-  return count;
+  return linkedItems;
 }
 
-function buildFolderCreateData(actor) {
-  return {
-    name: String(actor?.name ?? '').trim() || String(actor?.id ?? ''),
-    type: 'Item',
-    ownership: buildActorOwnership(actor),
-    flags: {
-      [MODULE_ID]: {
-        [LIBRARY_ACTOR_ID_FLAG]: actor.id
-      }
-    }
-  };
+function getLinkedActors(libraryUuid) {
+  const actorsById = new Map();
+  for (const item of getLinkedActorItems(libraryUuid)) {
+    const actor = item?.parent;
+    if (!actor?.id || actorsById.has(actor.id)) continue;
+    actorsById.set(actor.id, actor);
+  }
+  return Array.from(actorsById.values());
 }
 
-function buildFolderUpdateData(actor, folder) {
-  const update = {};
-  const desiredName = String(actor?.name ?? '').trim() || String(actor?.id ?? '');
-  const desiredOwnership = buildActorOwnership(actor);
+function chooseCanonicalLibraryItem(items) {
+  return [...items].sort((left, right) => {
+    const leftCount = getLinkedActorItems(left.uuid).length;
+    const rightCount = getLinkedActorItems(right.uuid).length;
+    if (leftCount !== rightCount) return rightCount - leftCount;
 
-  if (folder?.name !== desiredName) update.name = desiredName;
-  if (!sameValue(folder?.ownership ?? {}, desiredOwnership)) update.ownership = desiredOwnership;
-  if (getLibraryActorId(folder) !== String(actor?.id ?? '').trim()) {
-    update[`flags.${MODULE_ID}.${LIBRARY_ACTOR_ID_FLAG}`] = actor.id;
-  }
-
-  return update;
+    const leftId = String(left?.id ?? '');
+    const rightId = String(right?.id ?? '');
+    return leftId.localeCompare(rightId);
+  })[0];
 }
 
-async function ensureActorLibraryFolder(actor, options = {}) {
-  const { renderDirectory = true } = options;
-  if (!actor) return { folder: null, created: false, updated: false };
-
-  let folder = getActorLibraryFolder(actor);
-  if (!folder) {
-    folder = await Folder.create(buildFolderCreateData(actor), {
-      render: false,
-      [LIBRARY_SYNC_OPTION_KEY]: {
-        source: 'actor-folder-create'
-      }
-    });
-
-    if (folder && renderDirectory) {
-      renderItemDirectory();
-    }
-
-    return { folder, created: Boolean(folder), updated: false };
-  }
-
-  const update = buildFolderUpdateData(actor, folder);
-  if (!Object.keys(update).length) {
-    return { folder, created: false, updated: false };
-  }
-
-  await folder.update(update, {
-    render: false,
-    [LIBRARY_SYNC_OPTION_KEY]: {
-      source: 'actor-folder-sync'
-    }
-  });
-
-  if (renderDirectory) {
-    renderItemDirectory();
-  }
-
-  return { folder, created: false, updated: true };
-}
-
-function buildLibraryItemCreateData(actorItem, folder) {
+function buildLibraryItemCreateData(actorItem) {
   const actor = actorItem.parent;
   const payload = buildSharedItemPayload(actorItem);
 
@@ -229,7 +209,6 @@ function buildLibraryItemCreateData(actorItem, folder) {
     type: payload.type,
     img: payload.img,
     system: payload.system,
-    folder: folder?.id ?? null,
     ownership: buildActorOwnership(actor),
     flags: {
       [MODULE_ID]: {
@@ -240,23 +219,12 @@ function buildLibraryItemCreateData(actorItem, folder) {
   };
 }
 
-function buildLibraryItemMetadataUpdate(actorItem, folder) {
-  const actor = actorItem.parent;
-  return {
-    folder: folder?.id ?? null,
-    ownership: buildActorOwnership(actor),
-    [`flags.${MODULE_ID}.${LIBRARY_ACTOR_ID_FLAG}`]: actor.id,
-    [`flags.${MODULE_ID}.${LIBRARY_ACTOR_ITEM_ID_FLAG}`]: actorItem.id
-  };
-}
-
-function buildWorldItemUpdateData(actorItem, folder) {
+function buildWorldItemUpdateData(actorItem) {
   const payload = buildSharedItemPayload(actorItem);
   return {
     name: payload.name,
     img: payload.img,
-    system: payload.system,
-    ...buildLibraryItemMetadataUpdate(actorItem, folder)
+    system: payload.system
   };
 }
 
@@ -276,12 +244,42 @@ function buildActorItemUpdateDataFromLibrary(libraryItem, actorItem) {
   };
 }
 
-function needsLibraryItemMetadataSync(libraryItem, actorItem, folder) {
-  if (!libraryItem || !actorItem) return false;
-  if (getDocumentFolderId(libraryItem) !== String(folder?.id ?? '').trim()) return true;
-  if (!sameValue(libraryItem.ownership ?? {}, buildActorOwnership(actorItem.parent))) return true;
-  if (!isLibraryItemOwnedByActorItem(libraryItem, actorItem)) return true;
-  return false;
+function buildLibraryItemStructureUpdate(libraryItem, linkedActorItems) {
+  const linkedActors = [];
+  const actorsById = new Map();
+  for (const item of linkedActorItems) {
+    const actor = item?.parent;
+    if (!actor?.id || actorsById.has(actor.id)) continue;
+    actorsById.set(actor.id, actor);
+    linkedActors.push(actor);
+  }
+
+  const isShared = linkedActorItems.length > 1;
+  const primaryItem = linkedActorItems.length === 1 ? linkedActorItems[0] : null;
+  const ownership = isShared
+    ? buildMergedOwnership(linkedActors)
+    : primaryItem?.parent
+      ? buildActorOwnership(primaryItem.parent)
+      : (libraryItem?.ownership ?? {});
+
+  const update = {};
+  if (!sameValue(libraryItem?.ownership ?? {}, ownership)) {
+    update.ownership = ownership;
+  }
+  if (getLibraryItemUuid(libraryItem) !== libraryItem.uuid) {
+    update[`flags.${MODULE_ID}.${LIBRARY_ITEM_UUID_FLAG}`] = libraryItem.uuid;
+  }
+
+  const desiredActorId = isShared ? null : (primaryItem?.parent?.id ?? null);
+  const desiredActorItemId = isShared ? null : (primaryItem?.id ?? null);
+  if (getLibraryActorId(libraryItem) !== String(desiredActorId ?? '').trim()) {
+    update[`flags.${MODULE_ID}.${LIBRARY_ACTOR_ID_FLAG}`] = desiredActorId;
+  }
+  if (getLibraryActorItemId(libraryItem) !== String(desiredActorItemId ?? '').trim()) {
+    update[`flags.${MODULE_ID}.${LIBRARY_ACTOR_ITEM_ID_FLAG}`] = desiredActorItemId;
+  }
+
+  return update;
 }
 
 function collectActorUpdatesForLibraryUuid(libraryUuid, buildUpdate) {
@@ -303,6 +301,36 @@ function collectActorUpdatesForLibraryUuid(libraryUuid, buildUpdate) {
   }
 
   return updatesByActor;
+}
+
+async function syncLibraryItemStructure(libraryItem, options = {}) {
+  const { renderDirectory = true } = options;
+  if (!libraryItem) {
+    return { updated: false };
+  }
+
+  const linkedActorItems = getLinkedActorItems(libraryItem.uuid);
+  if (!linkedActorItems.length) {
+    return { updated: false };
+  }
+
+  const update = buildLibraryItemStructureUpdate(libraryItem, linkedActorItems);
+  let updated = false;
+  if (Object.keys(update).length) {
+    await libraryItem.update(update, {
+      render: false,
+      [LIBRARY_SYNC_OPTION_KEY]: {
+        source: 'library-item-structure-sync'
+      }
+    });
+    updated = true;
+  }
+
+  if (renderDirectory && updated) {
+    renderItemDirectory();
+  }
+
+  return { updated };
 }
 
 export function getLibrarySyncOptionKey() {
@@ -342,36 +370,26 @@ export async function ensureActorItemLibraryLink(actorItem, options = {}) {
   const { renderDirectory = true } = options;
 
   if (!actorItem?.parent || actorItem.parent.documentName !== 'Actor') {
-    return { libraryItem: null, folder: null, created: false, linked: false };
+    return { libraryItem: null, created: false, linked: false, libraryItemUpdated: false };
   }
 
   if (!isLibrarySyncManagedType(actorItem.type)) {
-    return { libraryItem: null, folder: null, created: false, linked: false };
+    return { libraryItem: null, created: false, linked: false, libraryItemUpdated: false };
   }
-
-  const {
-    folder,
-    created: folderCreated,
-    updated: folderUpdated
-  } = await ensureActorLibraryFolder(actorItem.parent, { renderDirectory: false });
 
   let libraryItem = getLinkedWorldItem(actorItem);
   let created = false;
   let linked = false;
-  let libraryItemUpdated = false;
 
-  if (libraryItem && !isLibraryItemOwnedByActorItem(libraryItem, actorItem)) {
-    if (countLinkedActorItems(libraryItem.uuid) <= 1) {
-      await libraryItem.update(buildLibraryItemMetadataUpdate(actorItem, folder), {
-        render: false,
-        [LIBRARY_SYNC_OPTION_KEY]: {
-          source: 'library-item-adopt'
-        }
-      });
-      libraryItemUpdated = true;
-    } else {
-      libraryItem = null;
+  if (!libraryItem) {
+    const sourceWorldItem = getSourceWorldItem(actorItem);
+    if (sourceWorldItem && isLibrarySyncManagedType(sourceWorldItem.type)) {
+      libraryItem = sourceWorldItem;
     }
+  }
+
+  if (!libraryItem) {
+    libraryItem = getWorldItemFromInheritedLibraryMetadata(actorItem);
   }
 
   if (!libraryItem) {
@@ -379,25 +397,17 @@ export async function ensureActorItemLibraryLink(actorItem, options = {}) {
   }
 
   if (!libraryItem) {
-    libraryItem = await Item.create(buildLibraryItemCreateData(actorItem, folder), {
+    libraryItem = await Item.create(buildLibraryItemCreateData(actorItem), {
       render: false,
       [LIBRARY_SYNC_OPTION_KEY]: {
         source: 'actor-create-library'
       }
     });
     created = Boolean(libraryItem);
-  } else if (needsLibraryItemMetadataSync(libraryItem, actorItem, folder)) {
-    await libraryItem.update(buildLibraryItemMetadataUpdate(actorItem, folder), {
-      render: false,
-      [LIBRARY_SYNC_OPTION_KEY]: {
-        source: 'library-item-metadata-sync'
-      }
-    });
-    libraryItemUpdated = true;
   }
 
   if (!libraryItem) {
-    return { libraryItem: null, folder, created, linked };
+    return { libraryItem: null, created, linked, libraryItemUpdated: false };
   }
 
   if (getLibraryItemUuid(actorItem) !== libraryItem.uuid) {
@@ -415,31 +425,33 @@ export async function ensureActorItemLibraryLink(actorItem, options = {}) {
     linked = true;
   }
 
-  if (renderDirectory && (folderCreated || folderUpdated || created || libraryItemUpdated)) {
+  const structureResult = await syncLibraryItemStructure(libraryItem, { renderDirectory: false });
+
+  if (renderDirectory && (created || linked || structureResult.updated)) {
     renderItemDirectory();
   }
 
   return {
     libraryItem,
-    folder,
     created,
     linked,
-    folderCreated,
-    folderUpdated,
-    libraryItemUpdated
+    libraryItemUpdated: Boolean(structureResult.updated)
   };
 }
 
 export async function syncActorItemToLibrary(actorItem) {
-  const { libraryItem, folder } = await ensureActorItemLibraryLink(actorItem);
+  const { libraryItem } = await ensureActorItemLibraryLink(actorItem);
   if (!libraryItem) return null;
 
-  await libraryItem.update(buildWorldItemUpdateData(actorItem, folder), {
+  await libraryItem.update(buildWorldItemUpdateData(actorItem), {
     render: false,
     [LIBRARY_SYNC_OPTION_KEY]: {
       source: 'actor-to-library'
     }
   });
+
+  await syncLibraryItemStructure(libraryItem, { renderDirectory: false });
+  await syncLibraryItemToActors(libraryItem);
 
   renderItemDirectory();
 
@@ -467,6 +479,98 @@ export async function syncLibraryItemToActors(libraryItem) {
   return updatedCount;
 }
 
+export async function syncLinkedLibraryItemStructure(item, options = {}) {
+  const libraryItem = getLinkedWorldItem(item);
+  if (!libraryItem) {
+    return { updated: false };
+  }
+
+  return syncLibraryItemStructure(libraryItem, options);
+}
+
+export async function mergeDuplicateLibraryItems() {
+  if (!game.user?.isGM) return null;
+
+  const summary = {
+    groupsChecked: 0,
+    duplicateGroups: 0,
+    actorLinksReassigned: 0,
+    duplicateItemsDeleted: 0,
+    orphanDuplicateItemsDeleted: 0
+  };
+
+  const groups = new Map();
+  for (const item of getWorldItems()) {
+    if (!isLibrarySyncManagedType(item.type)) continue;
+
+    const linkedActorItems = getLinkedActorItems(item.uuid);
+    if (!linkedActorItems.length && !hasLibrarySyncMetadata(item)) continue;
+
+    const key = buildSharedPayloadKey(item);
+    const group = groups.get(key) ?? [];
+    group.push(item);
+    groups.set(key, group);
+  }
+
+  summary.groupsChecked = groups.size;
+
+  for (const groupItems of groups.values()) {
+    if (groupItems.length <= 1) continue;
+    summary.duplicateGroups += 1;
+
+    const canonicalItem = chooseCanonicalLibraryItem(groupItems);
+    const duplicateItems = groupItems.filter((item) => item.id !== canonicalItem?.id);
+    if (!canonicalItem || !duplicateItems.length) continue;
+
+    for (const duplicateItem of duplicateItems) {
+      const linkedActorItems = getLinkedActorItems(duplicateItem.uuid);
+      const updatesByActor = collectActorUpdatesForLibraryUuid(duplicateItem.uuid, () => ({
+        [`flags.${MODULE_ID}.${LIBRARY_ITEM_UUID_FLAG}`]: canonicalItem.uuid
+      }));
+
+      for (const [actor, updates] of updatesByActor.entries()) {
+        await actor.updateEmbeddedDocuments('Item', updates, {
+          render: false,
+          [LIBRARY_SYNC_OPTION_KEY]: {
+            source: 'library-duplicate-merge'
+          }
+        });
+        summary.actorLinksReassigned += updates.length;
+      }
+
+      if (!linkedActorItems.length) {
+        summary.orphanDuplicateItemsDeleted += 1;
+      }
+    }
+
+    await Item.deleteDocuments(
+      duplicateItems.map((item) => item.id),
+      {
+        render: false,
+        [LIBRARY_SYNC_OPTION_KEY]: {
+          source: 'library-duplicate-merge'
+        }
+      }
+    );
+    summary.duplicateItemsDeleted += duplicateItems.length;
+
+    if (getLinkedActorItems(canonicalItem.uuid).length) {
+      await syncLibraryItemStructure(canonicalItem, { renderDirectory: false });
+    }
+  }
+
+  if (
+    summary.actorLinksReassigned ||
+    summary.duplicateItemsDeleted ||
+    summary.orphanDuplicateItemsDeleted
+  ) {
+    renderItemDirectory();
+  }
+
+  debugLog('Duplicate library item merge completed', summary);
+  return summary;
+}
+
 export async function unlinkLibraryItemFromActors(libraryItem) {
   if (!libraryItem) return 0;
 
@@ -490,48 +594,24 @@ export async function unlinkLibraryItemFromActors(libraryItem) {
 
 export async function syncActorLibraryStructure(actor, options = {}) {
   const { renderDirectory = true } = options;
-  if (!actor) return { folder: null, foldersCreated: 0, foldersUpdated: 0, itemsUpdated: 0 };
+  if (!actor) return { itemsUpdated: 0 };
 
-  const linkedItems = getWorldItems().filter((item) => getLibraryActorId(item) === actor.id);
-  if (!linkedItems.length && !getActorLibraryFolder(actor)) {
-    return { folder: null, foldersCreated: 0, foldersUpdated: 0, itemsUpdated: 0 };
+  let itemsUpdated = 0;
+
+  const linkedWorldItems = getWorldItems().filter((item) =>
+    getLinkedActors(item.uuid).some((linkedActor) => linkedActor.id === actor.id)
+  );
+
+  for (const item of linkedWorldItems) {
+    const result = await syncLibraryItemStructure(item, { renderDirectory: false });
+    if (result.updated) itemsUpdated += 1;
   }
 
-  const { folder, created, updated } = await ensureActorLibraryFolder(actor, {
-    renderDirectory: false
-  });
-  const updates = linkedItems
-    .filter(
-      (item) =>
-        getDocumentFolderId(item) !== String(folder?.id ?? '').trim() ||
-        !sameValue(item.ownership ?? {}, buildActorOwnership(actor))
-    )
-    .map((item) => ({
-      _id: item.id,
-      folder: folder?.id ?? null,
-      ownership: buildActorOwnership(actor),
-      [`flags.${MODULE_ID}.${LIBRARY_ACTOR_ID_FLAG}`]: actor.id
-    }));
-
-  if (updates.length) {
-    await Item.updateDocuments(updates, {
-      render: false,
-      [LIBRARY_SYNC_OPTION_KEY]: {
-        source: 'actor-library-structure-sync'
-      }
-    });
-  }
-
-  if (renderDirectory && (created || updated || updates.length)) {
+  if (renderDirectory && itemsUpdated) {
     renderItemDirectory();
   }
 
-  return {
-    folder,
-    foldersCreated: created ? 1 : 0,
-    foldersUpdated: updated ? 1 : 0,
-    itemsUpdated: updates.length
-  };
+  return { itemsUpdated };
 }
 
 export async function migrateActorItemsToLibrary() {
@@ -540,8 +620,7 @@ export async function migrateActorItemsToLibrary() {
     itemsChecked: 0,
     linksCreated: 0,
     libraryItemsCreated: 0,
-    foldersCreated: 0,
-    foldersUpdated: 0
+    libraryItemsUpdated: 0
   };
 
   for (const actor of getActors()) {
@@ -554,12 +633,11 @@ export async function migrateActorItemsToLibrary() {
       const result = await ensureActorItemLibraryLink(item, { renderDirectory: false });
       if (result.created) summary.libraryItemsCreated += 1;
       if (result.linked) summary.linksCreated += 1;
-      if (result.folderCreated) summary.foldersCreated += 1;
-      if (result.folderUpdated) summary.foldersUpdated += 1;
+      if (result.libraryItemUpdated) summary.libraryItemsUpdated += 1;
     }
   }
 
-  if (summary.libraryItemsCreated > 0 || summary.linksCreated > 0 || summary.foldersCreated > 0) {
+  if (summary.libraryItemsCreated > 0 || summary.linksCreated > 0 || summary.libraryItemsUpdated) {
     renderItemDirectory();
   }
 
