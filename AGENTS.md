@@ -52,17 +52,6 @@ project-andromeda/
 |  google-sheets-sync.md
 |  google-sheets-webapp.gs
 |
-+- Gear balance/
-|  weapons_sim.py
-|  sim_driver.py
-|  sim_accel.py
-|  sim_rules.py
-|  sheets_sync.py
-|  property_values.json
-|  property_combos.json
-|  custom_simulations.json
-|  Андромеда_ Контент - Свойства (1).csv
-|
 '- .github/
    workflows/
    release.yml
@@ -172,21 +161,13 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 
 ---
 
-## 6.1 Gear Balance Workspace
+## 6.1 Local Balance Workspace
 
-The `Gear balance/` folder is **not** part of the Foundry build. It is a local tooling workspace for simulations and data prep.
+The optional `Gear balance/` folder is a **local gitignored tooling workspace** for simulations and data prep. It is not part of the shipped Foundry system, is not expected to exist in every clone, and should not be committed to the main repository.
 
-- **Source of truth:** `Андромеда_ Контент - Свойства (1).csv` defines the list of weapon properties.
-- **Sync rule:** `Gear balance/weapons_sim.py` must include **all** properties from that CSV and **no extra** ones. If you add, remove, or rename a property, update both files together.
-- **Naming:** Preserve the exact property names, including `X`/`Х` suffixes.
-- **Versioning:** Changes in `Gear balance/` do **not** require a `system.json` version bump.
-- **Simulation rules mirror:** If you change the base simulation rules (rolls, actions, reactions, statuses, movement, damage), update the rules description in `Gear balance/sim_rules.py` in the same change.
-
-Typical workflow:
-
-1. Edit the CSV to change, add, or remove a property.
-2. Update `PROPERTY_DEFS` and any related logic in `weapons_sim.py`.
-3. Run quick validation, for example `python -m py_compile "Gear balance/weapons_sim.py"`.
+- **Tracking:** keep `Gear balance/` out of git. If you use it locally, treat it as personal or maintainer tooling rather than repository content.
+- **Versioning:** local `Gear balance/` changes do **not** require a `system.json` version bump.
+- **Documentation:** if local balance tooling changes in a way that affects tracked repo documentation or workflows, update the relevant tracked docs separately instead of assuming the workspace is available to other users.
 
 ---
 
@@ -220,4 +201,4 @@ The Google Sheets sync MVP is part of the shipped Foundry system.
 
 ---
 
-_Last updated: 2026-03-22_
+_Last updated: 2026-03-29_

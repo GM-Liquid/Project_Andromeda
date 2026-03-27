@@ -4,8 +4,6 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "sync:readme": "node ./scripts/sync-readme-from-rulebook.mjs",
-    "sync:readme:watch": "node ./scripts/sync-readme-from-rulebook.mjs --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
