@@ -1,0 +1,67 @@
+name: Deploy Rulebook Site
+
+on:
+  push:
+    branches:
+      - master
+      - main
+    paths:
+      - ".github/workflows/deploy-rulebook.yml"
+      - ".quartz-site/**"
+      - "Книга правил v0.4/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: .quartz-site
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .quartz-site/.node-version
+          cache: npm
+          cache-dependency-path: .quartz-site/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Quartz site
+        run: npm run build
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: .quartz-site/public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

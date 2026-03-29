@@ -2,6 +2,8 @@
 import { GoogleSheetsSyncApp } from './apps/google-sheets-sync-app.mjs';
 import { ProjectAndromedaActor } from './documents/actor.mjs';
 import { ProjectAndromedaItem } from './documents/item.mjs';
+// Temporary test override. Remove this import to disable the alternate defense/stress formulas.
+import './tests/defense-formulas-test.mjs';
 // Import sheet classes.
 import {
   ProjectAndromedaActorSheet,
@@ -1261,7 +1263,10 @@ Hooks.on('renderDialog', (dialog, html) => {
   if (!selectElement) return;
 
   const allowedActorTypes = new Set(game.documentTypes?.Actor ?? []);
-  if (allowedActorTypes.size && shouldCustomizeActorTypeDialog(dialog, selectElement, allowedActorTypes)) {
+  if (
+    allowedActorTypes.size &&
+    shouldCustomizeActorTypeDialog(dialog, selectElement, allowedActorTypes)
+  ) {
     buildActorTypeOptions({ select, allowedTypes: allowedActorTypes });
     return;
   }
@@ -1565,4 +1570,3 @@ Hooks.once('ready', async function () {
     await purgeObsoleteCartridgeData();
   }
 });
-

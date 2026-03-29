@@ -1,0 +1,174 @@
+@use "../../styles/variables.scss" as *;
+
+.rulebook-nav {
+  background: #050505;
+  color: #f5f7fb;
+  border-radius: 18px;
+  padding: 1.4rem;
+  box-shadow:
+    0 22px 50px rgba(0, 0, 0, 0.24),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.rulebook-nav-list,
+.rulebook-nav-headings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.rulebook-nav-item {
+  position: relative;
+
+  & + & {
+    margin-top: 0.25rem;
+  }
+
+  &.has-flyout > .rulebook-nav-link::after {
+    content: ">";
+    color: rgba(240, 244, 252, 0.45);
+    font-size: 1rem;
+    flex: 0 0 auto;
+  }
+
+  &.has-flyout::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 100%;
+    width: 1rem;
+    height: 100%;
+  }
+
+  &.active > .rulebook-nav-link {
+    color: #ffffff;
+    background: rgba(98, 176, 255, 0.18);
+    box-shadow: inset 0 0 0 1px rgba(98, 176, 255, 0.28);
+  }
+
+  &[data-open="true"] > .rulebook-nav-flyout {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+}
+
+.rulebook-nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 0.9rem;
+  border-radius: 12px;
+  color: #f5f7fb;
+  font-family: var(--headerFont);
+  font-size: 1rem;
+  font-weight: $semiBoldWeight;
+  line-height: 1.3;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+
+  &:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(2px);
+  }
+}
+
+.rulebook-nav-flyout {
+  position: absolute;
+  top: 0;
+  left: calc(100% + 0.25rem);
+  min-width: 18rem;
+  max-width: 24rem;
+  max-height: min(70vh, 36rem);
+  overflow-y: auto;
+  padding: 0.8rem 0.7rem;
+  border-radius: 16px;
+  background: #111214;
+  box-shadow:
+    0 20px 48px rgba(0, 0, 0, 0.32),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(10px);
+  pointer-events: none;
+  transition:
+    opacity 0.18s ease,
+    visibility 0.18s ease,
+    transform 0.18s ease;
+  z-index: 20;
+
+  & a {
+    display: block;
+    padding: 0.55rem 0.75rem;
+    border-radius: 10px;
+    color: rgba(240, 244, 252, 0.88);
+    font-size: 0.95rem;
+    font-weight: $normalWeight;
+    line-height: 1.35;
+
+    &:hover,
+    &:focus-visible {
+      color: #ffffff;
+      background: rgba(98, 176, 255, 0.16);
+    }
+  }
+
+  @for $i from 0 through 6 {
+    & .depth-#{$i} {
+      padding-left: calc(0.75rem * #{$i});
+    }
+  }
+}
+
+@media all and not ($desktop) {
+  .rulebook-nav {
+    background: transparent;
+    color: var(--dark);
+    border-radius: 14px;
+    border: 1px solid var(--lightgray);
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .rulebook-nav-item {
+    & + & {
+      margin-top: 0;
+    }
+
+    &.has-flyout > .rulebook-nav-link::after {
+      content: none;
+    }
+
+    &.active > .rulebook-nav-link {
+      color: var(--secondary);
+      background: var(--highlight);
+      box-shadow: none;
+    }
+  }
+
+  .rulebook-nav-link {
+    color: var(--dark);
+    border-radius: 0;
+    padding: 0.9rem 1rem;
+    border-top: 1px solid var(--lightgray);
+
+    &:hover {
+      color: var(--secondary);
+      background: var(--highlight);
+      transform: none;
+    }
+  }
+
+  .rulebook-nav-item:first-child > .rulebook-nav-link {
+    border-top: none;
+  }
+
+  .rulebook-nav-flyout {
+    display: none;
+  }
+}

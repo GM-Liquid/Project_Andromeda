@@ -1,0 +1,88 @@
+@use "./base.scss";
+@use "./variables.scss" as *;
+
+body[data-slug="index"],
+body[data-slug^="rulebook/"] {
+  .page > #quartz-body {
+    @media all and ($desktop) {
+      grid-template-columns: 320px minmax(0, 1fr);
+      grid-template-rows: auto auto auto;
+      grid-template-areas:
+        "grid-sidebar-left grid-header"
+        "grid-sidebar-left grid-center"
+        "grid-sidebar-left grid-footer";
+      column-gap: 2rem;
+    }
+
+    @media all and not ($desktop) {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto auto;
+      grid-template-areas:
+        "grid-sidebar-left"
+        "grid-header"
+        "grid-center"
+        "grid-footer";
+      row-gap: 1rem;
+    }
+
+    .sidebar.right {
+      display: none;
+      width: 0;
+      height: 0;
+      padding: 0;
+      margin: 0;
+    }
+
+    .sidebar.left {
+      @media all and ($desktop) {
+        padding: 4rem 1.5rem 2rem 0;
+        justify-content: center;
+        align-items: stretch;
+        overflow: visible;
+      }
+
+      @media all and not ($desktop) {
+        position: initial;
+        display: block;
+        height: auto;
+        padding: 0;
+      }
+
+      & > * {
+        width: 100%;
+      }
+    }
+
+    .page-header {
+      @media all and ($desktop) {
+        margin-top: 4rem;
+      }
+    }
+
+    .center {
+      width: 100%;
+      min-width: 0;
+      max-width: 920px;
+      margin-left: auto;
+      margin-right: 0;
+
+      @media all and not ($desktop) {
+        max-width: 100%;
+        margin-left: 0;
+      }
+    }
+
+    footer {
+      min-width: 0;
+      max-width: 920px;
+      width: 100%;
+      margin-left: auto;
+      margin-right: 0;
+
+      @media all and not ($desktop) {
+        max-width: 100%;
+        margin-left: 0;
+      }
+    }
+  }
+}

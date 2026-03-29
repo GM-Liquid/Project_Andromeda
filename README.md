@@ -1,6 +1,6 @@
 # Project Andromeda
 
-Этот репозиторий содержит систему Project Andromeda для Foundry VTT.
+Этот репозиторий содержит систему Project Andromeda для Foundry VTT и публичный Quartz-сайт книги правил.
 
-Сами правила и материалы по игре опубликованы отдельно:
-[gm-liquid.github.io/Docs_Project_Andromeda](https://gm-liquid.github.io/Docs_Project_Andromeda/)
+Публичная книга правил публикуется отсюда же:
+[gm-liquid.github.io/Project_Andromeda](https://gm-liquid.github.io/Project_Andromeda/)
