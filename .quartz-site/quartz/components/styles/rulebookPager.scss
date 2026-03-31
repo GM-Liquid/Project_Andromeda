@@ -1,0 +1,55 @@
+@use "../../styles/variables.scss" as *;
+
+.rulebook-pager {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.rulebook-pager-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-height: 7rem;
+  padding: 1.15rem 1.25rem;
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(244, 239, 232, 0.94));
+  box-shadow:
+    0 18px 38px rgba(15, 20, 28, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+  & span {
+    color: rgba(43, 53, 69, 0.58);
+    font-size: 0.8rem;
+    font-weight: $semiBoldWeight;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  & strong {
+    color: var(--dark);
+    font-family: var(--headerFont);
+    font-size: 1.16rem;
+    line-height: 1.28;
+  }
+
+  &.next {
+    text-align: right;
+  }
+
+  &.ghost {
+    visibility: hidden;
+  }
+}
+
+@media all and not ($desktop) {
+  .rulebook-pager {
+    grid-template-columns: 1fr;
+  }
+
+  .rulebook-pager-card.ghost {
+    display: none;
+  }
+}

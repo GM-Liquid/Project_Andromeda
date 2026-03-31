@@ -8,6 +8,9 @@ import ReaderMode from "./ReaderMode";
 import Head from "./Head";
 import PageTitle from "./PageTitle";
 import RulebookNav from "./RulebookNav";
+import RulebookHeader from "./RulebookHeader";
+import RulebookHero from "./RulebookHero";
+import RulebookPager from "./RulebookPager";
 import ContentMeta from "./ContentMeta";
 import Spacer from "./Spacer";
 import TableOfContents from "./TableOfContents";
@@ -35,6 +38,9 @@ export {
   Head,
   PageTitle,
   RulebookNav,
+  RulebookHeader,
+  RulebookHero,
+  RulebookPager,
   ContentMeta,
   Spacer,
   TableOfContents,

@@ -1,20 +1,38 @@
+@use "sass:map";
 @use "./base.scss";
 @use "./variables.scss" as *;
 
-body[data-slug="index"],
-body[data-slug^="rulebook/"] {
+body[data-rulebook="true"] {
+  background:
+    radial-gradient(circle at top, rgba(143, 176, 196, 0.18), transparent 28%),
+    linear-gradient(180deg, #f6f0e8, #f2ebe1);
+
+  .page {
+    max-width: calc(#{map.get($breakpoints, desktop)} + 560px);
+  }
+
   .page > #quartz-body {
     @media all and ($desktop) {
-      grid-template-columns: 320px minmax(0, 1fr);
+      grid-template-columns: 300px minmax(0, 1fr) 260px;
+      grid-template-rows: auto auto auto;
+      grid-template-areas:
+        "grid-sidebar-left grid-header grid-sidebar-right"
+        "grid-sidebar-left grid-center grid-sidebar-right"
+        "grid-sidebar-left grid-footer grid-sidebar-right";
+      column-gap: 1.5rem;
+    }
+
+    @media all and ($tablet) {
+      grid-template-columns: 280px minmax(0, 1fr);
       grid-template-rows: auto auto auto;
       grid-template-areas:
         "grid-sidebar-left grid-header"
         "grid-sidebar-left grid-center"
         "grid-sidebar-left grid-footer";
-      column-gap: 2rem;
+      column-gap: 1rem;
     }
 
-    @media all and not ($desktop) {
+    @media all and ($mobile) {
       grid-template-columns: 1fr;
       grid-template-rows: auto auto auto auto;
       grid-template-areas:
@@ -23,25 +41,25 @@ body[data-slug^="rulebook/"] {
         "grid-center"
         "grid-footer";
       row-gap: 1rem;
-    }
-
-    .sidebar.right {
-      display: none;
-      width: 0;
-      height: 0;
-      padding: 0;
-      margin: 0;
+      padding: 0 0.9rem 2rem;
     }
 
     .sidebar.left {
       @media all and ($desktop) {
-        padding: 4rem 1.5rem 2rem 0;
-        justify-content: center;
+        padding: 2rem 0.75rem 2rem 0;
         align-items: stretch;
+        justify-content: flex-start;
         overflow: visible;
       }
 
-      @media all and not ($desktop) {
+      @media all and ($tablet) {
+        padding: 1.2rem 0.5rem 1.5rem 0;
+        align-items: stretch;
+        justify-content: flex-start;
+        overflow: visible;
+      }
+
+      @media all and ($mobile) {
         position: initial;
         display: block;
         height: auto;
@@ -53,9 +71,32 @@ body[data-slug^="rulebook/"] {
       }
     }
 
-    .page-header {
+    .sidebar.right {
       @media all and ($desktop) {
-        margin-top: 4rem;
+        display: flex;
+        padding: 2rem 0 2rem 0.25rem;
+        align-items: flex-start;
+        justify-content: flex-start;
+      }
+
+      @media all and not ($desktop) {
+        display: none;
+        width: 0;
+        height: 0;
+        padding: 0;
+        margin: 0;
+      }
+
+      & > * {
+        width: 100%;
+      }
+    }
+
+    .page-header {
+      margin-top: 2rem;
+
+      @media all and ($mobile) {
+        margin-top: 1rem;
       }
     }
 
@@ -64,12 +105,7 @@ body[data-slug^="rulebook/"] {
       min-width: 0;
       max-width: 920px;
       margin-left: auto;
-      margin-right: 0;
-
-      @media all and not ($desktop) {
-        max-width: 100%;
-        margin-left: 0;
-      }
+      margin-right: auto;
     }
 
     footer {
@@ -77,12 +113,266 @@ body[data-slug^="rulebook/"] {
       max-width: 920px;
       width: 100%;
       margin-left: auto;
-      margin-right: 0;
+      margin-right: auto;
+    }
+  }
 
-      @media all and not ($desktop) {
-        max-width: 100%;
-        margin-left: 0;
-      }
+  header {
+    margin: 0 0 1rem;
+  }
+
+  .page-header > .popover-hint {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .center > article {
+    padding: clamp(1.35rem, 2vw, 2rem);
+    border-radius: 28px;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(250, 247, 242, 0.8));
+    box-shadow:
+      0 20px 48px rgba(23, 27, 36, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(64, 72, 86, 0.08);
+  }
+
+  article h1,
+  article h2,
+  article h3 {
+    letter-spacing: -0.02em;
+  }
+
+  article h1 {
+    font-size: clamp(2rem, 3vw, 2.8rem);
+  }
+
+  article h2 {
+    margin-top: 2.3rem;
+    font-size: clamp(1.55rem, 2.2vw, 1.9rem);
+  }
+
+  article h3 {
+    margin-top: 1.8rem;
+    font-size: 1.18rem;
+  }
+
+  article p,
+  article li,
+  article td,
+  article th {
+    color: var(--darkgray);
+    font-size: 1.05rem;
+    line-height: 1.85;
+  }
+
+  article a.internal {
+    background: rgba(45, 88, 118, 0.08);
+    color: var(--secondary);
+  }
+
+  article blockquote {
+    margin: 1.4rem 0;
+    border-left: none;
+    padding-left: 0;
+  }
+
+  article hr {
+    margin: 2.2rem 0;
+  }
+
+  .page-footer {
+    margin-top: 1rem;
+  }
+
+  hr {
+    background-color: rgba(64, 72, 86, 0.12);
+  }
+
+  .toc {
+    padding: 1rem 1rem 1.1rem;
+    border-radius: 22px;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(247, 242, 236, 0.84));
+    box-shadow:
+      0 18px 36px rgba(15, 20, 28, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(64, 72, 86, 0.08);
+  }
+
+  button.toc-header h3 {
+    font-family: var(--headerFont);
+    font-size: 1.02rem;
+  }
+
+  ul.toc-content.overflow > li > a {
+    opacity: 0.48;
+    font-size: 0.94rem;
+    line-height: 1.5;
+
+    &.in-view {
+      opacity: 0.9;
+      color: var(--secondary);
+    }
+  }
+
+  .editorial-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin: 1.2rem 0 0;
+  }
+
+  .editorial-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    min-height: 14rem;
+    padding: 1.3rem 1.3rem 1.15rem;
+    border-radius: 24px;
+    background:
+      linear-gradient(180deg, rgba(72, 74, 80, 0.96), rgba(58, 61, 68, 0.98));
+    color: #f5f7fb;
+    box-shadow:
+      0 18px 38px rgba(17, 20, 28, 0.16),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+    & h3,
+    & p {
+      margin: 0;
+      color: inherit;
+    }
+
+    & h3 {
+      font-size: 1.32rem;
+      line-height: 1.16;
+    }
+
+    & h3 a,
+    & h3 a.internal {
+      background: transparent;
+      color: #ffffff;
+      padding: 0;
+    }
+  }
+
+  .editorial-card-eyebrow {
+    color: rgba(245, 247, 251, 0.62);
+    font-size: 0.76rem;
+    font-weight: $semiBoldWeight;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .editorial-card-arrow {
+    margin-top: auto;
+    color: rgba(245, 247, 251, 0.88);
+    font-size: 1.2rem;
+    font-weight: $boldWeight;
+  }
+
+  .callout[data-callout="abstract"][data-callout-metadata="rulebook-summary"] {
+    margin: 0;
+    padding: 0.2rem 1.3rem 1rem;
+    border: none;
+    border-radius: 24px;
+    background:
+      linear-gradient(180deg, rgba(232, 238, 242, 0.9), rgba(224, 232, 236, 0.95));
+    box-shadow:
+      0 18px 40px rgba(17, 20, 28, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.88);
+
+    & .callout-title {
+      padding-bottom: 0.45rem;
+      color: var(--secondary);
+    }
+
+    & .callout-title .callout-icon {
+      display: none;
+    }
+
+    & .callout-title-inner > p {
+      color: var(--secondary);
+      font-size: 1rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+  }
+
+  &[data-page-type="reference"] .callout.is-collapsible[data-callout="note"] {
+    position: relative;
+    margin: 0.8rem 0;
+    padding: 0 1rem;
+    border: none;
+    border-radius: 18px;
+    background:
+      linear-gradient(180deg, rgba(9, 11, 14, 0.98), rgba(16, 20, 26, 0.98));
+
+    &::after {
+      content: attr(data-callout-metadata);
+      position: absolute;
+      top: 1rem;
+      right: 3.2rem;
+      color: rgba(245, 247, 251, 0.62);
+      font-size: 0.82rem;
+      font-weight: $semiBoldWeight;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    & .callout-title {
+      align-items: center;
+      padding: 1rem 0;
+      color: #ffffff;
+    }
+
+    & .callout-title .callout-icon {
+      display: none;
+    }
+
+    & .callout-title .callout-title-inner > p {
+      color: #ffffff;
+      font-size: 1.05rem;
+      font-weight: $boldWeight;
+    }
+
+    & .callout-title .fold-callout-icon {
+      margin-left: auto;
+      opacity: 1;
+      background-color: rgba(245, 247, 251, 0.84);
+    }
+
+    & .callout-content {
+      color: rgba(245, 247, 251, 0.88);
+      padding-bottom: 1rem;
+    }
+
+    & .callout-content p,
+    & .callout-content li {
+      color: rgba(245, 247, 251, 0.88);
+      font-size: 1rem;
+      line-height: 1.75;
+    }
+  }
+}
+
+@media all and ($mobile) {
+  body[data-rulebook="true"] {
+    .center > article {
+      border-radius: 22px;
+      padding: 1.15rem 1rem 1.35rem;
+    }
+
+    .editorial-card {
+      min-height: auto;
+    }
+
+    &[data-page-type="reference"] .callout.is-collapsible[data-callout="note"]::after {
+      position: static;
+      display: block;
+      margin: -0.25rem 0 0.85rem;
     }
   }
 }

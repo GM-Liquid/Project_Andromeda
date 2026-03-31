@@ -1,7 +1,16 @@
 ---
-title: Создание персонажа
-created: 2026-03-30
-modified: 2026-03-30
+title: "Создание персонажа"
+navTitle: "Персонаж"
+order: 30
+pageType: "chapter"
+summary: "Пошаговая сборка героя: архетип, ценности, характеристики, навыки, снаряжение и параметры."
+heroImage: "assets/rulebook/art-core-1.webp"
+heroAlt: "Абстрактный арт для раздела о создании персонажа."
+showHero: true
+showToc: true
+parent: null
+created: "2026-03-30"
+modified: "2026-03-30"
 ---
 
 ## Шаг 1: Узнайте у мастера стартовые параметры

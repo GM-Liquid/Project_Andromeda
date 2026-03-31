@@ -1,0 +1,86 @@
+@use "../../styles/variables.scss" as *;
+
+.rulebook-header-shell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.95rem 1.15rem;
+  border: 1px solid rgba(15, 20, 28, 0.08);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 244, 238, 0.94));
+  box-shadow:
+    0 14px 32px rgba(15, 20, 28, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.rulebook-header-brand {
+  min-width: 0;
+
+  & a {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    color: var(--dark);
+  }
+
+  & strong {
+    font-family: var(--headerFont);
+    font-size: 1rem;
+    font-weight: $boldWeight;
+    letter-spacing: 0.01em;
+  }
+}
+
+.rulebook-header-kicker {
+  font-size: 0.72rem;
+  font-weight: $semiBoldWeight;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(43, 53, 69, 0.62);
+}
+
+.rulebook-header-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem;
+
+  & a {
+    padding: 0.5rem 0.75rem;
+    border-radius: 999px;
+    color: rgba(43, 53, 69, 0.82);
+    font-size: 0.95rem;
+    font-weight: $semiBoldWeight;
+  }
+
+  & a.active,
+  & a:hover {
+    color: var(--dark);
+    background: rgba(38, 83, 115, 0.1);
+  }
+}
+
+.rulebook-header-action {
+  flex: 0 0 auto;
+  padding: 0.65rem 1rem;
+  border-radius: 999px;
+  color: #f5f7fb;
+  background: #101317;
+  font-size: 0.92rem;
+  font-weight: $semiBoldWeight;
+}
+
+@media all and not ($desktop) {
+  .rulebook-header-shell {
+    flex-wrap: wrap;
+    padding: 0.9rem 1rem;
+  }
+
+  .rulebook-header-nav {
+    order: 3;
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

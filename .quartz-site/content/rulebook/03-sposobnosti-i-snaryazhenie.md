@@ -1,7 +1,16 @@
 ---
-title: Способности и снаряжение
-created: 2026-03-29
-modified: 2026-03-29
+title: "Способности и снаряжение"
+navTitle: "Снаряжение"
+order: 50
+pageType: "chapter"
+summary: "Способности, экипировка и всё, что расширяет базовые возможности персонажа за пределами навыков."
+heroImage: null
+heroAlt: null
+showHero: true
+showToc: true
+parent: null
+created: "2026-03-29"
+modified: "2026-03-29"
 ---
 
 СОДЕРЖАНИЕ УСТАРЕЛО, ЗДЕСЬ ПРАВИЛА ПРОШЛОЙ ВЕРСИИ СИСТЕМЫ

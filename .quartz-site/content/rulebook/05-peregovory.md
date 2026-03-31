@@ -1,7 +1,16 @@
 ---
-title: Переговоры
-created: 2026-03-30
-modified: 2026-03-30
+title: "Переговоры"
+navTitle: "Переговоры"
+order: 70
+pageType: "chapter"
+summary: "Социальные сцены, давление, убеждение и правила, которые поддерживают переговоры как полноценную механику."
+heroImage: null
+heroAlt: null
+showHero: true
+showToc: true
+parent: null
+created: "2026-03-30"
+modified: "2026-03-30"
 ---
 
 ## Что такое переговоры

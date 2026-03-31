@@ -1,6 +1,11 @@
 import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  getGeneratedRulebookEntries,
+  slugToContentPath,
+  validateRulebookManifest,
+} from "./rulebook.manifest.mjs";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const siteRoot = resolve(scriptDir, "..");
@@ -9,34 +14,7 @@ const repoRoot = resolve(siteRoot, "..");
 const sourceDir = resolve(repoRoot, "Книга правил v0.4");
 const contentDir = resolve(siteRoot, "content");
 const rulebookDir = resolve(contentDir, "rulebook");
-
-const chapters = [
-  {
-    source: "Основные правила.md",
-    target: "01-osnovnye-pravila.md",
-    title: "Основные правила",
-  },
-  {
-    source: "Создание персонажа.md",
-    target: "02-sozdanie-personazha.md",
-    title: "Создание персонажа",
-  },
-  {
-    source: "Способности и снаряжение.md",
-    target: "03-sposobnosti-i-snaryazhenie.md",
-    title: "Способности и снаряжение",
-  },
-  {
-    source: "Бой.md",
-    target: "04-boy.md",
-    title: "Бой",
-  },
-  {
-    source: "Переговоры.md",
-    target: "05-peregovory.md",
-    title: "Переговоры",
-  },
-];
+const generatedStatePath = resolve(contentDir, ".generated-rulebook.json");
 
 function formatDate(date) {
   const year = date.getFullYear();
@@ -45,12 +23,28 @@ function formatDate(date) {
   return `${year}-${month}-${day}`;
 }
 
-function withFrontmatter({ title, created, modified }, body) {
+function serializeFrontmatterValue(value) {
+  if (Array.isArray(value)) {
+    return `[${value.map((item) => JSON.stringify(item)).join(", ")}]`;
+  }
+
+  if (typeof value === "string") {
+    return JSON.stringify(value);
+  }
+
+  if (value === null) {
+    return "null";
+  }
+
+  return String(value);
+}
+
+function withFrontmatter(frontmatter, body) {
   return [
     "---",
-    `title: ${title}`,
-    `created: ${created}`,
-    `modified: ${modified}`,
+    ...Object.entries(frontmatter).map(
+      ([key, value]) => `${key}: ${serializeFrontmatterValue(value)}`,
+    ),
     "---",
     "",
     body.trimEnd(),
@@ -75,81 +69,80 @@ function normalizeBody(body, title) {
   return cleaned;
 }
 
-function renderHomePage(chaptersToRender, pageDate) {
-  const chapterLinks = chaptersToRender
-    .map(
-      (chapter) =>
-        `1. [${chapter.title}](rulebook/${chapter.target.replace(/\.md$/, "")})`,
-    )
-    .join("\n");
+async function readGeneratedState() {
+  try {
+    const raw = await readFile(generatedStatePath, "utf8");
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
 
-  const body = [
-    "Книга правил публикуется как цепочка отдельных страниц. Основные разделы доступны в левой панели.",
-    "",
-    "Начать удобнее сразу с нужной главы.",
-    "",
-    "## Читать по порядку",
-    "",
-    chapterLinks,
-  ].join("\n");
-
-  return withFrontmatter(
-    {
-      title: "Проект Андромеда",
-      created: pageDate,
-      modified: pageDate,
-    },
-    body,
+async function writeGeneratedState(generatedFiles) {
+  await writeFile(
+    generatedStatePath,
+    `${JSON.stringify(generatedFiles, null, 2)}\n`,
+    "utf8",
   );
 }
 
 export async function syncBook() {
+  const chapters = await validateRulebookManifest();
+  const generatedEntries = getGeneratedRulebookEntries();
+
   await mkdir(contentDir, { recursive: true });
-  await rm(rulebookDir, { recursive: true, force: true });
   await mkdir(rulebookDir, { recursive: true });
 
-  let latestTimestamp = 0;
-  const renderedChapters = [];
+  const previouslyGenerated = await readGeneratedState();
+  const nextGeneratedFiles = [];
 
-  for (const chapter of chapters) {
+  for (const chapter of generatedEntries) {
     const sourcePath = resolve(sourceDir, chapter.source);
-    const targetPath = resolve(rulebookDir, chapter.target);
+    const targetRelativePath = slugToContentPath(chapter.slug);
+    const targetPath = resolve(contentDir, targetRelativePath);
     const source = await readFile(sourcePath, "utf8");
     const sourceStats = await stat(sourcePath);
     const modified = formatDate(sourceStats.mtime);
 
-    latestTimestamp = Math.max(latestTimestamp, sourceStats.mtimeMs);
-
     const generated = withFrontmatter(
       {
         title: chapter.title,
+        navTitle: chapter.navTitle,
+        order: chapter.order,
+        pageType: chapter.pageType,
+        summary: chapter.summary,
+        heroImage: chapter.heroImage,
+        heroAlt: chapter.heroAlt,
+        showHero: chapter.showHero,
+        showToc: chapter.showToc,
+        parent: chapter.parent,
         created: modified,
         modified,
       },
       normalizeBody(source, chapter.title),
     );
 
+    await mkdir(dirname(targetPath), { recursive: true });
     await writeFile(targetPath, generated, "utf8");
-    renderedChapters.push(chapter);
+    nextGeneratedFiles.push(targetRelativePath);
   }
 
-  const pageDate = formatDate(new Date(latestTimestamp || Date.now()));
+  for (const previousFile of previouslyGenerated) {
+    if (nextGeneratedFiles.includes(previousFile)) {
+      continue;
+    }
 
-  await writeFile(
-    resolve(contentDir, "index.md"),
-    renderHomePage(renderedChapters, pageDate),
-    "utf8",
-  );
+    await rm(resolve(contentDir, previousFile), { force: true });
+  }
+
+  await writeGeneratedState(nextGeneratedFiles);
 
   return {
     sourceDir,
     contentDir,
-    generatedFiles: [
-      resolve(contentDir, "index.md"),
-      ...renderedChapters.map((chapter) =>
-        resolve(rulebookDir, chapter.target),
-      ),
-    ],
+    manifest: chapters,
+    generatedFiles: nextGeneratedFiles.map((file) => resolve(contentDir, file)),
   };
 }
 
