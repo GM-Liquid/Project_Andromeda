@@ -45,6 +45,8 @@ project-andromeda/
 |  quartz/
 |  scripts/
 |  | sync-book.mjs <- generates chapter pages from the public mirror
+|  | rulebook-source.mjs <- resolves canonical rulebook source and mirrors sibling Docs_Project_Andromeda when available
+|  | rulebook-source.test.mjs <- regression tests for source resolution / mirroring fallback
 |  | rulebook.manifest.mjs <- single source of editorial rulebook structure
 |  '- dev.mjs
 |  quartz.config.ts
@@ -84,6 +86,7 @@ project-andromeda/
 
 - `Книга правил v0.4/` in this repository is a **public mirror**, not the canonical rules source. Canonical mechanics still live in the private source repo `Docs_Project_Andromeda`.
 - `.quartz-site/scripts/sync-book.mjs` auto-detects a sibling `../Docs_Project_Andromeda/Книга правил v0.4/` (or `PROJECT_ANDROMEDA_DOCS_REPO`) and mirrors it into this repository before generating Quartz chapter pages.
+- `.quartz-site/scripts/dev.mjs`, `.quartz-site/scripts/sync-book.mjs`, and `.quartz-site/package.json` build scripts all rely on the same source-resolution helper so local Quartz work reads from the canonical private-docs repo when it is available.
 - If the private docs repo is unavailable, Quartz falls back to the mirrored `Книга правил v0.4/` inside this public repository so CI and GitHub Pages builds still work.
 - `.quartz-site/scripts/rulebook.manifest.mjs` is the single source of truth for public rulebook structure, ordering, summaries, hero settings, and which pages are generated versus hand-authored.
 - `.quartz-site/content/` is now **mixed authored/generated publication content**:
@@ -105,6 +108,7 @@ project-andromeda/
 
 - `.quartz-site/scripts/rulebook.manifest.mjs` when page order, hero metadata, summaries, page types, or generated/manual rulebook boundaries change.
 - `.quartz-site/scripts/sync-book.mjs` and `.quartz-site/scripts/rulebook-source.mjs` when the mapping between `Книга правил v0.4/` and generated chapter pages changes, or when emitted chapter frontmatter / private-docs mirroring behaviour changes.
+- `.quartz-site/scripts/rulebook-source.test.mjs` when the private-docs auto-mirror or fallback behaviour changes and needs regression coverage.
 - `.quartz-site/content/index.md` and other hand-authored files in `.quartz-site/content/` when curated landing/reference content changes.
 - `.quartz-site/quartz.layout.ts` when rulebook layout, sidebars, TOC placement, or conditional page composition change.
 - `.quartz-site/quartz/components/` and `.quartz-site/quartz/styles/` when editorial hero/header/nav/pager behaviour, interaction logic, or styling change.

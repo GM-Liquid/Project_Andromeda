@@ -8,7 +8,10 @@
   background:
     linear-gradient(135deg, rgba(19, 26, 37, 0.95), rgba(59, 68, 84, 0.82)),
     radial-gradient(circle at top left, rgba(93, 155, 202, 0.3), transparent 52%),
-    var(--rulebook-hero-image);
+    var(
+      --rulebook-hero-image,
+      linear-gradient(135deg, rgba(26, 33, 46, 0.98), rgba(48, 58, 76, 0.92))
+    );
   background-size: cover;
   background-position: center;
   box-shadow:

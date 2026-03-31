@@ -3,6 +3,16 @@
 @use "./variables.scss" as *;
 
 body[data-rulebook="true"] {
+  --light: #f6f0e8;
+  --lightgray: #ddd2c5;
+  --gray: #a79b8d;
+  --darkgray: #544d46;
+  --dark: #1e1d1c;
+  --secondary: #2d5876;
+  --tertiary: #7ea3b8;
+  --highlight: rgba(45, 88, 118, 0.11);
+  --textHighlight: #fff23688;
+
   background:
     radial-gradient(circle at top, rgba(143, 176, 196, 0.18), transparent 28%),
     linear-gradient(180deg, #f6f0e8, #f2ebe1);
