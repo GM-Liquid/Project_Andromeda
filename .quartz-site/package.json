@@ -16,6 +16,7 @@
     "build": "node ./scripts/sync-book.mjs && npx quartz build",
     "dev": "node ./scripts/dev.mjs",
     "sync-book": "node ./scripts/sync-book.mjs",
+    "test:rulebook-source": "node --test ./scripts/rulebook-source.test.mjs",
     "check": "tsc --noEmit",
     "format": "npx prettier . --write"
   },

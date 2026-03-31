@@ -83,7 +83,8 @@ project-andromeda/
 ### 2.1 Public Rulebook & Quartz
 
 - `Книга правил v0.4/` in this repository is a **public mirror**, not the canonical rules source. Canonical mechanics still live in the private source repo `Docs_Project_Andromeda`.
-- The public mirror is refreshed from the private repo **outside** this repository. Inside this repo, Quartz chapter pages are then generated locally by `.quartz-site/scripts/sync-book.mjs`.
+- `.quartz-site/scripts/sync-book.mjs` auto-detects a sibling `../Docs_Project_Andromeda/Книга правил v0.4/` (or `PROJECT_ANDROMEDA_DOCS_REPO`) and mirrors it into this repository before generating Quartz chapter pages.
+- If the private docs repo is unavailable, Quartz falls back to the mirrored `Книга правил v0.4/` inside this public repository so CI and GitHub Pages builds still work.
 - `.quartz-site/scripts/rulebook.manifest.mjs` is the single source of truth for public rulebook structure, ordering, summaries, hero settings, and which pages are generated versus hand-authored.
 - `.quartz-site/content/` is now **mixed authored/generated publication content**:
   - generated chapter pages under `.quartz-site/content/rulebook/01-...05-...`
@@ -103,7 +104,7 @@ project-andromeda/
 ### 2.3 Where to Edit Quartz
 
 - `.quartz-site/scripts/rulebook.manifest.mjs` when page order, hero metadata, summaries, page types, or generated/manual rulebook boundaries change.
-- `.quartz-site/scripts/sync-book.mjs` when the mapping between `Книга правил v0.4/` and generated chapter pages changes, or when emitted chapter frontmatter / generated file tracking changes.
+- `.quartz-site/scripts/sync-book.mjs` and `.quartz-site/scripts/rulebook-source.mjs` when the mapping between `Книга правил v0.4/` and generated chapter pages changes, or when emitted chapter frontmatter / private-docs mirroring behaviour changes.
 - `.quartz-site/content/index.md` and other hand-authored files in `.quartz-site/content/` when curated landing/reference content changes.
 - `.quartz-site/quartz.layout.ts` when rulebook layout, sidebars, TOC placement, or conditional page composition change.
 - `.quartz-site/quartz/components/` and `.quartz-site/quartz/styles/` when editorial hero/header/nav/pager behaviour, interaction logic, or styling change.

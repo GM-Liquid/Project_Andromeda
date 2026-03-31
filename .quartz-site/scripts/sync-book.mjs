@@ -6,12 +6,12 @@ import {
   slugToContentPath,
   validateRulebookManifest,
 } from "./rulebook.manifest.mjs";
+import { prepareRulebookSource } from "./rulebook-source.mjs";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const siteRoot = resolve(scriptDir, "..");
 const repoRoot = resolve(siteRoot, "..");
 
-const sourceDir = resolve(repoRoot, "Книга правил v0.4");
 const contentDir = resolve(siteRoot, "content");
 const rulebookDir = resolve(contentDir, "rulebook");
 const generatedStatePath = resolve(contentDir, ".generated-rulebook.json");
@@ -90,6 +90,8 @@ async function writeGeneratedState(generatedFiles) {
 export async function syncBook() {
   const chapters = await validateRulebookManifest();
   const generatedEntries = getGeneratedRulebookEntries();
+  const source = await prepareRulebookSource({ repoRoot });
+  const sourceDir = source.canonicalSourceDir;
 
   await mkdir(contentDir, { recursive: true });
   await mkdir(rulebookDir, { recursive: true });
@@ -140,6 +142,9 @@ export async function syncBook() {
 
   return {
     sourceDir,
+    mirrorDir: source.publicMirrorDir,
+    externalSourceDir: source.externalSourceDir,
+    externalAvailable: source.externalAvailable,
     contentDir,
     manifest: chapters,
     generatedFiles: nextGeneratedFiles.map((file) => resolve(contentDir, file)),

@@ -3,14 +3,15 @@ import { spawn } from "node:child_process"
 import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
+import { getRulebookWatchPattern } from "./rulebook-source.mjs"
 import { syncBook } from "./sync-book.mjs"
 
 const scriptDir = dirname(fileURLToPath(import.meta.url))
 const siteRoot = resolve(scriptDir, "..")
 const repoRoot = resolve(siteRoot, "..")
-const sourceGlob = resolve(repoRoot, "Книга правил v0.4", "*.md")
 
-await syncBook()
+const initialSync = await syncBook()
+const sourceGlob = await getRulebookWatchPattern({ repoRoot })
 
 const npxCommand = process.platform === "win32" ? "npx.cmd" : "npx"
 const quartz = spawn(npxCommand, ["quartz", "build", "--serve"], {
@@ -23,9 +24,11 @@ const watcher = chokidar.watch(sourceGlob, {
 })
 
 watcher.on("all", async () => {
-  await syncBook()
-  console.log("Rulebook source changed. Synced Quartz content pages.")
+  const result = await syncBook()
+  console.log(`Rulebook source changed. Synced Quartz content from ${result.sourceDir}.`)
 })
+
+console.log(`Watching rulebook source: ${initialSync.sourceDir}`)
 
 const shutdown = async (signal) => {
   await watcher.close()
