@@ -32,9 +32,9 @@ const chapters = [
     title: "Бой",
   },
   {
-    source: "Социальные сцены.md",
-    target: "05-socialnye-sceny.md",
-    title: "Социальные сцены",
+    source: "Переговоры.md",
+    target: "05-peregovory.md",
+    title: "Переговоры",
   },
 ];
 

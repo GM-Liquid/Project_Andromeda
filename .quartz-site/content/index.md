@@ -1,7 +1,7 @@
 ---
 title: Проект Андромеда
-created: 2026-03-29
-modified: 2026-03-29
+created: 2026-03-30
+modified: 2026-03-30
 ---
 
 Книга правил публикуется как цепочка отдельных страниц. Основные разделы доступны в левой панели.
@@ -14,4 +14,4 @@ modified: 2026-03-29
 1. [Создание персонажа](rulebook/02-sozdanie-personazha)
 1. [Способности и снаряжение](rulebook/03-sposobnosti-i-snaryazhenie)
 1. [Бой](rulebook/04-boy)
-1. [Социальные сцены](rulebook/05-socialnye-sceny)
+1. [Переговоры](rulebook/05-peregovory)

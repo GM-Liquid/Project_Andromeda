@@ -21,7 +21,6 @@ dist/
 build/
 .eslintcache
 coverage/
-Gear balance/
 __pycache__/
 *.tgz
 *.zip

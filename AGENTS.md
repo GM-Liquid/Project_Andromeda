@@ -26,6 +26,14 @@ project-andromeda/
 | system.json <- Foundry manifest
 | template.json <- data templates
 | package.json
+| Книга правил v0.4/ <- public reader-facing rulebook mirror, refreshed from the private source repo
+|
++- .quartz-site/
+|  content/
+|  quartz/
+|  scripts/
+|  quartz.config.ts
+|  quartz.layout.ts
 |
 +- module/
 |  project-andromeda.mjs
@@ -120,9 +128,9 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 - **Fourth number (`FOUNDRY`):** Use this for normal shipped Foundry-system updates that do not significantly change the rules, such as sheet/UI work, localisation parity, bug fixes, quality-of-life improvements, small content plumbing, migrations that preserve the same rules, and internal refactors with the same gameplay behaviour.
 - **First number (`MAJOR`):** Reserve for a stable milestone or an intentionally breaking overhaul.
 - **When to bump:** Only bump `system.json` when a change affects shipped Foundry system files (for example `module/`, `templates/`, `css/`, `lang/`, `assets/`, `system.json`, `template.json`).
-- **When not to bump:** Changes that do **not** touch the shipped Foundry system (for example Python tools, balance sims, docs, or workflow-only changes in `/Gear balance`, `.github`, or root docs) do **not** require a `system.json` version bump.
+- **When not to bump:** Changes that do **not** touch the shipped Foundry system (for example Quartz publication files, public rulebook pages, docs, or changes in the private companion source repo such as balance sims) do **not** require a `system.json` version bump.
 - **Examples:** `0.3.0.3 -> 0.3.0.4` for a normal Foundry-side fix; `0.3.0.4 -> 0.3.1.0` for a major rules update; `0.3.1.2 -> 0.4.0.0` only if the maintainer explicitly asks for that line bump.
-- **Release packaging:** GitHub Actions builds a `dist/` folder from the shipped Foundry files and zips that folder for distribution. Local tooling folders such as `Gear balance/` are excluded from the release archive.
+- **Release packaging:** GitHub Actions builds a `dist/` folder from the shipped Foundry files and zips that folder for distribution. Quartz, public rulebook files, and other non-shipped publication folders are excluded from the release archive.
 - **Release tags:** GitHub release tags should match the manifest version as `v<system.json version>` (for example `v0.3.0.0`).
 - **Local development:** It is valid to point Foundry's local `Data/systems/project-andromeda` folder at this repository via a Windows junction or symlink. That local setup does not change what gets packaged for users.
 
@@ -161,13 +169,13 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 
 ---
 
-## 6.1 Local Balance Workspace
+## 6.1 Private Balance Tooling
 
-The optional `Gear balance/` folder is a **local gitignored tooling workspace** for simulations and data prep. It is not part of the shipped Foundry system, is not expected to exist in every clone, and should not be committed to the main repository.
+Balance simulations and data-prep tooling live in the **private companion source repo**, not in this public Foundry repository.
 
-- **Tracking:** keep `Gear balance/` out of git. If you use it locally, treat it as personal or maintainer tooling rather than repository content.
-- **Versioning:** local `Gear balance/` changes do **not** require a `system.json` version bump.
-- **Documentation:** if local balance tooling changes in a way that affects tracked repo documentation or workflows, update the relevant tracked docs separately instead of assuming the workspace is available to other users.
+- **Tracking:** do not recreate or commit a local `Gear balance/` workspace here. Keep balance tooling in the private repo under `tools/gear-balance/`.
+- **Versioning:** private balance-tooling changes do **not** require a `system.json` version bump unless they also modify shipped Foundry files in this repository.
+- **Documentation:** if balance-tooling changes require Foundry-side workflow or documentation changes, update the tracked files in this repository separately.
 
 ---
 
