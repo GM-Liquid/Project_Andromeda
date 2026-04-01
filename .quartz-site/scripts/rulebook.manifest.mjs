@@ -1,134 +1,122 @@
-import { access } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { access } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
-const siteRoot = resolve(scriptDir, "..");
-const repoRoot = resolve(siteRoot, "..");
-const sourceDir = resolve(repoRoot, "Книга правил v0.4");
-const contentDir = resolve(siteRoot, "content");
-const staticDir = resolve(siteRoot, "quartz", "static");
+const siteRoot = resolve(scriptDir, '..');
+const repoRoot = resolve(siteRoot, '..');
+const sourceDir = resolve(repoRoot, 'Книга правил v0.4');
+const contentDir = resolve(siteRoot, 'content');
+const staticDir = resolve(siteRoot, 'quartz', 'static');
 
 export const rulebookManifest = [
   {
-    id: "rulebook-home",
-    type: "manual",
-    slug: "index",
-    file: "index.md",
-    title: "Project Andromeda",
-    navTitle: "Главная",
-    order: 10,
-    pageType: "landing",
-    summary:
-      "Красивая онлайн-версия книги правил с быстрыми точками входа, линейным чтением и справочными страницами.",
-    heroImage: "assets/rulebook/art-core-1.webp",
-    heroAlt: "Абстрактный арт Project Andromeda.",
-    showHero: true,
-    showToc: false,
-    parent: null,
-  },
-  {
-    id: "rulebook-core-rules",
-    type: "generated",
-    slug: "rulebook/01-osnovnye-pravila",
-    source: "Основные правила.md",
-    title: "Основные правила",
-    navTitle: "Основы",
+    id: 'rulebook-core-rules',
+    type: 'generated',
+    slug: 'rulebook/01-osnovnye-pravila',
+    source: 'Основные правила.md',
+    title: 'Основные правила',
+    navTitle: 'Основы',
     order: 20,
-    pageType: "chapter",
+    pageType: 'chapter',
     summary:
-      "Базовая модель бросков, проверки, движение, стресс и другие фундаментальные правила игры.",
+      'Базовая модель бросков, проверки, движение, стресс и другие фундаментальные правила игры.',
+    aliases: ['index'],
     heroImage: null,
     heroAlt: null,
     showHero: true,
     showToc: true,
-    parent: null,
+    showInHeaderNav: true,
+    parent: null
   },
   {
-    id: "rulebook-character-creation",
-    type: "generated",
-    slug: "rulebook/02-sozdanie-personazha",
-    source: "Создание персонажа.md",
-    title: "Создание персонажа",
-    navTitle: "Персонаж",
+    id: 'rulebook-character-creation',
+    type: 'generated',
+    slug: 'rulebook/02-sozdanie-personazha',
+    source: 'Создание персонажа.md',
+    title: 'Создание персонажа',
+    navTitle: 'Персонаж',
     order: 30,
-    pageType: "chapter",
+    pageType: 'chapter',
     summary:
-      "Пошаговая сборка героя: архетип, ценности, характеристики, навыки, снаряжение и параметры.",
-    heroImage: "assets/rulebook/art-core-1.webp",
-    heroAlt: "Абстрактный арт для раздела о создании персонажа.",
+      'Пошаговая сборка героя: архетип, ценности, характеристики, навыки, снаряжение и параметры.',
+    heroImage: 'assets/rulebook/art-core-1.webp',
+    heroAlt: 'Абстрактный арт для раздела о создании персонажа.',
     showHero: true,
     showToc: true,
-    parent: null,
+    showInHeaderNav: true,
+    parent: null
   },
   {
-    id: "rulebook-skills-reference",
-    type: "manual",
-    slug: "rulebook/skills-reference",
-    file: "rulebook/skills-reference.md",
-    title: "Навыки и ориентиры",
-    navTitle: "Навыки",
+    id: 'rulebook-skills-reference',
+    type: 'generated',
+    slug: 'rulebook/skills-reference',
+    source: 'Навыки.md',
+    title: 'Навыки и ориентиры',
+    navTitle: 'Навыки',
     order: 40,
-    pageType: "reference",
+    pageType: 'reference',
     summary:
-      "Справочная страница с раскрывающимися блоками по ключевым навыкам и их игровому назначению.",
-    heroImage: "assets/rulebook/art-core-1.webp",
-    heroAlt: "Абстрактный арт для страницы навыков.",
+      'Справочная страница с раскрывающимися блоками по ключевым навыкам и их игровому назначению.',
+    heroImage: 'assets/rulebook/art-core-1.webp',
+    heroAlt: 'Абстрактный арт для страницы навыков.',
     showHero: true,
     showToc: true,
-    parent: null,
+    parent: null
   },
   {
-    id: "rulebook-abilities-equipment",
-    type: "generated",
-    slug: "rulebook/03-sposobnosti-i-snaryazhenie",
-    source: "Способности и снаряжение.md",
-    title: "Способности и снаряжение",
-    navTitle: "Снаряжение",
+    id: 'rulebook-abilities-equipment',
+    type: 'generated',
+    slug: 'rulebook/03-sposobnosti-i-snaryazhenie',
+    source: 'Способности и снаряжение.md',
+    title: 'Способности и снаряжение',
+    navTitle: 'Снаряжение',
     order: 50,
-    pageType: "chapter",
+    pageType: 'chapter',
     summary:
-      "Способности, экипировка и всё, что расширяет базовые возможности персонажа за пределами навыков.",
+      'Способности, экипировка и всё, что расширяет базовые возможности персонажа за пределами навыков.',
     heroImage: null,
     heroAlt: null,
     showHero: true,
     showToc: true,
-    parent: null,
+    showInHeaderNav: true,
+    parent: null
   },
   {
-    id: "rulebook-combat",
-    type: "generated",
-    slug: "rulebook/04-boy",
-    source: "Бой.md",
-    title: "Бой",
-    navTitle: "Бой",
+    id: 'rulebook-combat',
+    type: 'generated',
+    slug: 'rulebook/04-boy',
+    source: 'Бой.md',
+    title: 'Бой',
+    navTitle: 'Бой',
     order: 60,
-    pageType: "chapter",
+    pageType: 'chapter',
     summary:
-      "Структура боевой сцены, действия персонажей и всё, что нужно для разрешения конфликта в тактах.",
+      'Структура боевой сцены, действия персонажей и всё, что нужно для разрешения конфликта в тактах.',
     heroImage: null,
     heroAlt: null,
     showHero: true,
     showToc: true,
-    parent: null,
+    showInHeaderNav: true,
+    parent: null
   },
   {
-    id: "rulebook-negotiations",
-    type: "generated",
-    slug: "rulebook/05-peregovory",
-    source: "Переговоры.md",
-    title: "Переговоры",
-    navTitle: "Переговоры",
+    id: 'rulebook-negotiations',
+    type: 'generated',
+    slug: 'rulebook/05-peregovory',
+    source: 'Переговоры.md',
+    title: 'Переговоры',
+    navTitle: 'Переговоры',
     order: 70,
-    pageType: "chapter",
+    pageType: 'chapter',
     summary:
-      "Социальные сцены, давление, убеждение и правила, которые поддерживают переговоры как полноценную механику.",
+      'Социальные сцены, давление, убеждение и правила, которые поддерживают переговоры как полноценную механику.',
     heroImage: null,
     heroAlt: null,
     showHero: true,
     showToc: true,
-    parent: null,
-  },
+    parent: null
+  }
 ];
 
 export function getRulebookManifest() {
@@ -136,11 +124,11 @@ export function getRulebookManifest() {
 }
 
 export function getGeneratedRulebookEntries() {
-  return getRulebookManifest().filter((entry) => entry.type === "generated");
+  return getRulebookManifest().filter((entry) => entry.type === 'generated');
 }
 
 export function slugToContentPath(slug) {
-  return slug === "index" ? "index.md" : `${slug}.md`;
+  return `${slug}.md`;
 }
 
 function resolveHeroImagePath(heroImage) {
@@ -148,8 +136,8 @@ function resolveHeroImagePath(heroImage) {
     return null;
   }
 
-  if (heroImage.startsWith("static/")) {
-    return resolve(siteRoot, "quartz", heroImage);
+  if (heroImage.startsWith('static/')) {
+    return resolve(siteRoot, 'quartz', heroImage);
   }
 
   return resolve(contentDir, heroImage);
@@ -189,23 +177,23 @@ export async function validateRulebookManifest() {
       throw new Error(`Rulebook manifest entry is missing required labels: ${entry.id}`);
     }
 
-    if (entry.type === "generated") {
+    if (entry.type === 'generated') {
       if (!entry.source) {
         throw new Error(`Generated rulebook entry is missing source: ${entry.id}`);
       }
 
       await assertPathExists(
         resolve(sourceDir, entry.source),
-        `Missing generated source file for ${entry.id}`,
+        `Missing generated source file for ${entry.id}`
       );
-    } else if (entry.type === "manual") {
+    } else if (entry.type === 'manual') {
       if (!entry.file) {
         throw new Error(`Manual rulebook entry is missing file: ${entry.id}`);
       }
 
       await assertPathExists(
         resolve(contentDir, entry.file),
-        `Missing manual content file for ${entry.id}`,
+        `Missing manual content file for ${entry.id}`
       );
     } else {
       throw new Error(`Unsupported rulebook entry type for ${entry.id}: ${entry.type}`);

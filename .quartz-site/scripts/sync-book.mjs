@@ -1,39 +1,42 @@
-import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   getGeneratedRulebookEntries,
   slugToContentPath,
-  validateRulebookManifest,
-} from "./rulebook.manifest.mjs";
-import { prepareRulebookSource } from "./rulebook-source.mjs";
+  validateRulebookManifest
+} from './rulebook.manifest.mjs';
+import { prepareRulebookSource } from './rulebook-source.mjs';
+import { transformSkillsReferenceSource } from './skills-reference-source.mjs';
+
+export { transformSkillsReferenceSource } from './skills-reference-source.mjs';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
-const siteRoot = resolve(scriptDir, "..");
-const repoRoot = resolve(siteRoot, "..");
+const siteRoot = resolve(scriptDir, '..');
+const repoRoot = resolve(siteRoot, '..');
 
-const contentDir = resolve(siteRoot, "content");
-const rulebookDir = resolve(contentDir, "rulebook");
-const generatedStatePath = resolve(contentDir, ".generated-rulebook.json");
+const contentDir = resolve(siteRoot, 'content');
+const rulebookDir = resolve(contentDir, 'rulebook');
+const generatedStatePath = resolve(contentDir, '.generated-rulebook.json');
 
 function formatDate(date) {
   const year = date.getFullYear();
-  const month = `${date.getMonth() + 1}`.padStart(2, "0");
-  const day = `${date.getDate()}`.padStart(2, "0");
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
 
 function serializeFrontmatterValue(value) {
   if (Array.isArray(value)) {
-    return `[${value.map((item) => JSON.stringify(item)).join(", ")}]`;
+    return `[${value.map((item) => JSON.stringify(item)).join(', ')}]`;
   }
 
-  if (typeof value === "string") {
+  if (typeof value === 'string') {
     return JSON.stringify(value);
   }
 
   if (value === null) {
-    return "null";
+    return 'null';
   }
 
   return String(value);
@@ -41,29 +44,30 @@ function serializeFrontmatterValue(value) {
 
 function withFrontmatter(frontmatter, body) {
   return [
-    "---",
+    '---',
     ...Object.entries(frontmatter).map(
-      ([key, value]) => `${key}: ${serializeFrontmatterValue(value)}`,
+      ([key, value]) => `${key}: ${serializeFrontmatterValue(value)}`
     ),
-    "---",
-    "",
+    '---',
+    '',
     body.trimEnd(),
-    "",
-  ].join("\n");
+    ''
+  ].join('\n');
 }
 
-function normalizeBody(body, title) {
-  const cleaned = body.replace(/^\uFEFF/, "").trim();
+function normalizeBody(body, chapter) {
+  const cleaned = body.replace(/^\uFEFF/, '').trim();
 
   if (!cleaned) {
-    return "TODO: раздел пока в подготовке.";
+    return 'TODO: раздел пока в подготовке.';
   }
 
-  if (title === "Бой") {
-    return cleaned.replace(
-      /\[Основные правила\]\(\)/g,
-      "[Основные правила](01-osnovnye-pravila)",
-    );
+  if (chapter.id === 'rulebook-skills-reference') {
+    return transformSkillsReferenceSource(cleaned);
+  }
+
+  if (chapter.title === 'Бой') {
+    return cleaned.replace(/\[Основные правила\]\(\)/g, '[Основные правила](01-osnovnye-pravila)');
   }
 
   return cleaned;
@@ -71,7 +75,7 @@ function normalizeBody(body, title) {
 
 async function readGeneratedState() {
   try {
-    const raw = await readFile(generatedStatePath, "utf8");
+    const raw = await readFile(generatedStatePath, 'utf8');
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : [];
   } catch {
@@ -80,17 +84,13 @@ async function readGeneratedState() {
 }
 
 async function writeGeneratedState(generatedFiles) {
-  await writeFile(
-    generatedStatePath,
-    `${JSON.stringify(generatedFiles, null, 2)}\n`,
-    "utf8",
-  );
+  await writeFile(generatedStatePath, `${JSON.stringify(generatedFiles, null, 2)}\n`, 'utf8');
 }
 
 export async function syncBook() {
+  const source = await prepareRulebookSource({ repoRoot });
   const chapters = await validateRulebookManifest();
   const generatedEntries = getGeneratedRulebookEntries();
-  const source = await prepareRulebookSource({ repoRoot });
   const sourceDir = source.canonicalSourceDir;
 
   await mkdir(contentDir, { recursive: true });
@@ -103,7 +103,7 @@ export async function syncBook() {
     const sourcePath = resolve(sourceDir, chapter.source);
     const targetRelativePath = slugToContentPath(chapter.slug);
     const targetPath = resolve(contentDir, targetRelativePath);
-    const source = await readFile(sourcePath, "utf8");
+    const source = await readFile(sourcePath, 'utf8');
     const sourceStats = await stat(sourcePath);
     const modified = formatDate(sourceStats.mtime);
 
@@ -114,19 +114,20 @@ export async function syncBook() {
         order: chapter.order,
         pageType: chapter.pageType,
         summary: chapter.summary,
+        ...(chapter.aliases?.length ? { aliases: chapter.aliases } : {}),
         heroImage: chapter.heroImage,
         heroAlt: chapter.heroAlt,
         showHero: chapter.showHero,
         showToc: chapter.showToc,
         parent: chapter.parent,
         created: modified,
-        modified,
+        modified
       },
-      normalizeBody(source, chapter.title),
+      normalizeBody(source, chapter)
     );
 
     await mkdir(dirname(targetPath), { recursive: true });
-    await writeFile(targetPath, generated, "utf8");
+    await writeFile(targetPath, generated, 'utf8');
     nextGeneratedFiles.push(targetRelativePath);
   }
 
@@ -147,20 +148,14 @@ export async function syncBook() {
     externalAvailable: source.externalAvailable,
     contentDir,
     manifest: chapters,
-    generatedFiles: nextGeneratedFiles.map((file) => resolve(contentDir, file)),
+    generatedFiles: nextGeneratedFiles.map((file) => resolve(contentDir, file))
   };
 }
 
-const isDirectRun =
-  process.argv[1] &&
-  resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+const isDirectRun = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 
 if (isDirectRun) {
-  const {
-    sourceDir: source,
-    contentDir: target,
-    generatedFiles,
-  } = await syncBook();
+  const { sourceDir: source, contentDir: target, generatedFiles } = await syncBook();
   console.log(`Synced ${source} -> ${target}`);
   console.log(`Generated ${generatedFiles.length} files.`);
 }

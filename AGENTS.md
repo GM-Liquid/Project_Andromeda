@@ -30,18 +30,17 @@ project-andromeda/
 |
 +- .quartz-site/
 |  content/
-|  | index.md <- hand-authored public landing page for the rulebook
 |  | .generated-rulebook.json <- generated chapter file registry for Quartz sync
 |  | assets/
 |  |  '- rulebook/
 |  |     '- art-core-1.webp
 |  | '- rulebook/
-|  |    | 01-osnovnye-pravila.md <- generated from the public mirror
+|  |    | 01-osnovnye-pravila.md <- generated from the public mirror and also owns the root `/` redirect
 |  |    | 02-sozdanie-personazha.md <- generated from the public mirror
 |  |    | 03-sposobnosti-i-snaryazhenie.md <- generated from the public mirror
 |  |    | 04-boy.md <- generated from the public mirror
 |  |    | 05-peregovory.md <- generated from the public mirror
-|  |    '- skills-reference.md <- hand-authored editorial reference page
+|  |    '- skills-reference.md <- generated from the canonical `Навыки.md` source with Quartz accordion formatting
 |  quartz/
 |  scripts/
 |  | sync-book.mjs <- generates chapter pages from the public mirror
@@ -87,29 +86,29 @@ project-andromeda/
 - `Книга правил v0.4/` in this repository is a **public mirror**, not the canonical rules source. Canonical mechanics still live in the private source repo `Docs_Project_Andromeda`.
 - `.quartz-site/scripts/sync-book.mjs` auto-detects a sibling `../Docs_Project_Andromeda/Книга правил v0.4/` (or `PROJECT_ANDROMEDA_DOCS_REPO`) and mirrors it into this repository before generating Quartz chapter pages.
 - `.quartz-site/scripts/dev.mjs`, `.quartz-site/scripts/sync-book.mjs`, and `.quartz-site/package.json` build scripts all rely on the same source-resolution helper so local Quartz work reads from the canonical private-docs repo when it is available.
+- The sibling private repo may also install a local `post-commit` hook that runs `node scripts/publish-public.mjs --build` after commits in `Docs_Project_Andromeda`, updating this public mirror plus `.quartz-site/content/rulebook` and `.quartz-site/public` automatically on the local machine.
 - If the private docs repo is unavailable, Quartz falls back to the mirrored `Книга правил v0.4/` inside this public repository so CI and GitHub Pages builds still work.
+- That local hook is a convenience for the maintainer only. GitHub Pages still deploys only after the resulting changes are committed and pushed from this `Project Andromeda` repository.
 - `.quartz-site/scripts/rulebook.manifest.mjs` is the single source of truth for public rulebook structure, ordering, summaries, hero settings, and which pages are generated versus hand-authored.
-- `.quartz-site/content/` is now **mixed authored/generated publication content**:
-  - generated chapter pages under `.quartz-site/content/rulebook/01-...05-...`
-  - hand-authored editorial pages such as `.quartz-site/content/index.md` and `.quartz-site/content/rulebook/skills-reference.md`
+- `.quartz-site/content/` contains generated public rulebook pages under `.quartz-site/content/rulebook/`, including mirrored main chapters plus transformed reference pages such as `skills-reference.md`.
 - `.quartz-site/content/.generated-rulebook.json` is generated state used by the sync pipeline. Do not hand-edit it unless you are explicitly changing sync internals.
 - `.quartz-site/public/` is build output. Never edit it manually.
 
 ### 2.2 Current Quartz Publication Shape
 
-- `/` is the main landing page for the public rulebook.
+- `/` is a redirect entry point that immediately forwards readers to `/rulebook/01-osnovnye-pravila/`.
 - `/rulebook/` is intentionally **not** used as a separate landing page to avoid duplicating the home page.
 - Main generated book chapters are published as `/rulebook/<slug>/` and keep their stable chapter URLs.
-- Curated editorial/support pages may also live under `/rulebook/` when they are intentionally hand-authored rather than mirrored 1:1 from the public book copy.
+- Curated editorial/support pages may also live under `/rulebook/` when they are intentionally transformed for Quartz presentation rather than mirrored 1:1 from the public book copy.
 - Rulebook navigation order comes from `rulebook.manifest.mjs`, not from filename sorting.
-- The landing page, editorial hero, left navigation, right-hand TOC, and previous/next pager are part of the Quartz presentation layer, not part of the game canon.
+- The root redirect, editorial hero, left navigation, right-hand TOC, and previous/next pager are part of the Quartz presentation layer, not part of the game canon.
 
 ### 2.3 Where to Edit Quartz
 
-- `.quartz-site/scripts/rulebook.manifest.mjs` when page order, hero metadata, summaries, page types, or generated/manual rulebook boundaries change.
-- `.quartz-site/scripts/sync-book.mjs` and `.quartz-site/scripts/rulebook-source.mjs` when the mapping between `Книга правил v0.4/` and generated chapter pages changes, or when emitted chapter frontmatter / private-docs mirroring behaviour changes.
+- `.quartz-site/scripts/rulebook.manifest.mjs` when page order, hero metadata, summaries, page types, or generated/transformed rulebook boundaries change.
+- `.quartz-site/scripts/sync-book.mjs`, `.quartz-site/scripts/skills-reference-source.mjs`, and `.quartz-site/scripts/rulebook-source.mjs` when the mapping between `Книга правил v0.4/` and generated Quartz pages changes, or when emitted frontmatter / private-docs mirroring / skills-reference accordion formatting changes.
 - `.quartz-site/scripts/rulebook-source.test.mjs` when the private-docs auto-mirror or fallback behaviour changes and needs regression coverage.
-- `.quartz-site/content/index.md` and other hand-authored files in `.quartz-site/content/` when curated landing/reference content changes.
+- `Docs_Project_Andromeda/Книга правил v0.4/Навыки.md` when the published skills-reference page text changes.
 - `.quartz-site/quartz.layout.ts` when rulebook layout, sidebars, TOC placement, or conditional page composition change.
 - `.quartz-site/quartz/components/` and `.quartz-site/quartz/styles/` when editorial hero/header/nav/pager behaviour, interaction logic, or styling change.
 - `.quartz-site/quartz/plugins/transformers/rulebookBlocks.ts` when the custom `:::summary`, `:::cards`, or `:::accordion` authoring syntax changes.
@@ -120,7 +119,7 @@ project-andromeda/
 - Do not bump `system.json` for Quartz-only, public-rulebook-only, or other non-shipped publication changes.
 - Keep the public mirror in `Книга правил v0.4/` clean and reader-facing. Editorial-only structure, hero metadata, and navigation logic belong in Quartz manifest/layout/content files, not in the mirrored rule text unless the maintainer explicitly wants that coupling.
 - When changing routes, slugs, or emitted pages, check for duplicate pages created by both generated chapter output and hand-authored Quartz pages.
-- Do not let `sync-book.mjs` overwrite hand-authored editorial pages such as the landing page or curated reference pages.
+- Do not let `sync-book.mjs` overwrite hand-authored editorial pages if such pages are added later; generated/transformed pages such as `skills-reference.md` are allowed to be replaced on each sync.
 - If a published page disappears or its slug changes, explicitly call out the old URL impact unless a redirect is added.
 
 ---
@@ -267,4 +266,4 @@ The Google Sheets sync MVP is part of the shipped Foundry system.
 
 ---
 
-_Last updated: 2026-03-31_
+_Last updated: 2026-04-01_

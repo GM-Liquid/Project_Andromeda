@@ -4,6 +4,7 @@ navTitle: "Основы"
 order: 20
 pageType: "chapter"
 summary: "Базовая модель бросков, проверки, движение, стресс и другие фундаментальные правила игры."
+aliases: ["index"]
 heroImage: null
 heroAlt: null
 showHero: true

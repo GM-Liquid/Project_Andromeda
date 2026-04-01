@@ -3,6 +3,7 @@ import { spawn } from "node:child_process"
 import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
+import { getQuartzDevCommand } from "./quartz-dev-command.mjs"
 import { getRulebookWatchPattern } from "./rulebook-source.mjs"
 import { syncBook } from "./sync-book.mjs"
 
@@ -13,8 +14,8 @@ const repoRoot = resolve(siteRoot, "..")
 const initialSync = await syncBook()
 const sourceGlob = await getRulebookWatchPattern({ repoRoot })
 
-const npxCommand = process.platform === "win32" ? "npx.cmd" : "npx"
-const quartz = spawn(npxCommand, ["quartz", "build", "--serve"], {
+const { command, args } = getQuartzDevCommand({ siteRoot })
+const quartz = spawn(command, args, {
   cwd: siteRoot,
   stdio: "inherit",
 })
