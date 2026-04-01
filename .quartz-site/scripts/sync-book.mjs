@@ -1,5 +1,5 @@
 import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
+import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   getGeneratedRulebookEntries,
@@ -55,7 +55,82 @@ function withFrontmatter(frontmatter, body) {
   ].join('\n');
 }
 
-function normalizeBody(body, chapter) {
+function buildRulebookInternalLinkMap(chapters) {
+  return new Map(
+    chapters
+      .filter((chapter) => chapter.source)
+      .map((chapter) => [
+        chapter.source.replace(/\.md$/i, ''),
+        basename(chapter.slug)
+      ])
+  );
+}
+
+function rewriteRulebookLinkTarget(target, linkMap) {
+  if (!target || target.startsWith('#')) {
+    return target;
+  }
+
+  const trimmedTarget = target.trim();
+  const anchorIndex = trimmedTarget.indexOf('#');
+  const pathPart = anchorIndex === -1 ? trimmedTarget : trimmedTarget.slice(0, anchorIndex);
+  const anchorPart = anchorIndex === -1 ? '' : trimmedTarget.slice(anchorIndex);
+
+  let prefix = '';
+  let normalizedPath = pathPart;
+  if (normalizedPath.startsWith('./')) {
+    prefix = './';
+    normalizedPath = normalizedPath.slice(2);
+  }
+
+  normalizedPath = normalizedPath.replace(/\.md$/i, '');
+  const rewrittenPath = linkMap.get(normalizedPath);
+
+  if (!rewrittenPath) {
+    return target;
+  }
+
+  return `${prefix}${rewrittenPath}${anchorPart}`;
+}
+
+export function rewriteRulebookInternalLinks(body, chapters = getGeneratedRulebookEntries()) {
+  const linkMap = buildRulebookInternalLinkMap(chapters);
+  if (linkMap.size === 0) {
+    return body;
+  }
+
+  return body
+    .replace(/\[\[([^\]|#]+)?(#[^\]|]+)?(\|[^\]]*)?\]\]/g, (full, rawTarget = '', rawAnchor = '', rawAlias = '') => {
+      if (!rawTarget) {
+        return full;
+      }
+
+      const rewrittenTarget = rewriteRulebookLinkTarget(
+        `${rawTarget}${rawAnchor ?? ''}`,
+        linkMap
+      );
+
+      if (rewrittenTarget === `${rawTarget}${rawAnchor ?? ''}`) {
+        return full;
+      }
+
+      return `[[${rewrittenTarget}${rawAlias ?? ''}]]`;
+    })
+    .replace(/(?<!!)\[([^\]]+)\]\(([^)]+)\)/g, (full, text, rawTarget) => {
+      if (/^(?:[a-z]+:)?\/\//i.test(rawTarget) || rawTarget.startsWith('#')) {
+        return full;
+      }
+
+      const rewrittenTarget = rewriteRulebookLinkTarget(rawTarget, linkMap);
+      if (rewrittenTarget === rawTarget) {
+        return full;
+      }
+
+      return `[${text}](${rewrittenTarget})`;
+    });
+}
+
+function normalizeBody(body, chapter, chapters) {
   const cleaned = body.replace(/^\uFEFF/, '').trim();
 
   if (!cleaned) {
@@ -66,11 +141,16 @@ function normalizeBody(body, chapter) {
     return transformSkillsReferenceSource(cleaned);
   }
 
+  let normalized = rewriteRulebookInternalLinks(cleaned, chapters);
+
   if (chapter.title === 'Бой') {
-    return cleaned.replace(/\[Основные правила\]\(\)/g, '[Основные правила](01-osnovnye-pravila)');
+    normalized = normalized.replace(
+      /\[Основные правила\]\(\)/g,
+      '[Основные правила](01-osnovnye-pravila)'
+    );
   }
 
-  return cleaned;
+  return normalized;
 }
 
 async function readGeneratedState() {
@@ -123,7 +203,7 @@ export async function syncBook() {
         created: modified,
         modified
       },
-      normalizeBody(source, chapter)
+      normalizeBody(source, chapter, generatedEntries)
     );
 
     await mkdir(dirname(targetPath), { recursive: true });

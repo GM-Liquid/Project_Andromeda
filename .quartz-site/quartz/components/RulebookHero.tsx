@@ -8,7 +8,6 @@ import {
   getRulebookFirstChapter,
   getRulebookPageMeta,
   getRulebookPageTypeLabel,
-  getRulebookReferenceEntry,
   isRulebookSlug,
   resolveRulebookAsset,
 } from "../util/rulebook"
@@ -36,7 +35,6 @@ export default (() => {
     }
 
     const firstChapter = getRulebookFirstChapter()
-    const referenceEntry = getRulebookReferenceEntry()
     const typeLabel = getRulebookPageTypeLabel(meta.pageType)
     const styleValue = heroStyle(currentSlug, meta.heroImage)
     const actions = [
@@ -44,13 +42,6 @@ export default (() => {
         ? (
             <a class="primary" href={resolveRelative(currentSlug, firstChapter.slug)}>
               Читать по порядку
-            </a>
-          )
-        : null,
-      referenceEntry && referenceEntry.slug !== currentSlug
-        ? (
-            <a class="secondary" href={resolveRelative(currentSlug, referenceEntry.slug)}>
-              Открыть справочник
             </a>
           )
         : null,

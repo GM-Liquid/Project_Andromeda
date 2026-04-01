@@ -55,6 +55,8 @@ body[data-rulebook="true"] {
     }
 
     .sidebar.left {
+      z-index: 4;
+
       @media all and ($desktop) {
         padding: 2rem 0.75rem 2rem 0;
         align-items: stretch;
@@ -180,6 +182,11 @@ body[data-rulebook="true"] {
   article a.internal {
     background: rgba(45, 88, 118, 0.08);
     color: var(--secondary);
+  }
+
+  .callout[data-callout="info"] {
+    border: none;
+    box-shadow: inset 0 0 0 1px var(--border);
   }
 
   article blockquote {
