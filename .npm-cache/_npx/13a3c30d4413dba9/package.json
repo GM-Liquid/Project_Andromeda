@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@jackyzha0/quartz": "file:../../../.quartz-site"
+  }
+}
