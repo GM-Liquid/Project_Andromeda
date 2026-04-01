@@ -11,8 +11,8 @@
 | ----------------------------- | --------------------------------------------------------------- |
 | **System name**               | **Project Andromeda**                                           |
 | **Foundry VTT compatibility** | v12 (verified 12)                                               |
-| **Current version**           | `0.3.2.0`                                                       |
-| **Current release line**      | `0.3.0.x`                                                       |
+| **Current version**           | `0.3.3.0`                                                       |
+| **Current release line**      | `0.3.3.x`                                                       |
 | **Languages**                 | English, Русский (full parity required)                         |
 | **Main tech**                 | ES-module JavaScript (`*.mjs`), Handlebars (`*.hbs`), JSON, CSS |
 | **Licence**                   | CC BY-NC-SA 4.0                                                 |
@@ -167,9 +167,9 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 
 ### 3.5 Movement Speed
 
-- Base movement speed is **1**.
-- Movement speed does **not** scale from abilities or rank.
-- Armor speed modifiers and `system.tempspeed` remain additive on top of that base value.
+- Base movement speed depends on `system.currentRank`: **15** at rank 1, **45** at rank 2, **150** at rank 3, and **450** at rank 4.
+- Movement speed does **not** scale from abilities.
+- Armor speed modifiers and `system.tempspeed` remain additive on top of that rank-based base value.
 
 ### 3.6 Extreme Roll Reward
 

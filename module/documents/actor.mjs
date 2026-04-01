@@ -5,6 +5,7 @@ import {
   isSupportedCharacterActorType,
   supportsAzureStress
 } from '../helpers/actor-types.mjs';
+import { calcMovementSpeed } from '../helpers/movement-speed.mjs';
 import { getAbilityDieRoll, getAbilityDieNumeric, normalizeAbilityDie } from '../helpers/utils.mjs';
 
 /**
@@ -126,8 +127,7 @@ export class ProjectAndromedaActor extends Actor {
   }
 
   _calcSpeed(s, itemTotals = {}) {
-    const armorSpeed = Number(itemTotals?.armor?.speed) || 0;
-    return 1 + armorSpeed + (Number(s.tempspeed) || 0);
+    return calcMovementSpeed(s, itemTotals);
   }
 
   _calcDefPhys(s, itemTotals = {}) {

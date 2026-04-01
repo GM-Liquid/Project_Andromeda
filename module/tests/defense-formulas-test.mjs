@@ -1,56 +1,52 @@
 import { debugLog } from '../config.mjs';
 import { ProjectAndromedaActor } from '../documents/actor.mjs';
-import { getAbilityDieNumeric } from '../helpers/utils.mjs';
 
-const TEST_DEFENSE_TRANSLATIONS = {
+const TEST_UI_TRANSLATIONS = {
   en: {
     defenses: {
-      PhysicalLabel: 'Endurance',
-      MagicalLabel: 'Fortitude',
-      PsychicLabel: 'Will'
+      MagicalLabel: 'Technical Protection',
+      PsychicLabel: 'Magical Protection'
     },
     armorItem: {
-      BonusPhysicalLabel: 'Bonus to Endurance',
-      BonusMagicalLabel: 'Bonus to Fortitude',
-      BonusPsychicLabel: 'Bonus to Will'
+      BonusMagicalLabel: 'Bonus to Technical Protection',
+      BonusPsychicLabel: 'Bonus to Magical Protection'
     },
     temp: {
-      BonusPhysicalLabel: 'Temp. Endurance',
-      BonusMagicalLabel: 'Temp. Fortitude',
-      BonusPsychicLabel: 'Temp. Will'
+      BonusMagicalLabel: 'Temp. Tech. Protection',
+      BonusPsychicLabel: 'Temp. Mag. Protection'
+    },
+    googleSheetsSync: {
+      Headers: {
+        ItemAzure: 'Technical Protection',
+        ItemMental: 'Magical Protection'
+      }
     }
   },
   ru: {
     defenses: {
-      PhysicalLabel: 'Выдержка',
-      MagicalLabel: 'Стойкость',
-      PsychicLabel: 'Воля'
+      MagicalLabel: 'Техническая защита',
+      PsychicLabel: 'Магическая защита'
     },
     armorItem: {
-      BonusPhysicalLabel: 'Бонус к Выдержке',
-      BonusMagicalLabel: 'Бонус к Стойкости',
-      BonusPsychicLabel: 'Бонус к Воле'
+      BonusMagicalLabel: 'Бонус к технической защите',
+      BonusPsychicLabel: 'Бонус к магической защите'
     },
     temp: {
-      BonusPhysicalLabel: 'Врем. Выдержка',
-      BonusMagicalLabel: 'Врем. Стойкость',
-      BonusPsychicLabel: 'Врем. Воля'
+      BonusMagicalLabel: 'Врем. тех. защита',
+      BonusPsychicLabel: 'Врем. маг. защита'
+    },
+    googleSheetsSync: {
+      Headers: {
+        ItemAzure: 'Тех. защита',
+        ItemMental: 'Маг. защита'
+      }
     }
   }
 };
 
-function getAbilityValue(system, key) {
-  return getAbilityDieNumeric(system?.abilities?.[key]?.value);
-}
-
-function getQuarterDefense(system, firstAbility, secondAbility) {
-  const total = getAbilityValue(system, firstAbility) + getAbilityValue(system, secondAbility);
-  return Math.round(total / 4);
-}
-
-function applyDefenseLabelOverrides() {
+function applyProtectionLabelOverrides() {
   const language = game.i18n?.lang ?? 'en';
-  const translations = TEST_DEFENSE_TRANSLATIONS[language] ?? TEST_DEFENSE_TRANSLATIONS.en;
+  const translations = TEST_UI_TRANSLATIONS[language] ?? TEST_UI_TRANSLATIONS.en;
   const root = game.i18n?.translations?.MY_RPG;
   if (!root) return;
 
@@ -66,27 +62,13 @@ function applyDefenseLabelOverrides() {
     insertKeys: true,
     overwrite: true
   });
+  foundry.utils.mergeObject((root.GoogleSheetsSync ??= {}), translations.googleSheetsSync, {
+    insertKeys: true,
+    overwrite: true
+  });
 
-  debugLog('Applied test defense labels', { language, translations });
+  debugLog('Applied test protection label overrides', { language, translations });
 }
-
-ProjectAndromedaActor.prototype._calcDefPhys = function (system, itemTotals = {}) {
-  const itemBonus = Number(itemTotals?.armor?.physical) || 0;
-  const tempBonus = Number(system?.tempphys) || 0;
-  return getQuarterDefense(system, 'con', 'int') + itemBonus + tempBonus;
-};
-
-ProjectAndromedaActor.prototype._calcDefAzure = function (system, itemTotals = {}) {
-  const itemBonus = Number(itemTotals?.armor?.azure) || 0;
-  const tempBonus = Number(system?.tempazure) || 0;
-  return getQuarterDefense(system, 'con', 'spi') + itemBonus + tempBonus;
-};
-
-ProjectAndromedaActor.prototype._calcDefMent = function (system, itemTotals = {}) {
-  const itemBonus = Number(itemTotals?.armor?.mental) || 0;
-  const tempBonus = Number(system?.tempmental) || 0;
-  return getQuarterDefense(system, 'spi', 'int') + itemBonus + tempBonus;
-};
 
 ProjectAndromedaActor.prototype._calcStressMax = function (system) {
   const rank = Math.max(Number(system?.currentRank) || 0, 0);
@@ -103,6 +85,6 @@ ProjectAndromedaActor.prototype._calcEliteStressMax = function (system) {
   return Math.max(0, rank * 10);
 };
 
-Hooks.once('setup', applyDefenseLabelOverrides);
+Hooks.once('setup', applyProtectionLabelOverrides);
 
-debugLog('Loaded test defense and stress formula overrides');
+debugLog('Loaded test stress formula and protection label overrides');
