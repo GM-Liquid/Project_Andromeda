@@ -20,6 +20,10 @@
 - `npm run build` - синхронизировать главы и собрать сайт.
 - `npm run dev` - локальный предпросмотр с автосинхронизацией, если меняются файлы книги.
 
+## UI
+
+- Короткая Quartz-памятка по visual language лежит в `../docs/quartz-ui-style.md`.
+
 ## GitHub Pages
 
 Workflow лежит в `../.github/workflows/deploy-rulebook.yml`.

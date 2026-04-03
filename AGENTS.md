@@ -11,8 +11,8 @@
 | ----------------------------- | --------------------------------------------------------------- |
 | **System name**               | **Project Andromeda**                                           |
 | **Foundry VTT compatibility** | v12 (verified 12)                                               |
-| **Current version**           | `0.3.3.0`                                                       |
-| **Current release line**      | `0.3.3.x`                                                       |
+| **Current version**           | `0.3.4.0`                                                       |
+| **Current release line**      | `0.3.4.x`                                                       |
 | **Languages**                 | English, Русский (full parity required)                         |
 | **Main tech**                 | ES-module JavaScript (`*.mjs`), Handlebars (`*.hbs`), JSON, CSS |
 | **Licence**                   | CC BY-NC-SA 4.0                                                 |
@@ -158,10 +158,10 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 ### 3.4 Stress Formulas
 
 - The system has **four** actor character types: `playerCharacter`, `minion`, `rankAndFile`, and `elite`.
-- Player characters (`playerCharacter`, shown in UI as **Player Character** / **Персонаж игрока**) use stress **3 x rank** and support azure-stress marking on the stress track.
-- Minions (`minion`, shown in UI as **Minion** / **Миньон**) use stress **3 x rank** and do **not** support azure-stress marking on the stress track.
-- Rank-and-file characters (`rankAndFile`, shown in UI as **Rank-and-File** / **Рядовой**) use stress **3 x rank** and **do** support azure-stress marking on the stress track.
-- Elite characters (`elite`, shown in UI as **Elite** / **Элита**) use stress **9 x rank** and do **not** support azure-stress marking on the stress track.
+- Player characters (`playerCharacter`, shown in UI as **Player Character** / **Персонаж игрока**) use stress **4 x rank** and support azure-stress marking on the stress track.
+- Minions (`minion`, shown in UI as **Minion** / **Миньон**) use stress **4 x rank** and do **not** support azure-stress marking on the stress track.
+- Rank-and-file characters (`rankAndFile`, shown in UI as **Rank-and-File** / **Рядовой**) use stress **4 x rank** and **do** support azure-stress marking on the stress track.
+- Elite characters (`elite`, shown in UI as **Elite** / **Элита**) use stress **10 x rank** and do **not** support azure-stress marking on the stress track.
 - `system.temphealth` is presented as **temporary stress** for backwards compatibility and extends the **power shield** track rather than the base stress track.
 
 ### 3.5 Movement Speed
@@ -266,4 +266,4 @@ The Google Sheets sync MVP is part of the shipped Foundry system.
 
 ---
 
-_Last updated: 2026-04-01_
+_Last updated: 2026-04-03_

@@ -97,17 +97,17 @@ export class ProjectAndromedaActor extends Actor {
   /* ------------------------ Формулы ------------------------------ */
   _calcStressMax(s) {
     const rank = Math.max(Number(s.currentRank) || 0, 0);
-    return Math.max(0, rank * 3);
+    return Math.max(0, rank * 4);
   }
 
   _calcGmStressMax(s) {
     const rank = Math.max(Number(s.currentRank) || 0, 0);
-    return Math.max(0, rank * 3);
+    return Math.max(0, rank * 4);
   }
 
   _calcEliteStressMax(s) {
     const rank = Math.max(Number(s.currentRank) || 0, 0);
-    return Math.max(0, rank * 9);
+    return Math.max(0, rank * 10);
   }
 
   _calcForceShieldMax(s, itemTotals = {}) {

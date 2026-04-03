@@ -70,21 +70,6 @@ function applyProtectionLabelOverrides() {
   debugLog('Applied test protection label overrides', { language, translations });
 }
 
-ProjectAndromedaActor.prototype._calcStressMax = function (system) {
-  const rank = Math.max(Number(system?.currentRank) || 0, 0);
-  return Math.max(0, rank * 4);
-};
-
-ProjectAndromedaActor.prototype._calcGmStressMax = function (system) {
-  const rank = Math.max(Number(system?.currentRank) || 0, 0);
-  return Math.max(0, rank * 4);
-};
-
-ProjectAndromedaActor.prototype._calcEliteStressMax = function (system) {
-  const rank = Math.max(Number(system?.currentRank) || 0, 0);
-  return Math.max(0, rank * 10);
-};
-
 Hooks.once('setup', applyProtectionLabelOverrides);
 
-debugLog('Loaded test stress formula and protection label overrides');
+debugLog('Loaded test protection label overrides');

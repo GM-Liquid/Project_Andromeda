@@ -130,6 +130,33 @@ export function rewriteRulebookInternalLinks(body, chapters = getGeneratedRulebo
     });
 }
 
+function normalizeCharacterSheetExamples(body) {
+  const lines = body.split('\n');
+  const normalized = [];
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+
+    if (!line.startsWith('**Имя:**')) {
+      normalized.push(line);
+      continue;
+    }
+
+    const blockLines = [line.trimEnd()];
+    let cursor = index + 1;
+
+    while (cursor < lines.length && lines[cursor].trim() !== '') {
+      blockLines.push(lines[cursor].trimEnd());
+      cursor += 1;
+    }
+
+    normalized.push(blockLines.join('  \n'));
+    index = cursor - 1;
+  }
+
+  return normalized.join('\n');
+}
+
 function normalizeBody(body, chapter, chapters) {
   const cleaned = body.replace(/^\uFEFF/, '').trim();
 
@@ -142,6 +169,7 @@ function normalizeBody(body, chapter, chapters) {
   }
 
   let normalized = rewriteRulebookInternalLinks(cleaned, chapters);
+  normalized = normalizeCharacterSheetExamples(normalized);
 
   if (chapter.title === 'Бой') {
     normalized = normalized.replace(

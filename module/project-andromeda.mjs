@@ -2,7 +2,7 @@
 import { GoogleSheetsSyncApp } from './apps/google-sheets-sync-app.mjs';
 import { ProjectAndromedaActor } from './documents/actor.mjs';
 import { ProjectAndromedaItem } from './documents/item.mjs';
-// Temporary test override. Remove this import to disable the alternate defense/stress formulas.
+// Temporary test override. Remove this import to disable the alternate protection labels.
 import './tests/defense-formulas-test.mjs';
 // Import sheet classes.
 import {
