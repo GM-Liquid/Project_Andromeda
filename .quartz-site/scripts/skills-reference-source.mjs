@@ -48,7 +48,7 @@ export function transformSkillsReferenceSource(source) {
     throw new Error('Список навыков must appear after the intro section.');
   }
 
-  const summaryLines = trimBlankLines(lines.slice(introIndex + 1, skillsListIndex));
+  const summaryLines = trimBlankLines(lines.slice(introIndex, skillsListIndex));
   const output = [':::summary', ...summaryLines, ':::', ''];
   const skillsLines = lines.slice(skillsListIndex + 1);
 
@@ -74,7 +74,7 @@ export function transformSkillsReferenceSource(source) {
         abilityLabel
       };
 
-      output.push(`## ${groupTitle}`, '');
+      output.push(`### ${groupTitle}`, '');
       index += 1;
       continue;
     }

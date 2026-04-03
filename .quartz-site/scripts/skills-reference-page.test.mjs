@@ -35,8 +35,11 @@ test('transformSkillsReferenceSource converts the skills source into summary and
 `);
 
   assert.match(transformed, /:::summary/);
+  assert.match(transformed, /### Что означают значения навыков/);
   assert.match(transformed, /Навыки растут от \*\*0\*\* до \*\*10\*\*\./);
-  assert.match(transformed, /^## Навыки Тела$/m);
+  assert.match(transformed, /^### Навыки Тела$/m);
+  assert.match(transformed, /^### Навыки Духа$/m);
+  assert.doesNotMatch(transformed, /^## Навыки Тела$/m);
   assert.match(transformed, /:::accordion "Мощь" \| Тело/);
   assert.match(transformed, /:::accordion "Мистика" \| Дух/);
 });

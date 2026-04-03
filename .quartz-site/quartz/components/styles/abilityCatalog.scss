@@ -306,6 +306,11 @@
     vertical-align: middle;
   }
 
+  thead th:first-child,
+  tbody td:first-child {
+    padding-left: 1.1rem;
+  }
+
   &__summary-row {
     cursor: pointer;
 
@@ -414,7 +419,7 @@
     gap: 0.9rem;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    padding-inline-end: 0.45rem;
+    padding-inline-end: 0.35rem;
   }
 
   &__description-preview {
@@ -481,6 +486,15 @@
     text-transform: uppercase;
     color: var(--secondary);
   }
+}
+
+.rulebook-ability-catalog .table-container {
+  overflow-x: visible;
+}
+
+.rulebook-ability-catalog .table-container > table {
+  margin: 0;
+  padding: 0;
 }
 
 .rulebook-ability-catalog input.rulebook-ability-catalog__dropdown-checkbox {

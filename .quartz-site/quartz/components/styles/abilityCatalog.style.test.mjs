@@ -25,3 +25,14 @@ test("ability catalog resets global checkbox offsets and boxes credit inputs cor
   assert.match(styleSource, /&__credits-field[\s\S]*input\s*\{[\s\S]*min-width:\s*0;/)
   assert.match(styleSource, /&__credits-field[\s\S]*input\s*\{[\s\S]*box-sizing:\s*border-box;/)
 })
+
+test("ability catalog neutralizes generic markdown table wrappers so the shell does not scroll unnecessarily", () => {
+  assert.match(styleSource, /\.rulebook-ability-catalog\s+\.table-container\s*\{[\s\S]*overflow-x:\s*visible;/)
+  assert.match(styleSource, /\.rulebook-ability-catalog\s+\.table-container\s*>\s*table\s*\{[\s\S]*margin:\s*0;/)
+  assert.match(styleSource, /\.rulebook-ability-catalog\s+\.table-container\s*>\s*table\s*\{[\s\S]*padding:\s*0;/)
+})
+
+test("ability catalog balances left and right outer spacing for table rows", () => {
+  assert.match(styleSource, /thead th:first-child,\s*tbody td:first-child\s*\{[\s\S]*padding-left:\s*1\.1rem;/)
+  assert.match(styleSource, /&__description-cell\s*\{[\s\S]*padding-inline-end:\s*0\.35rem;/)
+})

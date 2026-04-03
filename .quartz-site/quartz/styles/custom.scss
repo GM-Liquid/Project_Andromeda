@@ -364,6 +364,7 @@ body[data-rulebook="true"] {
     & .callout-content {
       color: rgba(245, 247, 251, 0.88);
       padding-bottom: 1rem;
+      padding-inline-start: 0;
     }
 
     & .callout-content p,

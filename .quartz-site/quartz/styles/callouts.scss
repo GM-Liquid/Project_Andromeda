@@ -2,6 +2,8 @@
 @use "sass:color";
 
 .callout {
+  --callout-icon-size: 18px;
+  --callout-title-gap: 5px;
   border: 1px solid var(--border);
   background-color: var(--bg);
   border-radius: 5px;
@@ -118,6 +120,23 @@
     --callout-icon: var(--callout-icon-quote);
   }
 
+  &[data-callout="info"],
+  &[data-callout="note"] {
+    & > .callout-content {
+      padding: 0 0 1rem calc(var(--callout-icon-size) + var(--callout-title-gap));
+    }
+
+    & > .callout-content > :last-child {
+      margin-bottom: 0;
+    }
+
+    & > .callout-content p,
+    & > .callout-content ul,
+    & > .callout-content ol {
+      margin-bottom: 0.9rem;
+    }
+  }
+
   &.is-collapsed {
     & > .callout-title > .fold-callout-icon {
       transform: rotateZ(-90deg);
@@ -137,11 +156,11 @@
 .callout-title {
   display: flex;
   align-items: flex-start;
-  gap: 5px;
+  gap: var(--callout-title-gap);
   padding: 1rem 0;
   color: var(--color);
 
-  --icon-size: 18px;
+  --icon-size: var(--callout-icon-size);
 
   & .fold-callout-icon {
     transition: transform 0.15s ease;
