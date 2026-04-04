@@ -122,8 +122,10 @@
 
   &[data-callout="info"],
   &[data-callout="note"] {
+    padding-inline: 1.35rem;
+
     & > .callout-content {
-      padding: 0 0 1rem calc(var(--callout-icon-size) + var(--callout-title-gap));
+      padding: 0 0 1rem;
     }
 
     & > .callout-content > :last-child {

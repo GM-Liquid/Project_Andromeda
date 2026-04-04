@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
-test('generic info and note callouts indent their body content under the title text', async () => {
+test('generic info and note callouts use one shared inset for icon, title, and body', async () => {
   const stylesheetPath = fileURLToPath(
     new URL('../quartz/styles/callouts.scss', import.meta.url)
   );
@@ -13,7 +13,11 @@ test('generic info and note callouts indent their body content under the title t
   assert.match(stylesheet, /\.callout\s*\{[\s\S]*--callout-title-gap:\s*5px;/);
   assert.match(
     stylesheet,
-    /&\[data-callout="info"\],\s*&\[data-callout="note"\]\s*\{[\s\S]*?&\s*>\s*\.callout-content\s*\{[\s\S]*padding:\s*0 0 1rem calc\(var\(--callout-icon-size\) \+ var\(--callout-title-gap\)\);/
+    /&\[data-callout="info"\],\s*&\[data-callout="note"\]\s*\{[\s\S]*?padding-inline:\s*1\.35rem;/
+  );
+  assert.match(
+    stylesheet,
+    /&\[data-callout="info"\],\s*&\[data-callout="note"\]\s*\{[\s\S]*?&\s*>\s*\.callout-content\s*\{[\s\S]*padding:\s*0 0 1rem;/
   );
   assert.match(
     stylesheet,

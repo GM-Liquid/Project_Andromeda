@@ -46,6 +46,11 @@ type SimpleCatalogColumns = DescriptionColumns & {
   credits: number
 }
 
+type EquipmentCatalogColumns = SimpleCatalogColumns & {
+  skill?: number
+  damage?: number
+}
+
 type ArmorCatalogColumns = SimpleCatalogColumns & {
   physicalDefense?: number
   magicalDefense?: number
@@ -127,6 +132,7 @@ const catalogHeaderAliases: Record<CatalogHeaderField, string[]> = {
 const rankOptions = ["1", "2", "3", "4"]
 const frequencyOptions = ["Неограниченно", "1/сцену", "1/сессию"]
 const actionOptions = ["Основное", "Маневр", "Реакция", "Свободное"]
+const noSkillLabel = "Без навыка"
 const skillSeedValues = [
   "Анализ",
   "Биомантия",
@@ -316,6 +322,19 @@ function resolveArmorCatalogColumns(headers: string[]): ArmorCatalogColumns | nu
   }
 }
 
+function resolveEquipmentCatalogColumns(headers: string[]): EquipmentCatalogColumns | null {
+  const columns = resolveSimpleCatalogColumns(headers)
+  if (!columns) {
+    return null
+  }
+
+  return {
+    ...columns,
+    skill: findColumn(headers, catalogHeaderAliases.skill),
+    damage: findColumn(headers, catalogHeaderAliases.damage),
+  }
+}
+
 export function isAbilityCatalogTable(headers: string[]) {
   return resolveAbilityCatalogColumns(headers) !== null
 }
@@ -332,11 +351,21 @@ export function detectRulebookCatalogKind(
   headers: string[],
   context: RulebookCatalogContext = {},
 ): RulebookCatalogKind | null {
+  const contextText = normalizeCatalogValue(`${context.heading ?? ""} ${context.label ?? ""}`)
+
   if (isAbilityCatalogTable(headers)) {
     return "abilities"
   }
 
   if (isWeaponCatalogTable(headers)) {
+    if (
+      contextText.includes("снаряж") ||
+      contextText.includes("имплант") ||
+      contextText.includes("экип")
+    ) {
+      return "equipment"
+    }
+
     return "weapons"
   }
 
@@ -352,7 +381,6 @@ export function detectRulebookCatalogKind(
     return "armor"
   }
 
-  const contextText = normalizeCatalogValue(`${context.heading ?? ""} ${context.label ?? ""}`)
   if (contextText.includes("брон")) {
     return "armor"
   }
@@ -499,6 +527,10 @@ function deriveSkillLabel(description: string) {
   return ""
 }
 
+function normalizeSkillFilterValue(value: string) {
+  return value.trim() || noSkillLabel
+}
+
 function applyDescriptionCleaner(
   value: string,
   cleaner?: ((description: string) => string) | undefined,
@@ -561,7 +593,17 @@ function stripArmorDefenseMarkers(description: string) {
 }
 
 function sortAlphaValues(values: string[]) {
-  return [...new Set(values.filter(Boolean))].sort((left, right) => left.localeCompare(right, "ru"))
+  return [...new Set(values.filter(Boolean))].sort((left, right) => {
+    if (left === noSkillLabel) {
+      return right === noSkillLabel ? 0 : -1
+    }
+
+    if (right === noSkillLabel) {
+      return 1
+    }
+
+    return left.localeCompare(right, "ru")
+  })
 }
 
 function sortNumericValues(values: string[]) {
@@ -612,7 +654,7 @@ function buildAbilityCatalogModel(headers: string[], rows: string[][]): Rulebook
       filters: {
         rank,
         frequency,
-        skill,
+        skill: normalizeSkillFilterValue(skill),
         actions,
       },
       sortValues: {
@@ -642,6 +684,7 @@ function buildAbilityCatalogModel(headers: string[], rows: string[][]): Rulebook
         field: "skill",
         label: "Навык",
         values: sortAlphaValues([
+          noSkillLabel,
           ...skillSeedValues,
           ...entries.map((entry) => entry.filters.skill ?? ""),
         ]),
@@ -692,7 +735,7 @@ function buildWeaponCatalogModel(headers: string[], rows: string[][]): RulebookC
       tags: [skill, damage].filter(Boolean),
       filters: {
         rank,
-        skill,
+        skill: normalizeSkillFilterValue(skill),
         damage,
       },
       sortValues: {
@@ -712,6 +755,7 @@ function buildWeaponCatalogModel(headers: string[], rows: string[][]): RulebookC
         field: "skill",
         label: "Навык",
         values: sortAlphaValues([
+          noSkillLabel,
           ...skillSeedValues,
           ...entries.map((entry) => entry.filters.skill ?? ""),
         ]),
@@ -812,7 +856,7 @@ function buildArmorCatalogModel(headers: string[], rows: string[][]): RulebookCa
 }
 
 function buildEquipmentCatalogModel(headers: string[], rows: string[][]): RulebookCatalogModel {
-  const columns = resolveSimpleCatalogColumns(headers)
+  const columns = resolveEquipmentCatalogColumns(headers)
   if (!columns) {
     return { entries: [], filters: [], sortOptions: equipmentSortOptions }
   }
@@ -822,6 +866,14 @@ function buildEquipmentCatalogModel(headers: string[], rows: string[][]): Rulebo
     const rank = (row[columns.rank] ?? "").trim()
     const name = (row[columns.name] ?? "").trim()
     const price = (row[columns.credits] ?? "").trim()
+    const skill =
+      columns.skill !== undefined && columns.skill !== -1
+        ? (row[columns.skill] ?? "").trim() || deriveSkillLabel(descriptions.fullDescription)
+        : ""
+    const damage =
+      columns.damage !== undefined && columns.damage !== -1
+        ? (row[columns.damage] ?? "").trim()
+        : ""
 
     return {
       id: `equipment-${index + 1}`,
@@ -830,20 +882,42 @@ function buildEquipmentCatalogModel(headers: string[], rows: string[][]): Rulebo
       price,
       previewDescription: descriptions.previewDescription,
       fullDescription: descriptions.fullDescription,
-      tags: [],
+      tags: [skill, damage].filter(Boolean),
       filters: {
         rank,
+        ...(columns.skill !== undefined && columns.skill !== -1
+          ? { skill: normalizeSkillFilterValue(skill) }
+          : {}),
       },
       sortValues: {
         rank: parseCatalogNumber(rank),
         price: parseCatalogNumber(price),
+        damage: parseCatalogNumber(damage, 0),
       },
     } satisfies RulebookCatalogEntry
   })
 
+  const hasSkillColumn = columns.skill !== undefined && columns.skill !== -1
+
   return {
     entries,
-    filters: [{ kind: "multi", field: "rank", label: "Ранг", values: rankOptions }],
+    filters: [
+      { kind: "multi", field: "rank", label: "Ранг", values: rankOptions },
+      ...(hasSkillColumn
+        ? [
+            {
+              kind: "multi" as const,
+              field: "skill" as const,
+              label: "Навык",
+              values: sortAlphaValues([
+                noSkillLabel,
+                ...skillSeedValues,
+                ...entries.map((entry) => entry.filters.skill ?? ""),
+              ]),
+            },
+          ]
+        : []),
+    ],
     sortOptions: equipmentSortOptions,
   }
 }

@@ -49,6 +49,16 @@ const weaponHeaders = [
   "Описание",
 ]
 
+const combinedEquipmentHeaders = [
+  "Тип",
+  "Название",
+  "Ранг",
+  "Навык",
+  "Урон",
+  "Описание",
+  "Цена",
+]
+
 const simplePriceHeaders = ["Название", "Ранг", "Описание", "Цена:"]
 
 function getFirstSummaryRow(html: string) {
@@ -85,6 +95,13 @@ test("detectRulebookCatalogKind resolves the table family from headers and surro
   assert.equal(
     detectRulebookCatalogKind(weaponHeaders, { heading: "Оружие", label: "Таблица оружия" }),
     "weapons",
+  )
+  assert.equal(
+    detectRulebookCatalogKind(combinedEquipmentHeaders, {
+      heading: "Снаряжение",
+      label: "Таблица снаряжения",
+    }),
+    "equipment",
   )
   assert.equal(
     detectRulebookCatalogKind(simplePriceHeaders, { heading: "Броня", label: "Таблица брони" }),
@@ -208,11 +225,12 @@ test("buildAbilityCatalogHtml normalizes filter values and exposes the full drop
   assert.ok(frequencyBlock.includes("\u041d\u0435\u043e\u0433\u0440\u0430\u043d\u0438\u0447\u0435\u043d\u043d\u043e"))
   assert.ok(skillBlock.includes("\u041a\u0438\u043d\u0435\u0442\u0438\u043a\u0430"))
   assert.ok(skillBlock.includes("\u041f\u0440\u043e\u0433\u0440\u0430\u043c\u043c\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435"))
+  assert.ok(skillBlock.includes("\u0411\u0435\u0437 \u043d\u0430\u0432\u044b\u043a\u0430"))
   assert.ok(rankBlock.includes('value="4"'))
-  assert.ok(actionsBlock.includes("\u041e\u0441\u043d\u043e\u0432\u043d\u043e\u0435"))
-  assert.ok(actionsBlock.includes("\u041c\u0430\u043d\u0435\u0432\u0440"))
-  assert.ok(actionsBlock.includes("\u0420\u0435\u0430\u043a\u0446\u0438\u044f"))
-  assert.ok(actionsBlock.includes("\u0421\u0432\u043e\u0431\u043e\u0434\u043d\u043e\u0435"))
+  assert.ok(actionsBlock.includes('value="\u041e\u0441\u043d\u043e\u0432\u043d\u043e\u0435"'))
+  assert.ok(actionsBlock.includes('value="\u041c\u0430\u043d\u0435\u0432\u0440"'))
+  assert.ok(actionsBlock.includes('value="\u0420\u0435\u0430\u043a\u0446\u0438\u044f"'))
+  assert.ok(actionsBlock.includes('value="\u0421\u0432\u043e\u0431\u043e\u0434\u043d\u043e\u0435"'))
   assert.ok(html.includes("\u003e1/\u0441\u0446\u0435\u043d\u0443\u003c"))
 })
 
@@ -270,4 +288,23 @@ test("buildRulebookCatalogHtml renders equipment as the same table shape without
   assert.ok(!html.includes('data-filter-dropdown="physicalDefense"'))
   assert.ok(!firstSummaryRow.includes("rulebook-ability-catalog__meta-chips"))
   assert.ok(firstSummaryRow.includes(">160 кр<"))
+})
+
+test("buildRulebookCatalogHtml renders merged equipment with skill tags and a 'Без навыка' filter option", () => {
+  const html = buildRulebookCatalogHtml("equipment", combinedEquipmentHeaders, [
+    ["Имплант", "Керезников", "1", "", "", "Ускоритель реакции для пользователя.", "160"],
+    ["Стрелковое", "Игла", "2", "Стрельба", "4", "Точная снайперская винтовка.", "780"],
+  ])
+  const summaryRows = [...html.matchAll(/<tr[\s\S]*?<\/tr>/g)]
+    .map((match) => match[0])
+    .filter((row) => row.includes('class="rulebook-ability-catalog__summary-row"'))
+
+  assert.equal(summaryRows.length, 2)
+  assert.ok(html.includes('data-filter-dropdown="rank"'))
+  assert.ok(html.includes('data-filter-dropdown="skill"'))
+  assert.ok(!html.includes('data-filter-dropdown="damage"'))
+  assert.ok(html.includes('value="Без навыка"'))
+  assert.ok(!summaryRows[0].includes("rulebook-ability-catalog__meta-chips"))
+  assert.ok(summaryRows[1].includes(">Стрельба<"))
+  assert.ok(summaryRows[1].includes(">4<"))
 })
