@@ -1,0 +1,359 @@
+{
+  "_meta": {
+    "schemaVersion": 2,
+    "category": "armor",
+    "sourceOfTruth": "data/gear",
+    "notes": "Канонический каталог брони. Перенесен из синхронизированного раздела главы 'Способности и снаряжение' и нормализован по общему словарю свойств."
+  },
+  "items": [
+    {
+      "id": "kd-2",
+      "name": "КД-2",
+      "type": "armor",
+      "foundryType": "armor",
+      "rank": 1,
+      "skill": null,
+      "properties": [
+        {
+          "key": "fortitude-bonus-x",
+          "value": 2,
+          "label": "Стойкость +2"
+        },
+        {
+          "key": "force-shield-x",
+          "value": 3,
+          "label": "Силовой щит 3"
+        }
+      ],
+      "description": "Базовая общевойсковая броня для прямого боя и первого размена под огнем. Стойкость +2, Силовой Щит 3.",
+      "bookText": "Базовая общевойсковая броня для прямого боя и первого размена под огнем. Стойкость +2, Силовой Щит 3.",
+      "foundryDescription": "Базовая общевойсковая броня для прямого боя и первого размена под огнем. Стойкость +2, Силовой Щит 3.",
+      "tags": [],
+      "pricing": {
+        "baseCost": null,
+        "propertyCost": null,
+        "manualDelta": 0,
+        "finalCost": 110,
+        "status": "pending"
+      },
+      "links": {
+        "sheetRowId": null,
+        "foundrySyncId": null
+      },
+      "status": "approved"
+    },
+    {
+      "id": "patrul",
+      "name": "Патруль",
+      "type": "armor",
+      "foundryType": "armor",
+      "rank": 1,
+      "skill": null,
+      "properties": [
+        {
+          "key": "control-bonus-x",
+          "value": 2,
+          "label": "Контроль +2"
+        },
+        {
+          "key": "maneuverable-x",
+          "value": 5,
+          "label": "Маневренная 5"
+        }
+      ],
+      "description": "Легкая патрульная броня для преследования и смены позиций. Контроль +2, Маневренная 5.",
+      "bookText": "Легкая патрульная броня для преследования и смены позиций. Контроль +2, Маневренная 5.",
+      "foundryDescription": "Легкая патрульная броня для преследования и смены позиций. Контроль +2, Маневренная 5.",
+      "tags": [],
+      "pricing": {
+        "baseCost": null,
+        "propertyCost": null,
+        "manualDelta": 0,
+        "finalCost": 110,
+        "status": "pending"
+      },
+      "links": {
+        "sheetRowId": null,
+        "foundrySyncId": null
+      },
+      "status": "approved"
+    },
+    {
+      "id": "ozk",
+      "name": "ОЗК",
+      "type": "armor",
+      "foundryType": "armor",
+      "rank": 1,
+      "skill": null,
+      "properties": [
+        {
+          "key": "fortitude-bonus-x",
+          "value": 1,
+          "label": "Стойкость +1"
+        },
+        {
+          "key": "will-bonus-x",
+          "value": 1,
+          "label": "Воля +1"
+        }
+      ],
+      "description": "Облегченный изоляционный комплект для грязной среды и слабых аномалий. Стойкость +1, Воля +1. Состояния окружающей среды 1го ранга не влияют на вас.",
+      "bookText": "Облегченный изоляционный комплект для грязной среды и слабых аномалий. Стойкость +1, Воля +1. Состояния окружающей среды 1го ранга не влияют на вас.",
+      "foundryDescription": "Облегченный изоляционный комплект для грязной среды и слабых аномалий. Стойкость +1, Воля +1. Состояния окружающей среды 1го ранга не влияют на вас.",
+      "tags": [],
+      "pricing": {
+        "baseCost": null,
+        "propertyCost": null,
+        "manualDelta": 0,
+        "finalCost": 100,
+        "status": "pending"
+      },
+      "links": {
+        "sheetRowId": null,
+        "foundrySyncId": null
+      },
+      "status": "approved"
+    },
+    {
+      "id": "shans",
+      "name": "Шанс",
+      "type": "armor",
+      "foundryType": "armor",
+      "rank": 2,
+      "skill": null,
+      "properties": [
+        {
+          "key": "fortitude-bonus-x",
+          "value": 3,
+          "label": "Стойкость +3"
+        },
+        {
+          "key": "control-bonus-x",
+          "value": 1,
+          "label": "Контроль +1"
+        },
+        {
+          "key": "force-shield-x",
+          "value": 6,
+          "label": "Силовой щит 6"
+        }
+      ],
+      "description": "Штурмовой комплект для входа под огонь и удержания линии. Стойкость +3, Контроль +1, Силовой щит 6.",
+      "bookText": "Штурмовой комплект для входа под огонь и удержания линии. Стойкость +3, Контроль +1, Силовой щит 6.",
+      "foundryDescription": "Штурмовой комплект для входа под огонь и удержания линии. Стойкость +3, Контроль +1, Силовой щит 6.",
+      "tags": [],
+      "pricing": {
+        "baseCost": null,
+        "propertyCost": null,
+        "manualDelta": 0,
+        "finalCost": 400,
+        "status": "pending"
+      },
+      "links": {
+        "sheetRowId": null,
+        "foundrySyncId": null
+      },
+      "status": "approved"
+    },
+    {
+      "id": "pravosudie",
+      "name": "Правосудие",
+      "type": "armor",
+      "foundryType": "armor",
+      "rank": 2,
+      "skill": null,
+      "properties": [
+        {
+          "key": "fortitude-bonus-x",
+          "value": 1,
+          "label": "Стойкость +1"
+        },
+        {
+          "key": "control-bonus-x",
+          "value": 3,
+          "label": "Контроль +3"
+        },
+        {
+          "key": "maneuverable-x",
+          "value": 15,
+          "label": "Маневренная 15"
+        }
+      ],
+      "description": "Подвижный доспех для преследования и контроля дистанции. Контроль +3, Стойкость +1, Маневренная 15.",
+      "bookText": "Подвижный доспех для преследования и контроля дистанции. Контроль +3, Стойкость +1, Маневренная 15.",
+      "foundryDescription": "Подвижный доспех для преследования и контроля дистанции. Контроль +3, Стойкость +1, Маневренная 15.",
+      "tags": [],
+      "pricing": {
+        "baseCost": null,
+        "propertyCost": null,
+        "manualDelta": 0,
+        "finalCost": 410,
+        "status": "pending"
+      },
+      "links": {
+        "sheetRowId": null,
+        "foundrySyncId": null
+      },
+      "status": "approved"
+    },
+    {
+      "id": "khimik",
+      "name": "Химик",
+      "type": "armor",
+      "foundryType": "armor",
+      "rank": 2,
+      "skill": null,
+      "properties": [
+        {
+          "key": "fortitude-bonus-x",
+          "value": 1,
+          "label": "Стойкость +1"
+        },
+        {
+          "key": "will-bonus-x",
+          "value": 3,
+          "label": "Воля +3"
+        }
+      ],
+      "description": "Герметичный костюм для опасной среды и долгой работы в аномальных очагах. Стойкость +1, Воля +3. 1/сцену, реакцией, снимите с себя состояние.",
+      "bookText": "Герметичный костюм для опасной среды и долгой работы в аномальных очагах. Стойкость +1, Воля +3. 1/сцену, реакцией, снимите с себя состояние.",
+      "foundryDescription": "Герметичный костюм для опасной среды и долгой работы в аномальных очагах. Стойкость +1, Воля +3. 1/сцену, реакцией, снимите с себя состояние.",
+      "tags": [],
+      "pricing": {
+        "baseCost": null,
+        "propertyCost": null,
+        "manualDelta": 0,
+        "finalCost": 370,
+        "status": "pending"
+      },
+      "links": {
+        "sheetRowId": null,
+        "foundrySyncId": null
+      },
+      "status": "approved"
+    },
+    {
+      "id": "korund",
+      "name": "Корунд",
+      "type": "armor",
+      "foundryType": "armor",
+      "rank": 3,
+      "skill": null,
+      "properties": [
+        {
+          "key": "fortitude-bonus-x",
+          "value": 4,
+          "label": "Стойкость +4"
+        },
+        {
+          "key": "control-bonus-x",
+          "value": 3,
+          "label": "Контроль +3"
+        },
+        {
+          "key": "force-shield-x",
+          "value": 15,
+          "label": "Силовой щит 15"
+        },
+        {
+          "key": "unwieldy-x",
+          "value": 50,
+          "label": "Неповоротливая 50"
+        }
+      ],
+      "description": "Тяжелая штурмовая броня для авангарда и пролома под плотным огнем. Стойкость +4, Контроль +3, Силовой щит 15, Неповоротливая 50.",
+      "bookText": "Тяжелая штурмовая броня для авангарда и пролома под плотным огнем. Стойкость +4, Контроль +3, Силовой щит 15, Неповоротливая 50.",
+      "foundryDescription": "Тяжелая штурмовая броня для авангарда и пролома под плотным огнем. Стойкость +4, Контроль +3, Силовой щит 15, Неповоротливая 50.",
+      "tags": [],
+      "pricing": {
+        "baseCost": null,
+        "propertyCost": null,
+        "manualDelta": 0,
+        "finalCost": 1340,
+        "status": "pending"
+      },
+      "links": {
+        "sheetRowId": null,
+        "foundrySyncId": null
+      },
+      "status": "approved"
+    },
+    {
+      "id": "vektor",
+      "name": "Вектор",
+      "type": "armor",
+      "foundryType": "armor",
+      "rank": 3,
+      "skill": null,
+      "properties": [
+        {
+          "key": "fortitude-bonus-x",
+          "value": 2,
+          "label": "Стойкость +2"
+        },
+        {
+          "key": "control-bonus-x",
+          "value": 4,
+          "label": "Контроль +4"
+        },
+        {
+          "key": "accelerated-x",
+          "value": 5,
+          "label": "Ускоренная 5"
+        }
+      ],
+      "description": "Элитная мобильная броня для быстрого входа в бой и захвата ключевой позиции. Контроль +4, Стойкость +2, Ускоренная 5.",
+      "bookText": "Элитная мобильная броня для быстрого входа в бой и захвата ключевой позиции. Контроль +4, Стойкость +2, Ускоренная 5.",
+      "foundryDescription": "Элитная мобильная броня для быстрого входа в бой и захвата ключевой позиции. Контроль +4, Стойкость +2, Ускоренная 5.",
+      "tags": [],
+      "pricing": {
+        "baseCost": null,
+        "propertyCost": null,
+        "manualDelta": 0,
+        "finalCost": 1320,
+        "status": "pending"
+      },
+      "links": {
+        "sheetRowId": null,
+        "foundrySyncId": null
+      },
+      "status": "approved"
+    },
+    {
+      "id": "piroman",
+      "name": "Пироман",
+      "type": "armor",
+      "foundryType": "armor",
+      "rank": 3,
+      "skill": null,
+      "properties": [
+        {
+          "key": "fortitude-bonus-x",
+          "value": 2,
+          "label": "Стойкость +2"
+        },
+        {
+          "key": "will-bonus-x",
+          "value": 4,
+          "label": "Воля +4"
+        }
+      ],
+      "description": "Тяжелый изоляционный доспех для пожаров, утечек и сильных аномальных зон. Стойкость +2, Воля +4. Состояния окружающей среды 3го ранга не влияют на вас. 1/сцену, реакцией, снимите с себя состояние.",
+      "bookText": "Тяжелый изоляционный доспех для пожаров, утечек и сильных аномальных зон. Стойкость +2, Воля +4. Состояния окружающей среды 3го ранга не влияют на вас. 1/сцену, реакцией, снимите с себя состояние.",
+      "foundryDescription": "Тяжелый изоляционный доспех для пожаров, утечек и сильных аномальных зон. Стойкость +2, Воля +4. Состояния окружающей среды 3го ранга не влияют на вас. 1/сцену, реакцией, снимите с себя состояние.",
+      "tags": [],
+      "pricing": {
+        "baseCost": null,
+        "propertyCost": null,
+        "manualDelta": 0,
+        "finalCost": 1290,
+        "status": "pending"
+      },
+      "links": {
+        "sheetRowId": null,
+        "foundrySyncId": null
+      },
+      "status": "approved"
+    }
+  ]
+}

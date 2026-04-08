@@ -247,7 +247,9 @@ function initAbilityCatalog(catalog: HTMLElement) {
   const multiFilterFields = getMultiFilterFields(catalog)
   const rangeControls = getRangeControls(catalog)
   const defaultSortValue =
-    catalog.querySelector<HTMLElement>("[data-sort-option]")?.dataset.sortValue ?? "title-asc"
+    catalog.querySelector<HTMLElement>('[data-sort-option][data-sort-value="rank-asc"]')?.dataset.sortValue ??
+    catalog.querySelector<HTMLElement>("[data-sort-option]")?.dataset.sortValue ??
+    "rank-asc"
 
   function syncFiltersPanelState() {
     const isOpen = !catalogFiltersPanel.hidden
@@ -352,7 +354,7 @@ function initAbilityCatalog(catalog: HTMLElement) {
   function sortEntries(nextEntries: RulebookCatalogEntry[]) {
     const sorted = [...nextEntries]
     const activeOption = catalog.querySelector<HTMLElement>(`[data-sort-option][data-sort-value="${catalogSortInput.value}"]`)
-    const sortKey = activeOption?.dataset.sortKey ?? "name"
+    const sortKey = activeOption?.dataset.sortKey ?? "rank"
     const sortDirection = activeOption?.dataset.sortDirection === "desc" ? -1 : 1
 
     sorted.sort((left, right) => {

@@ -6,6 +6,7 @@ import {
   slugToContentPath,
   validateRulebookManifest
 } from './rulebook.manifest.mjs';
+import { prepareGearCatalogSource } from './gear-catalog-source.mjs';
 import { prepareRulebookSource } from './rulebook-source.mjs';
 import { transformSkillsReferenceSource } from './skills-reference-source.mjs';
 
@@ -18,6 +19,12 @@ const repoRoot = resolve(siteRoot, '..');
 const contentDir = resolve(siteRoot, 'content');
 const rulebookDir = resolve(contentDir, 'rulebook');
 const generatedStatePath = resolve(contentDir, '.generated-rulebook.json');
+const conceptAbilitiesCatalogPath = resolve(siteRoot, 'data', 'temporary', 'concept-abilities.json');
+const gearCatalogFiles = {
+  armor: 'armor.json',
+  equipment: 'equipment.json',
+  abilities: 'abilities.json'
+};
 
 function formatDate(date) {
   const year = date.getFullYear();
@@ -157,7 +164,308 @@ function normalizeCharacterSheetExamples(body) {
   return normalized.join('\n');
 }
 
-function normalizeBody(body, chapter, chapters) {
+function escapeMarkdownTableCell(value) {
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  return String(value).replace(/\r?\n/g, ' ').replace(/\|/g, '\\|').trim();
+}
+
+function renderMarkdownTable(headers, rows) {
+  return [
+    `| ${headers.map((header) => escapeMarkdownTableCell(header)).join(' | ')} |`,
+    `| ${headers.map(() => '---').join(' | ')} |`,
+    ...rows.map(
+      (row) => `| ${row.map((cell) => escapeMarkdownTableCell(cell)).join(' | ')} |`
+    )
+  ].join('\n');
+}
+
+function getGearBookText(item) {
+  return (item.bookText ?? item.description ?? '').trim();
+}
+
+function getGearCatalogPrice(item) {
+  if (item.pricing?.finalCost === null || item.pricing?.finalCost === undefined) {
+    return '';
+  }
+
+  return String(item.pricing.finalCost);
+}
+
+function isPublishedGearCatalogItem(item) {
+  return item?.status !== 'draft' && item?.status !== 'deprecated';
+}
+
+function getGearPropertyValue(item, propertyKey) {
+  const property = item.properties?.find((candidate) => candidate.key === propertyKey);
+  if (!property || property.value === null || property.value === undefined) {
+    return '';
+  }
+
+  return String(property.value);
+}
+
+function getEquipmentTypeLabel(item) {
+  const tags = new Set(item.tags ?? []);
+  if (tags.has('blizhnee') || item.foundryType === 'melee') {
+    return 'Ближнее';
+  }
+
+  if (tags.has('strelkovoe') || item.foundryType === 'ranged') {
+    return 'Стрелковое';
+  }
+
+  if (tags.has('metatelnoe') || item.foundryType === 'thrown') {
+    return 'Метательное';
+  }
+
+  return 'Снаряжение';
+}
+
+function getEquipmentDamageValue(item) {
+  const description = getGearBookText(item);
+  const damageMatch = description.match(/\bУрон:\s*([^.;]+)/u);
+  return damageMatch ? damageMatch[1].trim() : '';
+}
+
+function buildArmorCatalogTable(catalog) {
+  const rows = catalog.items
+    .filter(isPublishedGearCatalogItem)
+    .map((item) => [
+      item.name,
+      item.rank,
+      getGearPropertyValue(item, 'fortitude-bonus-x'),
+      getGearPropertyValue(item, 'control-bonus-x'),
+      getGearPropertyValue(item, 'will-bonus-x'),
+      getGearBookText(item),
+      getGearCatalogPrice(item)
+    ]);
+
+  return renderMarkdownTable(
+    ['Название', 'Ранг', 'Стойкость', 'Контроль', 'Воля', 'Описание', 'Цена'],
+    rows
+  );
+}
+
+function buildEquipmentCatalogTable(catalog) {
+  const rows = catalog.items
+    .filter(isPublishedGearCatalogItem)
+    .map((item) => [
+      getEquipmentTypeLabel(item),
+      item.name,
+      item.rank,
+      item.skill ?? '',
+      getEquipmentDamageValue(item),
+      getGearBookText(item),
+      getGearCatalogPrice(item)
+    ]);
+
+  return renderMarkdownTable(
+    ['Тип', 'Название', 'Ранг', 'Навык', 'Урон', 'Описание', 'Цена'],
+    rows
+  );
+}
+
+function buildAbilityCatalogTable(catalog) {
+  const rows = catalog.items
+    .filter(isPublishedGearCatalogItem)
+    .map((item) => [
+      item.name,
+      item.rank,
+      getGearBookText(item),
+      '',
+      item.skill ?? '',
+      '',
+      getGearCatalogPrice(item)
+    ]);
+
+  return renderMarkdownTable(
+    [
+      'Название',
+      'Ранг',
+      'Полное описание',
+      'Частота использования',
+      'Навык',
+      'Цена в действиях',
+      'Цена в кредитах'
+    ],
+    rows
+  );
+}
+
+function buildConceptAbilityCatalogTable(catalog) {
+  // Temporary Quartz-only catalog fed from .quartz-site/data/temporary/concept-abilities.json.
+  const rows = catalog.items.map((item) => [
+    item.name ?? '',
+    item.rank ?? '',
+    item.fullDescription ?? '',
+    item.frequency ?? '',
+    item.skill ?? '',
+    item.actions ?? '',
+    item.credits ?? ''
+  ]);
+
+  return renderMarkdownTable(
+    [
+      'Название',
+      'Ранг',
+      'Полное описание',
+      'Частота использования',
+      'Навык',
+      'Цена в действиях',
+      'Цена в кредитах'
+    ],
+    rows
+  );
+}
+
+function stripMarkdownTableBlocks(lines) {
+  const output = [];
+
+  for (let index = 0; index < lines.length; index += 1) {
+    if (!lines[index].trim().startsWith('|')) {
+      output.push(lines[index]);
+      continue;
+    }
+
+    while (index < lines.length && lines[index].trim().startsWith('|')) {
+      index += 1;
+    }
+
+    while (index < lines.length && lines[index].trim() === '') {
+      index += 1;
+    }
+
+    index -= 1;
+  }
+
+  return output;
+}
+
+function trimSectionLines(lines) {
+  let start = 0;
+  let end = lines.length;
+
+  while (start < end && lines[start].trim() === '') {
+    start += 1;
+  }
+
+  while (end > start && lines[end - 1].trim() === '') {
+    end -= 1;
+  }
+
+  return lines.slice(start, end);
+}
+
+function transformAbilitiesEquipmentSource(source, gearCatalogs) {
+  const sectionTableMap = new Map([
+    ['Броня', buildArmorCatalogTable(gearCatalogs.armor)],
+    ['Снаряжение', buildEquipmentCatalogTable(gearCatalogs.equipment)],
+    ['Способности', buildAbilityCatalogTable(gearCatalogs.abilities)]
+  ]);
+  const lines = source.split('\n');
+  const nextLines = [];
+  let sectionHeading = null;
+  let sectionBody = [];
+
+  const flushSection = () => {
+    if (!sectionHeading) {
+      nextLines.push(...sectionBody);
+      sectionBody = [];
+      return;
+    }
+
+    const cleanedBody = trimSectionLines(stripMarkdownTableBlocks(sectionBody));
+    nextLines.push(sectionHeading);
+
+    if (cleanedBody.length > 0) {
+      nextLines.push('', ...cleanedBody);
+    }
+
+    const sectionTitle = sectionHeading.replace(/^##\s+/u, '').trim();
+    const injectedTable = sectionTableMap.get(sectionTitle);
+    if (injectedTable) {
+      nextLines.push('', injectedTable, '');
+    } else if (cleanedBody.length > 0) {
+      nextLines.push('');
+    }
+
+    sectionHeading = null;
+    sectionBody = [];
+  };
+
+  for (const line of lines) {
+    if (line.startsWith('## ')) {
+      flushSection();
+      sectionHeading = line;
+      continue;
+    }
+
+    sectionBody.push(line);
+  }
+
+  flushSection();
+
+  return nextLines.join('\n').trim();
+}
+
+async function readGearCatalog(catalogDir, filename) {
+  const raw = await readFile(resolve(catalogDir, filename), 'utf8');
+  const parsed = JSON.parse(raw);
+
+  if (!Array.isArray(parsed.items)) {
+    throw new Error(`Gear catalog is missing items[]: ${filename}`);
+  }
+
+  return parsed;
+}
+
+async function readGearCatalogs(catalogDir) {
+  return {
+    armor: await readGearCatalog(catalogDir, gearCatalogFiles.armor),
+    equipment: await readGearCatalog(catalogDir, gearCatalogFiles.equipment),
+    abilities: await readGearCatalog(catalogDir, gearCatalogFiles.abilities)
+  };
+}
+
+async function readConceptAbilitiesCatalog() {
+  try {
+    const raw = await readFile(conceptAbilitiesCatalogPath, 'utf8');
+    const parsed = JSON.parse(raw);
+
+    if (!Array.isArray(parsed.items)) {
+      throw new Error('Concept abilities catalog is missing items[]');
+    }
+
+    return parsed;
+  } catch (error) {
+    if (error?.code === 'ENOENT') {
+      return null;
+    }
+
+    throw error;
+  }
+}
+
+function injectConceptAbilitiesSection(source, catalog) {
+  if (!catalog || catalog.items.length === 0) {
+    return source;
+  }
+
+  const section = [
+    '## Концепт-способности',
+    '',
+    'Временный каталог идей и устаревших версий способностей. Нужен только для Quartz-подбора и ручного переноса понравившихся записей в основной каталог.',
+    '',
+    buildConceptAbilityCatalogTable(catalog)
+  ].join('\n');
+
+  return `${source.trimEnd()}\n\n${section}\n`;
+}
+
+function normalizeBody(body, chapter, chapters, options = {}) {
   const cleaned = body.replace(/^\uFEFF/, '').trim();
 
   if (!cleaned) {
@@ -170,6 +478,12 @@ function normalizeBody(body, chapter, chapters) {
 
   let normalized = rewriteRulebookInternalLinks(cleaned, chapters);
   normalized = normalizeCharacterSheetExamples(normalized);
+
+  if (chapter.id === 'rulebook-abilities-equipment') {
+    normalized = transformAbilitiesEquipmentSource(normalized, options.gearCatalogs);
+    normalized = injectConceptAbilitiesSection(normalized, options.conceptAbilitiesCatalog);
+  }
+
 
   if (chapter.title === 'Бой') {
     normalized = normalized.replace(
@@ -197,9 +511,12 @@ async function writeGeneratedState(generatedFiles) {
 
 export async function syncBook() {
   const source = await prepareRulebookSource({ repoRoot });
+  const gearCatalogSource = await prepareGearCatalogSource({ repoRoot });
   const chapters = await validateRulebookManifest();
   const generatedEntries = getGeneratedRulebookEntries();
   const sourceDir = source.canonicalSourceDir;
+  const gearCatalogs = await readGearCatalogs(gearCatalogSource.canonicalSourceDir);
+  const conceptAbilitiesCatalog = await readConceptAbilitiesCatalog();
 
   await mkdir(contentDir, { recursive: true });
   await mkdir(rulebookDir, { recursive: true });
@@ -211,7 +528,7 @@ export async function syncBook() {
     const sourcePath = resolve(sourceDir, chapter.source);
     const targetRelativePath = slugToContentPath(chapter.slug);
     const targetPath = resolve(contentDir, targetRelativePath);
-    const source = await readFile(sourcePath, 'utf8');
+    const sourceBody = await readFile(sourcePath, 'utf8');
     const sourceStats = await stat(sourcePath);
     const modified = formatDate(sourceStats.mtime);
 
@@ -231,7 +548,10 @@ export async function syncBook() {
         created: modified,
         modified
       },
-      normalizeBody(source, chapter, generatedEntries)
+      normalizeBody(sourceBody, chapter, generatedEntries, {
+        gearCatalogs,
+        conceptAbilitiesCatalog
+      })
     );
 
     await mkdir(dirname(targetPath), { recursive: true });

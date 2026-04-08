@@ -3,6 +3,7 @@ import { spawn } from "node:child_process"
 import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
+import { getGearCatalogWatchPattern } from "./gear-catalog-source.mjs"
 import { getQuartzDevCommand } from "./quartz-dev-command.mjs"
 import { getRulebookWatchPattern } from "./rulebook-source.mjs"
 import { syncBook } from "./sync-book.mjs"
@@ -12,7 +13,11 @@ const siteRoot = resolve(scriptDir, "..")
 const repoRoot = resolve(siteRoot, "..")
 
 const initialSync = await syncBook()
-const sourceGlob = await getRulebookWatchPattern({ repoRoot })
+const sourceGlobs = [
+  await getRulebookWatchPattern({ repoRoot }),
+  await getGearCatalogWatchPattern({ repoRoot }),
+  resolve(siteRoot, "data", "temporary", "concept-abilities.json"),
+]
 
 const { command, args } = getQuartzDevCommand({ siteRoot })
 const quartz = spawn(command, args, {
@@ -20,7 +25,7 @@ const quartz = spawn(command, args, {
   stdio: "inherit",
 })
 
-const watcher = chokidar.watch(sourceGlob, {
+const watcher = chokidar.watch(sourceGlobs, {
   ignoreInitial: true,
 })
 
@@ -29,7 +34,7 @@ watcher.on("all", async () => {
   console.log(`Rulebook source changed. Synced Quartz content from ${result.sourceDir}.`)
 })
 
-console.log(`Watching rulebook source: ${initialSync.sourceDir}`)
+console.log(`Watching rulebook sources: ${sourceGlobs.join(", ")}`)
 
 const shutdown = async (signal) => {
   await watcher.close()

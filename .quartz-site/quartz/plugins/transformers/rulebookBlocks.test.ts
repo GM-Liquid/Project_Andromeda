@@ -277,6 +277,27 @@ test.skip("buildRulebookCatalogHtml renders armor defense tags and filters from 
   assert.ok(firstSummaryRow.includes(">ПЗ 2<"))
 })
 
+test("buildRulebookCatalogHtml renders armor defense tags and filters with full defense names", () => {
+  const html = buildRulebookCatalogHtml("armor", simplePriceHeaders, [
+    ["ОЗК", "1", "Облегченная броня. Стойкость 3, Контроль 4, Воля 2", "100"],
+  ])
+  const firstSummaryRow = getFirstSummaryRow(html)
+
+  assert.ok(html.includes('data-filter-dropdown="rank"'))
+  assert.ok(html.includes('data-filter-dropdown="physicalDefense"'))
+  assert.ok(html.includes('data-filter-dropdown="magicalDefense"'))
+  assert.ok(html.includes('data-filter-dropdown="psychicDefense"'))
+  assert.ok(html.includes("По Стойкости"))
+  assert.ok(html.includes("По Контролю"))
+  assert.ok(html.includes("По Воле"))
+  assert.ok(html.includes(">Стойкость<"))
+  assert.ok(html.includes(">Контроль<"))
+  assert.ok(html.includes(">Воля<"))
+  assert.ok(firstSummaryRow.includes(">Стойкость 3<"))
+  assert.ok(firstSummaryRow.includes(">Контроль 4<"))
+  assert.ok(firstSummaryRow.includes(">Воля 2<"))
+})
+
 test("buildRulebookCatalogHtml renders equipment as the same table shape without tags", () => {
   const html = buildRulebookCatalogHtml("equipment", simplePriceHeaders, [
     ["Керезников", "1", "Ускоритель реакции для пользователя.", "160"],

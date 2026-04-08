@@ -129,6 +129,27 @@ const catalogHeaderAliases: Record<CatalogHeaderField, string[]> = {
   psychicDefense: ["психическая защита", "психическая", "пз"],
 }
 
+const armorDefenseAliases: Record<
+  "physicalDefense" | "magicalDefense" | "psychicDefense",
+  string[]
+> = {
+  physicalDefense: [...catalogHeaderAliases.physicalDefense, "\u0441\u0442\u043e\u0439\u043a\u043e\u0441\u0442\u044c"],
+  magicalDefense: [...catalogHeaderAliases.magicalDefense, "\u043a\u043e\u043d\u0442\u0440\u043e\u043b\u044c"],
+  psychicDefense: [...catalogHeaderAliases.psychicDefense, "\u0432\u043e\u043b\u044f"],
+}
+
+const armorDefenseLabels = {
+  physicalDefense: "\u0421\u0442\u043e\u0439\u043a\u043e\u0441\u0442\u044c",
+  magicalDefense: "\u041a\u043e\u043d\u0442\u0440\u043e\u043b\u044c",
+  psychicDefense: "\u0412\u043e\u043b\u044f",
+} as const
+
+const armorDefenseSortLabels = {
+  physicalDefense: "\u0421\u0442\u043e\u0439\u043a\u043e\u0441\u0442\u0438",
+  magicalDefense: "\u041a\u043e\u043d\u0442\u0440\u043e\u043b\u044e",
+  psychicDefense: "\u0412\u043e\u043b\u0435",
+} as const
+
 const rankOptions = ["1", "2", "3", "4"]
 const frequencyOptions = ["Неограниченно", "1/сцену", "1/сессию"]
 const actionOptions = ["Основное", "Маневр", "Реакция", "Свободное"]
@@ -316,9 +337,9 @@ function resolveArmorCatalogColumns(headers: string[]): ArmorCatalogColumns | nu
 
   return {
     ...columns,
-    physicalDefense: findColumn(headers, catalogHeaderAliases.physicalDefense),
-    magicalDefense: findColumn(headers, catalogHeaderAliases.magicalDefense),
-    psychicDefense: findColumn(headers, catalogHeaderAliases.psychicDefense),
+    physicalDefense: findColumn(headers, armorDefenseAliases.physicalDefense),
+    magicalDefense: findColumn(headers, armorDefenseAliases.magicalDefense),
+    psychicDefense: findColumn(headers, armorDefenseAliases.psychicDefense),
   }
 }
 
@@ -374,9 +395,9 @@ export function detectRulebookCatalogKind(
   }
 
   if (
-    findColumn(headers, catalogHeaderAliases.physicalDefense) !== -1 ||
-    findColumn(headers, catalogHeaderAliases.magicalDefense) !== -1 ||
-    findColumn(headers, catalogHeaderAliases.psychicDefense) !== -1
+    findColumn(headers, armorDefenseAliases.physicalDefense) !== -1 ||
+    findColumn(headers, armorDefenseAliases.magicalDefense) !== -1 ||
+    findColumn(headers, armorDefenseAliases.psychicDefense) !== -1
   ) {
     return "armor"
   }
@@ -580,10 +601,14 @@ function extractDefenseValue(value: string, aliases: string[]) {
 }
 
 function stripArmorDefenseMarkers(description: string) {
-  return description
-    .replace(/\b(?:ФЗ|Физическая(?: защита)?)\s*[:.]?\s*[+\-]?\d+\b/giu, "")
-    .replace(/\b(?:МЗ|Магическая(?: защита)?)\s*[:.]?\s*[+\-]?\d+\b/giu, "")
-    .replace(/\b(?:ПЗ|Психическая(?: защита)?)\s*[:.]?\s*[+\-]?\d+\b/giu, "")
+  const defensePatterns = [
+    /\b(?:\u0424\u0417|\u0424\u0438\u0437\u0438\u0447\u0435\u0441\u043a\u0430\u044f(?: \u0437\u0430\u0449\u0438\u0442\u0430)?|\u0421\u0442\u043e\u0439\u043a\u043e\u0441\u0442\u044c)\s*[:.]?\s*[+\-]?\d+\b/giu,
+    /\b(?:\u041c\u0417|\u041c\u0430\u0433\u0438\u0447\u0435\u0441\u043a\u0430\u044f(?: \u0437\u0430\u0449\u0438\u0442\u0430)?|\u041a\u043e\u043d\u0442\u0440\u043e\u043b\u044c)\s*[:.]?\s*[+\-]?\d+\b/giu,
+    /\b(?:\u041f\u0417|\u041f\u0441\u0438\u0445\u0438\u0447\u0435\u0441\u043a\u0430\u044f(?: \u0437\u0430\u0449\u0438\u0442\u0430)?|\u0412\u043e\u043b\u044f)\s*[:.]?\s*[+\-]?\d+\b/giu,
+  ]
+
+  return defensePatterns
+    .reduce((value, pattern) => value.replace(pattern, ""), description)
     .replace(/\s*[,;]\s*[,;]\s*/g, ", ")
     .replace(/\(\s*\)/g, "")
     .replace(/\s{2,}/g, " ")
@@ -790,15 +815,15 @@ function buildArmorCatalogModel(headers: string[], rows: string[][]): RulebookCa
     const physicalDefense =
       (columns.physicalDefense !== undefined && columns.physicalDefense !== -1
         ? (row[columns.physicalDefense] ?? "").trim()
-        : "") || extractDefenseValue(defenseSource, catalogHeaderAliases.physicalDefense)
+        : "") || extractDefenseValue(defenseSource, armorDefenseAliases.physicalDefense)
     const magicalDefense =
       (columns.magicalDefense !== undefined && columns.magicalDefense !== -1
         ? (row[columns.magicalDefense] ?? "").trim()
-        : "") || extractDefenseValue(defenseSource, catalogHeaderAliases.magicalDefense)
+        : "") || extractDefenseValue(defenseSource, armorDefenseAliases.magicalDefense)
     const psychicDefense =
       (columns.psychicDefense !== undefined && columns.psychicDefense !== -1
         ? (row[columns.psychicDefense] ?? "").trim()
-        : "") || extractDefenseValue(defenseSource, catalogHeaderAliases.psychicDefense)
+        : "") || extractDefenseValue(defenseSource, armorDefenseAliases.psychicDefense)
 
     return {
       id: `armor-${index + 1}`,
@@ -1034,8 +1059,9 @@ function renderCatalogMultiFilterDropdown(
 }
 
 function renderCatalogSortDropdown(sortOptions: RulebookCatalogSortOption[]) {
-  const activeLabel = sortOptions[0]?.label ?? ""
-  const activeValue = sortOptions[0]?.value ?? "title-asc"
+  const activeOption = sortOptions.find((option) => option.value === "rank-asc") ?? sortOptions[0]
+  const activeLabel = activeOption?.label ?? "По рангу"
+  const activeValue = activeOption?.value ?? "rank-asc"
 
   return `
     <div class="${abilityCatalogClass}__filter-group ${abilityCatalogClass}__dropdown-group" data-filter-dropdown="sort">
@@ -1044,25 +1070,27 @@ function renderCatalogSortDropdown(sortOptions: RulebookCatalogSortOption[]) {
       ${renderCatalogDropdownTrigger(activeLabel)}
       <div class="${abilityCatalogClass}__dropdown-menu" data-dropdown-menu hidden>
         ${sortOptions
-          .map(
-            (option, index) => `
+          .map((option) => {
+            const isActive = option.value === activeValue
+
+            return `
               <button
                 type="button"
                 class="${abilityCatalogClass}__dropdown-option ${abilityCatalogClass}__dropdown-option--button${
-                  index === 0 ? " is-active" : ""
+                  isActive ? " is-active" : ""
                 }"
                 data-sort-option
                 data-sort-value="${option.value}"
                 data-sort-key="${option.sortKey}"
                 data-sort-direction="${option.direction}"
-                aria-pressed="${index === 0 ? "true" : "false"}"
+                aria-pressed="${isActive ? "true" : "false"}"
               >
                 <span class="${abilityCatalogClass}__dropdown-option-label">
                   ${escapeHtml(option.label)}
                 </span>
               </button>
-            `,
-          )
+            `
+          })
           .join("")}
       </div>
     </div>
@@ -1202,12 +1230,82 @@ function buildRulebookCatalogModel(kind: RulebookCatalogKind, headers: string[],
   }
 }
 
+function localizeArmorTag(value: string) {
+  return value
+    .replace(/^\u0424\u0417\b/u, armorDefenseLabels.physicalDefense)
+    .replace(/^\u041c\u0417\b/u, armorDefenseLabels.magicalDefense)
+    .replace(/^\u041f\u0417\b/u, armorDefenseLabels.psychicDefense)
+}
+
+function localizeArmorFilterLabel(value: string) {
+  switch (value) {
+    case "\u0424\u0438\u0437\u0438\u0447\u0435\u0441\u043a\u0430\u044f":
+      return armorDefenseLabels.physicalDefense
+    case "\u041c\u0430\u0433\u0438\u0447\u0435\u0441\u043a\u0430\u044f":
+      return armorDefenseLabels.magicalDefense
+    case "\u041f\u0441\u0438\u0445\u0438\u0447\u0435\u0441\u043a\u0430\u044f":
+      return armorDefenseLabels.psychicDefense
+    default:
+      return value
+  }
+}
+
+function localizeArmorSortLabel(value: string) {
+  switch (value) {
+    case "\u041f\u043e \u0444\u0438\u0437\u0438\u0447\u0435\u0441\u043a\u043e\u0439":
+      return `\u041f\u043e ${armorDefenseSortLabels.physicalDefense}`
+    case "\u041f\u043e \u043c\u0430\u0433\u0438\u0447\u0435\u0441\u043a\u043e\u0439":
+      return `\u041f\u043e ${armorDefenseSortLabels.magicalDefense}`
+    case "\u041f\u043e \u043f\u0441\u0438\u0445\u0438\u0447\u0435\u0441\u043a\u043e\u0439":
+      return `\u041f\u043e ${armorDefenseSortLabels.psychicDefense}`
+    default:
+      return value
+  }
+}
+
+function localizeArmorCatalogModel(model: RulebookCatalogModel): RulebookCatalogModel {
+  return {
+    ...model,
+    entries: model.entries.map((entry) => ({
+      ...entry,
+      tags: [
+        entry.filters.physicalDefense
+          ? `${armorDefenseLabels.physicalDefense} ${entry.filters.physicalDefense}`
+          : "",
+        entry.filters.magicalDefense
+          ? `${armorDefenseLabels.magicalDefense} ${entry.filters.magicalDefense}`
+          : "",
+        entry.filters.psychicDefense
+          ? `${armorDefenseLabels.psychicDefense} ${entry.filters.psychicDefense}`
+          : "",
+      ]
+        .filter(Boolean)
+        .map(localizeArmorTag),
+    })),
+    filters: model.filters.map((filter) =>
+      filter.kind === "multi"
+        ? {
+            ...filter,
+            label: localizeArmorFilterLabel(filter.label),
+          }
+        : filter,
+    ),
+    sortOptions: model.sortOptions.map((option) => ({
+      ...option,
+      label: localizeArmorSortLabel(option.label),
+    })),
+  }
+}
+
 export function buildRulebookCatalogHtml(
   kind: RulebookCatalogKind,
   headers: string[],
   rows: string[][],
 ) {
-  const model = buildRulebookCatalogModel(kind, headers, rows)
+  const model =
+    kind === "armor"
+      ? localizeArmorCatalogModel(buildRulebookCatalogModel(kind, headers, rows))
+      : buildRulebookCatalogModel(kind, headers, rows)
 
   return `
     <section class="${abilityCatalogClass}" data-catalog-kind="${kind}">
