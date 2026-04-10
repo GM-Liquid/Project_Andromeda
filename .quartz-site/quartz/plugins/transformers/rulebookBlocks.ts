@@ -405,8 +405,11 @@ export function buildAbilityCatalogEntries(headers: string[], rows: string[][]):
     const rawFullDescription =
       columns.fullDescription !== undefined ? (row[columns.fullDescription] ?? "").trim() : ""
     const fullDescription = rawFullDescription || legacyDescription || rawPreviewDescription
-    const previewSource = legacyDescription || fullDescription
-    const previewDescription = rawPreviewDescription || buildDescriptionPreview(previewSource)
+    const hasExplicitPreviewColumn = columns.previewDescription !== undefined
+    const previewSource = rawPreviewDescription || legacyDescription || fullDescription
+    const previewDescription = hasExplicitPreviewColumn
+      ? rawPreviewDescription
+      : rawPreviewDescription || buildDescriptionPreview(previewSource)
     const frequency =
       normalizeFrequencyLabel((row[columns.frequency] ?? "").trim()) ||
       deriveFrequencyLabel(fullDescription)

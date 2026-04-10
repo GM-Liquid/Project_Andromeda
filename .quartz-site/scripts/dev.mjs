@@ -16,7 +16,6 @@ const initialSync = await syncBook()
 const sourceGlobs = [
   await getRulebookWatchPattern({ repoRoot }),
   await getGearCatalogWatchPattern({ repoRoot }),
-  resolve(siteRoot, "data", "temporary", "concept-abilities.json"),
 ]
 
 const { command, args } = getQuartzDevCommand({ siteRoot })

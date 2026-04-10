@@ -1,0 +1,30 @@
+[
+  {
+    "file": "abilities.json",
+    "schemaVersion": 4,
+    "category": "abilities",
+    "sourceOfTruth": "data/gear",
+    "notes": "Каталог способностей, импортированный из переходной главы 'Способности и снаряжение'. Частота и цена в действиях сохранены в тексте записи; legacy-статус отмечен на уровне записей."
+  },
+  {
+    "file": "armor.json",
+    "schemaVersion": 4,
+    "category": "armor",
+    "sourceOfTruth": "data/gear",
+    "notes": "Канонический каталог брони. Перенесен из синхронизированного раздела главы 'Способности и снаряжение' и нормализован по общему словарю свойств."
+  },
+  {
+    "file": "concept-abilities.json",
+    "schemaVersion": 4,
+    "category": "concept-abilities",
+    "sourceOfTruth": "data/gear",
+    "notes": "Временный четвертый каталог concept-способностей для Quartz-главы 03. Удаляется вместе с отдельной вставкой concept-abilities в публичном sync-book по инструкции из data/gear/README.md."
+  },
+  {
+    "file": "equipment.json",
+    "schemaVersion": 4,
+    "category": "equipment",
+    "sourceOfTruth": "data/gear",
+    "notes": "Единый каталог снаряжения. Включает оружие, гаджеты и переходные записи из устаревшей части главы 'Способности и снаряжение'; статус legacy сохранен на уровне записей."
+  }
+]

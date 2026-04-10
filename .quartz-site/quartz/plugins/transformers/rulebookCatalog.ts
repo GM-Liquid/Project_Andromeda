@@ -12,7 +12,14 @@ type CatalogHeaderField =
   | "skill"
   | "credits"
   | "actions"
+  | "range"
+  | "targets"
+  | "area"
+  | "defense"
+  | "duration"
   | "damage"
+  | "shield"
+  | "speed"
   | "physicalDefense"
   | "magicalDefense"
   | "psychicDefense"
@@ -30,6 +37,11 @@ type AbilityCatalogColumns = DescriptionColumns & {
   skill: number
   credits: number
   actions: number
+  range?: number
+  targets?: number
+  area?: number
+  defense?: number
+  duration?: number
 }
 
 type WeaponCatalogColumns = DescriptionColumns & {
@@ -38,6 +50,13 @@ type WeaponCatalogColumns = DescriptionColumns & {
   credits: number
   skill: number
   damage: number
+  frequency?: number
+  actions?: number
+  range?: number
+  targets?: number
+  area?: number
+  defense?: number
+  duration?: number
 }
 
 type SimpleCatalogColumns = DescriptionColumns & {
@@ -49,12 +68,24 @@ type SimpleCatalogColumns = DescriptionColumns & {
 type EquipmentCatalogColumns = SimpleCatalogColumns & {
   skill?: number
   damage?: number
+  frequency?: number
+  actions?: number
+  range?: number
+  targets?: number
+  area?: number
+  defense?: number
+  duration?: number
 }
 
 type ArmorCatalogColumns = SimpleCatalogColumns & {
   physicalDefense?: number
   magicalDefense?: number
   psychicDefense?: number
+  shield?: number
+  speed?: number
+  frequency?: number
+  actions?: number
+  duration?: number
 }
 
 type RulebookCatalogContext = {
@@ -95,6 +126,11 @@ type RulebookCatalogFilterDefinition =
       unit: string
     }
 
+type CatalogDetailTag = {
+  label: string
+  value: string
+}
+
 type RulebookCatalogEntry = {
   id: string
   name: string
@@ -103,6 +139,7 @@ type RulebookCatalogEntry = {
   previewDescription: string
   fullDescription: string
   tags: string[]
+  detailTags: CatalogDetailTag[]
   filters: Partial<Record<RulebookCatalogFilterField, string>>
   sortValues: Record<string, number>
 }
@@ -123,7 +160,14 @@ const catalogHeaderAliases: Record<CatalogHeaderField, string[]> = {
   skill: ["навык", "используемый навык"],
   credits: ["цена", "цена:", "цена в кредитах"],
   actions: ["цена в действиях", "действие для активации", "действия"],
+  range: ["дальность", "дистанция"],
+  targets: ["цели", "цель"],
+  area: ["зона", "область"],
+  defense: ["защита"],
+  duration: ["длительность"],
   damage: ["урон"],
+  shield: ["силовой щит", "щит"],
+  speed: ["скорость"],
   physicalDefense: ["физическая защита", "физическая", "фз"],
   magicalDefense: ["магическая защита", "магическая", "мз"],
   psychicDefense: ["психическая защита", "психическая", "пз"],
@@ -148,6 +192,23 @@ const armorDefenseSortLabels = {
   physicalDefense: "\u0421\u0442\u043e\u0439\u043a\u043e\u0441\u0442\u0438",
   magicalDefense: "\u041a\u043e\u043d\u0442\u0440\u043e\u043b\u044e",
   psychicDefense: "\u0412\u043e\u043b\u0435",
+} as const
+
+const detailTagLabels = {
+  actions: "Активация",
+  range: "Дальность",
+  targets: "Цели",
+  area: "Зона",
+  defense: "Защита",
+  duration: "Длительность",
+  skill: "Навык",
+  frequency: "Частота",
+  damage: "Урон",
+  shield: "Силовой щит",
+  speed: "Скорость",
+  physicalDefense: "Стойкость",
+  magicalDefense: "Контроль",
+  psychicDefense: "Воля",
 } as const
 
 const rankOptions = ["1", "2", "3", "4"]
@@ -264,6 +325,11 @@ function resolveAbilityCatalogColumns(headers: string[]): AbilityCatalogColumns 
     skill: findColumn(headers, catalogHeaderAliases.skill),
     credits: findColumn(headers, catalogHeaderAliases.credits),
     actions: findColumn(headers, catalogHeaderAliases.actions),
+    range: findColumn(headers, catalogHeaderAliases.range),
+    targets: findColumn(headers, catalogHeaderAliases.targets),
+    area: findColumn(headers, catalogHeaderAliases.area),
+    defense: findColumn(headers, catalogHeaderAliases.defense),
+    duration: findColumn(headers, catalogHeaderAliases.duration),
     ...descriptionColumns,
   }
 
@@ -293,6 +359,13 @@ function resolveWeaponCatalogColumns(headers: string[]): WeaponCatalogColumns | 
     credits: findColumn(headers, catalogHeaderAliases.credits),
     skill: findColumn(headers, catalogHeaderAliases.skill),
     damage: findColumn(headers, catalogHeaderAliases.damage),
+    frequency: findColumn(headers, catalogHeaderAliases.frequency),
+    actions: findColumn(headers, catalogHeaderAliases.actions),
+    range: findColumn(headers, catalogHeaderAliases.range),
+    targets: findColumn(headers, catalogHeaderAliases.targets),
+    area: findColumn(headers, catalogHeaderAliases.area),
+    defense: findColumn(headers, catalogHeaderAliases.defense),
+    duration: findColumn(headers, catalogHeaderAliases.duration),
     ...descriptionColumns,
   }
 
@@ -340,6 +413,11 @@ function resolveArmorCatalogColumns(headers: string[]): ArmorCatalogColumns | nu
     physicalDefense: findColumn(headers, armorDefenseAliases.physicalDefense),
     magicalDefense: findColumn(headers, armorDefenseAliases.magicalDefense),
     psychicDefense: findColumn(headers, armorDefenseAliases.psychicDefense),
+    shield: findColumn(headers, catalogHeaderAliases.shield),
+    speed: findColumn(headers, catalogHeaderAliases.speed),
+    frequency: findColumn(headers, catalogHeaderAliases.frequency),
+    actions: findColumn(headers, catalogHeaderAliases.actions),
+    duration: findColumn(headers, catalogHeaderAliases.duration),
   }
 }
 
@@ -353,6 +431,13 @@ function resolveEquipmentCatalogColumns(headers: string[]): EquipmentCatalogColu
     ...columns,
     skill: findColumn(headers, catalogHeaderAliases.skill),
     damage: findColumn(headers, catalogHeaderAliases.damage),
+    frequency: findColumn(headers, catalogHeaderAliases.frequency),
+    actions: findColumn(headers, catalogHeaderAliases.actions),
+    range: findColumn(headers, catalogHeaderAliases.range),
+    targets: findColumn(headers, catalogHeaderAliases.targets),
+    area: findColumn(headers, catalogHeaderAliases.area),
+    defense: findColumn(headers, catalogHeaderAliases.defense),
+    duration: findColumn(headers, catalogHeaderAliases.duration),
   }
 }
 
@@ -581,8 +666,11 @@ function buildDescriptions(
     options.legacyCleaner,
   )
   const fullDescription = rawFullDescription || cleanedLegacyDescription || rawPreviewDescription
+  const hasExplicitPreviewColumn = columns.previewDescription !== undefined
   const previewSource = rawPreviewDescription || cleanedLegacyDescription || fullDescription
-  const previewDescription = rawPreviewDescription || buildDescriptionPreview(previewSource)
+  const previewDescription = hasExplicitPreviewColumn
+    ? rawPreviewDescription
+    : rawPreviewDescription || buildDescriptionPreview(previewSource)
 
   return {
     previewDescription,
@@ -615,6 +703,18 @@ function stripArmorDefenseMarkers(description: string) {
     .replace(/\s+([,.;:!?])/g, "$1")
     .replace(/^[,.;:\s]+/g, "")
     .replace(/[,.;:\s]+$/g, "")
+}
+
+function readOptionalColumnValue(row: string[], column?: number) {
+  if (column === undefined || column === -1) {
+    return ""
+  }
+
+  return (row[column] ?? "").trim()
+}
+
+function buildDetailTags(tags: Array<CatalogDetailTag | null | undefined>) {
+  return tags.filter((tag): tag is CatalogDetailTag => Boolean(tag?.value))
 }
 
 function sortAlphaValues(values: string[]) {
@@ -664,6 +764,11 @@ function buildAbilityCatalogModel(headers: string[], rows: string[][]): Rulebook
     const actions =
       normalizeActionLabel((row[columns.actions] ?? "").trim()) ||
       deriveActionLabel(descriptions.fullDescription)
+    const range = readOptionalColumnValue(row, columns.range)
+    const targets = readOptionalColumnValue(row, columns.targets)
+    const area = readOptionalColumnValue(row, columns.area)
+    const defense = readOptionalColumnValue(row, columns.defense)
+    const duration = readOptionalColumnValue(row, columns.duration)
     const price = (row[columns.credits] ?? "").trim()
     const rank = (row[columns.rank] ?? "").trim()
     const name = (row[columns.name] ?? "").trim()
@@ -676,6 +781,16 @@ function buildAbilityCatalogModel(headers: string[], rows: string[][]): Rulebook
       previewDescription: descriptions.previewDescription,
       fullDescription: descriptions.fullDescription,
       tags: [frequency, skill].filter(Boolean),
+      detailTags: buildDetailTags([
+        actions ? { label: detailTagLabels.actions, value: actions } : null,
+        range ? { label: detailTagLabels.range, value: range } : null,
+        targets ? { label: detailTagLabels.targets, value: targets } : null,
+        area ? { label: detailTagLabels.area, value: area } : null,
+        defense ? { label: detailTagLabels.defense, value: defense } : null,
+        duration ? { label: detailTagLabels.duration, value: duration } : null,
+        skill ? { label: detailTagLabels.skill, value: skill } : null,
+        frequency ? { label: detailTagLabels.frequency, value: frequency } : null,
+      ]),
       filters: {
         rank,
         frequency,
@@ -749,6 +864,13 @@ function buildWeaponCatalogModel(headers: string[], rows: string[][]): RulebookC
     const price = (row[columns.credits] ?? "").trim()
     const skill = (row[columns.skill] ?? "").trim()
     const damage = (row[columns.damage] ?? "").trim()
+    const frequency = readOptionalColumnValue(row, columns.frequency)
+    const actions = readOptionalColumnValue(row, columns.actions)
+    const range = readOptionalColumnValue(row, columns.range)
+    const targets = readOptionalColumnValue(row, columns.targets)
+    const area = readOptionalColumnValue(row, columns.area)
+    const defense = readOptionalColumnValue(row, columns.defense)
+    const duration = readOptionalColumnValue(row, columns.duration)
 
     return {
       id: `weapon-${index + 1}`,
@@ -757,7 +879,18 @@ function buildWeaponCatalogModel(headers: string[], rows: string[][]): RulebookC
       price,
       previewDescription: descriptions.previewDescription,
       fullDescription: descriptions.fullDescription,
-      tags: [skill, damage].filter(Boolean),
+      tags: [skill].filter(Boolean),
+      detailTags: buildDetailTags([
+        damage ? { label: detailTagLabels.damage, value: damage } : null,
+        actions ? { label: detailTagLabels.actions, value: actions } : null,
+        range ? { label: detailTagLabels.range, value: range } : null,
+        targets ? { label: detailTagLabels.targets, value: targets } : null,
+        area ? { label: detailTagLabels.area, value: area } : null,
+        defense ? { label: detailTagLabels.defense, value: defense } : null,
+        duration ? { label: detailTagLabels.duration, value: duration } : null,
+        skill ? { label: detailTagLabels.skill, value: skill } : null,
+        frequency ? { label: detailTagLabels.frequency, value: frequency } : null,
+      ]),
       filters: {
         rank,
         skill: normalizeSkillFilterValue(skill),
@@ -824,6 +957,11 @@ function buildArmorCatalogModel(headers: string[], rows: string[][]): RulebookCa
       (columns.psychicDefense !== undefined && columns.psychicDefense !== -1
         ? (row[columns.psychicDefense] ?? "").trim()
         : "") || extractDefenseValue(defenseSource, armorDefenseAliases.psychicDefense)
+    const shield = readOptionalColumnValue(row, columns.shield)
+    const speed = readOptionalColumnValue(row, columns.speed)
+    const frequency = readOptionalColumnValue(row, columns.frequency)
+    const actions = readOptionalColumnValue(row, columns.actions)
+    const duration = readOptionalColumnValue(row, columns.duration)
 
     return {
       id: `armor-${index + 1}`,
@@ -837,6 +975,16 @@ function buildArmorCatalogModel(headers: string[], rows: string[][]): RulebookCa
         magicalDefense ? `МЗ ${magicalDefense}` : "",
         psychicDefense ? `ПЗ ${psychicDefense}` : "",
       ].filter(Boolean),
+      detailTags: buildDetailTags([
+        physicalDefense ? { label: detailTagLabels.physicalDefense, value: physicalDefense } : null,
+        magicalDefense ? { label: detailTagLabels.magicalDefense, value: magicalDefense } : null,
+        psychicDefense ? { label: detailTagLabels.psychicDefense, value: psychicDefense } : null,
+        shield ? { label: detailTagLabels.shield, value: shield } : null,
+        speed ? { label: detailTagLabels.speed, value: speed } : null,
+        actions ? { label: detailTagLabels.actions, value: actions } : null,
+        duration ? { label: detailTagLabels.duration, value: duration } : null,
+        frequency ? { label: detailTagLabels.frequency, value: frequency } : null,
+      ]),
       filters: {
         rank,
         physicalDefense,
@@ -899,6 +1047,13 @@ function buildEquipmentCatalogModel(headers: string[], rows: string[][]): Rulebo
       columns.damage !== undefined && columns.damage !== -1
         ? (row[columns.damage] ?? "").trim()
         : ""
+    const frequency = readOptionalColumnValue(row, columns.frequency)
+    const actions = readOptionalColumnValue(row, columns.actions)
+    const range = readOptionalColumnValue(row, columns.range)
+    const targets = readOptionalColumnValue(row, columns.targets)
+    const area = readOptionalColumnValue(row, columns.area)
+    const defense = readOptionalColumnValue(row, columns.defense)
+    const duration = readOptionalColumnValue(row, columns.duration)
 
     return {
       id: `equipment-${index + 1}`,
@@ -907,7 +1062,18 @@ function buildEquipmentCatalogModel(headers: string[], rows: string[][]): Rulebo
       price,
       previewDescription: descriptions.previewDescription,
       fullDescription: descriptions.fullDescription,
-      tags: [skill, damage].filter(Boolean),
+      tags: [skill].filter(Boolean),
+      detailTags: buildDetailTags([
+        damage ? { label: detailTagLabels.damage, value: damage } : null,
+        actions ? { label: detailTagLabels.actions, value: actions } : null,
+        range ? { label: detailTagLabels.range, value: range } : null,
+        targets ? { label: detailTagLabels.targets, value: targets } : null,
+        area ? { label: detailTagLabels.area, value: area } : null,
+        defense ? { label: detailTagLabels.defense, value: defense } : null,
+        duration ? { label: detailTagLabels.duration, value: duration } : null,
+        skill ? { label: detailTagLabels.skill, value: skill } : null,
+        frequency ? { label: detailTagLabels.frequency, value: frequency } : null,
+      ]),
       filters: {
         rank,
         ...(columns.skill !== undefined && columns.skill !== -1
@@ -966,6 +1132,27 @@ function renderCatalogMetaChips(entry: RulebookCatalogEntry) {
         .map(
           (value) => `
             <span class="${abilityCatalogClass}__meta-chip">${escapeHtml(value)}</span>
+          `,
+        )
+        .join("")}
+    </div>
+  `
+}
+
+function renderCatalogDetailTags(entry: RulebookCatalogEntry) {
+  if (entry.detailTags.length === 0) {
+    return ""
+  }
+
+  return `
+    <div class="${abilityCatalogClass}__detail-tags">
+      ${entry.detailTags
+        .map(
+          (tag) => `
+            <span class="${abilityCatalogClass}__detail-tag">
+              <span class="${abilityCatalogClass}__detail-tag-label">${escapeHtml(tag.label)}</span>
+              <span class="${abilityCatalogClass}__detail-tag-value">${escapeHtml(tag.value)}</span>
+            </span>
           `,
         )
         .join("")}
@@ -1207,6 +1394,7 @@ function renderCatalogRows(entries: RulebookCatalogEntry[], expandedEntries = ne
         }>
           <td colspan="4">
             <div class="${abilityCatalogClass}__detail-body">
+              ${renderCatalogDetailTags(entry)}
               <span class="${abilityCatalogClass}__detail-label">Описание</span>
               <p>${renderCatalogValue(entry.fullDescription)}</p>
             </div>

@@ -1,1868 +1,903 @@
-{
-  "_meta": {
-    "schemaVersion": 2,
-    "category": "equipment",
-    "sourceOfTruth": "data/gear",
-    "notes": "Единый каталог снаряжения. Включает оружие, гаджеты и переходные записи из устаревшей части главы 'Способности и снаряжение'; статус legacy сохранен на уровне записей."
+[
+  {
+    "id": "okhotnichiy-drobovik",
+    "name": "Охотничий дробовик",
+    "type": "equipment",
+    "rank": 1,
+    "skill": "Стрельба",
+    "properties": [],
+    "description": "Урон: 2. Вы можете совершить две атаки по целям в двух соседних клетках. Каждая получает штраф -2.",
+    "tags": [
+      "strelkovoe"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": null
   },
-  "items": [
-    {
-      "id": "takticheskiy-vibroklinok",
-      "name": "Тактический виброклинок",
-      "type": "equipment",
-      "foundryType": "melee",
-      "rank": 1,
-      "skill": "Ближний бой",
-      "properties": [],
-      "description": "Урон: 1.",
-      "bookText": "Урон: 1.",
-      "foundryDescription": "Урон: 1.",
-      "tags": [
-        "blizhnee"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "reyderskiy-pistolet",
-      "name": "Рейдерский пистолет",
-      "type": "equipment",
-      "foundryType": "ranged",
-      "rank": 1,
-      "skill": "Стрельба",
-      "properties": [
-        {
-          "key": "escalation-x",
-          "value": 1,
-          "label": "Эскалация 1"
-        }
-      ],
-      "description": "Урон: 1. Эскалация.",
-      "bookText": "Урон: 1. Эскалация.",
-      "foundryDescription": "Урон: 1. Эскалация.",
-      "tags": [
-        "strelkovoe"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "okhotnichiy-drobovik",
-      "name": "Охотничий дробовик",
-      "type": "equipment",
-      "foundryType": "ranged",
-      "rank": 1,
-      "skill": "Стрельба",
-      "properties": [],
-      "description": "Урон: 2. Вы можете совершить две атаки по целям в двух соседних клетках. Каждая получает штраф -2.",
-      "bookText": "Урон: 2. Вы можете совершить две атаки по целям в двух соседних клетках. Каждая получает штраф -2.",
-      "foundryDescription": "Урон: 2. Вы можете совершить две атаки по целям в двух соседних клетках. Каждая получает штраф -2.",
-      "tags": [
-        "strelkovoe"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "reyderskaya-snayperskaya-vintovka",
-      "name": "Рейдерская снайперская винтовка",
-      "type": "equipment",
-      "foundryType": "ranged",
-      "rank": 1,
-      "skill": "Стрельба",
-      "properties": [
-        {
-          "key": "reload-x",
-          "value": 2,
-          "label": "Перезарядка 2"
-        },
-        {
-          "key": "stabilization-x",
-          "value": 1,
-          "label": "Стабилизация 1"
-        }
-      ],
-      "description": "Урон: 2. Перезарядка 2. Если вы ещё не перемещались в этом ходу, добавьте +1 к атаке этим оружием. А если уже перемещались - вычтите 1.",
-      "bookText": "Урон: 2. Перезарядка 2. Если вы ещё не перемещались в этом ходу, добавьте +1 к атаке этим оружием. А если уже перемещались - вычтите 1.",
-      "foundryDescription": "Урон: 2. Перезарядка 2. Если вы ещё не перемещались в этом ходу, добавьте +1 к атаке этим оружием. А если уже перемещались - вычтите 1.",
-      "tags": [
-        "strelkovoe"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "avtomat-avokin",
-      "name": "Автомат \"Авокин\"",
-      "type": "equipment",
-      "foundryType": "ranged",
-      "rank": 2,
-      "skill": "Стрельба",
-      "properties": [],
-      "description": "Урон: 3.",
-      "bookText": "Урон: 3.",
-      "foundryDescription": "Урон: 3.",
-      "tags": [
-        "strelkovoe"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "vintovka-shturmovaya-ares",
-      "name": "Винтовка штурмовая \"Арес\"",
-      "type": "equipment",
-      "foundryType": "ranged",
-      "rank": 2,
-      "skill": "Стрельба",
-      "properties": [
-        {
-          "key": "aggressive-overwatch",
-          "value": true,
-          "label": "Агрессивный обстрел"
-        }
-      ],
-      "description": "Урон: 3. Агрессивный обстрел, бронебойность.",
-      "bookText": "Урон: 3. Агрессивный обстрел, бронебойность.",
-      "foundryDescription": "Урон: 3. Агрессивный обстрел, бронебойность.",
-      "tags": [
-        "strelkovoe"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "snayperskaya-vintovka-igla",
-      "name": "Снайперская винтовка \"Игла\"",
-      "type": "equipment",
-      "foundryType": "ranged",
-      "rank": 2,
-      "skill": "Стрельба",
-      "properties": [
-        {
-          "key": "escalation-x",
-          "value": 1,
-          "label": "Эскалация 1"
-        },
-        {
-          "key": "stabilization-x",
-          "value": 1,
-          "label": "Стабилизация 1"
-        },
-        {
-          "key": "concealable",
-          "value": true,
-          "label": "Скрытное"
-        }
-      ],
-      "description": "Урон: 4. Эскалация, Скрытное, Стабилизация (Если вы ещё не перемещались в этом ходу, добавьте +1 к атаке этим оружием.).",
-      "bookText": "Урон: 4. Эскалация, Скрытное, Стабилизация (Если вы ещё не перемещались в этом ходу, добавьте +1 к атаке этим оружием.).",
-      "foundryDescription": "Урон: 4. Эскалация, Скрытное, Стабилизация (Если вы ещё не перемещались в этом ходу, добавьте +1 к атаке этим оружием.).",
-      "tags": [
-        "strelkovoe"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "pistolet-pulemet-x70",
-      "name": "Пистолет-пулемет X70",
-      "type": "equipment",
-      "foundryType": "ranged",
-      "rank": 2,
-      "skill": "Стрельба",
-      "properties": [],
-      "description": "Урон: 3. Очередь.",
-      "bookText": "Урон: 3. Очередь.",
-      "foundryDescription": "Урон: 3. Очередь.",
-      "tags": [
-        "strelkovoe"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "drobovik-marduk",
-      "name": "Дробовик Мардук",
-      "type": "equipment",
-      "foundryType": "ranged",
-      "rank": 2,
-      "skill": "Стрельба",
-      "properties": [
-        {
-          "key": "armor-piercing-x",
-          "value": 1,
-          "label": "Бронебойность 1"
-        }
-      ],
-      "description": "Урон: 4. Бронебойность 1.",
-      "bookText": "Урон: 4. Бронебойность 1.",
-      "foundryDescription": "Урон: 4. Бронебойность 1.",
-      "tags": [
-        "strelkovoe"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "tyazhelyy-pulemet-m-4k",
-      "name": "Тяжелый пулемет М-4к",
-      "type": "equipment",
-      "foundryType": "ranged",
-      "rank": 2,
-      "skill": "Стрельба",
-      "properties": [
-        {
-          "key": "armor-piercing-x",
-          "value": 1,
-          "label": "Бронебойность 1"
-        }
-      ],
-      "description": "Урон: 4. Стационарный тяжелый пулемет. Для установки огневой точки требуется действие. Очередь, Бронебойность 1.",
-      "bookText": "Урон: 4. Стационарный тяжелый пулемет. Для установки огневой точки требуется действие. Очередь, Бронебойность 1.",
-      "foundryDescription": "Урон: 4. Стационарный тяжелый пулемет. Для установки огневой точки требуется действие. Очередь, Бронебойность 1.",
-      "tags": [
-        "strelkovoe"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "reyderskiy-tsiklomech",
-      "name": "Рейдерский цикломеч",
-      "type": "equipment",
-      "foundryType": "melee",
-      "rank": 2,
-      "skill": "Ближний бой",
-      "properties": [
-        {
-          "key": "armor-piercing-x",
-          "value": 3,
-          "label": "Бронебойность 3"
-        }
-      ],
-      "description": "Бронебойность 3.",
-      "bookText": "Бронебойность 3.",
-      "foundryDescription": "Бронебойность 3.",
-      "tags": [
-        "blizhnee"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "vibroklinok",
-      "name": "Виброклинок",
-      "type": "equipment",
-      "foundryType": "melee",
-      "rank": 2,
-      "skill": "Ближний бой",
-      "properties": [
-        {
-          "key": "concealable",
-          "value": true,
-          "label": "Скрытное"
-        }
-      ],
-      "description": "Урон: 5. Скрытное.",
-      "bookText": "Урон: 5. Скрытное.",
-      "foundryDescription": "Урон: 5. Скрытное.",
-      "tags": [
-        "blizhnee"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "krupnokalibernyy-pistolet-yarost",
-      "name": "Крупнокалиберный пистолет Ярость",
-      "type": "equipment",
-      "foundryType": "ranged",
-      "rank": 2,
-      "skill": "Стрельба",
-      "properties": [
-        {
-          "key": "armor-piercing-x",
-          "value": 1,
-          "label": "Бронебойность 1"
-        }
-      ],
-      "description": "Урон: 3. Очередь, бронебойность 1.",
-      "bookText": "Урон: 3. Очередь, бронебойность 1.",
-      "foundryDescription": "Урон: 3. Очередь, бронебойность 1.",
-      "tags": [
-        "strelkovoe"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "raketnitsa-ptr-3",
-      "name": "Ракетница ПТР-3",
-      "type": "equipment",
-      "foundryType": "ranged",
-      "rank": 3,
-      "skill": "Стрельба",
-      "properties": [
-        {
-          "key": "escalation-x",
-          "value": 3,
-          "label": "Эскалация 3"
-        },
-        {
-          "key": "reload-x",
-          "value": 2,
-          "label": "Перезарядка 2"
-        }
-      ],
-      "description": "Урон: 2. Сплеш, Перезарядка 2, Эскалация 3.",
-      "bookText": "Урон: 2. Сплеш, Перезарядка 2, Эскалация 3.",
-      "foundryDescription": "Урон: 2. Сплеш, Перезарядка 2, Эскалация 3.",
-      "tags": [
-        "strelkovoe"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "ognemet-ifrit",
-      "name": "Огнемет Ифрит",
-      "type": "equipment",
-      "foundryType": "ranged",
-      "rank": 2,
-      "skill": "Стрельба",
-      "properties": [],
-      "description": "Урон: 2. Струя пламени. (Поражает всех стоящих на линии длиной до 10м.).",
-      "bookText": "Урон: 2. Струя пламени. (Поражает всех стоящих на линии длиной до 10м.).",
-      "foundryDescription": "Урон: 2. Струя пламени. (Поражает всех стоящих на линии длиной до 10м.).",
-      "tags": [
-        "strelkovoe"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "granata",
-      "name": "Граната",
-      "type": "equipment",
-      "foundryType": "thrown",
-      "rank": 2,
-      "skill": "Тело",
-      "properties": [],
-      "description": "Урон: 2.",
-      "bookText": "Урон: 2.",
-      "foundryDescription": "Урон: 2.",
-      "tags": [
-        "metatelnoe"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "emi-granata",
-      "name": "Эми-граната",
-      "type": "equipment",
-      "foundryType": "thrown",
-      "rank": 2,
-      "skill": "Тело",
-      "properties": [],
-      "description": "Урон: 2. Отключает всю электронику в радиусе. В зависимости от сложности задетого устройства, на повторное включение может потребоваться от одного действия до целой сцены.",
-      "bookText": "Урон: 2. Отключает всю электронику в радиусе. В зависимости от сложности задетого устройства, на повторное включение может потребоваться от одного действия до целой сцены.",
-      "foundryDescription": "Урон: 2. Отключает всю электронику в радиусе. В зависимости от сложности задетого устройства, на повторное включение может потребоваться от одного действия до целой сцены.",
-      "tags": [
-        "metatelnoe"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "plazmennaya-sablya",
-      "name": "Плазменная сабля",
-      "type": "equipment",
-      "foundryType": "melee",
-      "rank": 2,
-      "skill": "Ближний бой",
-      "properties": [
-        {
-          "key": "armor-piercing-x",
-          "value": 2,
-          "label": "Бронебойность 2"
-        }
-      ],
-      "description": "Урон: 5. Бронебойность 2. Реакцией, когда по вашей Стойкости атакуют, вы можете совершить проверку ближнего боя. Если ваш результат выше броска атаки противника, получите +2 к защите.",
-      "bookText": "Урон: 5. Бронебойность 2. Реакцией, когда по вашей Стойкости атакуют, вы можете совершить проверку ближнего боя. Если ваш результат выше броска атаки противника, получите +2 к защите.",
-      "foundryDescription": "Урон: 5. Бронебойность 2. Реакцией, когда по вашей Стойкости атакуют, вы можете совершить проверку ближнего боя. Если ваш результат выше броска атаки противника, получите +2 к защите.",
-      "tags": [
-        "blizhnee"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "karabin-s-impulsnym-modulem",
-      "name": "Карабин с импульсным модулем",
-      "type": "equipment",
-      "foundryType": "ranged",
-      "rank": 2,
-      "skill": "Стрельба",
-      "properties": [],
-      "description": "Урон: 4. Очередь. При попадании цель откидывает на одну клетку.",
-      "bookText": "Урон: 4. Очередь. При попадании цель откидывает на одну клетку.",
-      "foundryDescription": "Урон: 4. Очередь. При попадании цель откидывает на одну клетку.",
-      "tags": [
-        "strelkovoe"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "plazmennaya-rapira-spektralis",
-      "name": "Плазменная рапира \"Спектралис\"",
-      "type": "equipment",
-      "foundryType": "melee",
-      "rank": 3,
-      "skill": "Ближний бой",
-      "properties": [
-        {
-          "key": "armor-piercing-x",
-          "value": 0,
-          "label": "Бронебойность 0"
-        }
-      ],
-      "description": "Урон: 6. Бронебойность 0. Каждая последовательная атака по одному и тому же врагу увеличивает бронебойность этого оружия на 1 против этого врага.",
-      "bookText": "Урон: 6. Бронебойность 0. Каждая последовательная атака по одному и тому же врагу увеличивает бронебойность этого оружия на 1 против этого врага.",
-      "foundryDescription": "Урон: 6. Бронебойность 0. Каждая последовательная атака по одному и тому же врагу увеличивает бронебойность этого оружия на 1 против этого врага.",
-      "tags": [
-        "blizhnee"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "snayperskaya-vintovka-kope",
-      "name": "Снайперская винтовка \"Копье\"",
-      "type": "equipment",
-      "foundryType": "ranged",
-      "rank": 3,
-      "skill": "Стрельба",
-      "properties": [
-        {
-          "key": "armor-piercing-x",
-          "value": 2,
-          "label": "Бронебойность 2"
-        },
-        {
-          "key": "escalation-x",
-          "value": 1,
-          "label": "Эскалация 1"
-        },
-        {
-          "key": "stabilization-x",
-          "value": 1,
-          "label": "Стабилизация 1"
-        },
-        {
-          "key": "reload-x",
-          "value": 2,
-          "label": "Перезарядка 2"
-        }
-      ],
-      "description": "Урон: 5. Бронебойность 2, Эскалация, Тяжелая двузарядная плазменная винтовка, требуется перезарядка действием после каждых двух выстрелов. Стабилизация (Если вы ещё не перемещались в этом ходу, добавьте +1 к атаке этим оружием.).",
-      "bookText": "Урон: 5. Бронебойность 2, Эскалация, Тяжелая двузарядная плазменная винтовка, требуется перезарядка действием после каждых двух выстрелов. Стабилизация (Если вы ещё не перемещались в этом ходу, добавьте +1 к атаке этим оружием.).",
-      "foundryDescription": "Урон: 5. Бронебойность 2, Эскалация, Тяжелая двузарядная плазменная винтовка, требуется перезарядка действием после каждых двух выстрелов. Стабилизация (Если вы ещё не перемещались в этом ходу, добавьте +1 к атаке этим оружием.).",
-      "tags": [
-        "strelkovoe"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "dvuruchnyy-vibromech",
-      "name": "Двуручный вибромеч",
-      "type": "equipment",
-      "foundryType": "melee",
-      "rank": 3,
-      "skill": "Ближний бой",
-      "properties": [
-        {
-          "key": "armor-piercing-x",
-          "value": 2,
-          "label": "Бронебойность 2"
-        }
-      ],
-      "description": "Урон: 7. Бронебойность 2. Если вы попадаете этим оружием, и на кубе выпало 10, противник получает состояние \"отрубленная конечность\". До тех пор, пока ему не будет оказана мед. помощь как минимум 3го ранга, против получает, на ваш выбор, либо -2 ко всем проверкам, либо его скорость передвижения становится равна 4м.",
-      "bookText": "Урон: 7. Бронебойность 2. Если вы попадаете этим оружием, и на кубе выпало 10, противник получает состояние \"отрубленная конечность\". До тех пор, пока ему не будет оказана мед. помощь как минимум 3го ранга, против получает, на ваш выбор, либо -2 ко всем проверкам, либо его скорость передвижения становится равна 4м.",
-      "foundryDescription": "Урон: 7. Бронебойность 2. Если вы попадаете этим оружием, и на кубе выпало 10, противник получает состояние \"отрубленная конечность\". До тех пор, пока ему не будет оказана мед. помощь как минимум 3го ранга, против получает, на ваш выбор, либо -2 ко всем проверкам, либо его скорость передвижения становится равна 4м.",
-      "tags": [
-        "blizhnee"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "energiticheskiy-drobovik-tor",
-      "name": "Энергитический дробовик \"Тор\"",
-      "type": "equipment",
-      "foundryType": "melee",
-      "rank": 3,
-      "skill": "Ближний бой",
-      "properties": [],
-      "description": "Урон: 6.",
-      "bookText": "Урон: 6.",
-      "foundryDescription": "Урон: 6.",
-      "tags": [
-        "blizhnee"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "kompaktnyy-plazmorez",
-      "name": "Компактный плазморез",
-      "type": "equipment",
-      "foundryType": "melee",
-      "rank": 3,
-      "skill": "Ближний бой",
-      "properties": [
-        {
-          "key": "armor-piercing-x",
-          "value": 4,
-          "label": "Бронебойность 4"
-        },
-        {
-          "key": "reload-x",
-          "value": 1,
-          "label": "Перезарядка 1"
-        }
-      ],
-      "description": "Урон: 5. Создает короткий плазменный луч и позволяет на расстоянии ближнего боя атаковать противника или разрезать практически любые материалы. Тратит 1 припас за 1 атаку - или за минуту работы. Бронебойность 4. Требуется перезарядка действием после каждой активации. Материал первого ранга можно разрезать за действие, второго - за 10 минут, третьего - за час.",
-      "bookText": "Урон: 5. Создает короткий плазменный луч и позволяет на расстоянии ближнего боя атаковать противника или разрезать практически любые материалы. Тратит 1 припас за 1 атаку - или за минуту работы. Бронебойность 4. Требуется перезарядка действием после каждой активации. Материал первого ранга можно разрезать за действие, второго - за 10 минут, третьего - за час.",
-      "foundryDescription": "Урон: 5. Создает короткий плазменный луч и позволяет на расстоянии ближнего боя атаковать противника или разрезать практически любые материалы. Тратит 1 припас за 1 атаку - или за минуту работы. Бронебойность 4. Требуется перезарядка действием после каждой активации. Материал первого ранга можно разрезать за действие, второго - за 10 минут, третьего - за час.",
-      "tags": [
-        "blizhnee"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "energeticheskiy-topor",
-      "name": "Энергетический топор",
-      "type": "equipment",
-      "foundryType": "melee",
-      "rank": 3,
-      "skill": "Ближний бой",
-      "properties": [
-        {
-          "key": "armor-piercing-x",
-          "value": 3,
-          "label": "Бронебойность 3"
-        }
-      ],
-      "description": "Урон: 6. Бронебойность 3.",
-      "bookText": "Урон: 6. Бронебойность 3.",
-      "foundryDescription": "Урон: 6. Бронебойность 3.",
-      "tags": [
-        "blizhnee"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "kineticheskiy-molot",
-      "name": "Кинетический молот",
-      "type": "equipment",
-      "foundryType": "melee",
-      "rank": 3,
-      "skill": "Ближний бой",
-      "properties": [
-        {
-          "key": "armor-piercing-x",
-          "value": 2,
-          "label": "Бронебойность 2"
-        }
-      ],
-      "description": "Урон: 7. Бронебойность 2. Раз в сцену вы можете совершить атаку по зоне. Одним действием - по каждой цели вплотную к вам.",
-      "bookText": "Урон: 7. Бронебойность 2. Раз в сцену вы можете совершить атаку по зоне. Одним действием - по каждой цели вплотную к вам.",
-      "foundryDescription": "Урон: 7. Бронебойность 2. Раз в сцену вы можете совершить атаку по зоне. Одним действием - по каждой цели вплотную к вам.",
-      "tags": [
-        "blizhnee"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "shturmovaya-vintovka-siyanie",
-      "name": "Штурмовая винтовка \"Сияние\"",
-      "type": "equipment",
-      "foundryType": "ranged",
-      "rank": 3,
-      "skill": "Стрельба",
-      "properties": [
-        {
-          "key": "armor-piercing-x",
-          "value": 3,
-          "label": "Бронебойность 3"
-        }
-      ],
-      "description": "Урон: 5. Бронебойность 3, Очередь. Оружие постоянно светится и интенсивно сверкает.",
-      "bookText": "Урон: 5. Бронебойность 3, Очередь. Оружие постоянно светится и интенсивно сверкает.",
-      "foundryDescription": "Урон: 5. Бронебойность 3, Очередь. Оружие постоянно светится и интенсивно сверкает.",
-      "tags": [
-        "strelkovoe"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "vintovka-spets-naznacheniya-loza",
-      "name": "Винтовка спец. назначения \"Лоза\"",
-      "type": "equipment",
-      "foundryType": "ranged",
-      "rank": 3,
-      "skill": "Стрельба",
-      "properties": [
-        {
-          "key": "concealable",
-          "value": true,
-          "label": "Скрытное"
-        }
-      ],
-      "description": "Урон: 6. Скрытное. При попадании цель оказывается окутанной выросшими из земли металлическими канатами. Требуется проверка телосложения со сложностью 10, чтобы освободиться. Пока цель опутана, цель получает -1 на все проверки, а также скорость передвижения равную 0.",
-      "bookText": "Урон: 6. Скрытное. При попадании цель оказывается окутанной выросшими из земли металлическими канатами. Требуется проверка телосложения со сложностью 10, чтобы освободиться. Пока цель опутана, цель получает -1 на все проверки, а также скорость передвижения равную 0.",
-      "foundryDescription": "Урон: 6. Скрытное. При попадании цель оказывается окутанной выросшими из земли металлическими канатами. Требуется проверка телосложения со сложностью 10, чтобы освободиться. Пока цель опутана, цель получает -1 на все проверки, а также скорость передвижения равную 0.",
-      "tags": [
-        "strelkovoe"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "tyazhelyy-raketomet-vulkan",
-      "name": "Тяжелый ракетомет \"Вулкан\"",
-      "type": "equipment",
-      "foundryType": "ranged",
-      "rank": 3,
-      "skill": "Стрельба",
-      "properties": [
-        {
-          "key": "reload-x",
-          "value": 1,
-          "label": "Перезарядка 1"
-        }
-      ],
-      "description": "Урон: 4. Перезарядка 1.",
-      "bookText": "Урон: 4. Перезарядка 1.",
-      "foundryDescription": "Урон: 4. Перезарядка 1.",
-      "tags": [
-        "strelkovoe"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "fazovyy-klinok",
-      "name": "Фазовый клинок",
-      "type": "equipment",
-      "foundryType": "melee",
-      "rank": 3,
-      "skill": "Ближний бой",
-      "properties": [],
-      "description": "Урон: 8. Удлиняющийся клинок. Дистанция поражения этим клинком составляет 10м.",
-      "bookText": "Урон: 8. Удлиняющийся клинок. Дистанция поражения этим клинком составляет 10м.",
-      "foundryDescription": "Урон: 8. Удлиняющийся клинок. Дистанция поражения этим клинком составляет 10м.",
-      "tags": [
-        "blizhnee"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "gravikhlyst",
-      "name": "Гравихлыст",
-      "type": "equipment",
-      "foundryType": "melee",
-      "rank": 4,
-      "skill": "Ближний бой",
-      "properties": [],
-      "description": "Урон: 10. При попадании, если нанесено как минимум 5 урона, до начала вашего следующего хода скорость цели равна 0. Это оружие может атаковать в пределах 4м.",
-      "bookText": "Урон: 10. При попадании, если нанесено как минимум 5 урона, до начала вашего следующего хода скорость цели равна 0. Это оружие может атаковать в пределах 4м.",
-      "foundryDescription": "Урон: 10. При попадании, если нанесено как минимум 5 урона, до начала вашего следующего хода скорость цели равна 0. Это оружие может атаковать в пределах 4м.",
-      "tags": [
-        "blizhnee"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": null,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "kereznikov",
-      "name": "Керезников",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 1,
-      "skill": null,
-      "properties": [],
-      "description": "Всегда работающий ускоритель, который увеличивает скорость реакции. Получите +2 к броскам инициативы. Одновременно может быть установлен только один ускоритель.",
-      "bookText": "Всегда работающий ускоритель, который увеличивает скорость реакции. Получите +2 к броскам инициативы. Одновременно может быть установлен только один ускоритель.",
-      "foundryDescription": "Всегда работающий ускоритель, который увеличивает скорость реакции. Получите +2 к броскам инициативы. Одновременно может быть установлен только один ускоритель.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 160,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "sandevistan",
-      "name": "Сандевистан",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 2,
-      "skill": null,
-      "properties": [],
-      "description": "Ускоритель, дающий кратковременное усиление. При активации действием в течении следующей минуты дает максимальное значение на кубе инициативы. Возможна лишь одна активация в день. Одновременно может быть установлен только один ускоритель.",
-      "bookText": "Ускоритель, дающий кратковременное усиление. При активации действием в течении следующей минуты дает максимальное значение на кубе инициативы. Возможна лишь одна активация в день. Одновременно может быть установлен только один ускоритель.",
-      "foundryDescription": "Ускоритель, дающий кратковременное усиление. При активации действием в течении следующей минуты дает максимальное значение на кубе инициативы. Возможна лишь одна активация в день. Одновременно может быть установлен только один ускоритель.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 360,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "khimicheskiy-analizator",
-      "name": "Химический анализатор",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 3,
-      "skill": null,
-      "properties": [],
-      "description": "Позволяет анализировать химические вещества. Действием вы можете опознать любое вещество из обширной базы образцов до 3го ранга включительно.",
-      "bookText": "Позволяет анализировать химические вещества. Действием вы можете опознать любое вещество из обширной базы образцов до 3го ранга включительно.",
-      "foundryDescription": "Позволяет анализировать химические вещества. Действием вы можете опознать любое вещество из обширной базы образцов до 3го ранга включительно.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 1080,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "redaktor-boli",
-      "name": "Редактор боли",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 2,
-      "skill": null,
-      "properties": [],
-      "description": "При установке в разъем отключает восприятие боли и усталости, позволяя иметь на 2 ячейки стресса больше.",
-      "bookText": "При установке в разъем отключает восприятие боли и усталости, позволяя иметь на 2 ячейки стресса больше.",
-      "foundryDescription": "При установке в разъем отключает восприятие боли и усталости, позволяя иметь на 2 ячейки стресса больше.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 360,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "dartgan",
-      "name": "Дартган",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 2,
-      "skill": null,
-      "properties": [
-        {
-          "key": "armor-piercing-x",
-          "value": 2,
-          "label": "Бронебойность 2"
-        }
-      ],
-      "description": "Экзотическое скрытое оружие, устанавливаемое в глазницу. Однозарядное. Это +4 оружие имеет бронебойность 2.",
-      "bookText": "Экзотическое скрытое оружие, устанавливаемое в глазницу. Однозарядное. Это +4 оружие имеет бронебойность 2.",
-      "foundryDescription": "Экзотическое скрытое оружие, устанавливаемое в глазницу. Однозарядное. Это +4 оружие имеет бронебойность 2.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 430,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "usilitel-kartinki-i-zvuka",
-      "name": "Усилитель картинки и звука",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 1,
-      "skill": null,
-      "properties": [],
-      "description": "Вы получаете +2 к проверкам внимания. Несколько установок не суммируются.",
-      "bookText": "Вы получаете +2 к проверкам внимания. Несколько установок не суммируются.",
-      "foundryDescription": "Вы получаете +2 к проверкам внимания. Несколько установок не суммируются.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 140,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "ik-datchik",
-      "name": "ИК-датчик",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 1,
-      "skill": null,
-      "properties": [],
-      "description": "Позволяет проходить проверки внимания в частичной темноте или против невидимых противников. Радиус - 20м хорошо, 40м с штрафом -2.",
-      "bookText": "Позволяет проходить проверки внимания в частичной темноте или против невидимых противников. Радиус - 20м хорошо, 40м с штрафом -2.",
-      "foundryDescription": "Позволяет проходить проверки внимания в частичной темноте или против невидимых противников. Радиус - 20м хорошо, 40м с штрафом -2.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 120,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "mikro-optika",
-      "name": "Микро-оптика",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 2,
-      "skill": null,
-      "properties": [],
-      "description": "Возможность увеличения предметов до 10x. Вы получаете +3 к проверкам техники. Несколько установок не суммируются.",
-      "bookText": "Возможность увеличения предметов до 10x. Вы получаете +3 к проверкам техники. Несколько установок не суммируются.",
-      "foundryDescription": "Возможность увеличения предметов до 10x. Вы получаете +3 к проверкам техники. Несколько установок не суммируются.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 450,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "mikro-video",
-      "name": "Микро-видео",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 1,
-      "skill": null,
-      "properties": [],
-      "description": "Записывает аудио и видео информацию на встроенный носитель данных.",
-      "bookText": "Записывает аудио и видео информацию на встроенный носитель данных.",
-      "foundryDescription": "Записывает аудио и видео информацию на встроенный носитель данных.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 120,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "detektor-magii",
-      "name": "Детектор магии",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 2,
-      "skill": null,
-      "properties": [],
-      "description": "Позволяет проходить проверки внимания для обнаружения магии и магических существ. Радиус - 20м хорошо, 40м со штрафом -2.",
-      "bookText": "Позволяет проходить проверки внимания для обнаружения магии и магических существ. Радиус - 20м хорошо, 40м со штрафом -2.",
-      "foundryDescription": "Позволяет проходить проверки внимания для обнаружения магии и магических существ. Радиус - 20м хорошо, 40м со штрафом -2.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 360,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "takticheskiy-pritsel",
-      "name": "Тактический прицел",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 1,
-      "skill": null,
-      "properties": [],
-      "description": "Действие \"прицелиться\" дополнительно даёт +1.",
-      "bookText": "Действие \"прицелиться\" дополнительно даёт +1.",
-      "foundryDescription": "Действие \"прицелиться\" дополнительно даёт +1.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 130,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "kommunikator",
-      "name": "Коммуникатор",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 1,
-      "skill": null,
-      "properties": [],
-      "description": "Позволяет общаться в пределах одной области планеты.",
-      "bookText": "Позволяет общаться в пределах одной области планеты.",
-      "foundryDescription": "Позволяет общаться в пределах одной области планеты.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 120,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "kommunikator-mk-2",
-      "name": "Коммуникатор MK 2",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 2,
-      "skill": null,
-      "properties": [],
-      "description": "Позволяет общаться в пределах одной планеты на персональной, зашифрованной частоте.",
-      "bookText": "Позволяет общаться в пределах одной планеты на персональной, зашифрованной частоте.",
-      "foundryDescription": "Позволяет общаться в пределах одной планеты на персональной, зашифрованной частоте.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 360,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "radio-skaner",
-      "name": "Радио-сканер",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 2,
-      "skill": null,
-      "properties": [],
-      "description": "Концентрацией в течении минуты вы можете распознать любое устройство, излучающее радиоволны в радиусе 100м . Вы можете подключиться к незашифрованным.",
-      "bookText": "Концентрацией в течении минуты вы можете распознать любое устройство, излучающее радиоволны в радиусе 100м . Вы можете подключиться к незашифрованным.",
-      "foundryDescription": "Концентрацией в течении минуты вы можете распознать любое устройство, излучающее радиоволны в радиусе 100м . Вы можете подключиться к незашифрованным.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 360,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "analizator-golosa",
-      "name": "Анализатор голоса",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 2,
-      "skill": null,
-      "properties": [],
-      "description": "Потратив два действия, можно на минуту активировать специальную функцию \"Детектор Лжи\". В течение этого времени ГМ скрыто бросает за игрока все проверки навыков, перечисленных выше, и когда фиксирует ложь, подает один звуковой сигнал, или когда сам того захочет, если бросок был неудачным. Остерегайтесь ложных положительных и отрицательных результатов.",
-      "bookText": "Потратив два действия, можно на минуту активировать специальную функцию \"Детектор Лжи\". В течение этого времени ГМ скрыто бросает за игрока все проверки навыков, перечисленных выше, и когда фиксирует ложь, подает один звуковой сигнал, или когда сам того захочет, если бросок был неудачным. Остерегайтесь ложных положительных и отрицательных результатов.",
-      "foundryDescription": "Потратив два действия, можно на минуту активировать специальную функцию \"Детектор Лжи\". В течение этого времени ГМ скрыто бросает за игрока все проверки навыков, перечисленных выше, и когда фиксирует ложь, подает один звуковой сигнал, или когда сам того захочет, если бросок был неудачным. Остерегайтесь ложных положительных и отрицательных результатов.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 360,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "zhabry",
-      "name": "Жабры",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 2,
-      "skill": null,
-      "properties": [],
-      "description": "Позволяет дышать под водой.",
-      "bookText": "Позволяет дышать под водой.",
-      "foundryDescription": "Позволяет дышать под водой.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 360,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "venera-mr-perchik",
-      "name": "Венера/Mr. Перчик",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 2,
-      "skill": null,
-      "properties": [],
-      "description": "Получите +3 к социальным проверкам, связанных с соблазнением.",
-      "bookText": "Получите +3 к социальным проверкам, связанных с соблазнением.",
-      "foundryDescription": "Получите +3 к социальным проверкам, связанных с соблазнением.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 410,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "radar-sonar",
-      "name": "Радар/сонар",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 2,
-      "skill": null,
-      "properties": [],
-      "description": "Постоянно сканирует местность в радиусе 50м от пользователя. Раз в минуту или при входе в зону ведущий выдает информацию обо всех движущихся в зоне объектах. Стены служат помехой.",
-      "bookText": "Постоянно сканирует местность в радиусе 50м от пользователя. Раз в минуту или при входе в зону ведущий выдает информацию обо всех движущихся в зоне объектах. Стены служат помехой.",
-      "foundryDescription": "Постоянно сканирует местность в радиусе 50м от пользователя. Раз в минуту или при входе в зону ведущий выдает информацию обо всех движущихся в зоне объектах. Стены служат помехой.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 400,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "kiber-zmeya",
-      "name": "Кибер-змея",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 3,
-      "skill": "Ближний бой",
-      "properties": [],
-      "description": "Жутковатое щупальце, расположенное в пищеводе. Атака ближнего боя + 5 наносящая психический урон. При попадании накладывает штраф -2 на следующую проверку противника до начала вашего следующего хода.",
-      "bookText": "Жутковатое щупальце, расположенное в пищеводе. Атака ближнего боя + 5 наносящая психический урон. При попадании накладывает штраф -2 на следующую проверку противника до начала вашего следующего хода.",
-      "foundryDescription": "Жутковатое щупальце, расположенное в пищеводе. Атака ближнего боя + 5 наносящая психический урон. При попадании накладывает штраф -2 на следующую проверку противника до начала вашего следующего хода.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 1080,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "vampiry",
-      "name": "Вампиры",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 2,
-      "skill": null,
-      "properties": [],
-      "description": "Вживленные во рту пользователя клыки +3.",
-      "bookText": "Вживленные во рту пользователя клыки +3.",
-      "foundryDescription": "Вживленные во рту пользователя клыки +3.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 410,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "avtoinektor",
-      "name": "Автоинъектор",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 1,
-      "skill": null,
-      "properties": [],
-      "description": "Имеет слот под одно лекарство/стимулятор. Свободным действием позволяет автоматически впрыснуть лекарство в кровь.",
-      "bookText": "Имеет слот под одно лекарство/стимулятор. Свободным действием позволяет автоматически впрыснуть лекарство в кровь.",
-      "foundryDescription": "Имеет слот под одно лекарство/стимулятор. Свободным действием позволяет автоматически впрыснуть лекарство в кровь.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 120,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "rukokhvat",
-      "name": "Рукохват",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 2,
-      "skill": null,
-      "properties": [],
-      "description": "Действием, вы запускаете крюк, цепляющихся за любой объект, с дистанцией до 30 м. Вы можете перемещаться по тросу, но ваша скорость уменьшается в 2 раза. Вы также можете подтянуть к себе объект, если он на один размер меньше вас.",
-      "bookText": "Действием, вы запускаете крюк, цепляющихся за любой объект, с дистанцией до 30 м. Вы можете перемещаться по тросу, но ваша скорость уменьшается в 2 раза. Вы также можете подтянуть к себе объект, если он на один размер меньше вас.",
-      "foundryDescription": "Действием, вы запускаете крюк, цепляющихся за любой объект, с дистанцией до 30 м. Вы можете перемещаться по тросу, но ваша скорость уменьшается в 2 раза. Вы также можете подтянуть к себе объект, если он на один размер меньше вас.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 360,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "vykidnoe-oruzhie-blizhnego-boya",
-      "name": "Выкидное Оружие Ближнего Боя",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 2,
-      "skill": null,
-      "properties": [],
-      "description": "Одноручное лёгкое, среднее или тяжёлое оружие ближнего боя (не обязательно адаптированное под установку) выдвигается из полости руки. Пока оружие «вскинуто», пользователь не может держать ничего этой рукой.",
-      "bookText": "Одноручное лёгкое, среднее или тяжёлое оружие ближнего боя (не обязательно адаптированное под установку) выдвигается из полости руки. Пока оружие «вскинуто», пользователь не может держать ничего этой рукой.",
-      "foundryDescription": "Одноручное лёгкое, среднее или тяжёлое оружие ближнего боя (не обязательно адаптированное под установку) выдвигается из полости руки. Пока оружие «вскинуто», пользователь не может держать ничего этой рукой.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 360,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "proektsionnyy-modul-iskra-30",
-      "name": "Проекционный модуль «Искра-30»",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 3,
-      "skill": "Стихийность",
-      "properties": [
-        {
-          "key": "reload-x",
-          "value": 2,
-          "label": "Перезарядка 2"
-        }
-      ],
-      "description": "Действие: выпускаешь струю пламени в цель до 30 м. Атака Стихийности +6 против Воли. Перезарядка 2. Многоразовое.",
-      "bookText": "Действие: выпускаешь струю пламени в цель до 30 м. Атака Стихийности +6 против Воли. Перезарядка 2. Многоразовое.",
-      "foundryDescription": "Действие: выпускаешь струю пламени в цель до 30 м. Атака Стихийности +6 против Воли. Перезарядка 2. Многоразовое.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 1100,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "manipulyator-kulak-keplera",
-      "name": "Манипулятор «Кулак Кеплера»",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 3,
-      "skill": "Кинетика",
-      "properties": [
-        {
-          "key": "armor-piercing-x",
-          "value": 1,
-          "label": "Бронебойность 1"
-        }
-      ],
-      "description": "Действие: вырываешь кусок материи не выше ранга 2, размером с кулак, и «выстреливаешь» им в цель до 30 м. Атака Кинетики +4 против Стойкости. Дополнительно: можешь свободно левитировать такие куски в радиусе 30 м и взаимодействовать ими с окружением. Форму/структуру изменить нельзя. Бронебойность 1. Многоразовое.",
-      "bookText": "Действие: вырываешь кусок материи не выше ранга 2, размером с кулак, и «выстреливаешь» им в цель до 30 м. Атака Кинетики +4 против Стойкости. Дополнительно: можешь свободно левитировать такие куски в радиусе 30 м и взаимодействовать ими с окружением. Форму/структуру изменить нельзя. Бронебойность 1. Многоразовое.",
-      "foundryDescription": "Действие: вырываешь кусок материи не выше ранга 2, размером с кулак, и «выстреливаешь» им в цель до 30 м. Атака Кинетики +4 против Стойкости. Дополнительно: можешь свободно левитировать такие куски в радиусе 30 м и взаимодействовать ими с окружением. Форму/структуру изменить нельзя. Бронебойность 1. Многоразовое.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 1190,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "amplifikator-shepot",
-      "name": "Амплификатор «Шёпот»",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 3,
-      "skill": "Псионика",
-      "properties": [
-        {
-          "key": "concealable",
-          "value": true,
-          "label": "Скрытное"
-        }
-      ],
-      "description": "Действие: вы можете нанести удар пси-полем по живому существу в пределах 30м. Атака псионики + 4 против Воли цели. Скрытное. Многоразовое.",
-      "bookText": "Действие: вы можете нанести удар пси-полем по живому существу в пределах 30м. Атака псионики + 4 против Воли цели. Скрытное. Многоразовое.",
-      "foundryDescription": "Действие: вы можете нанести удар пси-полем по живому существу в пределах 30м. Атака псионики + 4 против Воли цели. Скрытное. Многоразовое.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 920,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "bioinvertor-zimniy-son",
-      "name": "Биоинвертор «Зимний Сон»",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 3,
-      "skill": "Биомантия",
-      "properties": [],
-      "description": "Действие: нарушаешь обмен веществ цели в пределах 30 м. Проверка Биомантий +4 против Воли. Если нанесено ≥ 5 урона, цель получает состояние «Уязвим». Многоразовое.",
-      "bookText": "Действие: нарушаешь обмен веществ цели в пределах 30 м. Проверка Биомантий +4 против Воли. Если нанесено ≥ 5 урона, цель получает состояние «Уязвим». Многоразовое.",
-      "foundryDescription": "Действие: нарушаешь обмен веществ цели в пределах 30 м. Проверка Биомантий +4 против Воли. Если нанесено ≥ 5 урона, цель получает состояние «Уязвим». Многоразовое.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 1100,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "prognosticheskiy-uzel-orakul",
-      "name": "Прогностический узел «Оракул»",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 3,
-      "skill": "Предвидение",
-      "properties": [],
-      "description": "Действие: проецируешь «неизбежный» удар по цели до 30 м. Проверка Предвидения +4 против Контроля. При успехе, следующая проверка или атака против цели, до начала вашего следующего хода получает + 3. Многоразовое.",
-      "bookText": "Действие: проецируешь «неизбежный» удар по цели до 30 м. Проверка Предвидения +4 против Контроля. При успехе, следующая проверка или атака против цели, до начала вашего следующего хода получает + 3. Многоразовое.",
-      "foundryDescription": "Действие: проецируешь «неизбежный» удар по цели до 30 м. Проверка Предвидения +4 против Контроля. При успехе, следующая проверка или атака против цели, до начала вашего следующего хода получает + 3. Многоразовое.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 1100,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "vykidnoy-shchit",
-      "name": "Выкидной щит",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 2,
-      "skill": null,
-      "properties": [],
-      "description": "Пуленепробиваемый складной щит, скрытый внутри руки. При выдвижении щита рука занята, и другие действия этой рукой невозможны. Щит в раскрытом состоянии дает +2 к Стойкости и Воле.",
-      "bookText": "Пуленепробиваемый складной щит, скрытый внутри руки. При выдвижении щита рука занята, и другие действия этой рукой невозможны. Щит в раскрытом состоянии дает +2 к Стойкости и Воле.",
-      "foundryDescription": "Пуленепробиваемый складной щит, скрытый внутри руки. При выдвижении щита рука занята, и другие действия этой рукой невозможны. Щит в раскрытом состоянии дает +2 к Стойкости и Воле.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 400,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "vykidnoe-oruzhie-dalnego-boya",
-      "name": "Выкидное Оружие Дальнего Боя",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 2,
-      "skill": null,
-      "properties": [],
-      "description": "Одноручное дальнобойное оружие, которое можно спрятать внутри руки и «вскинуть» при необходимости. Пока оружие «вскинуто», рука не может держать другие предметы.",
-      "bookText": "Одноручное дальнобойное оружие, которое можно спрятать внутри руки и «вскинуть» при необходимости. Пока оружие «вскинуто», рука не может держать другие предметы.",
-      "foundryDescription": "Одноручное дальнобойное оружие, которое можно спрятать внутри руки и «вскинуть» при необходимости. Пока оружие «вскинуто», рука не может держать другие предметы.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 360,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    },
-    {
-      "id": "plechevaya-kamera",
-      "name": "Плечевая Камера",
-      "type": "equipment",
-      "foundryType": "equipment",
-      "rank": 1,
-      "skill": null,
-      "properties": [],
-      "description": "Выдвижная камера под плечо, записывает звук и видео на стандартный носитель.",
-      "bookText": "Выдвижная камера под плечо, записывает звук и видео на стандартный носитель.",
-      "foundryDescription": "Выдвижная камера под плечо, записывает звук и видео на стандартный носитель.",
-      "tags": [
-        "snaryazhenie"
-      ],
-      "pricing": {
-        "baseCost": null,
-        "propertyCost": null,
-        "manualDelta": 0,
-        "finalCost": 120,
-        "status": "legacy"
-      },
-      "links": {
-        "sheetRowId": null,
-        "foundrySyncId": null
-      },
-      "status": "legacy"
-    }
-  ]
-}
+  {
+    "id": "reyderskaya-snayperskaya-vintovka",
+    "name": "Рейдерская снайперская винтовка",
+    "type": "equipment",
+    "rank": 1,
+    "skill": "Стрельба",
+    "properties": [
+      {
+        "key": "reload-x",
+        "value": 2,
+        "label": "Перезарядка 2"
+      },
+      {
+        "key": "stabilization-x",
+        "value": 1,
+        "label": "Стабилизация 1"
+      }
+    ],
+    "description": "Урон: 2. Перезарядка 2. Если вы ещё не перемещались в этом ходу, добавьте +1 к атаке этим оружием. А если уже перемещались - вычтите 1.",
+    "tags": [
+      "strelkovoe"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": null
+  },
+  {
+    "id": "vintovka-shturmovaya-ares",
+    "name": "Винтовка штурмовая \"Арес\"",
+    "type": "equipment",
+    "rank": 2,
+    "skill": "Стрельба",
+    "properties": [
+      {
+        "key": "aggressive-overwatch",
+        "value": true,
+        "label": "Агрессивный обстрел"
+      }
+    ],
+    "description": "Урон: 3. Агрессивный обстрел, бронебойность.",
+    "tags": [
+      "strelkovoe"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": null
+  },
+  {
+    "id": "snayperskaya-vintovka-igla",
+    "name": "Снайперская винтовка \"Игла\"",
+    "type": "equipment",
+    "rank": 2,
+    "skill": "Стрельба",
+    "properties": [
+      {
+        "key": "escalation-x",
+        "value": 1,
+        "label": "Эскалация 1"
+      },
+      {
+        "key": "stabilization-x",
+        "value": 1,
+        "label": "Стабилизация 1"
+      },
+      {
+        "key": "concealable",
+        "value": true,
+        "label": "Скрытное"
+      }
+    ],
+    "description": "Урон: 4. Эскалация, Скрытное, Стабилизация (Если вы ещё не перемещались в этом ходу, добавьте +1 к атаке этим оружием.).",
+    "tags": [
+      "strelkovoe"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": null
+  },
+  {
+    "id": "reyderskiy-tsiklomech",
+    "name": "Рейдерский цикломеч",
+    "type": "equipment",
+    "rank": 1,
+    "skill": "Ближний бой",
+    "properties": [
+      {
+        "key": "armor-piercing-x",
+        "value": 3,
+        "label": "Бронебойность 3"
+      }
+    ],
+    "description": "Бронебойность 2, Эскалация.",
+    "tags": [
+      "blizhnee"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": null
+  },
+  {
+    "id": "vibroklinok",
+    "name": "Виброклинок",
+    "type": "equipment",
+    "rank": 2,
+    "skill": "Ближний бой",
+    "properties": [
+      {
+        "key": "concealable",
+        "value": true,
+        "label": "Скрытное"
+      }
+    ],
+    "description": "Урон: 5. Скрытное.",
+    "tags": [
+      "blizhnee"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": null
+  },
+  {
+    "id": "krupnokalibernyy-pistolet-yarost",
+    "name": "Крупнокалиберный пистолет Ярость",
+    "type": "equipment",
+    "rank": 2,
+    "skill": "Стрельба",
+    "properties": [
+      {
+        "key": "armor-piercing-x",
+        "value": 1,
+        "label": "Бронебойность 1"
+      }
+    ],
+    "description": "Урон: 3. Очередь, бронебойность 1.",
+    "tags": [
+      "strelkovoe"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": null
+  },
+  {
+    "id": "raketnitsa-ptr-3",
+    "name": "Ракетница ПТР-3",
+    "type": "equipment",
+    "rank": 3,
+    "skill": "Стрельба",
+    "properties": [
+      {
+        "key": "escalation-x",
+        "value": 3,
+        "label": "Эскалация 3"
+      },
+      {
+        "key": "reload-x",
+        "value": 2,
+        "label": "Перезарядка 2"
+      }
+    ],
+    "description": "Урон: 2. Сплеш, Перезарядка 2, Эскалация 3.",
+    "tags": [
+      "strelkovoe"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": null
+  },
+  {
+    "id": "ognemet-ifrit",
+    "name": "Огнемет Ифрит",
+    "type": "equipment",
+    "rank": 2,
+    "skill": "Стрельба",
+    "properties": [],
+    "description": "Урон: 2. Струя пламени. (Поражает всех стоящих на линии длиной до 10м.).",
+    "tags": [
+      "strelkovoe"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": null
+  },
+  {
+    "id": "plazmennaya-sablya",
+    "name": "Плазменная сабля",
+    "type": "equipment",
+    "rank": 2,
+    "skill": "Ближний бой",
+    "properties": [
+      {
+        "key": "armor-piercing-x",
+        "value": 2,
+        "label": "Бронебойность 2"
+      }
+    ],
+    "description": "Урон: 5. Бронебойность 2. Реакцией, когда по вашей Стойкости атакуют, вы можете совершить проверку ближнего боя. Если ваш результат выше броска атаки противника, получите +2 к защите.",
+    "tags": [
+      "blizhnee"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": null
+  },
+  {
+    "id": "karabin-s-impulsnym-modulem",
+    "name": "Карабин с импульсным модулем",
+    "type": "equipment",
+    "rank": 2,
+    "skill": "Стрельба",
+    "properties": [],
+    "description": "Урон: 4. Очередь. При попадании цель откидывает на 10м.",
+    "tags": [
+      "strelkovoe"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": null
+  },
+  {
+    "id": "plazmennaya-rapira-spektralis",
+    "name": "Плазменная рапира \"Спектралис\"",
+    "type": "equipment",
+    "rank": 3,
+    "skill": "Ближний бой",
+    "properties": [
+      {
+        "key": "armor-piercing-x",
+        "value": 0,
+        "label": "Бронебойность 0"
+      }
+    ],
+    "description": "Урон: 6. Бронебойность 0. Каждая последовательная атака по одному и тому же врагу увеличивает бронебойность этого оружия на 1 против этого врага.",
+    "tags": [
+      "blizhnee"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": null
+  },
+  {
+    "id": "snayperskaya-vintovka-kope",
+    "name": "Снайперская винтовка \"Копье\"",
+    "type": "equipment",
+    "rank": 3,
+    "skill": "Стрельба",
+    "properties": [
+      {
+        "key": "armor-piercing-x",
+        "value": 2,
+        "label": "Бронебойность 2"
+      },
+      {
+        "key": "escalation-x",
+        "value": 1,
+        "label": "Эскалация 1"
+      },
+      {
+        "key": "stabilization-x",
+        "value": 1,
+        "label": "Стабилизация 1"
+      },
+      {
+        "key": "reload-x",
+        "value": 2,
+        "label": "Перезарядка 2"
+      }
+    ],
+    "description": "Урон: 5. Бронебойность 2, Эскалация, Тяжелая двузарядная плазменная винтовка, требуется перезарядка действием после каждых двух выстрелов. Стабилизация (Если вы ещё не перемещались в этом ходу, добавьте +1 к атаке этим оружием.).",
+    "tags": [
+      "strelkovoe"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": null
+  },
+  {
+    "id": "dvuruchnyy-vibromech",
+    "name": "Двуручный вибромеч",
+    "type": "equipment",
+    "rank": 3,
+    "skill": "Ближний бой",
+    "properties": [
+      {
+        "key": "armor-piercing-x",
+        "value": 2,
+        "label": "Бронебойность 2"
+      }
+    ],
+    "description": "Урон: 7. Бронебойность 2. Если вы попадаете этим оружием, и на кубе выпало 10, противник получает состояние \"отрубленная конечность\". До тех пор, пока ему не будет оказана мед. помощь как минимум 3го ранга, против получает, на ваш выбор, либо -2 ко всем проверкам, либо его скорость передвижения становится равна 4м.",
+    "tags": [
+      "blizhnee"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": null
+  },
+  {
+    "id": "kompaktnyy-plazmorez",
+    "name": "Компактный плазморез",
+    "type": "equipment",
+    "rank": 3,
+    "skill": "Ближний бой",
+    "properties": [
+      {
+        "key": "armor-piercing-x",
+        "value": 4,
+        "label": "Бронебойность 4"
+      },
+      {
+        "key": "reload-x",
+        "value": 1,
+        "label": "Перезарядка 1"
+      }
+    ],
+    "description": "Урон: 5. Создает короткий плазменный луч и позволяет на расстоянии ближнего боя атаковать противника или разрезать практически любые материалы. Тратит 1 припас за 1 атаку - или за минуту работы. Бронебойность 4. Требуется перезарядка действием после каждой активации. Материал первого ранга можно разрезать за действие, второго - за 10 минут, третьего - за час.",
+    "tags": [
+      "blizhnee"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": null
+  },
+  {
+    "id": "energeticheskiy-topor",
+    "name": "Энергетический топор",
+    "type": "equipment",
+    "rank": 3,
+    "skill": "Ближний бой",
+    "properties": [
+      {
+        "key": "armor-piercing-x",
+        "value": 3,
+        "label": "Бронебойность 3"
+      }
+    ],
+    "description": "Урон: 6. Бронебойность 3.",
+    "tags": [
+      "blizhnee"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": null
+  },
+  {
+    "id": "kineticheskiy-molot",
+    "name": "Кинетический молот",
+    "type": "equipment",
+    "rank": 3,
+    "skill": "Ближний бой",
+    "properties": [
+      {
+        "key": "armor-piercing-x",
+        "value": 2,
+        "label": "Бронебойность 2"
+      }
+    ],
+    "description": "Урон: 7. Бронебойность 2. Раз в сцену вы можете совершить атаку по зоне. Одним действием - по каждой цели вплотную к вам.",
+    "tags": [
+      "blizhnee"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": null
+  },
+  {
+    "id": "shturmovaya-vintovka-siyanie",
+    "name": "Штурмовая винтовка \"Сияние\"",
+    "type": "equipment",
+    "rank": 3,
+    "skill": "Стрельба",
+    "properties": [
+      {
+        "key": "armor-piercing-x",
+        "value": 3,
+        "label": "Бронебойность 3"
+      }
+    ],
+    "description": "Урон: 5. Бронебойность 3, Очередь. Оружие постоянно светится и интенсивно сверкает.",
+    "tags": [
+      "strelkovoe"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": null
+  },
+  {
+    "id": "vintovka-spets-naznacheniya-loza",
+    "name": "Винтовка спец. назначения \"Лоза\"",
+    "type": "equipment",
+    "rank": 3,
+    "skill": "Стрельба",
+    "properties": [
+      {
+        "key": "concealable",
+        "value": true,
+        "label": "Скрытное"
+      }
+    ],
+    "description": "Урон: 6. Скрытное. При попадании цель оказывается окутанной выросшими из земли металлическими канатами. Чтобы освободиться, нужна проверка Мощи со сложностью 10. Пока цель опутана, она получает −1 ко всем проверкам, а её скорость становится равной 0.",
+    "tags": [
+      "strelkovoe"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": null
+  },
+  {
+    "id": "tyazhelyy-raketomet-vulkan",
+    "name": "Тяжелый ракетомет \"Вулкан\"",
+    "type": "equipment",
+    "rank": 3,
+    "skill": "Стрельба",
+    "properties": [
+      {
+        "key": "reload-x",
+        "value": 1,
+        "label": "Перезарядка 1"
+      }
+    ],
+    "description": "Урон: 5. Перезарядка 1.\nСнаряд взрывается в 30м зоне. Урон наносится каждой цели в зоне",
+    "tags": [
+      "strelkovoe"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": null
+  },
+  {
+    "id": "fazovyy-klinok",
+    "name": "Фазовый клинок",
+    "type": "equipment",
+    "rank": 3,
+    "skill": "Ближний бой",
+    "properties": [],
+    "description": "Урон: 8. Удлиняющийся клинок. Дистанция поражения этим клинком составляет 10м.",
+    "tags": [
+      "blizhnee"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": null
+  },
+  {
+    "id": "kereznikov",
+    "name": "Керезников",
+    "type": "equipment",
+    "rank": 1,
+    "skill": "Ловкость",
+    "properties": [],
+    "description": "Постоянно работающий ускоритель реакции. Даёт +2 к броскам инициативы. Одновременно может быть установлен только один ускоритель.",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 160
+  },
+  {
+    "id": "sandevistan",
+    "name": "Сандевистан",
+    "type": "equipment",
+    "rank": 2,
+    "skill": "Ловкость",
+    "properties": [],
+    "description": "Ускоритель кратковременного усиления. 1/сессию, свободным действием активируется на 1 минуту и даёт максимальное значение на кубе инициативы. Одновременно может быть установлен только один ускоритель.",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 360
+  },
+  {
+    "id": "khimicheskiy-analizator",
+    "name": "Химический анализатор",
+    "type": "equipment",
+    "rank": 3,
+    "skill": [],
+    "properties": [],
+    "description": "Позволяет анализировать химические вещества. Действием, без проверки, вы можете опознать любое вещество из обширной базы образцов до 3-го ранга включительно.",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 1080
+  },
+  {
+    "id": "redaktor-boli",
+    "name": "Редактор боли",
+    "type": "equipment",
+    "rank": 2,
+    "skill": [],
+    "properties": [],
+    "description": "Отключает восприятие боли и усталости. Дает 4 временные ячейки стресса, очищающиеся в начале каждой сцены.",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 360
+  },
+  {
+    "id": "dartgan",
+    "name": "Дартган",
+    "type": "equipment",
+    "rank": 2,
+    "skill": "Стрельба",
+    "properties": [
+      {
+        "key": "armor-piercing-x",
+        "value": 2,
+        "label": "Бронебойность 2"
+      }
+    ],
+    "description": "Скрытое однозарядное оружие, устанавливаемое в глазницу. 6 урона. Бронебойность 2. Перезарядка действием.",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 430
+  },
+  {
+    "id": "mikro-optika",
+    "name": "Микро-оптика",
+    "type": "equipment",
+    "rank": 2,
+    "skill": [],
+    "properties": [],
+    "description": "Позволяет увеличивать предметы до 10x. Вы получаете возможность прицеливаться до 3х ходов подряд",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 450
+  },
+  {
+    "id": "mikro-video",
+    "name": "Микро-видео",
+    "type": "equipment",
+    "rank": 1,
+    "skill": [],
+    "properties": [],
+    "description": "Записывает аудио и видео на встроенный носитель данных.",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 120
+  },
+  {
+    "id": "detektor-magii",
+    "name": "Детектор магии",
+    "type": "equipment",
+    "rank": 2,
+    "skill": "Резонанс",
+    "properties": [],
+    "description": "Позволяет проходить проверки Резонанса для обнаружения магии и магических существ. Радиус: 20 м без штрафа, 40 м со штрафом −2.",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 360
+  },
+  {
+    "id": "takticheskiy-pritsel",
+    "name": "Тактический прицел",
+    "type": "equipment",
+    "rank": 1,
+    "skill": [],
+    "properties": [],
+    "description": "Действие «прицелиться» дополнительно даёт +1.",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 130
+  },
+  {
+    "id": "kommunikator",
+    "name": "Коммуникатор",
+    "type": "equipment",
+    "rank": 1,
+    "skill": [],
+    "properties": [],
+    "description": "Позволяет общаться в пределах одной области планеты. Открытый для прослушивания канал",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 120
+  },
+  {
+    "id": "kommunikator-mk-2",
+    "name": "Коммуникатор MK 2",
+    "type": "equipment",
+    "rank": 2,
+    "skill": [],
+    "properties": [],
+    "description": "Позволяет общаться в пределах одной планеты на персональной, зашифрованной частоте.",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 360
+  },
+  {
+    "id": "radio-skaner",
+    "name": "Радио-сканер",
+    "type": "equipment",
+    "rank": 2,
+    "skill": [],
+    "properties": [],
+    "description": "Концентрация в течение 1 минуты: вы распознаёте любое устройство, излучающее радиоволны, в радиусе 100 м. Вы можете подключиться к незашифрованным устройствам.",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 360
+  },
+  {
+    "id": "analizator-golosa",
+    "name": "Анализатор голоса",
+    "type": "equipment",
+    "rank": 2,
+    "skill": [],
+    "properties": [],
+    "description": "Свободным действием, вы на 1 минуту активируете функцию «Детектор лжи». В это время ведущий скрытно бросает за вас все связанные проверки и подаёт один звуковой сигнал, когда фиксирует ложь, либо когда сам того захочет, если бросок был неудачным. Учитывайте ложные положительные и отрицательные результаты.",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 360
+  },
+  {
+    "id": "zhabry",
+    "name": "Жабры",
+    "type": "equipment",
+    "rank": 2,
+    "skill": [],
+    "properties": [],
+    "description": "Убирает штрафы подводного боя",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 360
+  },
+  {
+    "id": "venera-mr-perchik",
+    "name": "Венера/Mr. Перчик",
+    "type": "equipment",
+    "rank": 2,
+    "skill": "Обаяние",
+    "properties": [],
+    "description": "Получите +3 к социальным проверкам, связанным с соблазнением.",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 410
+  },
+  {
+    "id": "radar-sonar",
+    "name": "Радар/сонар",
+    "type": "equipment",
+    "rank": 2,
+    "skill": [],
+    "properties": [],
+    "description": "Постоянно сканирует местность в радиусе 50 м от пользователя. Раз в минуту или при входе в зону ведущий сообщает обо всех движущихся объектах в зоне. Стены считаются помехой.",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 400
+  },
+  {
+    "id": "kiber-zmeya",
+    "name": "Кибер-змея",
+    "type": "equipment",
+    "rank": 3,
+    "skill": "Ближний бой",
+    "properties": [],
+    "description": "Жутковатое щупальце, расположенное в пищеводе. 6 урона. При попадании накладывает штраф -2 на следующую проверку противника до начала вашего следующего хода. Требуется перезарядка действием после каждой атаки",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 1080
+  },
+  {
+    "id": "vampiry",
+    "name": "Вампиры",
+    "type": "equipment",
+    "rank": 2,
+    "skill": "Ближний бой",
+    "properties": [],
+    "description": "Вживлённые клыки. 3 урона.",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 410
+  },
+  {
+    "id": "avtoinektor",
+    "name": "Автоинъектор",
+    "type": "equipment",
+    "rank": 1,
+    "skill": [],
+    "properties": [],
+    "description": "Поставляется в двух вариациях: лечебный и адреналиновый. Выбирается при покупке, покупка обоих вариаций невозможна. Свободным действием автоматически впрыскивает соответствующий препарат в кровь.\nАдреналин даёт +2 к след. проверке.\nЛечебный восполняет 6 стресса.\n\nОдно применение за сессию",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 120
+  },
+  {
+    "id": "rukokhvat",
+    "name": "Рукохват",
+    "type": "equipment",
+    "rank": 2,
+    "skill": [],
+    "properties": [],
+    "description": "Действие: вы запускаете крюк, который цепляется за объект на дистанции до 30 м. Вы можете перемещаться по тросу с половиной скорости или подтянуть к себе объект на один размер меньше вас.",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 360
+  },
+  {
+    "id": "vykidnoe-oruzhie-blizhnego-boya",
+    "name": "Выкидное Оружие Ближнего Боя",
+    "type": "equipment",
+    "rank": 2,
+    "skill": "Ближний бой",
+    "properties": [],
+    "description": "Одноручное оружие ближнего боя можно спрятать внутри руки и вскинуть свободным действием при необходимости.",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 360
+  },
+  {
+    "id": "proektsionnyy-modul-iskra-30",
+    "name": "Проекционный модуль «Искра-30»",
+    "type": "equipment",
+    "rank": 3,
+    "skill": "Резонанс",
+    "properties": [
+      {
+        "key": "reload-x",
+        "value": 2,
+        "label": "Перезарядка 2"
+      }
+    ],
+    "description": "Действие: выпустите струю пламени по цели в пределах 30 м. Совершите проверку Резонанса против Стойкости всех противников на линии. 5 урона. Перезарядка 2.",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 1100
+  },
+  {
+    "id": "manipulyator-kulak-keplera",
+    "name": "Манипулятор «Кулак Кеплера»",
+    "type": "equipment",
+    "rank": 3,
+    "skill": "Мощь",
+    "properties": [
+      {
+        "key": "armor-piercing-x",
+        "value": 1,
+        "label": "Бронебойность 1"
+      }
+    ],
+    "description": "Действие: вырвите кусок материи не выше 2-го ранга размером с кулак и выстрелите им по цели в пределах 30 м. Атака Мощи +4 против Стойкости. Дополнительно вы можете свободно левитировать такие куски в радиусе 30 м и взаимодействовать ими с окружением, но не менять их форму или структуру. Бронебойность 1.",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 1190
+  },
+  {
+    "id": "amplifikator-shepot",
+    "name": "Амплификатор «Шёпот»",
+    "type": "equipment",
+    "rank": 3,
+    "skill": "Доминирование",
+    "properties": [
+      {
+        "key": "concealable",
+        "value": true,
+        "label": "Скрытное"
+      }
+    ],
+    "description": "Действие: нанесите удар пси-полем по живому существу в пределах 30 м. Атака Доминирования +4 против Воли. Скрытное.",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 920
+  },
+  {
+    "id": "bioinvertor-zimniy-son",
+    "name": "Биоинвертор «Зимний Сон»",
+    "type": "equipment",
+    "rank": 3,
+    "skill": "Мистика",
+    "properties": [],
+    "description": "Действие: нарушьте обмен веществ цели в пределах 30 м. Проверка Мистики +4 против Воли. Если нанесено 5 или больше урона, цель получает состояние «Уязвим».",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 1100
+  },
+  {
+    "id": "prognosticheskiy-uzel-orakul",
+    "name": "Прогностический узел «Оракул»",
+    "type": "equipment",
+    "rank": 3,
+    "skill": "Мистика",
+    "properties": [],
+    "description": "Действие: проецируйте «неизбежный» удар по цели в пределах 30 м. Проверка Мистики +4 против Контроля. При успехе следующая проверка или атака против этой цели до начала вашего следующего хода получает +3.",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 1100
+  },
+  {
+    "id": "vykidnoy-shchit",
+    "name": "Выкидной щит",
+    "type": "equipment",
+    "rank": 2,
+    "skill": [],
+    "properties": [],
+    "description": "Пуленепробиваемый складной щит, скрытый внутри руки. При выдвижении свободным действием рука становится занятой, и другие действия этой рукой невозможны. В раскрытом состоянии щит даёт +2 к Стойкости.",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 400
+  },
+  {
+    "id": "vykidnoe-oruzhie-dalnego-boya",
+    "name": "Выкидное Оружие Дальнего Боя",
+    "type": "equipment",
+    "rank": 2,
+    "skill": "Стрельба",
+    "properties": [],
+    "description": "Одноручное дальнобойное оружие можно спрятать внутри руки и вскинуть свободным действием при необходимости.",
+    "tags": [
+      "snaryazhenie"
+    ],
+    "status": "legacy",
+    "shortDescription": "",
+    "finalCost": 360
+  }
+]

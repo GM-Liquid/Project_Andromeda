@@ -6,6 +6,7 @@ type RulebookCatalogEntry = {
   previewDescription: string
   fullDescription: string
   tags: string[]
+  detailTags: Array<{ label: string; value: string }>
   filters: Record<string, string>
   sortValues: Record<string, number>
 }
@@ -46,6 +47,27 @@ function renderMetaChips(entry: RulebookCatalogEntry) {
         .map(
           (value) => `
             <span class="rulebook-ability-catalog__meta-chip">${escapeHtml(value)}</span>
+          `,
+        )
+        .join("")}
+    </div>
+  `
+}
+
+function renderDetailTags(entry: RulebookCatalogEntry) {
+  if (entry.detailTags.length === 0) {
+    return ""
+  }
+
+  return `
+    <div class="rulebook-ability-catalog__detail-tags">
+      ${entry.detailTags
+        .map(
+          (tag) => `
+            <span class="rulebook-ability-catalog__detail-tag">
+              <span class="rulebook-ability-catalog__detail-tag-label">${escapeHtml(tag.label)}</span>
+              <span class="rulebook-ability-catalog__detail-tag-value">${escapeHtml(tag.value)}</span>
+            </span>
           `,
         )
         .join("")}
@@ -110,6 +132,7 @@ function renderRows(entries: RulebookCatalogEntry[], expanded: Set<string>) {
         }>
           <td colspan="4">
             <div class="rulebook-ability-catalog__detail-body">
+              ${renderDetailTags(entry)}
               <span class="rulebook-ability-catalog__detail-label">Описание</span>
               <p>${renderValue(entry.fullDescription)}</p>
             </div>

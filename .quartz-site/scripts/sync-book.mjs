@@ -19,12 +19,12 @@ const repoRoot = resolve(siteRoot, '..');
 const contentDir = resolve(siteRoot, 'content');
 const rulebookDir = resolve(contentDir, 'rulebook');
 const generatedStatePath = resolve(contentDir, '.generated-rulebook.json');
-const conceptAbilitiesCatalogPath = resolve(siteRoot, 'data', 'temporary', 'concept-abilities.json');
 const gearCatalogFiles = {
   armor: 'armor.json',
   equipment: 'equipment.json',
   abilities: 'abilities.json'
 };
+const conceptAbilitiesCatalogFilename = 'concept-abilities.json';
 
 function formatDate(date) {
   const year = date.getFullYear();
@@ -182,16 +182,123 @@ function renderMarkdownTable(headers, rows) {
   ].join('\n');
 }
 
-function getGearBookText(item) {
-  return (item.bookText ?? item.description ?? '').trim();
-}
-
-function getGearCatalogPrice(item) {
-  if (item.pricing?.finalCost === null || item.pricing?.finalCost === undefined) {
+function getGearQuartzValue(item, key) {
+  const value = item?.quartz?.[key];
+  if (value === null || value === undefined) {
     return '';
   }
 
-  return String(item.pricing.finalCost);
+  return String(value).trim();
+}
+
+function buildDescriptionPreview(description, maxLength = 110) {
+  const normalized = String(description ?? '').replace(/\s+/g, ' ').trim();
+  if (!normalized) {
+    return '';
+  }
+
+  const sentenceMatch = normalized.match(new RegExp(`^(.{1,${maxLength}}?[.!?](?=\\s|$))`, 'u'));
+  if (sentenceMatch && sentenceMatch[1].length >= 40) {
+    return sentenceMatch[1];
+  }
+
+  if (normalized.length <= maxLength) {
+    return normalized;
+  }
+
+  let preview = normalized.slice(0, maxLength - 1);
+  const lastSpace = preview.lastIndexOf(' ');
+  if (lastSpace >= Math.floor(maxLength * 0.6)) {
+    preview = preview.slice(0, lastSpace);
+  }
+
+  return `${preview.trimEnd()}…`;
+}
+
+function getGearDescription(item) {
+  if (Object.hasOwn(item?.quartz ?? {}, 'fullDescription')) {
+    return getGearQuartzValue(item, 'fullDescription');
+  }
+
+  return (item.description ?? '').trim();
+}
+
+function resolvePreviewDescription(previewDescription, fullDescription, fallbackDescription = '') {
+  const preview = String(previewDescription ?? '').trim();
+  const full = String(fullDescription ?? '').trim();
+  const fallback = String(fallbackDescription ?? '').trim();
+
+  if (preview) {
+    return full && preview === full ? buildDescriptionPreview(full) : preview;
+  }
+
+  if (full) {
+    return buildDescriptionPreview(full);
+  }
+
+  return fallback;
+}
+
+function buildStructuredGearPreview(item) {
+  const skill = getGearQuartzValue(item, 'skill') || String(item.skill ?? '').trim();
+  const damage = getGearQuartzValue(item, 'damage') || getEquipmentDamageValue(item);
+
+  if (skill || damage) {
+    const parts = [];
+    if (skill) {
+      parts.push(`для навыка ${skill}`);
+    }
+
+    if (damage) {
+      parts.push(`урон ${damage}`);
+    }
+
+    return `Оружие ${parts.join(', ')}.`;
+  }
+
+  const physicalDefense = getArmorDefenseValue(item, 'physicalDefense', 'fortitude-bonus-x');
+  const magicalDefense = getArmorDefenseValue(item, 'magicalDefense', 'control-bonus-x');
+  const psychicDefense = getArmorDefenseValue(item, 'psychicDefense', 'will-bonus-x');
+  const shield = getGearQuartzValue(item, 'shield');
+
+  if (physicalDefense || magicalDefense || psychicDefense || shield) {
+    const parts = [];
+    if (physicalDefense) {
+      parts.push(`Стойкость ${physicalDefense}`);
+    }
+
+    if (magicalDefense) {
+      parts.push(`Контроль ${magicalDefense}`);
+    }
+
+    if (psychicDefense) {
+      parts.push(`Воля ${psychicDefense}`);
+    }
+
+    if (shield) {
+      parts.push(`силовой щит ${shield}`);
+    }
+
+    return `Броня: ${parts.join(', ')}.`;
+  }
+
+  return '';
+}
+
+function getGearShortDescription(item) {
+  const explicitPreview = Object.hasOwn(item?.quartz ?? {}, 'previewDescription')
+    ? getGearQuartzValue(item, 'previewDescription')
+    : (item.shortDescription ?? '').trim();
+
+  return resolvePreviewDescription(explicitPreview, getGearDescription(item), buildStructuredGearPreview(item));
+}
+
+function getGearCatalogPrice(item) {
+  if (item.finalCost === null || item.finalCost === undefined) {
+    return '';
+  }
+
+  return String(item.finalCost);
 }
 
 function isPublishedGearCatalogItem(item) {
@@ -207,17 +314,21 @@ function getGearPropertyValue(item, propertyKey) {
   return String(property.value);
 }
 
+function getArmorDefenseValue(item, quartzKey, propertyKey) {
+  return getGearQuartzValue(item, quartzKey) || getGearPropertyValue(item, propertyKey);
+}
+
 function getEquipmentTypeLabel(item) {
   const tags = new Set(item.tags ?? []);
-  if (tags.has('blizhnee') || item.foundryType === 'melee') {
+  if (tags.has('blizhnee')) {
     return 'Ближнее';
   }
 
-  if (tags.has('strelkovoe') || item.foundryType === 'ranged') {
+  if (tags.has('strelkovoe')) {
     return 'Стрелковое';
   }
 
-  if (tags.has('metatelnoe') || item.foundryType === 'thrown') {
+  if (tags.has('metatelnoe')) {
     return 'Метательное';
   }
 
@@ -225,7 +336,7 @@ function getEquipmentTypeLabel(item) {
 }
 
 function getEquipmentDamageValue(item) {
-  const description = getGearBookText(item);
+  const description = getGearDescription(item);
   const damageMatch = description.match(/\bУрон:\s*([^.;]+)/u);
   return damageMatch ? damageMatch[1].trim() : '';
 }
@@ -236,15 +347,21 @@ function buildArmorCatalogTable(catalog) {
     .map((item) => [
       item.name,
       item.rank,
-      getGearPropertyValue(item, 'fortitude-bonus-x'),
-      getGearPropertyValue(item, 'control-bonus-x'),
-      getGearPropertyValue(item, 'will-bonus-x'),
-      getGearBookText(item),
+      getArmorDefenseValue(item, 'physicalDefense', 'fortitude-bonus-x'),
+      getArmorDefenseValue(item, 'magicalDefense', 'control-bonus-x'),
+      getArmorDefenseValue(item, 'psychicDefense', 'will-bonus-x'),
+      getGearQuartzValue(item, 'shield'),
+      getGearQuartzValue(item, 'speed'),
+      getGearQuartzValue(item, 'frequency'),
+      getGearQuartzValue(item, 'actions'),
+      getGearQuartzValue(item, 'duration'),
+      getGearShortDescription(item),
+      getGearDescription(item),
       getGearCatalogPrice(item)
     ]);
 
   return renderMarkdownTable(
-    ['Название', 'Ранг', 'Стойкость', 'Контроль', 'Воля', 'Описание', 'Цена'],
+    ['Название', 'Ранг', 'Стойкость', 'Контроль', 'Воля', 'Силовой щит', 'Скорость', 'Частота использования', 'Цена в действиях', 'Длительность', 'Краткое описание', 'Полное описание', 'Цена'],
     rows
   );
 }
@@ -256,14 +373,22 @@ function buildEquipmentCatalogTable(catalog) {
       getEquipmentTypeLabel(item),
       item.name,
       item.rank,
-      item.skill ?? '',
-      getEquipmentDamageValue(item),
-      getGearBookText(item),
+      getGearQuartzValue(item, 'skill') || (item.skill ?? ''),
+      getGearQuartzValue(item, 'damage') || getEquipmentDamageValue(item),
+      getGearQuartzValue(item, 'frequency'),
+      getGearQuartzValue(item, 'actions'),
+      getGearQuartzValue(item, 'range'),
+      getGearQuartzValue(item, 'targets'),
+      getGearQuartzValue(item, 'area'),
+      getGearQuartzValue(item, 'defense'),
+      getGearQuartzValue(item, 'duration'),
+      getGearShortDescription(item),
+      getGearDescription(item),
       getGearCatalogPrice(item)
     ]);
 
   return renderMarkdownTable(
-    ['Тип', 'Название', 'Ранг', 'Навык', 'Урон', 'Описание', 'Цена'],
+    ['Тип', 'Название', 'Ранг', 'Навык', 'Урон', 'Частота использования', 'Цена в действиях', 'Дальность', 'Цели', 'Зона', 'Защита', 'Длительность', 'Краткое описание', 'Полное описание', 'Цена'],
     rows
   );
 }
@@ -274,10 +399,16 @@ function buildAbilityCatalogTable(catalog) {
     .map((item) => [
       item.name,
       item.rank,
-      getGearBookText(item),
-      '',
-      item.skill ?? '',
-      '',
+      getGearShortDescription(item),
+      getGearDescription(item),
+      getGearQuartzValue(item, 'frequency'),
+      getGearQuartzValue(item, 'skill') || (item.skill ?? ''),
+      getGearQuartzValue(item, 'actions'),
+      getGearQuartzValue(item, 'range'),
+      getGearQuartzValue(item, 'targets'),
+      getGearQuartzValue(item, 'area'),
+      getGearQuartzValue(item, 'defense'),
+      getGearQuartzValue(item, 'duration'),
       getGearCatalogPrice(item)
     ]);
 
@@ -285,10 +416,16 @@ function buildAbilityCatalogTable(catalog) {
     [
       'Название',
       'Ранг',
+      'Краткое описание',
       'Полное описание',
       'Частота использования',
       'Навык',
       'Цена в действиях',
+      'Дальность',
+      'Цели',
+      'Зона',
+      'Защита',
+      'Длительность',
       'Цена в кредитах'
     ],
     rows
@@ -296,25 +433,39 @@ function buildAbilityCatalogTable(catalog) {
 }
 
 function buildConceptAbilityCatalogTable(catalog) {
-  // Temporary Quartz-only catalog fed from .quartz-site/data/temporary/concept-abilities.json.
-  const rows = catalog.items.map((item) => [
-    item.name ?? '',
-    item.rank ?? '',
-    item.fullDescription ?? '',
-    item.frequency ?? '',
-    item.skill ?? '',
-    item.actions ?? '',
-    item.credits ?? ''
-  ]);
+  // Temporary catalog sourced from data/gear/catalog/concept-abilities.json.
+  const rows = catalog.items
+    .filter(isPublishedGearCatalogItem)
+    .map((item) => [
+      item.name ?? '',
+      item.rank ?? '',
+      getGearShortDescription(item),
+      getGearDescription(item),
+      getGearQuartzValue(item, 'frequency'),
+      getGearQuartzValue(item, 'skill') || (item.skill ?? ''),
+      getGearQuartzValue(item, 'actions'),
+      getGearQuartzValue(item, 'range'),
+      getGearQuartzValue(item, 'targets'),
+      getGearQuartzValue(item, 'area'),
+      getGearQuartzValue(item, 'defense'),
+      getGearQuartzValue(item, 'duration'),
+      getGearQuartzValue(item, 'credits') || getGearCatalogPrice(item)
+    ]);
 
   return renderMarkdownTable(
     [
       'Название',
       'Ранг',
+      'Краткое описание',
       'Полное описание',
       'Частота использования',
       'Навык',
       'Цена в действиях',
+      'Дальность',
+      'Цели',
+      'Зона',
+      'Защита',
+      'Длительность',
       'Цена в кредитах'
     ],
     rows
@@ -415,11 +566,11 @@ async function readGearCatalog(catalogDir, filename) {
   const raw = await readFile(resolve(catalogDir, filename), 'utf8');
   const parsed = JSON.parse(raw);
 
-  if (!Array.isArray(parsed.items)) {
-    throw new Error(`Gear catalog is missing items[]: ${filename}`);
+  if (Array.isArray(parsed)) {
+    return { items: parsed };
   }
 
-  return parsed;
+  throw new Error(`Gear catalog must be a root array: ${filename}`);
 }
 
 async function readGearCatalogs(catalogDir) {
@@ -430,16 +581,9 @@ async function readGearCatalogs(catalogDir) {
   };
 }
 
-async function readConceptAbilitiesCatalog() {
+async function readConceptAbilitiesCatalog(catalogDir) {
   try {
-    const raw = await readFile(conceptAbilitiesCatalogPath, 'utf8');
-    const parsed = JSON.parse(raw);
-
-    if (!Array.isArray(parsed.items)) {
-      throw new Error('Concept abilities catalog is missing items[]');
-    }
-
-    return parsed;
+    return await readGearCatalog(catalogDir, conceptAbilitiesCatalogFilename);
   } catch (error) {
     if (error?.code === 'ENOENT') {
       return null;
@@ -516,7 +660,9 @@ export async function syncBook() {
   const generatedEntries = getGeneratedRulebookEntries();
   const sourceDir = source.canonicalSourceDir;
   const gearCatalogs = await readGearCatalogs(gearCatalogSource.canonicalSourceDir);
-  const conceptAbilitiesCatalog = await readConceptAbilitiesCatalog();
+  const conceptAbilitiesCatalog = await readConceptAbilitiesCatalog(
+    gearCatalogSource.canonicalSourceDir
+  );
 
   await mkdir(contentDir, { recursive: true });
   await mkdir(rulebookDir, { recursive: true });

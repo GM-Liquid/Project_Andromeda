@@ -1,11 +1,28 @@
-import assert from "node:assert/strict"
-import { readFile } from "node:fs/promises"
-import { resolve } from "node:path"
+import { constants as fsConstants } from "node:fs"
+import { access } from "node:fs/promises"
+import { readFile, rename, rm, writeFile } from "node:fs/promises"
+import { dirname, resolve } from "node:path"
 import test from "node:test"
+import assert from "node:assert/strict"
+import { fileURLToPath } from "node:url"
 
 import { syncBook } from "./sync-book.mjs"
 
-test("syncBook preserves line breaks in character sheet examples", async () => {
+const scriptDir = dirname(fileURLToPath(import.meta.url))
+const siteRoot = resolve(scriptDir, "..")
+const repoRoot = resolve(siteRoot, "..")
+const docsRepoRoot = resolve(repoRoot, "..", "Docs_Project_Andromeda")
+
+async function pathExists(path) {
+  try {
+    await access(path, fsConstants.F_OK)
+    return true
+  } catch {
+    return false
+  }
+}
+
+test("syncBook preserves line breaks in character sheet examples", { concurrency: false }, async () => {
   const { generatedFiles } = await syncBook()
   const chapterPath = generatedFiles.find((filePath) =>
     filePath.endsWith("02-sozdanie-personazha.md"),
@@ -25,9 +42,9 @@ test("syncBook preserves line breaks in character sheet examples", async () => {
   )
 })
 
-test("syncBook injects chapter 03 gear catalogs from JSON sources instead of authored markdown tables", async () => {
+test("syncBook injects chapter 03 gear catalogs from JSON sources instead of authored markdown tables", { concurrency: false }, async () => {
   const sourceChapter = await readFile(
-    resolve("..", "Книга правил v0.4", "Способности и снаряжение.md"),
+    resolve(repoRoot, "Книга правил v0.4", "Способности и снаряжение.md"),
     "utf8",
   )
 
@@ -45,16 +62,120 @@ test("syncBook injects chapter 03 gear catalogs from JSON sources instead of aut
 
   const generated = await readFile(resolve(chapterPath), "utf8")
 
-  assert.match(generated, /^\| Название \| Ранг \| Стойкость \| Контроль \| Воля \| Описание \| Цена \|$/m)
-  assert.match(generated, /^\| Тип \| Название \| Ранг \| Навык \| Урон \| Описание \| Цена \|$/m)
-  assert.match(generated, /^\| Название \| Ранг \| Полное описание \| Частота использования \| Навык \| Цена в действиях \| Цена в кредитах \|$/m)
+  assert.match(
+    generated,
+    /^\| Название \| Ранг \| Стойкость \| Контроль \| Воля \| Силовой щит \| Скорость \| Частота использования \| Цена в действиях \| Длительность \| Краткое описание \| Полное описание \| Цена \|$/m,
+  )
+  assert.match(
+    generated,
+    /^\| Тип \| Название \| Ранг \| Навык \| Урон \| Частота использования \| Цена в действиях \| Дальность \| Цели \| Зона \| Защита \| Длительность \| Краткое описание \| Полное описание \| Цена \|$/m,
+  )
+  assert.match(
+    generated,
+    /^\| Название \| Ранг \| Краткое описание \| Полное описание \| Частота использования \| Навык \| Цена в действиях \| Дальность \| Цели \| Зона \| Защита \| Длительность \| Цена в кредитах \|$/m,
+  )
   assert.match(generated, /^\|.*КД-2.*\|$/m)
-  assert.match(generated, /^\|.*Распад.*\|$/m)
+  assert.match(
+    generated,
+    /^\|.*Тактический виброклинок.*\|.*Ближний бой.*\|.*Урон: 1\..*\|$/m,
+  )
+  assert.match(
+    generated,
+    /^\|.*Распад.*\|.*Мощь.*\|.*310.*\|$/m,
+  )
 })
 
-test("syncBook injects the temporary concept abilities catalog into chapter 03 instead of chapter 04", async () => {
+test("syncBook injects concept abilities from the shared gear catalog source", { concurrency: false }, async () => {
+  const quartzConceptPath = resolve(siteRoot, "data", "temporary", "concept-abilities.json")
+  const quartzConceptBackupPath = resolve(
+    siteRoot,
+    "data",
+    "temporary",
+    "concept-abilities.json.codex-backup",
+  )
+  const docsConceptPath = resolve(docsRepoRoot, "data", "gear", "catalog", "concept-abilities.json")
+  const docsConceptBackupPath = resolve(
+    docsRepoRoot,
+    "data",
+    "gear",
+    "catalog",
+    "concept-abilities.json.codex-backup",
+  )
+  const quartzConceptExists = await pathExists(quartzConceptPath)
+  const docsConceptExists = await pathExists(docsConceptPath)
+
+  const conceptCatalog = [
+    {
+      id: "testovyi-kontsept",
+      name: "Тестовый концепт",
+      type: "ability",
+      rank: 1,
+      skill: "Мистика",
+      properties: [],
+      description: "Полное описание тестовой концепт-способности.",
+      shortDescription: "Краткое описание тестовой концепт-способности.",
+      tags: [],
+      finalCost: 777,
+      status: "legacy",
+      quartz: {
+        previewDescription: "Краткое описание тестовой концепт-способности.",
+        fullDescription: "Полное описание тестовой концепт-способности.",
+        skill: "Мистика",
+        frequency: "1/сцену",
+        actions: "Основное",
+        range: "30 м",
+        targets: "1 цель",
+        area: "",
+        defense: "Воля",
+        duration: "1 мин",
+        credits: "",
+      },
+    },
+  ]
+
+  if (quartzConceptExists) {
+    await rename(quartzConceptPath, quartzConceptBackupPath)
+  }
+
+  if (docsConceptExists) {
+    await rename(docsConceptPath, docsConceptBackupPath)
+  }
+
+  await writeFile(docsConceptPath, `${JSON.stringify(conceptCatalog, null, 2)}\n`, "utf8")
+
+  try {
+    const { generatedFiles } = await syncBook()
+    const chapter03Path = generatedFiles.find((filePath) =>
+      filePath.endsWith("03-sposobnosti-i-snaryazhenie.md"),
+    )
+
+    assert.ok(chapter03Path, "expected the abilities and equipment chapter to be generated")
+
+    const chapter03 = await readFile(resolve(chapter03Path), "utf8")
+
+    assert.match(chapter03, /^## Концепт-способности$/m)
+    assert.match(
+      chapter03,
+      /^\|.*Тестовый концепт.*\|.*30 м.*\|.*1 цель.*\|.*Воля.*\|.*1 мин.*\|.*777.*\|$/m,
+    )
+  } finally {
+    await rm(docsConceptPath, { force: true })
+
+    if (docsConceptExists) {
+      await rename(docsConceptBackupPath, docsConceptPath)
+    }
+
+    if (quartzConceptExists) {
+      await rename(quartzConceptBackupPath, quartzConceptPath)
+    } else {
+      await rm(quartzConceptBackupPath, { force: true })
+    }
+  }
+})
+
+test("syncBook injects the concept abilities catalog into chapter 03 instead of chapter 04", { concurrency: false }, async () => {
   const sourceChapter = await readFile(
-    resolve("..", "Книга правил v0.4", "Способности и снаряжение.md"),
+    resolve(repoRoot, "Книга правил v0.4", "Способности и снаряжение.md"),
     "utf8",
   )
 
@@ -79,7 +200,7 @@ test("syncBook injects the temporary concept abilities catalog into chapter 03 i
   )
   assert.match(
     chapter03,
-    /^\| Название \| Ранг \| Полное описание \| Частота использования \| Навык \| Цена в действиях \| Цена в кредитах \|$/m,
+    /^\| Название \| Ранг \| Краткое описание \| Полное описание \| Частота использования \| Навык \| Цена в действиях \| Дальность \| Цели \| Зона \| Защита \| Длительность \| Цена в кредитах \|$/m,
   )
   assert.match(chapter03, /^\|.*Болевой шок.*\|$/m)
   assert.doesNotMatch(chapter04, /^## Концепт-способности$/m)

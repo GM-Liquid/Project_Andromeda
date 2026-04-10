@@ -479,6 +479,40 @@
     }
   }
 
+  &__detail-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-bottom: 0.2rem;
+  }
+
+  &__detail-tag {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    min-height: 1.65rem;
+    padding: 0.28rem 0.58rem;
+    border: 1px solid color-mix(in srgb, var(--secondary) 22%, var(--lightgray) 78%);
+    border-radius: var(--ability-catalog-rect-radius);
+    background: color-mix(in srgb, var(--highlight) 34%, var(--light) 66%);
+  }
+
+  &__detail-tag-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--secondary);
+  }
+
+  &__detail-tag-value {
+    color: var(--dark);
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
   &__detail-label {
     font-size: 0.72rem;
     font-weight: 700;

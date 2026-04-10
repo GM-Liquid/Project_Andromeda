@@ -36,3 +36,10 @@ test("ability catalog balances left and right outer spacing for table rows", () 
   assert.match(styleSource, /thead th:first-child,\s*tbody td:first-child\s*\{[\s\S]*padding-left:\s*1\.1rem;/)
   assert.match(styleSource, /&__description-cell\s*\{[\s\S]*padding-inline-end:\s*0\.35rem;/)
 })
+
+test("ability catalog styles the expanded detail tag grid separately from the description copy", () => {
+  assert.match(styleSource, /&__detail-tags\s*\{[\s\S]*display:\s*flex;/)
+  assert.match(styleSource, /&__detail-tag\s*\{[\s\S]*display:\s*inline-flex;/)
+  assert.match(styleSource, /&__detail-tag-label\s*\{[\s\S]*font-weight:\s*700;/)
+  assert.match(styleSource, /&__detail-tag-value\s*\{[\s\S]*color:\s*var\(--dark\);/)
+})

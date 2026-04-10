@@ -1,0 +1,77 @@
+0 verbose cli C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js
+1 info using npm@10.9.0
+2 info using node@v22.12.0
+3 silly config load:file:C:\Program Files\nodejs\node_modules\npm\npmrc
+4 silly config load:file:D:\Моя_НРИ\Project Andromeda\.quartz-site\.npmrc
+5 silly config load:file:C:\Users\Matvei\.npmrc
+6 silly config load:file:D:\Моя_НРИ\Project Andromeda\.quartz-site\etc\npmrc
+7 verbose title npm exec quartz build
+8 verbose argv "exec" "--" "quartz" "build"
+9 verbose logfile logs-max:10 dir:D:\Моя_НРИ\Project Andromeda\.npm-cache\_logs\2026-04-09T16_58_51_687Z-
+10 verbose logfile D:\Моя_НРИ\Project Andromeda\.npm-cache\_logs\2026-04-09T16_58_51_687Z-debug-0.log
+11 silly logfile start cleaning logs, removing 1 files
+12 silly logfile done cleaning log files
+13 silly packumentCache heap:4345298944 maxSize:1086324736 maxEntrySize:543162368
+14 silly packumentCache heap:4345298944 maxSize:1086324736 maxEntrySize:543162368
+15 verbose shrinkwrap failed to load node_modules/.package-lock.json out of date, updated: ../../../.quartz-site
+16 silly idealTree buildDeps
+17 silly placeDep ROOT @jackyzha0/quartz@4.5.2 REPLACE for:  want: file:../../../.quartz-site
+18 warn EBADENGINE Unsupported engine {
+18 warn EBADENGINE   package: '@jackyzha0/quartz@4.5.2',
+18 warn EBADENGINE   required: { npm: '>=10.9.2', node: '>=22' },
+18 warn EBADENGINE   current: { node: 'v22.12.0', npm: '10.9.0' }
+18 warn EBADENGINE }
+19 warn EBADENGINE Unsupported engine {
+19 warn EBADENGINE   package: '@jackyzha0/quartz@4.5.2',
+19 warn EBADENGINE   required: { npm: '>=10.9.2', node: '>=22' },
+19 warn EBADENGINE   current: { node: 'v22.12.0', npm: '10.9.0' }
+19 warn EBADENGINE }
+20 silly reify moves {}
+21 silly audit bulk request { '@jackyzha0/quartz': [ '4.5.2' ] }
+22 silly audit bulk request failed undefined
+23 notice This endpoint is being retired. Use the bulk advisory endpoint instead. See the following docs for more info: https://api-docs.npmjs.com/#tag/Audit
+24 http fetch POST 400 https://registry.npmjs.org/-/npm/v1/security/audits/quick 452ms
+25 verbose audit error HttpErrorGeneral: 400 Bad Request - POST https://registry.npmjs.org/-/npm/v1/security/audits/quick - Bad Request
+25 verbose audit error     at C:\Program Files\nodejs\node_modules\npm\node_modules\npm-registry-fetch\lib\check-response.js:95:15
+25 verbose audit error     at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+25 verbose audit error     at async [getReport] (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\audit-report.js:336:21)
+25 verbose audit error     at async AuditReport.run (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\audit-report.js:106:19)
+25 verbose audit error     at async Arborist.reify (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\reify.js:268:24)
+25 verbose audit error     at async exec (C:\Program Files\nodejs\node_modules\npm\node_modules\libnpmexec\lib\index.js:290:7)
+25 verbose audit error     at async Npm.exec (C:\Program Files\nodejs\node_modules\npm\lib\npm.js:207:9)
+25 verbose audit error     at async module.exports (C:\Program Files\nodejs\node_modules\npm\lib\cli\entry.js:74:5) {
+25 verbose audit error   headers: [Object: null prototype] {
+25 verbose audit error     date: [ 'Thu, 09 Apr 2026 16:59:05 GMT' ],
+25 verbose audit error     'transfer-encoding': [ 'chunked' ],
+25 verbose audit error     connection: [ 'keep-alive' ],
+25 verbose audit error     server: [ 'cloudflare' ],
+25 verbose audit error     'cf-ray': [ '9e9b0f6bcfe8d0da-SOF' ],
+25 verbose audit error     'cf-cache-status': [ 'DYNAMIC' ],
+25 verbose audit error     'npm-notice': [
+25 verbose audit error       'This endpoint is being retired. Use the bulk advisory endpoint instead. See the following docs for more info: https://api-docs.npmjs.com/#tag/Audit'
+25 verbose audit error     ],
+25 verbose audit error     vary: [ 'Accept-Encoding' ],
+25 verbose audit error     'set-cookie': [
+25 verbose audit error       '_cfuvid=QiqHuuKee6B1s9rWt41PGVg2VVF45WNVEBFp5ScS5Mo-1775753945127-0.0.1.1-604800000; path=/; domain=.npmjs.org; HttpOnly; Secure; SameSite=None'
+25 verbose audit error     ],
+25 verbose audit error     'x-fetch-attempts': [ '1' ]
+25 verbose audit error   },
+25 verbose audit error   statusCode: 400,
+25 verbose audit error   code: 'E400',
+25 verbose audit error   method: 'POST',
+25 verbose audit error   uri: 'https://registry.npmjs.org/-/npm/v1/security/audits/quick',
+25 verbose audit error   body: {
+25 verbose audit error     statusCode: 400,
+25 verbose audit error     error: 'Bad Request',
+25 verbose audit error     message: 'Invalid package tree, run  npm install  to rebuild your package-lock.json'
+25 verbose audit error   },
+25 verbose audit error   pkgid: undefined
+25 verbose audit error }
+26 silly audit error [object Object]
+27 silly audit report null
+28 verbose cwd D:\Моя_НРИ\Project Andromeda\.quartz-site
+29 verbose os Windows_NT 10.0.19045
+30 verbose node v22.12.0
+31 verbose npm  v10.9.0
+32 verbose exit 0
+33 info ok
