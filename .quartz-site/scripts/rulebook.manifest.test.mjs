@@ -42,3 +42,14 @@ test('rulebook header navigation exposes only the main four sections', () => {
     ]
   );
 });
+
+test('equipment chapter can be overridden with a temporary notice without affecting neighboring chapters', () => {
+  const manifest = getRulebookManifest();
+  const equipmentChapter = manifest.find(
+    (entry) => entry.slug === 'rulebook/03-sposobnosti-i-snaryazhenie'
+  );
+  const combatChapter = manifest.find((entry) => entry.slug === 'rulebook/04-boy');
+
+  assert.equal(equipmentChapter?.temporaryNotice, 'В работе');
+  assert.equal(combatChapter?.temporaryNotice ?? null, null);
+});

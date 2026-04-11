@@ -1,18 +1,25 @@
 import { PageLayout, SharedLayout } from './quartz/cfg';
 import * as Component from './quartz/components';
+import type { QuartzPluginData } from './quartz/plugins/vfile';
+import { getRulebookPageMeta, isRulebookSlug } from './quartz/util/rulebook';
 
-const isRulebookPage = (page: { fileData: { slug?: string } }) =>
-  page.fileData.slug?.startsWith('rulebook/') ?? false;
+type RulebookLayoutPage = {
+  fileData: QuartzPluginData;
+};
 
-const shouldShowRulebookHero = (page: {
-  fileData: { slug?: string; frontmatter?: Record<string, unknown> };
-}) => isRulebookPage(page) && page.fileData.frontmatter?.showHero !== false;
+const isRulebookPage = (page: RulebookLayoutPage) =>
+  isRulebookSlug(page.fileData.slug);
 
-const shouldShowRulebookToc = (page: {
-  fileData: { slug?: string; frontmatter?: Record<string, unknown>; toc?: unknown[] };
-}) =>
+const hasRulebookTemporaryNotice = (page: RulebookLayoutPage) =>
+  isRulebookPage(page) && Boolean(getRulebookPageMeta(page.fileData).temporaryNotice);
+
+const shouldShowRulebookHero = (page: RulebookLayoutPage) =>
+  isRulebookPage(page) && !hasRulebookTemporaryNotice(page) && getRulebookPageMeta(page.fileData).showHero;
+
+const shouldShowRulebookToc = (page: RulebookLayoutPage) =>
   isRulebookPage(page) &&
-  page.fileData.frontmatter?.showToc !== false &&
+  !hasRulebookTemporaryNotice(page) &&
+  getRulebookPageMeta(page.fileData).showToc &&
   Array.isArray(page.fileData.toc) &&
   page.fileData.toc.length > 0;
 

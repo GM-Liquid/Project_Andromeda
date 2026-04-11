@@ -1,0 +1,29 @@
+.rulebook-temporary-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 16rem;
+  margin: 2rem 0 3rem;
+  padding: 2.5rem;
+  border: 1px solid color-mix(in srgb, var(--secondary) 45%, var(--lightgray));
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(circle at top, color-mix(in srgb, var(--tertiary) 20%, transparent), transparent 58%),
+    linear-gradient(180deg, color-mix(in srgb, var(--light) 90%, white), var(--light));
+  box-shadow: 0 1.5rem 3rem rgba(30, 29, 28, 0.08);
+  text-align: center;
+}
+
+.rulebook-temporary-notice__label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.9rem 1.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--secondary) 12%, white);
+  color: var(--secondary);
+  font-family: var(--headerFont);
+  font-size: clamp(1.4rem, 4vw, 2.25rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}

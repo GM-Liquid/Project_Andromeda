@@ -79,6 +79,7 @@ export const rulebookManifest = [
     heroAlt: null,
     showHero: true,
     showToc: true,
+    temporaryNotice: 'В работе',
     showInHeaderNav: true,
     parent: null
   },

@@ -126,7 +126,10 @@ type RulebookCatalogFilterDefinition =
       unit: string
     }
 
+type CatalogDetailTagKey = keyof typeof detailTagLabels
+
 type CatalogDetailTag = {
+  key: CatalogDetailTagKey
   label: string
   value: string
 }
@@ -210,6 +213,26 @@ const detailTagLabels = {
   magicalDefense: "Контроль",
   psychicDefense: "Воля",
 } as const
+
+const primaryDetailLineOrder: CatalogDetailTagKey[] = [
+  "damage",
+  "physicalDefense",
+  "magicalDefense",
+  "psychicDefense",
+  "shield",
+  "speed",
+  "range",
+  "targets",
+  "area",
+  "defense",
+]
+
+const secondaryDetailLineOrder: CatalogDetailTagKey[] = [
+  "duration",
+  "actions",
+  "frequency",
+  "skill",
+]
 
 const rankOptions = ["1", "2", "3", "4"]
 const frequencyOptions = ["Неограниченно", "1/сцену", "1/сессию"]
@@ -717,6 +740,30 @@ function buildDetailTags(tags: Array<CatalogDetailTag | null | undefined>) {
   return tags.filter((tag): tag is CatalogDetailTag => Boolean(tag?.value))
 }
 
+function createDetailTag(key: CatalogDetailTagKey, value: string) {
+  return value ? { key, label: detailTagLabels[key], value } : null
+}
+
+function buildOrderedDetailLine(tags: CatalogDetailTag[], order: CatalogDetailTagKey[]) {
+  return order
+    .map((key) => tags.find((tag) => tag.key === key))
+    .filter((tag): tag is CatalogDetailTag => Boolean(tag))
+}
+
+function buildDetailFactLines(tags: CatalogDetailTag[], lineSize = 4) {
+  const primaryLine = buildOrderedDetailLine(tags, primaryDetailLineOrder)
+  const secondaryLine = buildOrderedDetailLine(tags, secondaryDetailLineOrder)
+  const groupedKeys = new Set([...primaryDetailLineOrder, ...secondaryDetailLineOrder])
+  const remainingTags = tags.filter((tag) => !groupedKeys.has(tag.key))
+  const lines = [primaryLine, secondaryLine].filter((line) => line.length > 0)
+
+  for (let index = 0; index < remainingTags.length; index += lineSize) {
+    lines.push(remainingTags.slice(index, index + lineSize))
+  }
+
+  return lines
+}
+
 function sortAlphaValues(values: string[]) {
   return [...new Set(values.filter(Boolean))].sort((left, right) => {
     if (left === noSkillLabel) {
@@ -782,14 +829,14 @@ function buildAbilityCatalogModel(headers: string[], rows: string[][]): Rulebook
       fullDescription: descriptions.fullDescription,
       tags: [frequency, skill].filter(Boolean),
       detailTags: buildDetailTags([
-        actions ? { label: detailTagLabels.actions, value: actions } : null,
-        range ? { label: detailTagLabels.range, value: range } : null,
-        targets ? { label: detailTagLabels.targets, value: targets } : null,
-        area ? { label: detailTagLabels.area, value: area } : null,
-        defense ? { label: detailTagLabels.defense, value: defense } : null,
-        duration ? { label: detailTagLabels.duration, value: duration } : null,
-        skill ? { label: detailTagLabels.skill, value: skill } : null,
-        frequency ? { label: detailTagLabels.frequency, value: frequency } : null,
+        createDetailTag("range", range),
+        createDetailTag("targets", targets),
+        createDetailTag("area", area),
+        createDetailTag("defense", defense),
+        createDetailTag("duration", duration),
+        createDetailTag("actions", actions),
+        createDetailTag("frequency", frequency),
+        createDetailTag("skill", skill),
       ]),
       filters: {
         rank,
@@ -881,15 +928,15 @@ function buildWeaponCatalogModel(headers: string[], rows: string[][]): RulebookC
       fullDescription: descriptions.fullDescription,
       tags: [skill].filter(Boolean),
       detailTags: buildDetailTags([
-        damage ? { label: detailTagLabels.damage, value: damage } : null,
-        actions ? { label: detailTagLabels.actions, value: actions } : null,
-        range ? { label: detailTagLabels.range, value: range } : null,
-        targets ? { label: detailTagLabels.targets, value: targets } : null,
-        area ? { label: detailTagLabels.area, value: area } : null,
-        defense ? { label: detailTagLabels.defense, value: defense } : null,
-        duration ? { label: detailTagLabels.duration, value: duration } : null,
-        skill ? { label: detailTagLabels.skill, value: skill } : null,
-        frequency ? { label: detailTagLabels.frequency, value: frequency } : null,
+        createDetailTag("damage", damage),
+        createDetailTag("range", range),
+        createDetailTag("targets", targets),
+        createDetailTag("area", area),
+        createDetailTag("defense", defense),
+        createDetailTag("duration", duration),
+        createDetailTag("actions", actions),
+        createDetailTag("frequency", frequency),
+        createDetailTag("skill", skill),
       ]),
       filters: {
         rank,
@@ -976,14 +1023,14 @@ function buildArmorCatalogModel(headers: string[], rows: string[][]): RulebookCa
         psychicDefense ? `ПЗ ${psychicDefense}` : "",
       ].filter(Boolean),
       detailTags: buildDetailTags([
-        physicalDefense ? { label: detailTagLabels.physicalDefense, value: physicalDefense } : null,
-        magicalDefense ? { label: detailTagLabels.magicalDefense, value: magicalDefense } : null,
-        psychicDefense ? { label: detailTagLabels.psychicDefense, value: psychicDefense } : null,
-        shield ? { label: detailTagLabels.shield, value: shield } : null,
-        speed ? { label: detailTagLabels.speed, value: speed } : null,
-        actions ? { label: detailTagLabels.actions, value: actions } : null,
-        duration ? { label: detailTagLabels.duration, value: duration } : null,
-        frequency ? { label: detailTagLabels.frequency, value: frequency } : null,
+        createDetailTag("physicalDefense", physicalDefense),
+        createDetailTag("magicalDefense", magicalDefense),
+        createDetailTag("psychicDefense", psychicDefense),
+        createDetailTag("shield", shield),
+        createDetailTag("speed", speed),
+        createDetailTag("duration", duration),
+        createDetailTag("actions", actions),
+        createDetailTag("frequency", frequency),
       ]),
       filters: {
         rank,
@@ -1064,15 +1111,15 @@ function buildEquipmentCatalogModel(headers: string[], rows: string[][]): Rulebo
       fullDescription: descriptions.fullDescription,
       tags: [skill].filter(Boolean),
       detailTags: buildDetailTags([
-        damage ? { label: detailTagLabels.damage, value: damage } : null,
-        actions ? { label: detailTagLabels.actions, value: actions } : null,
-        range ? { label: detailTagLabels.range, value: range } : null,
-        targets ? { label: detailTagLabels.targets, value: targets } : null,
-        area ? { label: detailTagLabels.area, value: area } : null,
-        defense ? { label: detailTagLabels.defense, value: defense } : null,
-        duration ? { label: detailTagLabels.duration, value: duration } : null,
-        skill ? { label: detailTagLabels.skill, value: skill } : null,
-        frequency ? { label: detailTagLabels.frequency, value: frequency } : null,
+        createDetailTag("damage", damage),
+        createDetailTag("range", range),
+        createDetailTag("targets", targets),
+        createDetailTag("area", area),
+        createDetailTag("defense", defense),
+        createDetailTag("duration", duration),
+        createDetailTag("actions", actions),
+        createDetailTag("frequency", frequency),
+        createDetailTag("skill", skill),
       ]),
       filters: {
         rank,
@@ -1144,15 +1191,25 @@ function renderCatalogDetailTags(entry: RulebookCatalogEntry) {
     return ""
   }
 
+  const detailLines = buildDetailFactLines(entry.detailTags)
+
   return `
-    <div class="${abilityCatalogClass}__detail-tags">
-      ${entry.detailTags
+    <div class="${abilityCatalogClass}__detail-facts">
+      ${detailLines
         .map(
-          (tag) => `
-            <span class="${abilityCatalogClass}__detail-tag">
-              <span class="${abilityCatalogClass}__detail-tag-label">${escapeHtml(tag.label)}</span>
-              <span class="${abilityCatalogClass}__detail-tag-value">${escapeHtml(tag.value)}</span>
-            </span>
+          (line) => `
+            <div class="${abilityCatalogClass}__detail-fact-line">
+              ${line
+                .map(
+                  (tag) => `
+                    <span class="${abilityCatalogClass}__detail-fact">
+                      <strong class="${abilityCatalogClass}__detail-fact-label">${escapeHtml(tag.label)}</strong>
+                      <span class="${abilityCatalogClass}__detail-fact-value">${escapeHtml(tag.value)}</span>
+                    </span>
+                  `,
+                )
+                .join("")}
+            </div>
           `,
         )
         .join("")}
@@ -1395,8 +1452,9 @@ function renderCatalogRows(entries: RulebookCatalogEntry[], expandedEntries = ne
           <td colspan="4">
             <div class="${abilityCatalogClass}__detail-body">
               ${renderCatalogDetailTags(entry)}
-              <span class="${abilityCatalogClass}__detail-label">Описание</span>
-              <p>${renderCatalogValue(entry.fullDescription)}</p>
+              <div class="${abilityCatalogClass}__detail-copy">
+                <p>${renderCatalogValue(entry.fullDescription)}</p>
+              </div>
             </div>
           </td>
         </tr>

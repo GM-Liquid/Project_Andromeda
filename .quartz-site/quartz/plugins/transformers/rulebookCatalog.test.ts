@@ -179,23 +179,23 @@ test("catalog summaries keep only the requested meta chips in collapsed rows", (
   assert.match(abilitySummaryRow, /1\/сцену/u)
   assert.match(abilitySummaryRow, /Кинетика/u)
   assert.doesNotMatch(abilitySummaryRow, /Основное/u)
-  assert.match(abilityHtml, /rulebook-ability-catalog__detail-tag-label">Активация<\/span>/u)
+  assert.match(abilityHtml, /rulebook-ability-catalog__detail-fact-label">Активация<\/strong>/u)
 
   assert.equal(countMetaChips(equipmentSummaryRow), 1)
   assert.match(equipmentSummaryRow, /Стихийность/u)
   assert.doesNotMatch(equipmentSummaryRow, />6</u)
-  assert.match(equipmentHtml, /rulebook-ability-catalog__detail-tag-label">Урон<\/span>/u)
-  assert.match(equipmentHtml, /rulebook-ability-catalog__detail-tag-value">6<\/span>/u)
+  assert.match(equipmentHtml, /rulebook-ability-catalog__detail-fact-label">Урон<\/strong>/u)
+  assert.match(equipmentHtml, /rulebook-ability-catalog__detail-fact-value">6<\/span>/u)
 
   assert.equal(countMetaChips(armorSummaryRow), 2)
   assert.match(armorSummaryRow, /Стойкость 2/u)
   assert.match(armorSummaryRow, /Контроль 1/u)
   assert.doesNotMatch(armorSummaryRow, /Силовой щит/u)
-  assert.match(armorHtml, /rulebook-ability-catalog__detail-tag-label">Силовой щит<\/span>/u)
-  assert.match(armorHtml, /rulebook-ability-catalog__detail-tag-value">3<\/span>/u)
+  assert.match(armorHtml, /rulebook-ability-catalog__detail-fact-label">Силовой щит<\/strong>/u)
+  assert.match(armorHtml, /rulebook-ability-catalog__detail-fact-value">3<\/span>/u)
 })
 
-test("buildAbilityCatalogHtml renders filled detail tags before the full description", () => {
+test("buildAbilityCatalogHtml renders grouped detail facts before the full description without a description label", () => {
   const html = buildAbilityCatalogHtml(abilityHeaders, [
     [
       "Структурный голод",
@@ -214,19 +214,21 @@ test("buildAbilityCatalogHtml renders filled detail tags before the full descrip
     ],
   ])
 
-  assert.match(html, /rulebook-ability-catalog__detail-tags/u)
-  assert.match(html, /rulebook-ability-catalog__detail-tag-label">Дальность<\/span>/u)
-  assert.match(html, /rulebook-ability-catalog__detail-tag-value">30 м<\/span>/u)
-  assert.match(html, /rulebook-ability-catalog__detail-tag-label">Цели<\/span>/u)
-  assert.match(html, /rulebook-ability-catalog__detail-tag-value">1 цель<\/span>/u)
-  assert.match(html, /rulebook-ability-catalog__detail-tag-label">Защита<\/span>/u)
-  assert.match(html, /rulebook-ability-catalog__detail-tag-value">Стойкость<\/span>/u)
-  assert.match(html, /rulebook-ability-catalog__detail-tag-label">Длительность<\/span>/u)
-  assert.match(html, /rulebook-ability-catalog__detail-tag-value">1 мин<\/span>/u)
-  assert.doesNotMatch(html, /rulebook-ability-catalog__detail-tag-label">Зона<\/span>/u)
+  assert.match(html, /rulebook-ability-catalog__detail-facts/u)
   assert.match(
     html,
-    /rulebook-ability-catalog__detail-tags[\s\S]*rulebook-ability-catalog__detail-label">Описание<\/span>[\s\S]*Ближайшие твёрдые поверхности/u,
+    /rulebook-ability-catalog__detail-fact-line[\s\S]*Дальность<\/strong>[\s\S]*30 м[\s\S]*Цели<\/strong>[\s\S]*1 цель[\s\S]*Защита<\/strong>[\s\S]*Стойкость/u,
+  )
+  assert.match(
+    html,
+    /rulebook-ability-catalog__detail-fact-line[\s\S]*Длительность<\/strong>[\s\S]*1 мин[\s\S]*Активация<\/strong>[\s\S]*Основное[\s\S]*Частота<\/strong>[\s\S]*1\/сцену[\s\S]*Навык<\/strong>[\s\S]*Кинетика/u,
+  )
+  assert.doesNotMatch(html, /rulebook-ability-catalog__detail-fact-label">Зона<\/strong>/u)
+  assert.doesNotMatch(html, /rulebook-ability-catalog__detail-tag-label/u)
+  assert.doesNotMatch(html, /rulebook-ability-catalog__detail-label">Описание<\/span>/u)
+  assert.match(
+    html,
+    /rulebook-ability-catalog__detail-facts[\s\S]*rulebook-ability-catalog__detail-copy[\s\S]*Ближайшие твёрдые поверхности/u,
   )
 })
 

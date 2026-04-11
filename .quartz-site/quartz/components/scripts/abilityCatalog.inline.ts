@@ -6,7 +6,7 @@ type RulebookCatalogEntry = {
   previewDescription: string
   fullDescription: string
   tags: string[]
-  detailTags: Array<{ label: string; value: string }>
+  detailTags: Array<{ key: string; label: string; value: string }>
   filters: Record<string, string>
   sortValues: Record<string, number>
 }
@@ -54,20 +54,64 @@ function renderMetaChips(entry: RulebookCatalogEntry) {
   `
 }
 
+function buildDetailFactLines(
+  detailTags: Array<{ key: string; label: string; value: string }>,
+  lineSize = 4,
+) {
+  const primaryLineOrder = [
+    "damage",
+    "physicalDefense",
+    "magicalDefense",
+    "psychicDefense",
+    "shield",
+    "speed",
+    "range",
+    "targets",
+    "area",
+    "defense",
+  ]
+  const secondaryLineOrder = ["duration", "actions", "frequency", "skill"]
+  const buildOrderedLine = (order: string[]) =>
+    order
+      .map((key) => detailTags.find((tag) => tag.key === key))
+      .filter((tag): tag is { key: string; label: string; value: string } => Boolean(tag))
+  const groupedKeys = new Set([...primaryLineOrder, ...secondaryLineOrder])
+  const remainingTags = detailTags.filter((tag) => !groupedKeys.has(tag.key))
+  const lines = [buildOrderedLine(primaryLineOrder), buildOrderedLine(secondaryLineOrder)].filter(
+    (line) => line.length > 0,
+  )
+
+  for (let index = 0; index < remainingTags.length; index += lineSize) {
+    lines.push(remainingTags.slice(index, index + lineSize))
+  }
+
+  return lines
+}
+
 function renderDetailTags(entry: RulebookCatalogEntry) {
   if (entry.detailTags.length === 0) {
     return ""
   }
 
+  const detailLines = buildDetailFactLines(entry.detailTags)
+
   return `
-    <div class="rulebook-ability-catalog__detail-tags">
-      ${entry.detailTags
+    <div class="rulebook-ability-catalog__detail-facts">
+      ${detailLines
         .map(
-          (tag) => `
-            <span class="rulebook-ability-catalog__detail-tag">
-              <span class="rulebook-ability-catalog__detail-tag-label">${escapeHtml(tag.label)}</span>
-              <span class="rulebook-ability-catalog__detail-tag-value">${escapeHtml(tag.value)}</span>
-            </span>
+          (line) => `
+            <div class="rulebook-ability-catalog__detail-fact-line">
+              ${line
+                .map(
+                  (tag) => `
+                    <span class="rulebook-ability-catalog__detail-fact">
+                      <strong class="rulebook-ability-catalog__detail-fact-label">${escapeHtml(tag.label)}</strong>
+                      <span class="rulebook-ability-catalog__detail-fact-value">${escapeHtml(tag.value)}</span>
+                    </span>
+                  `,
+                )
+                .join("")}
+            </div>
           `,
         )
         .join("")}
@@ -133,8 +177,9 @@ function renderRows(entries: RulebookCatalogEntry[], expanded: Set<string>) {
           <td colspan="4">
             <div class="rulebook-ability-catalog__detail-body">
               ${renderDetailTags(entry)}
-              <span class="rulebook-ability-catalog__detail-label">Описание</span>
-              <p>${renderValue(entry.fullDescription)}</p>
+              <div class="rulebook-ability-catalog__detail-copy">
+                <p>${renderValue(entry.fullDescription)}</p>
+              </div>
             </div>
           </td>
         </tr>

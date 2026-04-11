@@ -77,7 +77,11 @@ test("syncBook injects chapter 03 gear catalogs from JSON sources instead of aut
   assert.match(generated, /^\|.*КД-2.*\|$/m)
   assert.match(
     generated,
-    /^\|.*Тактический виброклинок.*\|.*Ближний бой.*\|.*Урон: 1\..*\|$/m,
+    /^\| Абразив \| 1 \| Создайте облако сверхострой пыли, ранящее существ в зоне\. \| Создайте облако сверхострой пыли\. Требуется концентрация\. Проверка Мощи против Стойкости каждого существа, которое впервые за ход оказывается в зоне\. При успехе цель получает 2 урона\. \| 1\/сцену \| Мощь \| Основное \|  \| Каждое существо в зоне \|  \| Стойкость \| 10 минут \| 100 \|$/m,
+  )
+  assert.match(
+    generated,
+    /^\|.*Виброклинок.*\|.*Ближний бой.*\|.*Урон: 5\..*\|$/m,
   )
   assert.match(
     generated,
@@ -117,12 +121,21 @@ test("syncBook injects concept abilities from the shared gear catalog source", {
       tags: [],
       finalCost: 777,
       status: "legacy",
+      usage: {
+        frequency: "1/сцену",
+        actions: "Основное",
+        range: "15 м",
+        targets: "2 цели",
+        area: "",
+        defense: "Стойкость",
+        duration: "2 раунда",
+      },
       quartz: {
         previewDescription: "Краткое описание тестовой концепт-способности.",
         fullDescription: "Полное описание тестовой концепт-способности.",
-        skill: "Мистика",
-        frequency: "1/сцену",
-        actions: "Основное",
+        skill: "Старый навык",
+        frequency: "1/сессию",
+        actions: "Реакция",
         range: "30 м",
         targets: "1 цель",
         area: "",
@@ -156,8 +169,9 @@ test("syncBook injects concept abilities from the shared gear catalog source", {
     assert.match(chapter03, /^## Концепт-способности$/m)
     assert.match(
       chapter03,
-      /^\|.*Тестовый концепт.*\|.*30 м.*\|.*1 цель.*\|.*Воля.*\|.*1 мин.*\|.*777.*\|$/m,
+      /^\|.*Тестовый концепт.*\|.*Мистика.*\|.*Основное.*\|.*15 м.*\|.*2 цели.*\|.*Стойкость.*\|.*2 раунда.*\|.*777.*\|$/m,
     )
+    assert.doesNotMatch(chapter03, /Старый навык/u)
   } finally {
     await rm(docsConceptPath, { force: true })
 

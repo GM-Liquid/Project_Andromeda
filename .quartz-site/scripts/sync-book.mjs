@@ -191,6 +191,31 @@ function getGearQuartzValue(item, key) {
   return String(value).trim();
 }
 
+function getGearUsageValue(item, key) {
+  const value = item?.usage?.[key];
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  return String(value).trim();
+}
+
+function getGearUsageOrQuartzValue(item, key) {
+  return getGearUsageValue(item, key) || getGearQuartzValue(item, key);
+}
+
+function getGearSkillValue(item) {
+  const skill = item?.skill;
+  if (skill !== null && skill !== undefined) {
+    const normalized = String(skill).trim();
+    if (normalized) {
+      return normalized;
+    }
+  }
+
+  return getGearQuartzValue(item, 'skill');
+}
+
 function buildDescriptionPreview(description, maxLength = 110) {
   const normalized = String(description ?? '').replace(/\s+/g, ' ').trim();
   if (!normalized) {
@@ -240,7 +265,7 @@ function resolvePreviewDescription(previewDescription, fullDescription, fallback
 }
 
 function buildStructuredGearPreview(item) {
-  const skill = getGearQuartzValue(item, 'skill') || String(item.skill ?? '').trim();
+  const skill = getGearSkillValue(item);
   const damage = getGearQuartzValue(item, 'damage') || getEquipmentDamageValue(item);
 
   if (skill || damage) {
@@ -352,9 +377,9 @@ function buildArmorCatalogTable(catalog) {
       getArmorDefenseValue(item, 'psychicDefense', 'will-bonus-x'),
       getGearQuartzValue(item, 'shield'),
       getGearQuartzValue(item, 'speed'),
-      getGearQuartzValue(item, 'frequency'),
-      getGearQuartzValue(item, 'actions'),
-      getGearQuartzValue(item, 'duration'),
+      getGearUsageOrQuartzValue(item, 'frequency'),
+      getGearUsageOrQuartzValue(item, 'actions'),
+      getGearUsageOrQuartzValue(item, 'duration'),
       getGearShortDescription(item),
       getGearDescription(item),
       getGearCatalogPrice(item)
@@ -373,15 +398,15 @@ function buildEquipmentCatalogTable(catalog) {
       getEquipmentTypeLabel(item),
       item.name,
       item.rank,
-      getGearQuartzValue(item, 'skill') || (item.skill ?? ''),
+      getGearSkillValue(item),
       getGearQuartzValue(item, 'damage') || getEquipmentDamageValue(item),
-      getGearQuartzValue(item, 'frequency'),
-      getGearQuartzValue(item, 'actions'),
-      getGearQuartzValue(item, 'range'),
-      getGearQuartzValue(item, 'targets'),
-      getGearQuartzValue(item, 'area'),
-      getGearQuartzValue(item, 'defense'),
-      getGearQuartzValue(item, 'duration'),
+      getGearUsageOrQuartzValue(item, 'frequency'),
+      getGearUsageOrQuartzValue(item, 'actions'),
+      getGearUsageOrQuartzValue(item, 'range'),
+      getGearUsageOrQuartzValue(item, 'targets'),
+      getGearUsageOrQuartzValue(item, 'area'),
+      getGearUsageOrQuartzValue(item, 'defense'),
+      getGearUsageOrQuartzValue(item, 'duration'),
       getGearShortDescription(item),
       getGearDescription(item),
       getGearCatalogPrice(item)
@@ -401,14 +426,14 @@ function buildAbilityCatalogTable(catalog) {
       item.rank,
       getGearShortDescription(item),
       getGearDescription(item),
-      getGearQuartzValue(item, 'frequency'),
-      getGearQuartzValue(item, 'skill') || (item.skill ?? ''),
-      getGearQuartzValue(item, 'actions'),
-      getGearQuartzValue(item, 'range'),
-      getGearQuartzValue(item, 'targets'),
-      getGearQuartzValue(item, 'area'),
-      getGearQuartzValue(item, 'defense'),
-      getGearQuartzValue(item, 'duration'),
+      getGearUsageOrQuartzValue(item, 'frequency'),
+      getGearSkillValue(item),
+      getGearUsageOrQuartzValue(item, 'actions'),
+      getGearUsageOrQuartzValue(item, 'range'),
+      getGearUsageOrQuartzValue(item, 'targets'),
+      getGearUsageOrQuartzValue(item, 'area'),
+      getGearUsageOrQuartzValue(item, 'defense'),
+      getGearUsageOrQuartzValue(item, 'duration'),
       getGearCatalogPrice(item)
     ]);
 
@@ -441,14 +466,14 @@ function buildConceptAbilityCatalogTable(catalog) {
       item.rank ?? '',
       getGearShortDescription(item),
       getGearDescription(item),
-      getGearQuartzValue(item, 'frequency'),
-      getGearQuartzValue(item, 'skill') || (item.skill ?? ''),
-      getGearQuartzValue(item, 'actions'),
-      getGearQuartzValue(item, 'range'),
-      getGearQuartzValue(item, 'targets'),
-      getGearQuartzValue(item, 'area'),
-      getGearQuartzValue(item, 'defense'),
-      getGearQuartzValue(item, 'duration'),
+      getGearUsageOrQuartzValue(item, 'frequency'),
+      getGearSkillValue(item),
+      getGearUsageOrQuartzValue(item, 'actions'),
+      getGearUsageOrQuartzValue(item, 'range'),
+      getGearUsageOrQuartzValue(item, 'targets'),
+      getGearUsageOrQuartzValue(item, 'area'),
+      getGearUsageOrQuartzValue(item, 'defense'),
+      getGearUsageOrQuartzValue(item, 'duration'),
       getGearQuartzValue(item, 'credits') || getGearCatalogPrice(item)
     ]);
 
@@ -690,6 +715,7 @@ export async function syncBook() {
         heroAlt: chapter.heroAlt,
         showHero: chapter.showHero,
         showToc: chapter.showToc,
+        ...(chapter.temporaryNotice ? { temporaryNotice: chapter.temporaryNotice } : {}),
         parent: chapter.parent,
         created: modified,
         modified

@@ -20,6 +20,7 @@ export type RulebookEntry = {
   heroAlt?: string | null;
   showHero?: boolean;
   showToc?: boolean;
+  temporaryNotice?: string | null;
   showInHeaderNav?: boolean;
   parent?: string | null;
 };
@@ -33,6 +34,7 @@ type RulebookFrontmatter = Partial<{
   heroAlt: string | null;
   showHero: boolean;
   showToc: boolean;
+  temporaryNotice: string | null;
 }>;
 
 // @ts-ignore
@@ -102,7 +104,8 @@ export function getRulebookPageMeta(fileData: QuartzPluginData) {
     heroImage: frontmatter.heroImage ?? entry?.heroImage ?? null,
     heroAlt: frontmatter.heroAlt ?? entry?.heroAlt ?? null,
     showHero: frontmatter.showHero ?? entry?.showHero ?? false,
-    showToc: frontmatter.showToc ?? entry?.showToc ?? true
+    showToc: frontmatter.showToc ?? entry?.showToc ?? true,
+    temporaryNotice: frontmatter.temporaryNotice ?? entry?.temporaryNotice ?? null
   };
 }
 
