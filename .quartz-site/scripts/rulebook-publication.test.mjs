@@ -6,19 +6,19 @@ import test from 'node:test';
 import { getGeneratedRulebookEntries } from './rulebook.manifest.mjs';
 import * as syncBookModule from './sync-book.mjs';
 
-test('rewriteRulebookInternalLinks rewrites source-title wikilinks to generated slugs', () => {
+test('rewriteRulebookInternalLinks rewrites chapter-title wikilinks to generated slugs', () => {
   assert.equal(typeof syncBookModule.rewriteRulebookInternalLinks, 'function');
 
   const transformed = syncBookModule.rewriteRulebookInternalLinks(
     [
-      'См. [[Навыки|здесь]].',
-      'Также полезно [[Основные правила#Броски|вернуться к броскам]].'
+      'См. [[Глава 3. Навыки|здесь]].',
+      'Также полезно [[Глава 5. Основные правила#Броски|вернуться к броскам]].'
     ].join('\n'),
     getGeneratedRulebookEntries()
   );
 
-  assert.match(transformed, /\[\[skills-reference\|здесь\]\]/);
-  assert.match(transformed, /\[\[01-osnovnye-pravila#Броски\|вернуться к броскам\]\]/);
+  assert.match(transformed, /\[\[03-navyki\|здесь\]\]/);
+  assert.match(transformed, /\[\[05-osnovnye-pravila#Броски\|вернуться к броскам\]\]/);
 });
 
 test('rulebook custom styles keep nav flyouts above the hero and info callouts render full borders', async () => {

@@ -22,7 +22,7 @@ test('equipment chapter renders a temporary "В работе" notice instead of 
   }
 
   const htmlPath = fileURLToPath(
-    new URL('../public/rulebook/03-sposobnosti-i-snaryazhenie.html', import.meta.url)
+    new URL('../public/rulebook/04-sposobnosti-i-snaryazhenie.html', import.meta.url)
   );
   const html = await readFile(htmlPath, 'utf8');
 

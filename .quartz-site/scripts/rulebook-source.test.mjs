@@ -24,12 +24,12 @@ test("prepareRulebookSource mirrors the sibling docs repo into the public mirror
     const publicFile = resolve(
       publicRepoRoot,
       RULEBOOK_DIRNAME,
-      "Создание персонажа.md",
+      "Глава 2. Создание персонажа.md",
     )
     const docsFile = resolve(
       docsRepoRoot,
       RULEBOOK_DIRNAME,
-      "Создание персонажа.md",
+      "Глава 2. Создание персонажа.md",
     )
 
     await writeFile(publicFile, "public-old", "utf8")
@@ -58,7 +58,7 @@ test("prepareRulebookSource falls back to the public mirror when the docs repo i
 
   await mkdir(publicBookDir, { recursive: true })
 
-  const publicFile = resolve(publicBookDir, "Создание персонажа.md")
+  const publicFile = resolve(publicBookDir, "Глава 2. Создание персонажа.md")
   await writeFile(publicFile, "public-current", "utf8")
 
   try {

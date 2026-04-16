@@ -1,8 +1,9 @@
 [
-  "rulebook/01-osnovnye-pravila.md",
+  "rulebook/01-vvedenie.md",
   "rulebook/02-sozdanie-personazha.md",
-  "rulebook/skills-reference.md",
-  "rulebook/03-sposobnosti-i-snaryazhenie.md",
-  "rulebook/04-boy.md",
-  "rulebook/05-peregovory.md"
+  "rulebook/03-navyki.md",
+  "rulebook/04-sposobnosti-i-snaryazhenie.md",
+  "rulebook/05-osnovnye-pravila.md",
+  "rulebook/06-boy.md",
+  "rulebook/07-peregovory.md"
 ]

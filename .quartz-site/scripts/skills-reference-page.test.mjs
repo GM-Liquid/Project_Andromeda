@@ -6,12 +6,13 @@ import test from 'node:test';
 import { getRulebookManifest } from './rulebook.manifest.mjs';
 import * as syncBookModule from './sync-book.mjs';
 
-test('skills reference is generated from the canonical skills source file', () => {
-  const entry = getRulebookManifest().find((item) => item.id === 'rulebook-skills-reference');
+test('skills chapter is generated from the canonical chapter 3 source file', () => {
+  const entry = getRulebookManifest().find((item) => item.id === 'rulebook-skills');
 
   assert.ok(entry);
   assert.equal(entry.type, 'generated');
-  assert.equal(entry.source, 'Навыки.md');
+  assert.equal(entry.source, 'Глава 3. Навыки.md');
+  assert.deepEqual(entry.aliases, ['skills-reference']);
 });
 
 test('transformSkillsReferenceSource converts the skills source into summary and accordions', () => {
@@ -57,9 +58,9 @@ test('transformSkillsReferenceSource fails loudly when the skills list heading i
   );
 });
 
-test('public mirror includes Навыки.md for fallback builds without the private docs repo', async () => {
+test('public mirror includes chapter 3 skills for fallback builds without the private docs repo', async () => {
   const mirrorPath = fileURLToPath(
-    new URL('../../Книга правил v0.4/Навыки.md', import.meta.url)
+    new URL('../../Книга правил v0.4/Глава 3. Навыки.md', import.meta.url)
   );
 
   await assert.doesNotReject(() => access(mirrorPath));

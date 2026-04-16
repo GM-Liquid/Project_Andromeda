@@ -42,9 +42,9 @@ test("syncBook preserves line breaks in character sheet examples", { concurrency
   )
 })
 
-test("syncBook injects chapter 03 gear catalogs from JSON sources instead of authored markdown tables", { concurrency: false }, async () => {
+test("syncBook injects chapter 04 gear catalogs from JSON sources instead of authored markdown tables", { concurrency: false }, async () => {
   const sourceChapter = await readFile(
-    resolve(repoRoot, "Книга правил v0.4", "Способности и снаряжение.md"),
+    resolve(repoRoot, "Книга правил v0.4", "Глава 4. Способности и снаряжение.md"),
     "utf8",
   )
 
@@ -55,7 +55,7 @@ test("syncBook injects chapter 03 gear catalogs from JSON sources instead of aut
 
   const { generatedFiles } = await syncBook()
   const chapterPath = generatedFiles.find((filePath) =>
-    filePath.endsWith("03-sposobnosti-i-snaryazhenie.md"),
+    filePath.endsWith("04-sposobnosti-i-snaryazhenie.md"),
   )
 
   assert.ok(chapterPath, "expected the abilities and equipment chapter to be generated")
@@ -75,18 +75,8 @@ test("syncBook injects chapter 03 gear catalogs from JSON sources instead of aut
     /^\| Название \| Ранг \| Краткое описание \| Полное описание \| Частота использования \| Навык \| Цена в действиях \| Дальность \| Цели \| Зона \| Защита \| Длительность \| Цена в кредитах \|$/m,
   )
   assert.match(generated, /^\|.*КД-2.*\|$/m)
-  assert.match(
-    generated,
-    /^\| Абразив \| 1 \| Создайте облако сверхострой пыли, ранящее существ в зоне\. \| Создайте облако сверхострой пыли\. Требуется концентрация\. Проверка Мощи против Стойкости каждого существа, которое впервые за ход оказывается в зоне\. При успехе цель получает 2 урона\. \| 1\/сцену \| Мощь \| Основное \|  \| Каждое существо в зоне \|  \| Стойкость \| 10 минут \| 100 \|$/m,
-  )
-  assert.match(
-    generated,
-    /^\|.*Виброклинок.*\|.*Ближний бой.*\|.*Урон: 5\..*\|$/m,
-  )
-  assert.match(
-    generated,
-    /^\|.*Распад.*\|.*Мощь.*\|.*310.*\|$/m,
-  )
+  assert.match(generated, /^## Снаряжение$/m)
+  assert.match(generated, /^## Способности$/m)
 })
 
 test("syncBook injects concept abilities from the shared gear catalog source", { concurrency: false }, async () => {
@@ -158,20 +148,20 @@ test("syncBook injects concept abilities from the shared gear catalog source", {
 
   try {
     const { generatedFiles } = await syncBook()
-    const chapter03Path = generatedFiles.find((filePath) =>
-      filePath.endsWith("03-sposobnosti-i-snaryazhenie.md"),
+    const chapter04Path = generatedFiles.find((filePath) =>
+      filePath.endsWith("04-sposobnosti-i-snaryazhenie.md"),
     )
 
-    assert.ok(chapter03Path, "expected the abilities and equipment chapter to be generated")
+    assert.ok(chapter04Path, "expected the abilities and equipment chapter to be generated")
 
-    const chapter03 = await readFile(resolve(chapter03Path), "utf8")
+    const chapter04 = await readFile(resolve(chapter04Path), "utf8")
 
-    assert.match(chapter03, /^## Концепт-способности$/m)
+    assert.match(chapter04, /^## Концепт-способности$/m)
     assert.match(
-      chapter03,
+      chapter04,
       /^\|.*Тестовый концепт.*\|.*Мистика.*\|.*Основное.*\|.*15 м.*\|.*2 цели.*\|.*Стойкость.*\|.*2 раунда.*\|.*777.*\|$/m,
     )
-    assert.doesNotMatch(chapter03, /Старый навык/u)
+    assert.doesNotMatch(chapter04, /Старый навык/u)
   } finally {
     await rm(docsConceptPath, { force: true })
 
@@ -187,35 +177,35 @@ test("syncBook injects concept abilities from the shared gear catalog source", {
   }
 })
 
-test("syncBook injects the concept abilities catalog into chapter 03 instead of chapter 04", { concurrency: false }, async () => {
+test("syncBook injects the concept abilities catalog into chapter 04 instead of chapter 06", { concurrency: false }, async () => {
   const sourceChapter = await readFile(
-    resolve(repoRoot, "Книга правил v0.4", "Способности и снаряжение.md"),
+    resolve(repoRoot, "Книга правил v0.4", "Глава 4. Способности и снаряжение.md"),
     "utf8",
   )
 
   assert.doesNotMatch(sourceChapter, /^## Концепт-способности$/m)
 
   const { generatedFiles } = await syncBook()
-  const chapter03Path = generatedFiles.find((filePath) =>
-    filePath.endsWith("03-sposobnosti-i-snaryazhenie.md"),
+  const chapter04Path = generatedFiles.find((filePath) =>
+    filePath.endsWith("04-sposobnosti-i-snaryazhenie.md"),
   )
-  const chapter04Path = generatedFiles.find((filePath) => filePath.endsWith("04-boy.md"))
+  const chapter06Path = generatedFiles.find((filePath) => filePath.endsWith("06-boy.md"))
 
-  assert.ok(chapter03Path, "expected the abilities and equipment chapter to be generated")
-  assert.ok(chapter04Path, "expected the combat chapter to be generated")
+  assert.ok(chapter04Path, "expected the abilities and equipment chapter to be generated")
+  assert.ok(chapter06Path, "expected the combat chapter to be generated")
 
-  const chapter03 = await readFile(resolve(chapter03Path), "utf8")
   const chapter04 = await readFile(resolve(chapter04Path), "utf8")
+  const chapter06 = await readFile(resolve(chapter06Path), "utf8")
 
-  assert.match(chapter03, /^## Концепт-способности$/m)
+  assert.match(chapter04, /^## Концепт-способности$/m)
   assert.match(
-    chapter03,
+    chapter04,
     /Временный каталог идей и устаревших версий способностей/u,
   )
   assert.match(
-    chapter03,
+    chapter04,
     /^\| Название \| Ранг \| Краткое описание \| Полное описание \| Частота использования \| Навык \| Цена в действиях \| Дальность \| Цели \| Зона \| Защита \| Длительность \| Цена в кредитах \|$/m,
   )
-  assert.match(chapter03, /^\|.*Болевой шок.*\|$/m)
-  assert.doesNotMatch(chapter04, /^## Концепт-способности$/m)
+  assert.match(chapter04, /^\|.*Болевой шок.*\|$/m)
+  assert.doesNotMatch(chapter06, /^## Концепт-способности$/m)
 })

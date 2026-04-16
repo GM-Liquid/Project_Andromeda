@@ -641,7 +641,7 @@ function normalizeBody(body, chapter, chapters, options = {}) {
     return 'TODO: раздел пока в подготовке.';
   }
 
-  if (chapter.id === 'rulebook-skills-reference') {
+  if (chapter.id === 'rulebook-skills') {
     return transformSkillsReferenceSource(cleaned);
   }
 
@@ -657,7 +657,7 @@ function normalizeBody(body, chapter, chapters, options = {}) {
   if (chapter.title === 'Бой') {
     normalized = normalized.replace(
       /\[Основные правила\]\(\)/g,
-      '[Основные правила](01-osnovnye-pravila)'
+      '[Основные правила](05-osnovnye-pravila)'
     );
   }
 

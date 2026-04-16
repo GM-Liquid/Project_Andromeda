@@ -1,9 +1,10 @@
 ---
 title: "Переговоры"
 navTitle: "Переговоры"
-order: 70
+order: 80
 pageType: "chapter"
 summary: "Социальные сцены, давление, убеждение и правила, которые поддерживают переговоры как полноценную механику."
+aliases: ["05-peregovory"]
 heroImage: null
 heroAlt: null
 showHero: true

@@ -11,16 +11,16 @@ const staticDir = resolve(siteRoot, 'quartz', 'static');
 
 export const rulebookManifest = [
   {
-    id: 'rulebook-core-rules',
+    id: 'rulebook-introduction',
     type: 'generated',
-    slug: 'rulebook/01-osnovnye-pravila',
-    source: 'Основные правила.md',
-    title: 'Основные правила',
-    navTitle: 'Основы',
+    slug: 'rulebook/01-vvedenie',
+    source: 'Глава 1. Введение.md',
+    title: 'Введение',
+    navTitle: 'Введение',
     order: 20,
     pageType: 'chapter',
     summary:
-      'Базовая модель бросков, проверки, движение, стресс и другие фундаментальные правила игры.',
+      'О чем игра, как устроены сцены и чем Project Andromeda отличается от пошаговой симуляции каждого действия.',
     aliases: ['index'],
     heroImage: null,
     heroAlt: null,
@@ -33,13 +33,13 @@ export const rulebookManifest = [
     id: 'rulebook-character-creation',
     type: 'generated',
     slug: 'rulebook/02-sozdanie-personazha',
-    source: 'Создание персонажа.md',
+    source: 'Глава 2. Создание персонажа.md',
     title: 'Создание персонажа',
     navTitle: 'Персонаж',
     order: 30,
     pageType: 'chapter',
     summary:
-      'Пошаговая сборка героя: архетип, ценности, характеристики, навыки, снаряжение и параметры.',
+      'Пошаговая сборка героя: архетип, ценности, характеристики, навыки, снаряжение и итоговые параметры.',
     heroImage: 'assets/rulebook/art-core-1.webp',
     heroAlt: 'Абстрактный арт для раздела о создании персонажа.',
     showHero: true,
@@ -48,18 +48,19 @@ export const rulebookManifest = [
     parent: null
   },
   {
-    id: 'rulebook-skills-reference',
+    id: 'rulebook-skills',
     type: 'generated',
-    slug: 'rulebook/skills-reference',
-    source: 'Навыки.md',
-    title: 'Навыки и ориентиры',
+    slug: 'rulebook/03-navyki',
+    source: 'Глава 3. Навыки.md',
+    title: 'Навыки',
     navTitle: 'Навыки',
     order: 40,
-    pageType: 'reference',
+    pageType: 'chapter',
     summary:
-      'Справочная страница с раскрывающимися блоками по ключевым навыкам и их игровому назначению.',
+      'Справочная глава с расшифровкой уровней навыков и аккордеонами по ключевым навыкам тела, разума и духа.',
+    aliases: ['skills-reference'],
     heroImage: 'assets/rulebook/art-core-1.webp',
-    heroAlt: 'Абстрактный арт для страницы навыков.',
+    heroAlt: 'Абстрактный арт для главы о навыках.',
     showHero: true,
     showToc: true,
     parent: null
@@ -67,33 +68,53 @@ export const rulebookManifest = [
   {
     id: 'rulebook-abilities-equipment',
     type: 'generated',
-    slug: 'rulebook/03-sposobnosti-i-snaryazhenie',
-    source: 'Способности и снаряжение.md',
+    slug: 'rulebook/04-sposobnosti-i-snaryazhenie',
+    source: 'Глава 4. Способности и снаряжение.md',
     title: 'Способности и снаряжение',
     navTitle: 'Снаряжение',
     order: 50,
     pageType: 'chapter',
     summary:
-      'Способности, экипировка и всё, что расширяет базовые возможности персонажа за пределами навыков.',
+      'Способности, экипировка и каталоги, которые расширяют возможности персонажа за пределами базовых навыков.',
+    aliases: ['03-sposobnosti-i-snaryazhenie'],
     heroImage: null,
     heroAlt: null,
     showHero: true,
     showToc: true,
     temporaryNotice: 'В работе',
+    parent: null
+  },
+  {
+    id: 'rulebook-core-rules',
+    type: 'generated',
+    slug: 'rulebook/05-osnovnye-pravila',
+    source: 'Глава 5. Основные правила.md',
+    title: 'Основные правила',
+    navTitle: 'Правила',
+    order: 60,
+    pageType: 'chapter',
+    summary:
+      'Базовая модель бросков, проверки, движение, стресс и другие фундаментальные правила игры.',
+    aliases: ['01-osnovnye-pravila'],
+    heroImage: null,
+    heroAlt: null,
+    showHero: true,
+    showToc: true,
     showInHeaderNav: true,
     parent: null
   },
   {
     id: 'rulebook-combat',
     type: 'generated',
-    slug: 'rulebook/04-boy',
-    source: 'Бой.md',
+    slug: 'rulebook/06-boy',
+    source: 'Глава 6. Бой.md',
     title: 'Бой',
     navTitle: 'Бой',
-    order: 60,
+    order: 70,
     pageType: 'chapter',
     summary:
-      'Структура боевой сцены, действия персонажей и всё, что нужно для разрешения конфликта в тактах.',
+      'Структура боевой сцены, действия персонажей и все, что нужно для разрешения конфликта в тактах.',
+    aliases: ['04-boy'],
     heroImage: null,
     heroAlt: null,
     showHero: true,
@@ -104,14 +125,15 @@ export const rulebookManifest = [
   {
     id: 'rulebook-negotiations',
     type: 'generated',
-    slug: 'rulebook/05-peregovory',
-    source: 'Переговоры.md',
+    slug: 'rulebook/07-peregovory',
+    source: 'Глава 7. Переговоры.md',
     title: 'Переговоры',
     navTitle: 'Переговоры',
-    order: 70,
+    order: 80,
     pageType: 'chapter',
     summary:
       'Социальные сцены, давление, убеждение и правила, которые поддерживают переговоры как полноценную механику.',
+    aliases: ['05-peregovory'],
     heroImage: null,
     heroAlt: null,
     showHero: true,
@@ -138,7 +160,7 @@ function resolveHeroImagePath(heroImage) {
   }
 
   if (heroImage.startsWith('static/')) {
-    return resolve(siteRoot, 'quartz', heroImage);
+    return resolve(staticDir, heroImage.replace(/^static\//, ''));
   }
 
   return resolve(contentDir, heroImage);

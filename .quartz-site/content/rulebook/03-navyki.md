@@ -1,11 +1,12 @@
 ---
-title: "Навыки и ориентиры"
+title: "Навыки"
 navTitle: "Навыки"
 order: 40
-pageType: "reference"
-summary: "Справочная страница с раскрывающимися блоками по ключевым навыкам и их игровому назначению."
+pageType: "chapter"
+summary: "Справочная глава с расшифровкой уровней навыков и аккордеонами по ключевым навыкам тела, разума и духа."
+aliases: ["skills-reference"]
 heroImage: "assets/rulebook/art-core-1.webp"
-heroAlt: "Абстрактный арт для страницы навыков."
+heroAlt: "Абстрактный арт для главы о навыках."
 showHero: true
 showToc: true
 parent: null

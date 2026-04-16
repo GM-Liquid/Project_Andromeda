@@ -1,9 +1,10 @@
 ---
 title: "Бой"
 navTitle: "Бой"
-order: 60
+order: 70
 pageType: "chapter"
-summary: "Структура боевой сцены, действия персонажей и всё, что нужно для разрешения конфликта в тактах."
+summary: "Структура боевой сцены, действия персонажей и все, что нужно для разрешения конфликта в тактах."
+aliases: ["04-boy"]
 heroImage: null
 heroAlt: null
 showHero: true
