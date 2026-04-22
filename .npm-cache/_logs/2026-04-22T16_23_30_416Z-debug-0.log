@@ -7,8 +7,8 @@
 6 silly config load:file:D:\Моя_НРИ\Project Andromeda\.quartz-site\etc\npmrc
 7 verbose title npm exec quartz build
 8 verbose argv "exec" "--" "quartz" "build"
-9 verbose logfile logs-max:10 dir:D:\Моя_НРИ\Project Andromeda\.npm-cache\_logs\2026-04-13T08_29_29_959Z-
-10 verbose logfile D:\Моя_НРИ\Project Andromeda\.npm-cache\_logs\2026-04-13T08_29_29_959Z-debug-0.log
+9 verbose logfile logs-max:10 dir:D:\Моя_НРИ\Project Andromeda\.npm-cache\_logs\2026-04-22T16_23_30_416Z-
+10 verbose logfile D:\Моя_НРИ\Project Andromeda\.npm-cache\_logs\2026-04-22T16_23_30_416Z-debug-0.log
 11 silly logfile start cleaning logs, removing 1 files
 12 silly packumentCache heap:4345298944 maxSize:1086324736 maxEntrySize:543162368
 13 silly logfile done cleaning log files
@@ -28,7 +28,7 @@
 19 warn EBADENGINE }
 20 silly reify moves {}
 21 silly audit bulk request { '@jackyzha0/quartz': [ '4.5.2' ] }
-22 http fetch POST 200 https://registry.npmjs.org/-/npm/v1/security/advisories/bulk 412ms
+22 http fetch POST 200 https://registry.npmjs.org/-/npm/v1/security/advisories/bulk 521ms
 23 silly audit report {}
 24 verbose cwd D:\Моя_НРИ\Project Andromeda\.quartz-site
 25 verbose os Windows_NT 10.0.19045
