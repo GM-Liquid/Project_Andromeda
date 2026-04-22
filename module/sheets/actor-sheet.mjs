@@ -871,7 +871,8 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       canRoll:
         this._isSkillRollItem(item, typeConfig) ||
         (typeConfig.canRoll ?? groupConfig?.canRoll ?? false),
-      isMixedGroup: (groupConfig?.types?.length ?? 0) > 1
+      isMixedGroup: (groupConfig?.types?.length ?? 0) > 1,
+      showKindBadge: groupConfig?.showKindBadge ?? (groupConfig?.types?.length ?? 0) > 1
     };
   }
 
@@ -881,7 +882,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
 
   _getItemBadges(item, config) {
     const badges = [];
-    if (config?.isMixedGroup && config?.key !== 'equipment') {
+    if (config?.showKindBadge && config?.key !== 'equipment') {
       const kindBadge = this._getItemKindBadgeLabel(item);
       if (kindBadge) badges.push(kindBadge);
     }
@@ -947,6 +948,15 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
   }
 
   _getDefaultItemNameForType(type, fallbackConfig = null) {
+    const fallbackTypes = Array.isArray(fallbackConfig?.createTypes)
+      ? fallbackConfig.createTypes
+      : Array.isArray(fallbackConfig?.types)
+        ? fallbackConfig.types
+        : [];
+    if (fallbackConfig && fallbackTypes.includes(type)) {
+      return this._getDefaultItemName(fallbackConfig);
+    }
+
     const groupConfig = getItemGroupConfigs().find(
       (config) => config.types.length === 1 && config.types[0] === type
     );
@@ -1035,8 +1045,10 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const groupKey =
       $target.data('groupKey') || $target.closest('[data-item-group]').data('itemGroup');
     const type = $target.data('type');
-    let config = type ? getItemGroupConfigs().find((entry) => entry.types.includes(type)) : null;
-    if (!config) config = this._getGroupConfig(groupKey);
+    let config = this._getGroupConfig(groupKey);
+    if (!config && type) {
+      config = getItemGroupConfigs().find((entry) => entry.types.includes(type)) ?? null;
+    }
     if (!config) return;
     const selectedType = await this._promptForItemType(config);
     if (!selectedType) return;
@@ -1472,10 +1484,10 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const mental = Number(system.itemMental) || 0;
     const shield = Number(system.itemShield) || 0;
     const speed = Number(system.itemSpeed) || 0;
-    if (phys) lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.BonusPhysicalLabel')}: ${phys}`);
-    if (azure) lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.BonusMagicalLabel')}: ${azure}`);
+    if (phys) lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.BonusFortitudeLabel')}: ${phys}`);
+    if (azure) lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.BonusControlLabel')}: ${azure}`);
     if (mental)
-      lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.BonusPsychicLabel')}: ${mental}`);
+      lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.BonusWillLabel')}: ${mental}`);
     if (shield) lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.ShieldLabel')}: ${shield}`);
     if (speed) lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.BonusSpeedLabel')}: ${speed}`);
     let html = lines.join('<br>');

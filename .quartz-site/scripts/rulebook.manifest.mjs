@@ -81,7 +81,6 @@ export const rulebookManifest = [
     heroAlt: null,
     showHero: true,
     showToc: true,
-    temporaryNotice: 'В работе',
     parent: null
   },
   {

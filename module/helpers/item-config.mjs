@@ -426,32 +426,33 @@ export const ITEM_TYPE_CONFIGS = [
 
 export const ITEM_GROUP_CONFIGS = [
   {
-    key: 'genomes',
-    types: ['trait-genome'],
-    tab: 'abilities',
-    icon: 'fas fa-dna',
-    labelKey: 'MY_RPG.ItemGroups.Genomes',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyGenomes',
-    createKey: 'MY_RPG.ItemGroups.CreateGenome',
-    newNameKey: 'MY_RPG.ItemGroups.NewGenome',
-    showQuantity: false,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: false
-  },
-  {
-    key: 'sourceAbilities',
-    types: ['trait-source-ability'],
+    key: 'abilities',
+    types: [
+      'trait-source-ability',
+      'trait-genome',
+      'trait',
+      'trait-flaw',
+      'trait-general',
+      'trait-backstory',
+      'trait-social',
+      'trait-combat',
+      'trait-magical',
+      'trait-professional',
+      'trait-technological'
+    ],
+    createTypes: ['trait'],
+    filter: isStandardTraitItem,
     tab: 'abilities',
     icon: 'fas fa-bolt',
-    labelKey: 'MY_RPG.ItemGroups.SourceAbilities',
-    emptyKey: 'MY_RPG.ItemGroups.EmptySourceAbilities',
-    createKey: 'MY_RPG.ItemGroups.CreateSourceAbility',
-    newNameKey: 'MY_RPG.ItemGroups.NewSourceAbility',
+    labelKey: 'MY_RPG.ItemGroups.Abilities',
+    emptyKey: 'MY_RPG.ItemGroups.EmptyAbilities',
+    createKey: 'MY_RPG.ItemGroups.CreateAbility',
+    newNameKey: 'MY_RPG.ItemGroups.NewAbility',
     showQuantity: false,
     allowEquip: false,
     exclusive: false,
-    canRoll: false
+    canRoll: false,
+    showKindBadge: false
   },
   {
     key: 'weapons',
@@ -512,32 +513,6 @@ export const ITEM_GROUP_CONFIGS = [
     emptyKey: 'MY_RPG.ItemGroups.EmptyValues',
     createKey: 'MY_RPG.ItemGroups.CreateValue',
     newNameKey: 'MY_RPG.ItemGroups.NewValue',
-    showQuantity: false,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: false
-  },
-  {
-    key: 'traits',
-    types: [
-      'trait',
-      'trait-flaw',
-      'trait-general',
-      'trait-backstory',
-      'trait-social',
-      'trait-combat',
-      'trait-magical',
-      'trait-professional',
-      'trait-technological'
-    ],
-    createTypes: ['trait'],
-    filter: isStandardTraitItem,
-    tab: 'abilities',
-    icon: 'fas fa-tags',
-    labelKey: 'MY_RPG.ItemGroups.Traits',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyTraits',
-    createKey: 'MY_RPG.ItemGroups.CreateTrait',
-    newNameKey: 'MY_RPG.ItemGroups.NewTrait',
     showQuantity: false,
     allowEquip: false,
     exclusive: false,
@@ -661,9 +636,9 @@ export const ITEM_BADGE_BUILDERS = {
     const mental = Number(system.itemMental) || 0;
     const shield = Number(system.itemShield) || 0;
     const speed = Number(system.itemSpeed) || 0;
-    if (phys) badges.push(`${t.localize('MY_RPG.ArmorItem.BonusPhysicalLabel')}: ${phys}`);
-    if (azure) badges.push(`${t.localize('MY_RPG.ArmorItem.BonusMagicalLabel')}: ${azure}`);
-    if (mental) badges.push(`${t.localize('MY_RPG.ArmorItem.BonusPsychicLabel')}: ${mental}`);
+    if (phys) badges.push(`${t.localize('MY_RPG.ArmorItem.BonusFortitudeLabel')}: ${phys}`);
+    if (azure) badges.push(`${t.localize('MY_RPG.ArmorItem.BonusControlLabel')}: ${azure}`);
+    if (mental) badges.push(`${t.localize('MY_RPG.ArmorItem.BonusWillLabel')}: ${mental}`);
     if (shield) badges.push(`${t.localize('MY_RPG.ArmorItem.ShieldLabel')}: ${shield}`);
     if (speed) badges.push(`${t.localize('MY_RPG.ArmorItem.BonusSpeedLabel')}: ${speed}`);
     return badges;

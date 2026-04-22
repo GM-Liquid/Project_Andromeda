@@ -7,7 +7,7 @@ import test from 'node:test';
 
 const execFileAsync = promisify(execFile);
 
-test('equipment chapter renders a temporary "В работе" notice instead of the generated catalog content', async () => {
+test('equipment chapter renders the generated catalog content when the temporary notice is disabled', async () => {
   const cwd = fileURLToPath(new URL('..', import.meta.url));
   if (process.platform === 'win32') {
     await execFileAsync('cmd.exe', ['/d', '/s', '/c', 'npm run build'], {
@@ -26,6 +26,6 @@ test('equipment chapter renders a temporary "В работе" notice instead of 
   );
   const html = await readFile(htmlPath, 'utf8');
 
-  assert.match(html, /В работе/u);
-  assert.doesNotMatch(html, /КД-2/u);
+  assert.doesNotMatch(html, /data-temporary-notice="true"/u);
+  assert.match(html, /rulebook-ability-catalog__summary-row/u);
 });

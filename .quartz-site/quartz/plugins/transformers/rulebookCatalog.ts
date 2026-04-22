@@ -1,3 +1,9 @@
+import { readFileSync } from "node:fs"
+import { dirname, resolve } from "node:path"
+import { fileURLToPath } from "node:url"
+
+import { extractSkillTitles } from "../../../scripts/skills-reference-source.mjs"
+
 const abilityCatalogClass = "rulebook-ability-catalog"
 
 export type RulebookCatalogKind = "abilities" | "weapons" | "armor" | "equipment"
@@ -240,27 +246,40 @@ const actionOptions = ["Основное", "Маневр", "Реакция", "С
 const noSkillLabel = "Без навыка"
 const skillSeedValues = [
   "Анализ",
-  "Биомантия",
-  "Бионика",
   "Ближний бой",
   "Доминирование",
   "Инженерия",
-  "Кинетика",
   "Ловкость",
   "Мистика",
   "Мощь",
   "Наблюдательность",
   "Обаяние",
-  "Предвидение",
-  "Программирование",
-  "Псионика",
   "Резонанс",
   "Сокрытие",
   "Стрельба",
-  "Стихийность",
-  "Тело",
   "Хакерство",
 ]
+
+const rulebookSkillsSourcePath = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  "../../../..",
+  "Книга правил v0.4",
+  "Глава 3. Навыки.md",
+)
+
+function loadRulebookSkillSeedValues() {
+  try {
+    return extractSkillTitles(readFileSync(rulebookSkillsSourcePath, "utf8"))
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return skillSeedValues
+    }
+
+    throw error
+  }
+}
+
+const rulebookSkillSeedValues = loadRulebookSkillSeedValues()
 
 const abilitySortOptions: RulebookCatalogSortOption[] = [
   { value: "title-asc", label: "По названию", sortKey: "name", direction: "asc" },
@@ -872,7 +891,7 @@ function buildAbilityCatalogModel(headers: string[], rows: string[][]): Rulebook
         label: "Навык",
         values: sortAlphaValues([
           noSkillLabel,
-          ...skillSeedValues,
+          ...rulebookSkillSeedValues,
           ...entries.map((entry) => entry.filters.skill ?? ""),
         ]),
       },
@@ -961,7 +980,7 @@ function buildWeaponCatalogModel(headers: string[], rows: string[][]): RulebookC
         label: "Навык",
         values: sortAlphaValues([
           noSkillLabel,
-          ...skillSeedValues,
+          ...rulebookSkillSeedValues,
           ...entries.map((entry) => entry.filters.skill ?? ""),
         ]),
       },
@@ -1149,7 +1168,7 @@ function buildEquipmentCatalogModel(headers: string[], rows: string[][]): Rulebo
               label: "Навык",
               values: sortAlphaValues([
                 noSkillLabel,
-                ...skillSeedValues,
+                ...rulebookSkillSeedValues,
                 ...entries.map((entry) => entry.filters.skill ?? ""),
               ]),
             },

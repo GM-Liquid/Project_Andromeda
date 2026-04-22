@@ -11,7 +11,7 @@
 | ----------------------------- | --------------------------------------------------------------- |
 | **System name**               | **Project Andromeda**                                           |
 | **Foundry VTT compatibility** | v12 (verified 12)                                               |
-| **Current version**           | `0.3.4.0`                                                       |
+| **Current version**           | `0.3.4.3`                                                       |
 | **Current release line**      | `0.3.4.x`                                                       |
 | **Languages**                 | English, Русский (full parity required)                         |
 | **Main tech**                 | ES-module JavaScript (`*.mjs`), Handlebars (`*.hbs`), JSON, CSS |
@@ -180,10 +180,11 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 - Rank-and-file characters (`rankAndFile`, shown in UI as **Rank-and-File** / **Рядовой**) use stress **4 x rank** and **do** support azure-stress marking on the stress track.
 - Elite characters (`elite`, shown in UI as **Elite** / **Элита**) use stress **10 x rank** and do **not** support azure-stress marking on the stress track.
 - `system.temphealth` is presented as **temporary stress** for backwards compatibility and extends the **power shield** track rather than the base stress track.
+- Shipped defense labels use **Fortitude / Control / Will** in English and **Стойкость / Контроль / Воля** in Russian: Fortitude maps to Body, Control maps to Mind, and Will maps to Spirit.
 
 ### 3.5 Movement Speed
 
-- Base movement speed depends on `system.currentRank`: **15** at rank 1, **45** at rank 2, **150** at rank 3, and **450** at rank 4.
+- Base movement speed depends on `system.currentRank`: **15** at rank 1, **50** at rank 2, **150** at rank 3, and **450** at rank 4.
 - Movement speed does **not** scale from abilities.
 - Armor speed modifiers and `system.tempspeed` remain additive on top of that rank-based base value.
 
@@ -284,4 +285,4 @@ The Google Sheets sync MVP is part of the shipped Foundry system.
 
 ---
 
-_Last updated: 2026-04-16_
+_Last updated: 2026-04-22_

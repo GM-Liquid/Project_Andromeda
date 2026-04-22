@@ -14,7 +14,9 @@ const hasRulebookTemporaryNotice = (page: RulebookLayoutPage) =>
   isRulebookPage(page) && Boolean(getRulebookPageMeta(page.fileData).temporaryNotice);
 
 const shouldShowRulebookHero = (page: RulebookLayoutPage) =>
-  isRulebookPage(page) && !hasRulebookTemporaryNotice(page) && getRulebookPageMeta(page.fileData).showHero;
+  isRulebookPage(page) &&
+  !hasRulebookTemporaryNotice(page) &&
+  getRulebookPageMeta(page.fileData).showHero;
 
 const shouldShowRulebookToc = (page: RulebookLayoutPage) =>
   isRulebookPage(page) &&

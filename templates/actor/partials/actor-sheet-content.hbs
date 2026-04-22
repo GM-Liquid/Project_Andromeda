@@ -21,14 +21,6 @@
           <section class='sheet-box personality-sheet-box'>
             <div class='personality-grid'>
               <div class='form-group'>
-                <label>{{localize 'MY_RPG.Personality.Feature'}}</label>
-                <textarea
-                  class='auto-resize-textarea'
-                  name='system.biography.feature'
-                  rows='2'
-                >{{system.biography.feature}}</textarea>
-              </div>
-              <div class='form-group'>
                 <label>{{localize 'MY_RPG.Personality.Archetype'}}</label>
                 <textarea
                   class='auto-resize-textarea'
@@ -43,14 +35,6 @@
                   name='system.biography.appearance'
                   rows='2'
                 >{{system.biography.appearance}}</textarea>
-              </div>
-              <div class='form-group personality-field personality-field--full'>
-                <label>{{localize 'MY_RPG.Personality.Backstory'}}</label>
-                <textarea
-                  class='auto-resize-textarea'
-                  name='system.biography.backstory'
-                  rows='2'
-                >{{system.biography.backstory}}</textarea>
               </div>
             </div>
           </section>
@@ -267,7 +251,7 @@
 
             <div class='resource flex-group-center'>
               <label class='resource-label'>
-                {{localize 'MY_RPG.Defenses.PhysicalLabel'}}
+                {{localize 'MY_RPG.Defenses.FortitudeLabel'}}
               </label>
               <div class='resource-content flexcol'>
                 <input
@@ -285,7 +269,7 @@
 
             <div class='resource flex-group-center'>
               <label class='resource-label'>
-                {{localize 'MY_RPG.Defenses.MagicalLabel'}}
+                {{localize 'MY_RPG.Defenses.ControlLabel'}}
               </label>
               <div class='resource-content flexcol'>
                 <input
@@ -303,7 +287,7 @@
 
             <div class='resource flex-group-center'>
               <label class='resource-label'>
-{{localize 'MY_RPG.Defenses.PsychicLabel'}}
+{{localize 'MY_RPG.Defenses.WillLabel'}}
               </label>
               <div class='resource-content flexcol'>
                 <input
@@ -372,7 +356,7 @@
                     /></td>
                 </tr>
                 <tr>
-                  <td>{{localize 'MY_RPG.Temp.BonusPhysicalLabel'}}</td>
+                  <td>{{localize 'MY_RPG.Temp.BonusFortitudeLabel'}}</td>
                   <td><input
                       type='number'
                       name='system.tempphys'
@@ -380,7 +364,7 @@
                     /></td>
                 </tr>
                 <tr>
-                  <td>{{localize 'MY_RPG.Temp.BonusMagicalLabel'}}</td>
+                  <td>{{localize 'MY_RPG.Temp.BonusControlLabel'}}</td>
                   <td><input
                       type='number'
                       name='system.tempazure'
@@ -388,7 +372,7 @@
                     /></td>
                 </tr>
                 <tr>
-                  <td>{{localize 'MY_RPG.Temp.BonusPsychicLabel'}}</td>
+                  <td>{{localize 'MY_RPG.Temp.BonusWillLabel'}}</td>
                   <td><input
                       type='number'
                       name='system.tempmental'

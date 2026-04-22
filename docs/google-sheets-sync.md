@@ -50,7 +50,7 @@ Common visible columns on every sheet:
 Visible per-sheet columns:
 
 - `weapons`: localized `Rank`, `Skill`, `Damage`, `Description`
-- `armor`: localized `Rank`, `Physical Protection`, `Magical Protection`, `Mental Protection`, `Power Shield`, `Speed Bonus`, `Description`
+- `armor`: localized `Rank`, `Fortitude`, `Control`, `Will`, `Power Shield`, `Speed Bonus`, `Description`
 - `equipment`: localized `Rank`, `Skill`, `Damage`, `Description`
 - `traits`: localized `Usage Frequency`, `Activation`, `Range`, `Skill`, `Description`
 - `environment`: localized `Quantity`, `Description`

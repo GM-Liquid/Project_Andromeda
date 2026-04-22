@@ -22,6 +22,27 @@ async function pathExists(path) {
   }
 }
 
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+}
+
+function getSectionBody(document, heading) {
+  const headingPattern = new RegExp(`^## ${escapeRegExp(heading)}$`, "mu")
+  const match = headingPattern.exec(document)
+
+  if (!match) {
+    return ""
+  }
+
+  const sectionStart = match.index + match[0].length + 1
+  const nextHeadingMatch = /^## /m.exec(document.slice(sectionStart))
+  const sectionEnd = nextHeadingMatch
+    ? sectionStart + nextHeadingMatch.index
+    : document.length
+
+  return document.slice(sectionStart, sectionEnd)
+}
+
 test("syncBook preserves line breaks in character sheet examples", { concurrency: false }, async () => {
   const { generatedFiles } = await syncBook()
   const chapterPath = generatedFiles.find((filePath) =>
@@ -77,6 +98,34 @@ test("syncBook injects chapter 04 gear catalogs from JSON sources instead of aut
   assert.match(generated, /^\|.*КД-2.*\|$/m)
   assert.match(generated, /^## Снаряжение$/m)
   assert.match(generated, /^## Способности$/m)
+})
+
+test("syncBook keeps chapter 04 equipment and abilities sections populated when catalogs are draft-only", { concurrency: false }, async () => {
+  const { generatedFiles } = await syncBook()
+  const chapterPath = generatedFiles.find((filePath) =>
+    filePath.endsWith("04-sposobnosti-i-snaryazhenie.md"),
+  )
+
+  assert.ok(chapterPath, "expected the abilities and equipment chapter to be generated")
+
+  const generated = await readFile(resolve(chapterPath), "utf8")
+  const equipmentCatalog = JSON.parse(
+    await readFile(resolve(repoRoot, "data", "gear", "catalog", "equipment.json"), "utf8"),
+  )
+  const abilitiesCatalog = JSON.parse(
+    await readFile(resolve(repoRoot, "data", "gear", "catalog", "abilities.json"), "utf8"),
+  )
+  const equipmentEntry = equipmentCatalog.find((item) => item.status !== "deprecated")
+  const abilityEntry = abilitiesCatalog.find((item) => item.status !== "deprecated")
+
+  assert.ok(equipmentEntry, "expected at least one visible equipment entry")
+  assert.ok(abilityEntry, "expected at least one visible ability entry")
+
+  const equipmentSection = getSectionBody(generated, "Снаряжение")
+  const abilitiesSection = getSectionBody(generated, "Способности")
+
+  assert.match(equipmentSection, new RegExp(escapeRegExp(equipmentEntry.name), "u"))
+  assert.match(abilitiesSection, new RegExp(escapeRegExp(abilityEntry.name), "u"))
 })
 
 test("syncBook injects concept abilities from the shared gear catalog source", { concurrency: false }, async () => {

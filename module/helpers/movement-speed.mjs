@@ -1,6 +1,6 @@
 const MOVEMENT_SPEED_BY_RANK = Object.freeze({
   1: 15,
-  2: 45,
+  2: 50,
   3: 150,
   4: 450
 });

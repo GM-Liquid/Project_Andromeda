@@ -58,6 +58,36 @@ test('transformSkillsReferenceSource fails loudly when the skills list heading i
   );
 });
 
+test('extractSkillTitles returns the current public skill list in source order', () => {
+  assert.equal(typeof syncBookModule.extractSkillTitles, 'function');
+
+  const extracted = syncBookModule.extractSkillTitles(`### Что означают значения навыков
+
+Навыки растут от **0** до **10**.
+
+### Список навыков
+#### Навыки Тела
+
+**Мощь**
+Описание мощи.
+
+**Ловкость**
+Описание ловкости.
+
+#### Навыки Разума
+
+**Анализ**
+Описание анализа.
+
+#### Навыки Духа
+
+**Резонанс**
+Описание резонанса.
+`);
+
+  assert.deepEqual(extracted, ['Мощь', 'Ловкость', 'Анализ', 'Резонанс']);
+});
+
 test('public mirror includes chapter 3 skills for fallback builds without the private docs repo', async () => {
   const mirrorPath = fileURLToPath(
     new URL('../../Книга правил v0.4/Глава 3. Навыки.md', import.meta.url)

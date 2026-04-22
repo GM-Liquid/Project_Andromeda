@@ -8,9 +8,9 @@ import {
 } from './rulebook.manifest.mjs';
 import { prepareGearCatalogSource } from './gear-catalog-source.mjs';
 import { prepareRulebookSource } from './rulebook-source.mjs';
-import { transformSkillsReferenceSource } from './skills-reference-source.mjs';
+import { extractSkillTitles, transformSkillsReferenceSource } from './skills-reference-source.mjs';
 
-export { transformSkillsReferenceSource } from './skills-reference-source.mjs';
+export { extractSkillTitles, transformSkillsReferenceSource } from './skills-reference-source.mjs';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const siteRoot = resolve(scriptDir, '..');
@@ -330,6 +330,18 @@ function isPublishedGearCatalogItem(item) {
   return item?.status !== 'draft' && item?.status !== 'deprecated';
 }
 
+function getRenderableGearCatalogItems(catalog) {
+  const items = Array.isArray(catalog?.items) ? catalog.items : [];
+  const publishedItems = items.filter(isPublishedGearCatalogItem);
+
+  if (publishedItems.length > 0) {
+    return publishedItems;
+  }
+
+  // Keep public chapter sections usable while a whole catalog is still draft-only.
+  return items.filter((item) => item?.status !== 'deprecated');
+}
+
 function getGearPropertyValue(item, propertyKey) {
   const property = item.properties?.find((candidate) => candidate.key === propertyKey);
   if (!property || property.value === null || property.value === undefined) {
@@ -367,9 +379,7 @@ function getEquipmentDamageValue(item) {
 }
 
 function buildArmorCatalogTable(catalog) {
-  const rows = catalog.items
-    .filter(isPublishedGearCatalogItem)
-    .map((item) => [
+  const rows = getRenderableGearCatalogItems(catalog).map((item) => [
       item.name,
       item.rank,
       getArmorDefenseValue(item, 'physicalDefense', 'fortitude-bonus-x'),
@@ -392,9 +402,7 @@ function buildArmorCatalogTable(catalog) {
 }
 
 function buildEquipmentCatalogTable(catalog) {
-  const rows = catalog.items
-    .filter(isPublishedGearCatalogItem)
-    .map((item) => [
+  const rows = getRenderableGearCatalogItems(catalog).map((item) => [
       getEquipmentTypeLabel(item),
       item.name,
       item.rank,
@@ -419,9 +427,7 @@ function buildEquipmentCatalogTable(catalog) {
 }
 
 function buildAbilityCatalogTable(catalog) {
-  const rows = catalog.items
-    .filter(isPublishedGearCatalogItem)
-    .map((item) => [
+  const rows = getRenderableGearCatalogItems(catalog).map((item) => [
       item.name,
       item.rank,
       getGearShortDescription(item),
@@ -459,9 +465,7 @@ function buildAbilityCatalogTable(catalog) {
 
 function buildConceptAbilityCatalogTable(catalog) {
   // Temporary catalog sourced from data/gear/catalog/concept-abilities.json.
-  const rows = catalog.items
-    .filter(isPublishedGearCatalogItem)
-    .map((item) => [
+  const rows = getRenderableGearCatalogItems(catalog).map((item) => [
       item.name ?? '',
       item.rank ?? '',
       getGearShortDescription(item),

@@ -64,13 +64,13 @@ test('moved chapters keep the legacy public URLs as aliases', () => {
   assert.deepEqual(negotiationsChapter?.aliases, ['05-peregovory']);
 });
 
-test('equipment chapter can be overridden with a temporary notice without affecting neighboring chapters', () => {
+test('equipment chapter keeps the temporary notice mechanism disabled by default', () => {
   const manifest = getRulebookManifest();
   const equipmentChapter = manifest.find(
     (entry) => entry.slug === 'rulebook/04-sposobnosti-i-snaryazhenie'
   );
   const combatChapter = manifest.find((entry) => entry.slug === 'rulebook/06-boy');
 
-  assert.equal(equipmentChapter?.temporaryNotice, 'В работе');
+  assert.equal(equipmentChapter?.temporaryNotice ?? null, null);
   assert.equal(combatChapter?.temporaryNotice ?? null, null);
 });

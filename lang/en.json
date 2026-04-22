@@ -65,13 +65,13 @@
       "AlreadyEditing": "An edit dialog is already open. Please close it before opening another."
     },
     "Defenses": {
-      "PhysicalLabel": "Physical Protection",
-      "MagicalLabel": "Arcane Protection",
-      "PsychicLabel": "Mental Protection"
+      "FortitudeLabel": "Fortitude",
+      "ControlLabel": "Control",
+      "WillLabel": "Will"
     },
     "SheetLabels": {
       "Actor": "Character Sheet",
-      "AbilitiesAndMods": "Abilities and Genomes",
+      "AbilitiesAndMods": "Abilities",
       "Features": "Main Sheet",
       "Abilities": "Genomes",
       "Parameters": "Parameters",
@@ -118,9 +118,9 @@
       "CellAria": "Force shield point {index}"
     },
     "ArmorItem": {
-      "BonusPhysicalLabel": "Bonus to Physical Protection",
-      "BonusMagicalLabel": "Bonus to Arcane Protection",
-      "BonusPsychicLabel": "Bonus to Mental Protection",
+      "BonusFortitudeLabel": "Bonus to Fortitude",
+      "BonusControlLabel": "Bonus to Control",
+      "BonusWillLabel": "Bonus to Will",
       "ArmorSectionTitle": "Armor",
       "DescriptionLabel": "Description",
       "ShieldLabel": "Power Shield",
@@ -164,9 +164,9 @@
       "Label": "Temp. Stress"
     },
     "Temp": {
-      "BonusPhysicalLabel": "Temp. Phys. Protection",
-      "BonusMagicalLabel": "Temp. Arc. Protection",
-      "BonusPsychicLabel": "Temp. Ment. Protection"
+      "BonusFortitudeLabel": "Temp. Fortitude",
+      "BonusControlLabel": "Temp. Control",
+      "BonusWillLabel": "Temp. Will"
     },
     "TempSpeed": {
       "Label": "Temp. Speed"
@@ -251,6 +251,10 @@
       "EmptyImplants": "No implants yet.",
       "CreateImplant": "Add implant",
       "NewImplant": "New Implant",
+      "Abilities": "Abilities",
+      "EmptyAbilities": "No abilities yet.",
+      "CreateAbility": "Add ability",
+      "NewAbility": "New Ability",
       "Genomes": "Genomes",
       "EmptyGenomes": "No genomes yet.",
       "CreateGenome": "Add genome",
@@ -320,7 +324,7 @@
     },
     "UsageFrequency": {
       "Scene": "1/Scene",
-      "TwoPerScene": "2/Scene",
+      "TwoPerScene": "1/Session",
       "Passive": "Unlimited"
     },
     "ActivationTypes": {
@@ -395,9 +399,9 @@
         "Skill": "Skill",
         "SkillBonus": "Damage",
         "Description": "Description",
-        "ItemPhys": "Physical Protection",
-        "ItemAzure": "Magical Protection",
-        "ItemMental": "Mental Protection",
+        "ItemFortitude": "Fortitude",
+        "ItemControl": "Control",
+        "ItemWill": "Will",
         "ItemShield": "Power Shield",
         "ItemSpeed": "Speed Bonus",
         "UsageFrequency": "Usage Frequency",

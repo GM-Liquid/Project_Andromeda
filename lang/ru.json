@@ -31,9 +31,9 @@
       }
     },
     "Defenses": {
-      "PhysicalLabel": "Физическая защита",
-      "MagicalLabel": "Магическая защита",
-      "PsychicLabel": "Психическая защита"
+      "FortitudeLabel": "Стойкость",
+      "ControlLabel": "Контроль",
+      "WillLabel": "Воля"
     },
     "RankNumeric": {
       "Title": "Ранг",
@@ -45,9 +45,9 @@
     "ArmorItem": {
       "ArmorSectionTitle": "Доспех",
       "DescriptionLabel": "Описание",
-      "BonusPhysicalLabel": "Бонус к физической защите",
-      "BonusMagicalLabel": "Бонус к магической защите",
-      "BonusPsychicLabel": "Бонус к психической защите",
+      "BonusFortitudeLabel": "Бонус к Стойкости",
+      "BonusControlLabel": "Бонус к Контролю",
+      "BonusWillLabel": "Бонус к Воле",
       "ShieldLabel": "Силовой щит",
       "BonusSpeedLabel": "Бонус к скорости"
     },
@@ -79,9 +79,9 @@
       "MoneyLabel": "Деньги"
     },
     "Temp": {
-      "BonusPhysicalLabel": "Врем. физ. защита",
-      "BonusMagicalLabel": "Врем. маг. защита",
-      "BonusPsychicLabel": "Врем. псих. защита"
+      "BonusFortitudeLabel": "Врем. Стойкость",
+      "BonusControlLabel": "Врем. Контроль",
+      "BonusWillLabel": "Врем. Воля"
     },
     "KeyInfo": {
       "Calling": "Призвание",
@@ -96,7 +96,7 @@
     },
     "SheetLabels": {
       "Actor": "Лист персонажа",
-      "AbilitiesAndMods": "Способности и геномы",
+      "AbilitiesAndMods": "Способности",
       "Features": "Основной лист",
       "Abilities": "Геномы",
       "Parameters": "Параметры",
@@ -251,6 +251,10 @@
       "EmptyImplants": "Пока нет имплантов.",
       "CreateImplant": "Добавить имплант",
       "NewImplant": "Новый имплант",
+      "Abilities": "Способности",
+      "EmptyAbilities": "Пока нет способностей.",
+      "CreateAbility": "Добавить способность",
+      "NewAbility": "Новая способность",
       "Genomes": "Геномы",
       "EmptyGenomes": "Пока нет геномов.",
       "CreateGenome": "Добавить геном",
@@ -320,7 +324,7 @@
     },
     "UsageFrequency": {
       "Scene": "1/Сцену",
-      "TwoPerScene": "2/Сцену",
+      "TwoPerScene": "1/Сессию",
       "Passive": "Неограниченно"
     },
     "ActivationTypes": {
@@ -395,9 +399,9 @@
         "Skill": "Навык",
         "SkillBonus": "Урон",
         "Description": "Описание",
-        "ItemPhys": "Физ. защита",
-        "ItemAzure": "Маг. защита",
-        "ItemMental": "Псих. защита",
+        "ItemFortitude": "Стойкость",
+        "ItemControl": "Контроль",
+        "ItemWill": "Воля",
         "ItemShield": "Сил. щит",
         "ItemSpeed": "Бонус к скорости",
         "UsageFrequency": "Частота использования",

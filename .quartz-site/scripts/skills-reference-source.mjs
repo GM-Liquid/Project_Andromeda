@@ -27,7 +27,7 @@ function parseSkillTitle(line) {
   return match ? match[1].trim() : null;
 }
 
-export function transformSkillsReferenceSource(source) {
+function parseSkillsReference(source) {
   const cleaned = source.replace(/^\uFEFF/, '').trim();
   if (!cleaned) {
     throw new Error('Навыки.md is empty.');
@@ -49,10 +49,10 @@ export function transformSkillsReferenceSource(source) {
   }
 
   const summaryLines = trimBlankLines(lines.slice(introIndex, skillsListIndex));
-  const output = [':::summary', ...summaryLines, ':::', ''];
   const skillsLines = lines.slice(skillsListIndex + 1);
-
+  const groups = [];
   let currentGroup = null;
+
   for (let index = 0; index < skillsLines.length; ) {
     const line = skillsLines[index];
     const trimmed = line.trim();
@@ -71,10 +71,10 @@ export function transformSkillsReferenceSource(source) {
 
       currentGroup = {
         title: groupTitle,
-        abilityLabel
+        abilityLabel,
+        skills: []
       };
-
-      output.push(`### ${groupTitle}`, '');
+      groups.push(currentGroup);
       index += 1;
       continue;
     }
@@ -107,12 +107,39 @@ export function transformSkillsReferenceSource(source) {
       throw new Error(`Skill "${skillTitle}" is missing body text.`);
     }
 
-    output.push(
-      `:::accordion "${skillTitle}" | ${currentGroup.abilityLabel}`,
-      ...normalizedBody,
-      ':::',
-      ''
-    );
+    currentGroup.skills.push({
+      title: skillTitle,
+      bodyLines: normalizedBody
+    });
+  }
+
+  return {
+    summaryLines,
+    groups
+  };
+}
+
+export function extractSkillTitles(source) {
+  return parseSkillsReference(source).groups.flatMap((group) =>
+    group.skills.map((skill) => skill.title)
+  );
+}
+
+export function transformSkillsReferenceSource(source) {
+  const parsed = parseSkillsReference(source);
+  const output = [':::summary', ...parsed.summaryLines, ':::', ''];
+
+  for (const group of parsed.groups) {
+    output.push(`### ${group.title}`, '');
+
+    for (const skill of group.skills) {
+      output.push(
+        `:::accordion "${skill.title}" | ${group.abilityLabel}`,
+        ...skill.bodyLines,
+        ':::',
+        ''
+      );
+    }
   }
 
   return trimBlankLines(output).join('\n');

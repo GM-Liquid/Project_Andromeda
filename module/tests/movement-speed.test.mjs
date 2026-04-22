@@ -6,7 +6,7 @@ import { calcMovementSpeed, getBaseMovementSpeedByRank } from '../helpers/moveme
 test('maps character rank to the new base movement speed', () => {
   assert.equal(getBaseMovementSpeedByRank(0), 0);
   assert.equal(getBaseMovementSpeedByRank(1), 15);
-  assert.equal(getBaseMovementSpeedByRank(2), 45);
+  assert.equal(getBaseMovementSpeedByRank(2), 50);
   assert.equal(getBaseMovementSpeedByRank(3), 150);
   assert.equal(getBaseMovementSpeedByRank(4), 450);
   assert.equal(getBaseMovementSpeedByRank(99), 450);
@@ -17,5 +17,9 @@ test('keeps armor and temporary speed additive on top of the rank base', () => {
   assert.equal(
     calcMovementSpeed({ currentRank: 4, tempspeed: 10 }, { armor: { speed: -20 } }),
     440
+  );
+  assert.equal(
+    calcMovementSpeed({ currentRank: 2, tempspeed: 5 }, { armor: { speed: 10 } }),
+    65
   );
 });
