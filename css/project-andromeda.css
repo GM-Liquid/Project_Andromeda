@@ -1,7 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 /* Global styles */
 .window-app {
-  font-family: "Roboto", sans-serif;
+  font-family: 'Roboto', sans-serif;
 }
 
 /* Rank colors -------------------------------------------------- */
@@ -31,6 +31,33 @@
 .key-info-input[readonly] {
   background-color: #f8f8f8;
   color: #1b1210;
+}
+
+.key-info-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.key-info-grid__row {
+  display: grid;
+  gap: 10px;
+  align-items: start;
+}
+
+.key-info-grid__row--four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.key-info-grid__row--two-centered {
+  grid-template-columns: repeat(2, minmax(220px, 280px));
+  justify-content: center;
+}
+
+.key-info-grid__placeholder {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .key-info-health {
@@ -113,6 +140,11 @@
   .key-info-health .health-resource--stress,
   .key-info-health .health-resource--shield {
     justify-self: stretch;
+  }
+
+  .key-info-grid__row--four,
+  .key-info-grid__row--two-centered {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -324,7 +356,7 @@ textarea[disabled] {
   margin: 0;
 }
 
-.project-andromeda.item-sheet .item-field--checkbox input[type="checkbox"] {
+.project-andromeda.item-sheet .item-field--checkbox input[type='checkbox'] {
   width: 1.1rem;
   height: 1.1rem;
   margin: 0;
@@ -336,8 +368,8 @@ textarea[disabled] {
 }
 
 .project-andromeda.item-sheet textarea,
-.project-andromeda.item-sheet input[type="text"],
-.project-andromeda.item-sheet input[type="number"],
+.project-andromeda.item-sheet input[type='text'],
+.project-andromeda.item-sheet input[type='number'],
 .project-andromeda.item-sheet select {
   width: 100%;
   box-sizing: border-box;
@@ -489,12 +521,13 @@ textarea[disabled] {
 }
 
 .project-andromeda.sheet.actor {
+  --inventory-section-gap: 1rem;
   background-color: #d2d2c9;
 }
 
 form textarea,
-form input[type="text"],
-form input[type="number"] {
+form input[type='text'],
+form input[type='number'] {
   border: 2px solid #1b1210; /*            */
   background-color: #f8f8f8; /*                                         */
   color: #1b1210; /*                          */
@@ -542,6 +575,23 @@ form input[type="number"] {
 
 .skills-column-title {
   font-size: 1rem;
+}
+
+.temp-bonus-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  align-items: end;
+}
+
+.temp-bonus-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.temp-bonus-field label {
+  text-align: center;
 }
 
 /*         resizable   textarea */
@@ -615,9 +665,9 @@ td.col-name:hover {
 
 .project-andromeda
   .abilities-table
-  tr:nth-child(even):not(.ability-effect-row):not(.mod-effect-row):not(
-    .inventory-effect-row
-  ):not(.armor-effect-row):not(.weapon-effect-row) {
+  tr:nth-child(even):not(.ability-effect-row):not(.mod-effect-row):not(.inventory-effect-row):not(
+    .armor-effect-row
+  ):not(.weapon-effect-row) {
   background-color: #c1b1aa !important;
 }
 
@@ -668,9 +718,7 @@ td.col-name:hover {
   width: 21% !important;
 }
 
-.tab.abilities
-  table.abilities-table:not(.abilities-table--unity)
-  th.col-delete {
+.tab.abilities table.abilities-table:not(.abilities-table--unity) th.col-delete {
   width: 10% !important;
 }
 
@@ -769,30 +817,18 @@ td.col-name:hover {
   text-align: center;
 }
 
-.tab.inventory
-  table.abilities-table:not(.armor-table):not(.weapon-table)
-  th.col-name,
-.tab.inventory
-  table.abilities-table:not(.armor-table):not(.weapon-table)
-  td.col-name {
+.tab.inventory table.abilities-table:not(.armor-table):not(.weapon-table) th.col-name,
+.tab.inventory table.abilities-table:not(.armor-table):not(.weapon-table) td.col-name {
   width: 55%;
 }
 
-.tab.inventory
-  table.abilities-table:not(.armor-table):not(.weapon-table)
-  th.col-cost,
-.tab.inventory
-  table.abilities-table:not(.armor-table):not(.weapon-table)
-  td.col-cost {
+.tab.inventory table.abilities-table:not(.armor-table):not(.weapon-table) th.col-cost,
+.tab.inventory table.abilities-table:not(.armor-table):not(.weapon-table) td.col-cost {
   width: 30%;
 }
 
-.tab.inventory
-  table.abilities-table:not(.armor-table):not(.weapon-table)
-  th.col-delete,
-.tab.inventory
-  table.abilities-table:not(.armor-table):not(.weapon-table)
-  td.col-delete {
+.tab.inventory table.abilities-table:not(.armor-table):not(.weapon-table) th.col-delete,
+.tab.inventory table.abilities-table:not(.armor-table):not(.weapon-table) td.col-delete {
   width: 15%;
 }
 
@@ -1005,8 +1041,8 @@ td.col-name:hover {
 }
 
 /*                                             */
-.project-andromeda.sheet.actor form input[type="text"],
-.project-andromeda.sheet.actor form input[type="number"],
+.project-andromeda.sheet.actor form input[type='text'],
+.project-andromeda.sheet.actor form input[type='number'],
 .project-andromeda.sheet.actor form textarea {
   text-align: center;
 }
@@ -1096,8 +1132,8 @@ td.col-name:hover {
   margin-right: 10px;
 }
 
-.window-app.dialog .form-group input[type="text"],
-.window-app.dialog .form-group input[type="number"],
+.window-app.dialog .form-group input[type='text'],
+.window-app.dialog .form-group input[type='number'],
 .window-app.dialog .form-group textarea {
   width: 250px;
   box-sizing: border-box;
@@ -1216,7 +1252,11 @@ input.rank4 {
 .project-andromeda .item-groups {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--inventory-section-gap);
+}
+
+.project-andromeda .tab.inventory > .sheet-box {
+  margin-top: var(--inventory-section-gap);
 }
 
 .project-andromeda .item-group {
@@ -1442,7 +1482,7 @@ input.rank4 {
   font-weight: 600;
 }
 
-select[name="type"] optgroup {
+select[name='type'] optgroup {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
@@ -1563,5 +1603,9 @@ select[name="type"] optgroup {
 @media (max-width: 720px) {
   .google-sheets-sync__settings {
     grid-template-columns: 1fr;
+  }
+
+  .temp-bonus-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

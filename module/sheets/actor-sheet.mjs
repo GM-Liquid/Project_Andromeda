@@ -245,6 +245,8 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       const input = ev.currentTarget;
       const validatedValue = this.validateNumericInput(input);
       await this.actor.update({ [input.name]: validatedValue }, { render: false });
+      this.actor.prepareData();
+      this._refreshDerived(this.element);
       const rankClass = 'rank' + getColorRank(validatedValue, 'skill');
       input.classList.remove('rank1', 'rank2', 'rank3', 'rank4');
       input.classList.add(rankClass);
@@ -319,8 +321,8 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     context.itemGroups = itemGroups
       .filter((group) => group.key !== 'personalityValues')
       .reduce((acc, group) => {
-      (acc[group.tab] ??= []).push(group);
-      return acc;
+        (acc[group.tab] ??= []).push(group);
+        return acc;
       }, {});
     context.itemControls = this._getItemControlLabels();
 
@@ -655,6 +657,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
 
     // Speed
     setVal('system.speed.value', s?.speed?.value);
+    setVal('system.advancement.totalSpent', s?.advancement?.totalSpent);
     // Defenses
     setVal('system.defenses.physical', s?.defenses?.physical);
     setVal('system.defenses.azure', s?.defenses?.azure);
@@ -1486,8 +1489,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const speed = Number(system.itemSpeed) || 0;
     if (phys) lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.BonusFortitudeLabel')}: ${phys}`);
     if (azure) lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.BonusControlLabel')}: ${azure}`);
-    if (mental)
-      lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.BonusWillLabel')}: ${mental}`);
+    if (mental) lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.BonusWillLabel')}: ${mental}`);
     if (shield) lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.ShieldLabel')}: ${shield}`);
     if (speed) lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.BonusSpeedLabel')}: ${speed}`);
     let html = lines.join('<br>');

@@ -28,7 +28,7 @@ project-andromeda/
 | package.json
 | data/
 | '- gear/
-|    '- catalog/ <- public fallback mirror of the canonical armor / equipment / abilities JSON catalogs plus the temporary concept-abilities catalog used by Quartz when the private repo is unavailable
+|    '- catalog/ <- public fallback mirror of the canonical armor / equipment / abilities JSON catalogs plus the temporary concept-abilities source catalog kept available when the private repo is unavailable
 | Книга правил v0.4/ <- public reader-facing rulebook mirror, refreshed from the private source repo
 |
 +- .quartz-site/
@@ -98,8 +98,8 @@ project-andromeda/
 - That local hook is a convenience for the maintainer only. GitHub Pages still deploys only after the resulting changes are committed and pushed from this `Project Andromeda` repository.
 - `.quartz-site/scripts/rulebook.manifest.mjs` is the single source of truth for public rulebook structure, ordering, summaries, hero settings, and which pages are generated versus hand-authored.
 - `.quartz-site/content/` contains generated public rulebook pages under `.quartz-site/content/rulebook/`, including seven chapter pages where `03-navyki.md` is transformed from `Глава 3. Навыки.md` into Quartz accordions and keeps the legacy `/rulebook/skills-reference/` URL as an alias redirect.
-- `.quartz-site/content/rulebook/04-sposobnosti-i-snaryazhenie.md` keeps the surrounding prose from the mirrored chapter, but its armor / equipment / abilities tables plus the temporary `Концепт-способности` insert are generated from the canonical JSON catalogs during sync rather than hand-maintained in Markdown.
-- `Docs_Project_Andromeda/data/gear/catalog/concept-abilities.json` is a removable canonical source for the temporary `Концепт-способности` catalog appended to chapter 04 during sync.
+- `.quartz-site/content/rulebook/04-sposobnosti-i-snaryazhenie.md` keeps the surrounding prose from the mirrored chapter, but its armor / equipment / abilities tables are generated from the canonical JSON catalogs during sync rather than hand-maintained in Markdown.
+- `Docs_Project_Andromeda/data/gear/catalog/concept-abilities.json` is a removable canonical source catalog kept for curation / future reuse, but it is not appended to the public chapter 04 output during sync.
 - `.quartz-site/content/.generated-rulebook.json` is generated state used by the sync pipeline. Do not hand-edit it unless you are explicitly changing sync internals.
 - `.quartz-site/public/` is build output. Never edit it manually.
 
@@ -122,7 +122,8 @@ project-andromeda/
 - `.quartz-site/scripts/gear-catalog-source.test.mjs` when the gear-catalog mirror or fallback behaviour changes and needs regression coverage.
 - `.quartz-site/scripts/sync-book.test.mjs` when generated chapter output for JSON-backed rulebook catalogs changes and needs regression coverage.
 - `Docs_Project_Andromeda/Книга правил v0.4/Глава 3. Навыки.md` when the published skills chapter text changes.
-- `Docs_Project_Andromeda/data/gear/catalog/armor.json`, `Docs_Project_Andromeda/data/gear/catalog/equipment.json`, `Docs_Project_Andromeda/data/gear/catalog/abilities.json`, and `Docs_Project_Andromeda/data/gear/catalog/concept-abilities.json` when the published chapter 04 catalog data changes.
+- `Docs_Project_Andromeda/data/gear/catalog/armor.json`, `Docs_Project_Andromeda/data/gear/catalog/equipment.json`, and `Docs_Project_Andromeda/data/gear/catalog/abilities.json` when the published chapter 04 catalog data changes.
+- `Docs_Project_Andromeda/data/gear/catalog/concept-abilities.json` when the temporary source catalog itself changes, even though it is not currently published on the public Quartz site.
 - `Docs_Project_Andromeda/Книга правил v0.4/Глава 4. Способности и снаряжение.md` when the surrounding prose, section framing, or explanatory text changes around those generated catalogs.
 - `.quartz-site/quartz.layout.ts` when rulebook layout, sidebars, TOC placement, or conditional page composition change.
 - `.quartz-site/quartz/components/` and `.quartz-site/quartz/styles/` when editorial hero/header/nav/pager behaviour, interaction logic, or styling change.
@@ -134,7 +135,7 @@ project-andromeda/
 - Do not bump `system.json` for Quartz-only, public-rulebook-only, or other non-shipped publication changes.
 - Keep the public mirror in `Книга правил v0.4/` clean and reader-facing. Editorial-only structure, hero metadata, and navigation logic belong in Quartz manifest/layout/content files, not in the mirrored rule text unless the maintainer explicitly wants that coupling.
 - Do not hand-maintain armor, equipment, or abilities table rows inside `Книга правил v0.4/Глава 4. Способности и снаряжение.md`; the canonical data belongs in `data/gear/catalog/*.json`, and Quartz regenerates those tables during sync.
-- Treat the temporary `Концепт-способности` section in chapter 04 as Quartz-only curation material. It is not canonical rules text and may be deleted wholesale together with `data/gear/catalog/concept-abilities.json` and the explicit insertion hook in `.quartz-site/scripts/sync-book.mjs`.
+- Treat the temporary `concept-abilities` catalog as Quartz-side curation material only. It is not canonical rules text, it is not currently rendered into the public chapter 04 output, and it may be deleted wholesale together with `data/gear/catalog/concept-abilities.json` when no longer needed.
 - When changing routes, slugs, or emitted pages, check for duplicate pages created by both generated chapter output and hand-authored Quartz pages.
 - Do not let `sync-book.mjs` overwrite hand-authored editorial pages if such pages are added later; generated/transformed pages such as `03-navyki.md` are allowed to be replaced on each sync.
 - If a published page disappears or its slug changes, explicitly call out the old URL impact unless a redirect is added.
@@ -285,4 +286,4 @@ The Google Sheets sync MVP is part of the shipped Foundry system.
 
 ---
 
-_Last updated: 2026-04-22_
+_Last updated: 2026-04-24_

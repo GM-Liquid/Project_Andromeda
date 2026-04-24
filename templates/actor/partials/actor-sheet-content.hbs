@@ -1,6 +1,5 @@
 <form class='{{cssClass}} {{actor.type}} flexcol' autocomplete='off'>
 
-
   <div class='sheet-tabs-hex-container'>
     <nav class='sheet-tabs-hex' data-group='primary'>
       <a class='hex-button' data-tab='features'>{{localize 'MY_RPG.SheetLabels.Features'}}</a>
@@ -102,21 +101,20 @@
                   </tr>
                 </tbody>
               </table>
-<table class="rank-hint-table attributes-table">
-  <tr>
-    <th colspan='4'>{{localize 'MY_RPG.RankNumeric.Title'}}</th>
-  </tr>
-  <tr>
-    <td class='rank1'>{{rankLabel 1}}</td>
-    <td class='rank2'>{{rankLabel 2}}</td>
-    <td class='rank3'>{{rankLabel 3}}</td>
-    <td class='rank4'>{{rankLabel 4}}</td>
-  </tr>
-</table>
+              <table class='rank-hint-table attributes-table'>
+                <tr>
+                  <th colspan='4'>{{localize 'MY_RPG.RankNumeric.Title'}}</th>
+                </tr>
+                <tr>
+                  <td class='rank1'>{{rankLabel 1}}</td>
+                  <td class='rank2'>{{rankLabel 2}}</td>
+                  <td class='rank3'>{{rankLabel 3}}</td>
+                  <td class='rank4'>{{rankLabel 4}}</td>
+                </tr>
+              </table>
 
             </div>
           </section>
-
 
           <section class='resources grid grid-2col key-info-grid key-info-health'>
             <div class='resource flex-group-center health-resource health-resource--stress'>
@@ -153,30 +151,34 @@
             </div>
           </section>
 
-
-          <section class='resources grid grid-3col key-info-grid'>
-            <!-- Имя -->
-            <div class='resource flex-group-center'>
-              <label class='resource-label'>{{localize 'MY_RPG.KeyInfo.Name'}}</label>
-              <div class='resource-content flexcol'>
-                <input type='text' class='key-info-input' name='name' value='{{actor.name}}'/>
-              </div>
-            </div>
-
-            <!-- Призвание -->
-            {{#if isPlayerCharacter}}
+          <section class='key-info-stack'>
+            <div class='key-info-grid__row key-info-grid__row--four'>
               <div class='resource flex-group-center'>
-                <label class='resource-label'>{{localize 'MY_RPG.KeyInfo.Calling'}}</label>
+                <label class='resource-label'>{{localize 'MY_RPG.KeyInfo.Name'}}</label>
                 <div class='resource-content flexcol'>
-                  <input type='text' class='key-info-input' name='system.calling' value='{{system.calling}}'/>
+                  <input type='text' class='key-info-input' name='name' value='{{actor.name}}' />
                 </div>
               </div>
-            {{/if}}
 
-            <!-- Текущий ранг -->
-            <div class='resource flex-group-center'>
-              <label class='resource-label'>{{localize 'MY_RPG.KeyInfo.CurrentRank'}}</label>
-              <div class='resource-content flexcol'>
+              {{#if isPlayerCharacter}}
+                <div class='resource flex-group-center'>
+                  <label class='resource-label'>{{localize 'MY_RPG.KeyInfo.Calling'}}</label>
+                  <div class='resource-content flexcol'>
+                    <input
+                      type='text'
+                      class='key-info-input'
+                      name='system.calling'
+                      value='{{system.calling}}'
+                    />
+                  </div>
+                </div>
+              {{else}}
+                <div class='key-info-grid__placeholder' aria-hidden='true'></div>
+              {{/if}}
+
+              <div class='resource flex-group-center'>
+                <label class='resource-label'>{{localize 'MY_RPG.KeyInfo.CurrentRank'}}</label>
+                <div class='resource-content flexcol'>
                   <input
                     type='number'
                     class='key-info-input'
@@ -186,122 +188,148 @@
                     min='0'
                     inputmode='numeric'
                   />
+                </div>
+              </div>
+
+              {{#if isPlayerCharacter}}
+                <div class='resource flex-group-center'>
+                  <label class='resource-label'>{{localize 'MY_RPG.KeyInfo.MomentOfGlory'}}</label>
+                  <div class='resource-content flexcol'>
+                    <input
+                      type='number'
+                      class='key-info-input'
+                      name='system.momentOfGlory'
+                      value='{{system.momentOfGlory}}'
+                      step='1'
+                      inputmode='numeric'
+                    />
+                  </div>
+                </div>
+              {{/if}}
+              {{#if isGmCharacter}}
+                <div class='resource flex-group-center'>
+                  <label class='resource-label'>{{localize 'MY_RPG.KeyInfo.SharedMomentOfGlory'}}</label>
+                  <div class='resource-content flexcol'>
+                    <input
+                      type='number'
+                      class='key-info-input shared-hero-pool-input'
+                      value='{{sharedHeroPool}}'
+                      step='1'
+                      min='0'
+                      inputmode='numeric'
+                    />
+                  </div>
+                </div>
+              {{/if}}
+            </div>
+
+            <div class='key-info-grid__row key-info-grid__row--four'>
+              <div class='resource flex-group-center'>
+                <label class='resource-label'>{{localize 'MY_RPG.Speed.Label'}}</label>
+                <div class='resource-content flexcol'>
+                  <input
+                    type='number'
+                    class='key-info-input'
+                    name='system.speed.value'
+                    value='{{system.speed.value}}'
+                    step='1'
+                    inputmode='numeric'
+                    readonly
+                    tabindex='-1'
+                  />
+                </div>
+              </div>
+
+              <div class='resource flex-group-center'>
+                <label class='resource-label'>
+                  {{localize 'MY_RPG.Defenses.FortitudeLabel'}}
+                </label>
+                <div class='resource-content flexcol'>
+                  <input
+                    type='number'
+                    class='key-info-input'
+                    name='system.defenses.physical'
+                    value='{{system.defenses.physical}}'
+                    step='1'
+                    inputmode='numeric'
+                    readonly
+                    tabindex='-1'
+                  />
+                </div>
+              </div>
+
+              <div class='resource flex-group-center'>
+                <label class='resource-label'>
+                  {{localize 'MY_RPG.Defenses.ControlLabel'}}
+                </label>
+                <div class='resource-content flexcol'>
+                  <input
+                    type='number'
+                    class='key-info-input'
+                    name='system.defenses.azure'
+                    value='{{system.defenses.azure}}'
+                    step='1'
+                    inputmode='numeric'
+                    readonly
+                    tabindex='-1'
+                  />
+                </div>
+              </div>
+
+              <div class='resource flex-group-center'>
+                <label class='resource-label'>
+                  {{localize 'MY_RPG.Defenses.WillLabel'}}
+                </label>
+                <div class='resource-content flexcol'>
+                  <input
+                    type='number'
+                    class='key-info-input'
+                    name='system.defenses.mental'
+                    value='{{system.defenses.mental}}'
+                    step='1'
+                    inputmode='numeric'
+                    readonly
+                    tabindex='-1'
+                  />
+                </div>
               </div>
             </div>
 
             {{#if isPlayerCharacter}}
-              <div class='resource flex-group-center'>
-                <label class='resource-label'>{{localize 'MY_RPG.KeyInfo.MomentOfGlory'}}</label>
-                <div class='resource-content flexcol'>
-                  <input
-                    type='number'
-                    class='key-info-input'
-                    name='system.momentOfGlory'
-                    value='{{system.momentOfGlory}}'
-                    step='1'
-                    inputmode='numeric'
-                  />
+              <div class='key-info-grid__row key-info-grid__row--two-centered'>
+                <div class='resource flex-group-center'>
+                  <label class='resource-label'>{{localize 'MY_RPG.KeyInfo.ProgressPoints'}}</label>
+                  <div class='resource-content flexcol'>
+                    <input
+                      type='number'
+                      class='key-info-input'
+                      name='system.progressPoints'
+                      value='{{system.progressPoints}}'
+                      step='1'
+                      inputmode='numeric'
+                    />
+                  </div>
                 </div>
-              </div>
-              <div class='resource flex-group-center'>
-                <label class='resource-label'>{{localize 'MY_RPG.KeyInfo.ProgressPoints'}}</label>
-                <div class='resource-content flexcol'>
-                  <input
-                    type='number'
-                    class='key-info-input'
-                    name='system.progressPoints'
-                    value='{{system.progressPoints}}'
-                    step='1'
-                    inputmode='numeric'
-                  />
-                </div>
-              </div>
-            {{/if}}
-            {{#if isGmCharacter}}
-              <div class='resource flex-group-center'>
-                <label class='resource-label'>{{localize 'MY_RPG.KeyInfo.SharedMomentOfGlory'}}</label>
-                <div class='resource-content flexcol'>
-                  <input
-                    type='number'
-                    class='key-info-input shared-hero-pool-input'
-                    value='{{sharedHeroPool}}'
-                    step='1'
-                    min='0'
-                    inputmode='numeric'
-                  />
+
+                <div class='resource flex-group-center'>
+                  <label class='resource-label'>
+                    {{localize 'MY_RPG.KeyInfo.TotalAdvancementPoints'}}
+                  </label>
+                  <div class='resource-content flexcol'>
+                    <input
+                      type='number'
+                      class='key-info-input'
+                      name='system.advancement.totalSpent'
+                      value='{{system.advancement.totalSpent}}'
+                      step='1'
+                      inputmode='numeric'
+                      readonly
+                      tabindex='-1'
+                    />
+                  </div>
                 </div>
               </div>
             {{/if}}
-            <!--          (Speed) -->
-            <div class='resource flex-group-center'>
-              <label class='resource-label'>{{localize 'MY_RPG.Speed.Label'}}</label>
-              <div class='resource-content flexcol'>
-                <input
-                  type='number'
-                  class='key-info-input'
-                  name='system.speed.value'
-                  value='{{system.speed.value}}'
-                  step='1'
-                  inputmode='numeric'
-                  readonly
-                  tabindex='-1'
-                />
-              </div>
-            </div>
-
-            <div class='resource flex-group-center'>
-              <label class='resource-label'>
-                {{localize 'MY_RPG.Defenses.FortitudeLabel'}}
-              </label>
-              <div class='resource-content flexcol'>
-                <input
-                  type='number'
-                  class='key-info-input'
-                  name='system.defenses.physical'
-                  value='{{system.defenses.physical}}'
-                  step='1'
-                  inputmode='numeric'
-                  readonly
-                  tabindex='-1'
-                />
-              </div>
-            </div>
-
-            <div class='resource flex-group-center'>
-              <label class='resource-label'>
-                {{localize 'MY_RPG.Defenses.ControlLabel'}}
-              </label>
-              <div class='resource-content flexcol'>
-                <input
-                  type='number'
-                  class='key-info-input'
-                  name='system.defenses.azure'
-                  value='{{system.defenses.azure}}'
-                  step='1'
-                  inputmode='numeric'
-                  readonly
-                  tabindex='-1'
-                />
-              </div>
-            </div>
-
-            <div class='resource flex-group-center'>
-              <label class='resource-label'>
-{{localize 'MY_RPG.Defenses.WillLabel'}}
-              </label>
-              <div class='resource-content flexcol'>
-                <input
-                  type='number'
-                  class='key-info-input'
-                  name='system.defenses.mental'
-                  value='{{system.defenses.mental}}'
-                  step='1'
-                  inputmode='numeric'
-                  readonly
-                  tabindex='-1'
-                />
-              </div>
-            </div>
           </section>
         </div>
         <!--                sheet-box Key Info -->
@@ -344,51 +372,31 @@
             </div>
           </div>
 
-          <div class='sheet-box limited-height'>
+          <div class='sheet-box'>
             <h2>{{localize 'MY_RPG.TempBonus.Label'}}</h2>
-            <table>
-                <tr>
-                  <td>{{localize 'MY_RPG.TempStress.Label'}}</td>
-                  <td><input
-                      type='number'
-                      name='system.temphealth'
-                      value='{{system.temphealth}}'
-                    /></td>
-                </tr>
-                <tr>
-                  <td>{{localize 'MY_RPG.Temp.BonusFortitudeLabel'}}</td>
-                  <td><input
-                      type='number'
-                      name='system.tempphys'
-                      value='{{system.tempphys}}'
-                    /></td>
-                </tr>
-                <tr>
-                  <td>{{localize 'MY_RPG.Temp.BonusControlLabel'}}</td>
-                  <td><input
-                      type='number'
-                      name='system.tempazure'
-                      value='{{system.tempazure}}'
-                    /></td>
-                </tr>
-                <tr>
-                  <td>{{localize 'MY_RPG.Temp.BonusWillLabel'}}</td>
-                  <td><input
-                      type='number'
-                      name='system.tempmental'
-                      value='{{system.tempmental}}'
-                    /></td>
-                </tr>
-                <tr>
-                  <td>{{localize 'MY_RPG.TempSpeed.Label'}}</td>
-                  <td><input
-                      type='number'
-                      name='system.tempspeed'
-                      value='{{system.tempspeed}}'
-                    /></td>
-                </tr>
-              </table>
+            <div class='temp-bonus-grid'>
+              <div class='temp-bonus-field'>
+                <label>{{localize 'MY_RPG.TempStress.Label'}}</label>
+                <input type='number' name='system.temphealth' value='{{system.temphealth}}' />
+              </div>
+              <div class='temp-bonus-field'>
+                <label>{{localize 'MY_RPG.Temp.BonusFortitudeLabel'}}</label>
+                <input type='number' name='system.tempphys' value='{{system.tempphys}}' />
+              </div>
+              <div class='temp-bonus-field'>
+                <label>{{localize 'MY_RPG.Temp.BonusControlLabel'}}</label>
+                <input type='number' name='system.tempazure' value='{{system.tempazure}}' />
+              </div>
+              <div class='temp-bonus-field'>
+                <label>{{localize 'MY_RPG.Temp.BonusWillLabel'}}</label>
+                <input type='number' name='system.tempmental' value='{{system.tempmental}}' />
+              </div>
+              <div class='temp-bonus-field'>
+                <label>{{localize 'MY_RPG.TempSpeed.Label'}}</label>
+                <input type='number' name='system.tempspeed' value='{{system.tempspeed}}' />
+              </div>
             </div>
+          </div>
 
         </section>
 

@@ -92,7 +92,8 @@
       "ActorType": "Тип персонажа",
       "MomentOfGlory": "Пункты Героя",
       "SharedMomentOfGlory": "Общий запас Пунктов Героя",
-      "ProgressPoints": "Очки прогресса"
+      "ProgressPoints": "Доступные очки развития",
+      "TotalAdvancementPoints": "Всего очков развития"
     },
     "SheetLabels": {
       "Actor": "Лист персонажа",
@@ -160,7 +161,7 @@
       "CellAria": "Клетка силового щита {index}"
     },
     "Speed": {
-      "Label": "Скорость передвижения"
+      "Label": "Скорость"
     },
     "TempBonus": {
       "Label": "Временные бонусы"

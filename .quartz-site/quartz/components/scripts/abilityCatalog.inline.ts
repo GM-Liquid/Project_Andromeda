@@ -7,7 +7,7 @@ type RulebookCatalogEntry = {
   fullDescription: string
   tags: string[]
   detailTags: Array<{ key: string; label: string; value: string }>
-  filters: Record<string, string>
+  filters: Record<string, string | string[]>
   sortValues: Record<string, number>
 }
 
@@ -289,18 +289,16 @@ function initAbilityCatalog(catalog: HTMLElement) {
   const body = catalog.querySelector<HTMLElement>("[data-catalog-body]")
   const countNode = catalog.querySelector<HTMLElement>("[data-catalog-count]")
   const searchInput = catalog.querySelector<HTMLInputElement>("[data-catalog-search]")
-  const sortInput = catalog.querySelector<HTMLInputElement>("[data-catalog-sort]")
   const filtersToggle = catalog.querySelector<HTMLButtonElement>("[data-catalog-filters-toggle]")
   const filtersPanel = catalog.querySelector<HTMLElement>("[data-catalog-filters-panel]")
 
-  if (!dataNode || !body || !countNode || !searchInput || !sortInput || !filtersToggle || !filtersPanel) {
+  if (!dataNode || !body || !countNode || !searchInput || !filtersToggle || !filtersPanel) {
     return
   }
 
   const catalogBody = body
   const catalogCountNode = countNode
   const catalogSearchInput = searchInput
-  const catalogSortInput = sortInput
   const catalogFiltersToggle = filtersToggle
   const catalogFiltersPanel = filtersPanel
 
@@ -314,33 +312,11 @@ function initAbilityCatalog(catalog: HTMLElement) {
   const expandedEntries = new Set<string>()
   const multiFilterFields = getMultiFilterFields(catalog)
   const rangeControls = getRangeControls(catalog)
-  const defaultSortValue =
-    catalog.querySelector<HTMLElement>('[data-sort-option][data-sort-value="rank-asc"]')?.dataset.sortValue ??
-    catalog.querySelector<HTMLElement>("[data-sort-option]")?.dataset.sortValue ??
-    "rank-asc"
 
   function syncFiltersPanelState() {
     const isOpen = !catalogFiltersPanel.hidden
     catalogFiltersToggle.classList.toggle("is-active", isOpen)
     catalogFiltersToggle.setAttribute("aria-expanded", isOpen ? "true" : "false")
-  }
-
-  function syncSortState() {
-    const activeValue = catalogSortInput.value
-    const activeOption = catalog.querySelector<HTMLElement>(`[data-sort-option][data-sort-value="${activeValue}"]`)
-    const activeLabel = activeOption?.textContent?.replace(/\s+/g, " ").trim() || "По названию"
-
-    const dropdown = catalog.querySelector<HTMLElement>('[data-filter-dropdown="sort"]')
-    const labelNode = dropdown?.querySelector<HTMLElement>("[data-dropdown-label]")
-    if (labelNode) {
-      labelNode.textContent = activeLabel
-    }
-
-    catalog.querySelectorAll<HTMLElement>("[data-sort-option]").forEach((option) => {
-      const isActive = option.dataset.sortValue === activeValue
-      option.classList.toggle("is-active", isActive)
-      option.setAttribute("aria-pressed", isActive ? "true" : "false")
-    })
   }
 
   function syncDropdownSummaries() {
@@ -373,7 +349,6 @@ function initAbilityCatalog(catalog: HTMLElement) {
       )
     })
 
-    syncSortState()
   }
 
   function getFilteredEntries() {
@@ -396,7 +371,16 @@ function initAbilityCatalog(catalog: HTMLElement) {
           continue
         }
 
-        if (!values.has(entry.filters[field] ?? "")) {
+        const entryFilterValue = entry.filters[field]
+        if (Array.isArray(entryFilterValue)) {
+          if (!entryFilterValue.some((value) => values.has(value))) {
+            return false
+          }
+
+          continue
+        }
+
+        if (!values.has(entryFilterValue ?? "")) {
           return false
         }
       }
@@ -419,31 +403,8 @@ function initAbilityCatalog(catalog: HTMLElement) {
     })
   }
 
-  function sortEntries(nextEntries: RulebookCatalogEntry[]) {
-    const sorted = [...nextEntries]
-    const activeOption = catalog.querySelector<HTMLElement>(`[data-sort-option][data-sort-value="${catalogSortInput.value}"]`)
-    const sortKey = activeOption?.dataset.sortKey ?? "rank"
-    const sortDirection = activeOption?.dataset.sortDirection === "desc" ? -1 : 1
-
-    sorted.sort((left, right) => {
-      if (sortKey === "name") {
-        return left.name.localeCompare(right.name, "ru") * sortDirection
-      }
-
-      const leftValue = left.sortValues[sortKey] ?? Number.MAX_SAFE_INTEGER
-      const rightValue = right.sortValues[sortKey] ?? Number.MAX_SAFE_INTEGER
-      if (leftValue !== rightValue) {
-        return (leftValue - rightValue) * sortDirection
-      }
-
-      return left.name.localeCompare(right.name, "ru")
-    })
-
-    return sorted
-  }
-
   function render() {
-    const nextEntries = sortEntries(getFilteredEntries())
+    const nextEntries = getFilteredEntries()
     catalogBody.innerHTML = renderRows(nextEntries, expandedEntries)
     catalogCountNode.textContent = `Показано: ${nextEntries.length}`
     syncDropdownSummaries()
@@ -451,7 +412,6 @@ function initAbilityCatalog(catalog: HTMLElement) {
 
   function resetFilters() {
     catalogSearchInput.value = ""
-    catalogSortInput.value = defaultSortValue
     expandedEntries.clear()
 
     catalog.querySelectorAll<HTMLInputElement>("[data-filter-field]").forEach((input) => {
@@ -509,14 +469,6 @@ function initAbilityCatalog(catalog: HTMLElement) {
 
       const willOpen = dropdown.querySelector<HTMLElement>("[data-dropdown-menu]")?.hidden ?? true
       closeAllDropdowns(catalog, willOpen ? dropdown : null)
-      return
-    }
-
-    const sortOption = target.closest<HTMLElement>("[data-sort-option]")
-    if (sortOption?.dataset.sortValue) {
-      catalogSortInput.value = sortOption.dataset.sortValue
-      closeAllDropdowns(catalog)
-      render()
       return
     }
 
@@ -602,7 +554,6 @@ function initAbilityCatalog(catalog: HTMLElement) {
   })
 
   syncFiltersPanelState()
-  syncSortState()
   render()
 }
 

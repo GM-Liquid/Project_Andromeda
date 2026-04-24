@@ -54,7 +54,6 @@ const detailedArmorHeaders = [
 ]
 
 const weaponHeaders = ["Тип", "Название", "Цена", "Ранг", "Навык", "Урон", "Описание"]
-const armorHeaders = ["Название", "Ранг", "Описание", "Цена:"]
 
 function getSummaryRow(html: string) {
   return (
@@ -68,7 +67,19 @@ function countMetaChips(summaryRow: string) {
   return [...summaryRow.matchAll(/rulebook-ability-catalog__meta-chip"/g)].length
 }
 
-test("buildAbilityCatalogHtml defaults the active sort to rank", () => {
+function extractSerializedEntries(html: string) {
+  const dataMatch = html.match(
+    /<script type="application\/json" class="rulebook-ability-catalog__data">([^<]+)<\/script>/,
+  )
+
+  assert.ok(dataMatch, "expected serialized catalog data")
+
+  return JSON.parse(decodeURIComponent(dataMatch[1])) as Array<{
+    filters: Record<string, string | string[]>
+  }>
+}
+
+test("buildAbilityCatalogHtml renders a defense filter instead of sort controls", () => {
   const html = buildAbilityCatalogHtml(abilityHeaders, [
     [
       "Альфа",
@@ -87,8 +98,15 @@ test("buildAbilityCatalogHtml defaults the active sort to rank", () => {
     ],
   ])
 
-  assert.match(html, /<input type="hidden" value="rank-asc" data-catalog-sort \/>/)
-  assert.match(html, /data-sort-value="rank-asc"[\s\S]*?aria-pressed="true"/)
+  const [entry] = extractSerializedEntries(html)
+
+  assert.match(html, /Против Защиты/u)
+  assert.match(html, /value="Стойкость"/u)
+  assert.match(html, /value="Контроль"/u)
+  assert.match(html, /value="Воля"/u)
+  assert.doesNotMatch(html, /Сортировка/u)
+  assert.doesNotMatch(html, /data-sort-option/u)
+  assert.equal(entry.filters.defense, "Стойкость")
 })
 
 test("buildAbilityCatalogHtml keeps an empty preview when the split description columns are present", () => {
@@ -232,19 +250,62 @@ test("buildAbilityCatalogHtml renders grouped detail facts before the full descr
   )
 })
 
-test("buildRulebookCatalogHtml defaults the active sort to rank for every catalog family", () => {
+test("buildRulebookCatalogHtml uses the requested defense filter labels per catalog family", () => {
   const weaponHtml = buildRulebookCatalogHtml("weapons", weaponHeaders, [
     ["Стрелковое", "Игла", "780", "2", "Стрельба", "+4", "Точная винтовка."],
   ])
-  const armorHtml = buildRulebookCatalogHtml("armor", armorHeaders, [
-    ["ОЗК", "1", "Облегченная броня. Стойкость 3, Контроль 4, Воля 2", "100"],
+  const armorHtml = buildRulebookCatalogHtml("armor", detailedArmorHeaders, [
+    [
+      "ОЗК",
+      "1",
+      "3",
+      "4",
+      "2",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "Облегченная броня.",
+      "Облегченная броня для работы в опасной среде.",
+      "100",
+    ],
   ])
-  const equipmentHtml = buildRulebookCatalogHtml("equipment", armorHeaders, [
-    ["Керезников", "1", "Ускоритель реакции для пользователя.", "160"],
+  const equipmentHtml = buildRulebookCatalogHtml("equipment", equipmentHeaders, [
+    [
+      "Снаряжение",
+      "Керезников",
+      "1",
+      "",
+      "",
+      "Постоянно",
+      "",
+      "",
+      "На себя",
+      "",
+      "Контроль",
+      "",
+      "Ускоритель реакции для пользователя.",
+      "Ускоритель реакции для пользователя.",
+      "160",
+    ],
   ])
+  const [armorEntry] = extractSerializedEntries(armorHtml)
+  const [equipmentEntry] = extractSerializedEntries(equipmentHtml)
 
-  for (const html of [weaponHtml, armorHtml, equipmentHtml]) {
-    assert.match(html, /<input type="hidden" value="rank-asc" data-catalog-sort \/>/)
-    assert.match(html, /data-sort-value="rank-asc"[\s\S]*?aria-pressed="true"/)
-  }
+  assert.doesNotMatch(weaponHtml, /Сортировка/u)
+  assert.doesNotMatch(armorHtml, /Сортировка/u)
+  assert.doesNotMatch(equipmentHtml, /Сортировка/u)
+
+  assert.match(armorHtml, /Бонус к Защите/u)
+  assert.match(armorHtml, /value="Стойкость"/u)
+  assert.match(armorHtml, /value="Контроль"/u)
+  assert.match(armorHtml, /value="Воля"/u)
+  assert.deepEqual(armorEntry.filters.defense, ["Стойкость", "Контроль", "Воля"])
+
+  assert.match(equipmentHtml, /Против Защиты/u)
+  assert.match(equipmentHtml, /value="Стойкость"/u)
+  assert.match(equipmentHtml, /value="Контроль"/u)
+  assert.match(equipmentHtml, /value="Воля"/u)
+  assert.equal(equipmentEntry.filters.defense, "Контроль")
 })

@@ -24,7 +24,6 @@ const gearCatalogFiles = {
   equipment: 'equipment.json',
   abilities: 'abilities.json'
 };
-const conceptAbilitiesCatalogFilename = 'concept-abilities.json';
 
 function formatDate(date) {
   const year = date.getFullYear();
@@ -463,44 +462,6 @@ function buildAbilityCatalogTable(catalog) {
   );
 }
 
-function buildConceptAbilityCatalogTable(catalog) {
-  // Temporary catalog sourced from data/gear/catalog/concept-abilities.json.
-  const rows = getRenderableGearCatalogItems(catalog).map((item) => [
-      item.name ?? '',
-      item.rank ?? '',
-      getGearShortDescription(item),
-      getGearDescription(item),
-      getGearUsageOrQuartzValue(item, 'frequency'),
-      getGearSkillValue(item),
-      getGearUsageOrQuartzValue(item, 'actions'),
-      getGearUsageOrQuartzValue(item, 'range'),
-      getGearUsageOrQuartzValue(item, 'targets'),
-      getGearUsageOrQuartzValue(item, 'area'),
-      getGearUsageOrQuartzValue(item, 'defense'),
-      getGearUsageOrQuartzValue(item, 'duration'),
-      getGearQuartzValue(item, 'credits') || getGearCatalogPrice(item)
-    ]);
-
-  return renderMarkdownTable(
-    [
-      'Название',
-      'Ранг',
-      'Краткое описание',
-      'Полное описание',
-      'Частота использования',
-      'Навык',
-      'Цена в действиях',
-      'Дальность',
-      'Цели',
-      'Зона',
-      'Защита',
-      'Длительность',
-      'Цена в кредитах'
-    ],
-    rows
-  );
-}
-
 function stripMarkdownTableBlocks(lines) {
   const output = [];
 
@@ -610,34 +571,6 @@ async function readGearCatalogs(catalogDir) {
   };
 }
 
-async function readConceptAbilitiesCatalog(catalogDir) {
-  try {
-    return await readGearCatalog(catalogDir, conceptAbilitiesCatalogFilename);
-  } catch (error) {
-    if (error?.code === 'ENOENT') {
-      return null;
-    }
-
-    throw error;
-  }
-}
-
-function injectConceptAbilitiesSection(source, catalog) {
-  if (!catalog || catalog.items.length === 0) {
-    return source;
-  }
-
-  const section = [
-    '## Концепт-способности',
-    '',
-    'Временный каталог идей и устаревших версий способностей. Нужен только для Quartz-подбора и ручного переноса понравившихся записей в основной каталог.',
-    '',
-    buildConceptAbilityCatalogTable(catalog)
-  ].join('\n');
-
-  return `${source.trimEnd()}\n\n${section}\n`;
-}
-
 function normalizeBody(body, chapter, chapters, options = {}) {
   const cleaned = body.replace(/^\uFEFF/, '').trim();
 
@@ -654,7 +587,6 @@ function normalizeBody(body, chapter, chapters, options = {}) {
 
   if (chapter.id === 'rulebook-abilities-equipment') {
     normalized = transformAbilitiesEquipmentSource(normalized, options.gearCatalogs);
-    normalized = injectConceptAbilitiesSection(normalized, options.conceptAbilitiesCatalog);
   }
 
 
@@ -689,9 +621,6 @@ export async function syncBook() {
   const generatedEntries = getGeneratedRulebookEntries();
   const sourceDir = source.canonicalSourceDir;
   const gearCatalogs = await readGearCatalogs(gearCatalogSource.canonicalSourceDir);
-  const conceptAbilitiesCatalog = await readConceptAbilitiesCatalog(
-    gearCatalogSource.canonicalSourceDir
-  );
 
   await mkdir(contentDir, { recursive: true });
   await mkdir(rulebookDir, { recursive: true });
@@ -725,8 +654,7 @@ export async function syncBook() {
         modified
       },
       normalizeBody(sourceBody, chapter, generatedEntries, {
-        gearCatalogs,
-        conceptAbilitiesCatalog
+        gearCatalogs
       })
     );
 

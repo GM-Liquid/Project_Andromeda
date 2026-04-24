@@ -6,7 +6,7 @@
         "calling": "",
         "gender": "",
         "age": "",
-        "currentRank": "",
+        "currentRank": 1,
         "momentOfGlory": 0,
         "progressPoints": 0,
         "abilities": {

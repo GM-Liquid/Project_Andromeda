@@ -7,8 +7,8 @@
 6 silly config load:file:D:\Моя_НРИ\Project Andromeda\.quartz-site\etc\npmrc
 7 verbose title npm run build
 8 verbose argv "--prefix" ".quartz-site" "run" "build"
-9 verbose logfile logs-max:10 dir:D:\Моя_НРИ\Project Andromeda\.npm-cache\_logs\2026-04-22T14_01_51_669Z-
-10 verbose logfile D:\Моя_НРИ\Project Andromeda\.npm-cache\_logs\2026-04-22T14_01_51_669Z-debug-0.log
+9 verbose logfile logs-max:10 dir:D:\Моя_НРИ\Project Andromeda\.npm-cache\_logs\2026-04-24T17_23_06_241Z-
+10 verbose logfile D:\Моя_НРИ\Project Andromeda\.npm-cache\_logs\2026-04-24T17_23_06_241Z-debug-0.log
 11 silly logfile start cleaning logs, removing 1 files
 12 silly logfile done cleaning log files
 13 verbose cwd D:\Моя_НРИ\Project Andromeda

@@ -128,7 +128,7 @@ test("syncBook keeps chapter 04 equipment and abilities sections populated when 
   assert.match(abilitiesSection, new RegExp(escapeRegExp(abilityEntry.name), "u"))
 })
 
-test("syncBook injects concept abilities from the shared gear catalog source", { concurrency: false }, async () => {
+test("syncBook leaves concept abilities unpublished even when the shared gear catalog source provides them", { concurrency: false }, async () => {
   const quartzConceptPath = resolve(siteRoot, "data", "temporary", "concept-abilities.json")
   const quartzConceptBackupPath = resolve(
     siteRoot,
@@ -205,12 +205,13 @@ test("syncBook injects concept abilities from the shared gear catalog source", {
 
     const chapter04 = await readFile(resolve(chapter04Path), "utf8")
 
-    assert.match(chapter04, /^## Концепт-способности$/m)
-    assert.match(
+    assert.match(chapter04, /^## Способности$/m)
+    assert.doesNotMatch(chapter04, /^## Концепт-способности$/m)
+    assert.doesNotMatch(chapter04, /Тестовый концепт/u)
+    assert.doesNotMatch(
       chapter04,
-      /^\|.*Тестовый концепт.*\|.*Мистика.*\|.*Основное.*\|.*15 м.*\|.*2 цели.*\|.*Стойкость.*\|.*2 раунда.*\|.*777.*\|$/m,
+      /Временный каталог идей и устаревших версий способностей/u,
     )
-    assert.doesNotMatch(chapter04, /Старый навык/u)
   } finally {
     await rm(docsConceptPath, { force: true })
 
@@ -226,7 +227,7 @@ test("syncBook injects concept abilities from the shared gear catalog source", {
   }
 })
 
-test("syncBook injects the concept abilities catalog into chapter 04 instead of chapter 06", { concurrency: false }, async () => {
+test("syncBook keeps concept abilities out of both chapter 04 and chapter 06", { concurrency: false }, async () => {
   const sourceChapter = await readFile(
     resolve(repoRoot, "Книга правил v0.4", "Глава 4. Способности и снаряжение.md"),
     "utf8",
@@ -246,15 +247,11 @@ test("syncBook injects the concept abilities catalog into chapter 04 instead of 
   const chapter04 = await readFile(resolve(chapter04Path), "utf8")
   const chapter06 = await readFile(resolve(chapter06Path), "utf8")
 
-  assert.match(chapter04, /^## Концепт-способности$/m)
-  assert.match(
+  assert.doesNotMatch(chapter04, /^## Концепт-способности$/m)
+  assert.doesNotMatch(
     chapter04,
     /Временный каталог идей и устаревших версий способностей/u,
   )
-  assert.match(
-    chapter04,
-    /^\| Название \| Ранг \| Краткое описание \| Полное описание \| Частота использования \| Навык \| Цена в действиях \| Дальность \| Цели \| Зона \| Защита \| Длительность \| Цена в кредитах \|$/m,
-  )
-  assert.match(chapter04, /^\|.*Болевой шок.*\|$/m)
+  assert.doesNotMatch(chapter04, /^\|.*Болевой шок.*\|$/m)
   assert.doesNotMatch(chapter06, /^## Концепт-способности$/m)
 })

@@ -46,7 +46,8 @@
       "ActorType": "Character Type",
       "MomentOfGlory": "Points of Heroism",
       "SharedMomentOfGlory": "GM Heroism Pool",
-      "ProgressPoints": "Progress Points"
+      "ProgressPoints": "Available Advancement Points",
+      "TotalAdvancementPoints": "Total Advancement Points"
     },
     "Inventory": {
       "TableHeading": "Inventory",
@@ -155,7 +156,7 @@
     },
     "Initiative": "Initiative",
     "Speed": {
-      "Label": "Movement Speed"
+      "Label": "Speed"
     },
     "TempBonus": {
       "Label": "Temporary Bonuses"

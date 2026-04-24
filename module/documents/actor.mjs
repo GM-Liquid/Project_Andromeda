@@ -5,6 +5,7 @@ import {
   isSupportedCharacterActorType,
   supportsAzureStress
 } from '../helpers/actor-types.mjs';
+import { getTotalAdvancementSpent } from '../helpers/advancement-points.mjs';
 import { calcMovementSpeed } from '../helpers/movement-speed.mjs';
 import { getAbilityDieRoll, getAbilityDieNumeric, normalizeAbilityDie } from '../helpers/utils.mjs';
 
@@ -43,16 +44,19 @@ export class ProjectAndromedaActor extends Actor {
     /* 3. Производные параметры ------------------------------------ */
     s.speed ??= {};
     s.speed.value = this._calcSpeed(s, itemTotals);
+    s.advancement ??= {};
+    s.advancement.totalSpent = getTotalAdvancementSpent(s);
 
     const stress = s.stress ?? (s.stress = {});
     const forceShield = s.forceShield ?? (s.forceShield = {});
-    const calcStressMax =
-      isEliteActorType(this.type)
-        ? this._calcEliteStressMax
-        : isGmCharacter
-          ? this._calcGmStressMax
-          : this._calcStressMax;
-    const calcForceShieldMax = isGmCharacter ? this._calcGmForceShieldMax : this._calcForceShieldMax;
+    const calcStressMax = isEliteActorType(this.type)
+      ? this._calcEliteStressMax
+      : isGmCharacter
+        ? this._calcGmStressMax
+        : this._calcStressMax;
+    const calcForceShieldMax = isGmCharacter
+      ? this._calcGmForceShieldMax
+      : this._calcForceShieldMax;
     stress.max = calcStressMax.call(this, s);
     forceShield.max = calcForceShieldMax.call(this, s, itemTotals);
     const clamp = Math.clamp

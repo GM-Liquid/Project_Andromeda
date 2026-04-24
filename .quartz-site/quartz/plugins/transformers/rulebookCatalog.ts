@@ -99,15 +99,15 @@ type RulebookCatalogContext = {
   label?: string
 }
 
+type RulebookCatalogFilterValue = string | string[]
+
 type RulebookCatalogFilterField =
   | "rank"
   | "frequency"
   | "skill"
   | "actions"
   | "damage"
-  | "physicalDefense"
-  | "magicalDefense"
-  | "psychicDefense"
+  | "defense"
 
 type RulebookCatalogSortOption = {
   value: string
@@ -149,14 +149,13 @@ type RulebookCatalogEntry = {
   fullDescription: string
   tags: string[]
   detailTags: CatalogDetailTag[]
-  filters: Partial<Record<RulebookCatalogFilterField, string>>
+  filters: Partial<Record<RulebookCatalogFilterField, RulebookCatalogFilterValue>>
   sortValues: Record<string, number>
 }
 
 type RulebookCatalogModel = {
   entries: RulebookCatalogEntry[]
   filters: RulebookCatalogFilterDefinition[]
-  sortOptions: RulebookCatalogSortOption[]
 }
 
 const catalogHeaderAliases: Record<CatalogHeaderField, string[]> = {
@@ -195,12 +194,6 @@ const armorDefenseLabels = {
   physicalDefense: "\u0421\u0442\u043e\u0439\u043a\u043e\u0441\u0442\u044c",
   magicalDefense: "\u041a\u043e\u043d\u0442\u0440\u043e\u043b\u044c",
   psychicDefense: "\u0412\u043e\u043b\u044f",
-} as const
-
-const armorDefenseSortLabels = {
-  physicalDefense: "\u0421\u0442\u043e\u0439\u043a\u043e\u0441\u0442\u0438",
-  magicalDefense: "\u041a\u043e\u043d\u0442\u0440\u043e\u043b\u044e",
-  psychicDefense: "\u0412\u043e\u043b\u0435",
 } as const
 
 const detailTagLabels = {
@@ -243,6 +236,7 @@ const secondaryDetailLineOrder: CatalogDetailTagKey[] = [
 const rankOptions = ["1", "2", "3", "4"]
 const frequencyOptions = ["Неограниченно", "1/сцену", "1/сессию"]
 const actionOptions = ["Основное", "Маневр", "Реакция", "Свободное"]
+const defenseFilterValues = ["Стойкость", "Контроль", "Воля"] as const
 const noSkillLabel = "Без навыка"
 const skillSeedValues = [
   "Анализ",
@@ -310,6 +304,8 @@ const equipmentSortOptions: RulebookCatalogSortOption[] = [
   { value: "rank-asc", label: "По рангу", sortKey: "rank", direction: "asc" },
   { value: "price-asc", label: "По цене", sortKey: "price", direction: "asc" },
 ]
+
+void [abilitySortOptions, weaponSortOptions, armorSortOptions, equipmentSortOptions]
 
 function escapeHtml(value: string) {
   return value
@@ -679,6 +675,32 @@ function normalizeSkillFilterValue(value: string) {
   return value.trim() || noSkillLabel
 }
 
+function getSingleFilterValue(value: RulebookCatalogFilterValue | undefined) {
+  return typeof value === "string" ? value : ""
+}
+
+function normalizeDefenseLabel(value: string) {
+  const normalized = normalizeCatalogValue(value)
+
+  if (!normalized) {
+    return ""
+  }
+
+  if (armorDefenseAliases.physicalDefense.some((alias) => normalized === normalizeCatalogValue(alias))) {
+    return armorDefenseLabels.physicalDefense
+  }
+
+  if (armorDefenseAliases.magicalDefense.some((alias) => normalized === normalizeCatalogValue(alias))) {
+    return armorDefenseLabels.magicalDefense
+  }
+
+  if (armorDefenseAliases.psychicDefense.some((alias) => normalized === normalizeCatalogValue(alias))) {
+    return armorDefenseLabels.psychicDefense
+  }
+
+  return ""
+}
+
 function applyDescriptionCleaner(
   value: string,
   cleaner?: ((description: string) => string) | undefined,
@@ -818,7 +840,7 @@ function sortActionValues(values: string[]) {
 function buildAbilityCatalogModel(headers: string[], rows: string[][]): RulebookCatalogModel {
   const columns = resolveAbilityCatalogColumns(headers)
   if (!columns) {
-    return { entries: [], filters: [], sortOptions: abilitySortOptions }
+    return { entries: [], filters: [] }
   }
 
   const entries = rows.map((row, index) => {
@@ -833,7 +855,7 @@ function buildAbilityCatalogModel(headers: string[], rows: string[][]): Rulebook
     const range = readOptionalColumnValue(row, columns.range)
     const targets = readOptionalColumnValue(row, columns.targets)
     const area = readOptionalColumnValue(row, columns.area)
-    const defense = readOptionalColumnValue(row, columns.defense)
+    const defense = normalizeDefenseLabel(readOptionalColumnValue(row, columns.defense))
     const duration = readOptionalColumnValue(row, columns.duration)
     const price = (row[columns.credits] ?? "").trim()
     const rank = (row[columns.rank] ?? "").trim()
@@ -862,6 +884,7 @@ function buildAbilityCatalogModel(headers: string[], rows: string[][]): Rulebook
         frequency,
         skill: normalizeSkillFilterValue(skill),
         actions,
+        defense,
       },
       sortValues: {
         rank: parseCatalogNumber(rank),
@@ -882,7 +905,7 @@ function buildAbilityCatalogModel(headers: string[], rows: string[][]): Rulebook
         label: "Частота использования",
         values: sortFrequencyValues([
           ...frequencyOptions,
-          ...entries.map((entry) => entry.filters.frequency ?? ""),
+          ...entries.map((entry) => getSingleFilterValue(entry.filters.frequency)),
         ]),
       },
       {
@@ -892,7 +915,7 @@ function buildAbilityCatalogModel(headers: string[], rows: string[][]): Rulebook
         values: sortAlphaValues([
           noSkillLabel,
           ...rulebookSkillSeedValues,
-          ...entries.map((entry) => entry.filters.skill ?? ""),
+          ...entries.map((entry) => getSingleFilterValue(entry.filters.skill)),
         ]),
       },
       {
@@ -901,8 +924,14 @@ function buildAbilityCatalogModel(headers: string[], rows: string[][]): Rulebook
         label: "Цена в действиях",
         values: sortActionValues([
           ...actionOptions,
-          ...entries.map((entry) => entry.filters.actions ?? ""),
+          ...entries.map((entry) => getSingleFilterValue(entry.filters.actions)),
         ]),
+      },
+      {
+        kind: "multi",
+        field: "defense",
+        label: "Против Защиты",
+        values: [...defenseFilterValues],
       },
       {
         kind: "range",
@@ -913,14 +942,13 @@ function buildAbilityCatalogModel(headers: string[], rows: string[][]): Rulebook
         unit: "кр",
       },
     ],
-    sortOptions: abilitySortOptions,
   }
 }
 
 function buildWeaponCatalogModel(headers: string[], rows: string[][]): RulebookCatalogModel {
   const columns = resolveWeaponCatalogColumns(headers)
   if (!columns) {
-    return { entries: [], filters: [], sortOptions: weaponSortOptions }
+    return { entries: [], filters: [] }
   }
 
   const entries = rows.map((row, index) => {
@@ -935,7 +963,7 @@ function buildWeaponCatalogModel(headers: string[], rows: string[][]): RulebookC
     const range = readOptionalColumnValue(row, columns.range)
     const targets = readOptionalColumnValue(row, columns.targets)
     const area = readOptionalColumnValue(row, columns.area)
-    const defense = readOptionalColumnValue(row, columns.defense)
+    const defense = normalizeDefenseLabel(readOptionalColumnValue(row, columns.defense))
     const duration = readOptionalColumnValue(row, columns.duration)
 
     return {
@@ -981,24 +1009,23 @@ function buildWeaponCatalogModel(headers: string[], rows: string[][]): RulebookC
         values: sortAlphaValues([
           noSkillLabel,
           ...rulebookSkillSeedValues,
-          ...entries.map((entry) => entry.filters.skill ?? ""),
+          ...entries.map((entry) => getSingleFilterValue(entry.filters.skill)),
         ]),
       },
       {
         kind: "multi",
         field: "damage",
         label: "Урон",
-        values: sortNumericValues(entries.map((entry) => entry.filters.damage ?? "")),
+        values: sortNumericValues(entries.map((entry) => getSingleFilterValue(entry.filters.damage))),
       },
     ],
-    sortOptions: weaponSortOptions,
   }
 }
 
 function buildArmorCatalogModel(headers: string[], rows: string[][]): RulebookCatalogModel {
   const columns = resolveArmorCatalogColumns(headers)
   if (!columns) {
-    return { entries: [], filters: [], sortOptions: armorSortOptions }
+    return { entries: [], filters: [] }
   }
 
   const entries = rows.map((row, index) => {
@@ -1037,9 +1064,9 @@ function buildArmorCatalogModel(headers: string[], rows: string[][]): RulebookCa
       previewDescription: descriptions.previewDescription,
       fullDescription: descriptions.fullDescription,
       tags: [
-        physicalDefense ? `ФЗ ${physicalDefense}` : "",
-        magicalDefense ? `МЗ ${magicalDefense}` : "",
-        psychicDefense ? `ПЗ ${psychicDefense}` : "",
+        physicalDefense ? `${armorDefenseLabels.physicalDefense} ${physicalDefense}` : "",
+        magicalDefense ? `${armorDefenseLabels.magicalDefense} ${magicalDefense}` : "",
+        psychicDefense ? `${armorDefenseLabels.psychicDefense} ${psychicDefense}` : "",
       ].filter(Boolean),
       detailTags: buildDetailTags([
         createDetailTag("physicalDefense", physicalDefense),
@@ -1053,9 +1080,11 @@ function buildArmorCatalogModel(headers: string[], rows: string[][]): RulebookCa
       ]),
       filters: {
         rank,
-        physicalDefense,
-        magicalDefense,
-        psychicDefense,
+        defense: [
+          physicalDefense ? armorDefenseLabels.physicalDefense : "",
+          magicalDefense ? armorDefenseLabels.magicalDefense : "",
+          psychicDefense ? armorDefenseLabels.psychicDefense : "",
+        ].filter(Boolean),
       },
       sortValues: {
         rank: parseCatalogNumber(rank),
@@ -1073,31 +1102,18 @@ function buildArmorCatalogModel(headers: string[], rows: string[][]): RulebookCa
       { kind: "multi", field: "rank", label: "Ранг", values: rankOptions },
       {
         kind: "multi",
-        field: "physicalDefense",
-        label: "Физическая",
-        values: sortNumericValues(entries.map((entry) => entry.filters.physicalDefense ?? "")),
-      },
-      {
-        kind: "multi",
-        field: "magicalDefense",
-        label: "Магическая",
-        values: sortNumericValues(entries.map((entry) => entry.filters.magicalDefense ?? "")),
-      },
-      {
-        kind: "multi",
-        field: "psychicDefense",
-        label: "Психическая",
-        values: sortNumericValues(entries.map((entry) => entry.filters.psychicDefense ?? "")),
+        field: "defense",
+        label: "Бонус к Защите",
+        values: [...defenseFilterValues],
       },
     ],
-    sortOptions: armorSortOptions,
   }
 }
 
 function buildEquipmentCatalogModel(headers: string[], rows: string[][]): RulebookCatalogModel {
   const columns = resolveEquipmentCatalogColumns(headers)
   if (!columns) {
-    return { entries: [], filters: [], sortOptions: equipmentSortOptions }
+    return { entries: [], filters: [] }
   }
 
   const entries = rows.map((row, index) => {
@@ -1118,7 +1134,7 @@ function buildEquipmentCatalogModel(headers: string[], rows: string[][]): Rulebo
     const range = readOptionalColumnValue(row, columns.range)
     const targets = readOptionalColumnValue(row, columns.targets)
     const area = readOptionalColumnValue(row, columns.area)
-    const defense = readOptionalColumnValue(row, columns.defense)
+    const defense = normalizeDefenseLabel(readOptionalColumnValue(row, columns.defense))
     const duration = readOptionalColumnValue(row, columns.duration)
 
     return {
@@ -1145,6 +1161,7 @@ function buildEquipmentCatalogModel(headers: string[], rows: string[][]): Rulebo
         ...(columns.skill !== undefined && columns.skill !== -1
           ? { skill: normalizeSkillFilterValue(skill) }
           : {}),
+        defense,
       },
       sortValues: {
         rank: parseCatalogNumber(rank),
@@ -1169,13 +1186,18 @@ function buildEquipmentCatalogModel(headers: string[], rows: string[][]): Rulebo
               values: sortAlphaValues([
                 noSkillLabel,
                 ...rulebookSkillSeedValues,
-                ...entries.map((entry) => entry.filters.skill ?? ""),
+                ...entries.map((entry) => getSingleFilterValue(entry.filters.skill)),
               ]),
             },
           ]
         : []),
+      {
+        kind: "multi",
+        field: "defense",
+        label: "Против Защиты",
+        values: [...defenseFilterValues],
+      },
     ],
-    sortOptions: equipmentSortOptions,
   }
 }
 
@@ -1360,6 +1382,8 @@ function renderCatalogSortDropdown(sortOptions: RulebookCatalogSortOption[]) {
   `
 }
 
+void renderCatalogSortDropdown
+
 function renderCatalogRangeDropdown(filter: Extract<RulebookCatalogFilterDefinition, { kind: "range" }>) {
   return `
     <div
@@ -1420,14 +1444,10 @@ function renderCatalogToolbar(entriesCount: number) {
   `
 }
 
-function renderCatalogFiltersPanel(
-  filters: RulebookCatalogFilterDefinition[],
-  sortOptions: RulebookCatalogSortOption[],
-) {
+function renderCatalogFiltersPanel(filters: RulebookCatalogFilterDefinition[]) {
   return `
     <div class="${abilityCatalogClass}__filters-panel" data-catalog-filters-panel hidden>
       <div class="${abilityCatalogClass}__filters-grid">
-        ${renderCatalogSortDropdown(sortOptions)}
         ${filters
           .map((filter) =>
             filter.kind === "multi"
@@ -1495,88 +1515,18 @@ function buildRulebookCatalogModel(kind: RulebookCatalogKind, headers: string[],
   }
 }
 
-function localizeArmorTag(value: string) {
-  return value
-    .replace(/^\u0424\u0417\b/u, armorDefenseLabels.physicalDefense)
-    .replace(/^\u041c\u0417\b/u, armorDefenseLabels.magicalDefense)
-    .replace(/^\u041f\u0417\b/u, armorDefenseLabels.psychicDefense)
-}
-
-function localizeArmorFilterLabel(value: string) {
-  switch (value) {
-    case "\u0424\u0438\u0437\u0438\u0447\u0435\u0441\u043a\u0430\u044f":
-      return armorDefenseLabels.physicalDefense
-    case "\u041c\u0430\u0433\u0438\u0447\u0435\u0441\u043a\u0430\u044f":
-      return armorDefenseLabels.magicalDefense
-    case "\u041f\u0441\u0438\u0445\u0438\u0447\u0435\u0441\u043a\u0430\u044f":
-      return armorDefenseLabels.psychicDefense
-    default:
-      return value
-  }
-}
-
-function localizeArmorSortLabel(value: string) {
-  switch (value) {
-    case "\u041f\u043e \u0444\u0438\u0437\u0438\u0447\u0435\u0441\u043a\u043e\u0439":
-      return `\u041f\u043e ${armorDefenseSortLabels.physicalDefense}`
-    case "\u041f\u043e \u043c\u0430\u0433\u0438\u0447\u0435\u0441\u043a\u043e\u0439":
-      return `\u041f\u043e ${armorDefenseSortLabels.magicalDefense}`
-    case "\u041f\u043e \u043f\u0441\u0438\u0445\u0438\u0447\u0435\u0441\u043a\u043e\u0439":
-      return `\u041f\u043e ${armorDefenseSortLabels.psychicDefense}`
-    default:
-      return value
-  }
-}
-
-function localizeArmorCatalogModel(model: RulebookCatalogModel): RulebookCatalogModel {
-  return {
-    ...model,
-    entries: model.entries.map((entry) => ({
-      ...entry,
-      tags: [
-        entry.filters.physicalDefense
-          ? `${armorDefenseLabels.physicalDefense} ${entry.filters.physicalDefense}`
-          : "",
-        entry.filters.magicalDefense
-          ? `${armorDefenseLabels.magicalDefense} ${entry.filters.magicalDefense}`
-          : "",
-        entry.filters.psychicDefense
-          ? `${armorDefenseLabels.psychicDefense} ${entry.filters.psychicDefense}`
-          : "",
-      ]
-        .filter(Boolean)
-        .map(localizeArmorTag),
-    })),
-    filters: model.filters.map((filter) =>
-      filter.kind === "multi"
-        ? {
-            ...filter,
-            label: localizeArmorFilterLabel(filter.label),
-          }
-        : filter,
-    ),
-    sortOptions: model.sortOptions.map((option) => ({
-      ...option,
-      label: localizeArmorSortLabel(option.label),
-    })),
-  }
-}
-
 export function buildRulebookCatalogHtml(
   kind: RulebookCatalogKind,
   headers: string[],
   rows: string[][],
 ) {
-  const model =
-    kind === "armor"
-      ? localizeArmorCatalogModel(buildRulebookCatalogModel(kind, headers, rows))
-      : buildRulebookCatalogModel(kind, headers, rows)
+  const model = buildRulebookCatalogModel(kind, headers, rows)
 
   return `
     <section class="${abilityCatalogClass}" data-catalog-kind="${kind}">
       <div class="${abilityCatalogClass}__controls">
         ${renderCatalogToolbar(model.entries.length)}
-        ${renderCatalogFiltersPanel(model.filters, model.sortOptions)}
+        ${renderCatalogFiltersPanel(model.filters)}
       </div>
 
       <div class="${abilityCatalogClass}__table-shell">
