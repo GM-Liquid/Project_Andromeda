@@ -10,7 +10,7 @@
     "tags": [],
     "status": "draft",
     "shortDescription": "Превращает небольшой объект в порошок",
-    "finalCost": 310,
+    "finalCost": null,
     "usage": {
       "actions": "Действие",
       "frequency": "1/сессию",
@@ -29,7 +29,7 @@
     "tags": [],
     "status": "draft",
     "shortDescription": "Пол и стены оживают, хватая и обездвиживая цель.",
-    "finalCost": 320,
+    "finalCost": null,
     "usage": {
       "actions": "Действие",
       "frequency": "1/сцену",
@@ -50,7 +50,7 @@
     "tags": [],
     "status": "draft",
     "shortDescription": "Вы сжимаете пространство вокруг цели тисками гравитации, ломая её кости и броню.",
-    "finalCost": 400,
+    "finalCost": null,
     "usage": {
       "actions": "Действие",
       "frequency": "1/сессию",
@@ -70,7 +70,7 @@
     "tags": [],
     "status": "draft",
     "shortDescription": "Стяните всех в зоне к центру и нанесите урон.",
-    "finalCost": 370,
+    "finalCost": null,
     "usage": {
       "actions": "Действие",
       "frequency": "1/сцену",
@@ -91,7 +91,7 @@
     "tags": [],
     "status": "draft",
     "shortDescription": "Вы создаете пылающую зону, обжигающую тех, кто входит в неё.",
-    "finalCost": 960,
+    "finalCost": null,
     "usage": {
       "actions": "Действие",
       "frequency": "1/сцену",
@@ -113,7 +113,7 @@
     "tags": [],
     "status": "draft",
     "shortDescription": "Все источники света в зоне начинают поглощать свет.",
-    "finalCost": 100,
+    "finalCost": null,
     "usage": {
       "actions": "Свободное действие",
       "frequency": "1/сцену",
@@ -133,7 +133,7 @@
     "tags": [],
     "status": "draft",
     "shortDescription": "Заключите воспоминание цели в кристалл. Вы можете просмотреть это воспоминание в любой момент позже.",
-    "finalCost": 100,
+    "finalCost": null,
     "usage": {
       "actions": "Свободное действие",
       "frequency": "1/сцену",
@@ -152,7 +152,7 @@
     "tags": [],
     "status": "draft",
     "shortDescription": "Создайте сверхострый клинок и ударьте перед собой.",
-    "finalCost": 1100,
+    "finalCost": null,
     "usage": {
       "actions": "Действие",
       "frequency": "1/сцену",
@@ -172,7 +172,7 @@
     "tags": [],
     "status": "draft",
     "shortDescription": "Произнесите короткий приказ. Все, кто слышат вас и отказываются выполнить приказ, получают 7 урона.",
-    "finalCost": 340,
+    "finalCost": null,
     "usage": {
       "actions": "Действие",
       "frequency": "1/сцену",
@@ -192,7 +192,7 @@
     "tags": [],
     "status": "draft",
     "shortDescription": "Снаряжение цели сдавливает её.",
-    "finalCost": 960,
+    "finalCost": null,
     "usage": {
       "actions": "Действие",
       "frequency": "1/сцену",
@@ -219,7 +219,7 @@
     "tags": [],
     "status": "draft",
     "shortDescription": "Создайте ядовитое облако.",
-    "finalCost": 100
+    "finalCost": null
   },
   {
     "id": "rychag",
@@ -232,7 +232,7 @@
     "tags": [],
     "status": "draft",
     "shortDescription": "Краткий всплеск сил и небольшой откат после.",
-    "finalCost": 370,
+    "finalCost": null,
     "usage": {
       "actions": "Свободное действие",
       "frequency": "1/сцену",
@@ -250,7 +250,7 @@
     "tags": [],
     "status": "draft",
     "shortDescription": "Из материи под рукой вы создаете облако острейших игл, направляя их в цель.",
-    "finalCost": 1150,
+    "finalCost": null,
     "usage": {
       "actions": "Действие",
       "frequency": "1/сцену",
@@ -270,7 +270,7 @@
     "tags": [],
     "status": "draft",
     "shortDescription": "Поднимите температуру цели до немыслимых значений.",
-    "finalCost": 400,
+    "finalCost": null,
     "usage": {
       "actions": "Действие",
       "frequency": "1/сцену",
@@ -290,7 +290,7 @@
     "tags": [],
     "status": "draft",
     "shortDescription": "Вы создаете магнитную сферу, мешающую передвижению и стрельбе.",
-    "finalCost": 340,
+    "finalCost": null,
     "usage": {
       "actions": "Действие",
       "frequency": "1/сцену",
@@ -310,7 +310,7 @@
     "tags": [],
     "status": "draft",
     "shortDescription": "Вы излучаете концентрированный луч радиации, нанося урон и делая всех пораженных врагов уязвимыми.",
-    "finalCost": 350,
+    "finalCost": null,
     "usage": {
       "actions": "Действие",
       "frequency": "1/сцену",
@@ -331,7 +331,7 @@
     "tags": [],
     "status": "draft",
     "shortDescription": "На пути удара вырастает стена, поглощающая урон.",
-    "finalCost": 100,
+    "finalCost": null,
     "usage": {
       "actions": "Реакция",
       "frequency": "1/сцену",
@@ -350,7 +350,7 @@
     "tags": [],
     "status": "draft",
     "shortDescription": "Очаруйте цель, заставив считать вас своим другом.",
-    "finalCost": 120,
+    "finalCost": null,
     "usage": {
       "actions": "Действие",
       "frequency": "1/сцену",
@@ -370,7 +370,7 @@
     "tags": [],
     "status": "draft",
     "shortDescription": "Вы внушаете цели ужасающие галлюцинации.",
-    "finalCost": 340,
+    "finalCost": null,
     "usage": {
       "actions": "Действие",
       "frequency": "1/сцену",
@@ -391,7 +391,7 @@
     "tags": [],
     "status": "draft",
     "shortDescription": "Считайте поверхностные мысли и эмоции цели.",
-    "finalCost": 110,
+    "finalCost": null,
     "usage": {
       "actions": "Действие",
       "frequency": "1/сцену",
@@ -411,7 +411,7 @@
     "tags": [],
     "status": "draft",
     "shortDescription": "Немедленно телепортируйтесь на 15 м.",
-    "finalCost": 310,
+    "finalCost": null,
     "usage": {
       "actions": "Реакция",
       "frequency": "1/сцену",
@@ -429,7 +429,7 @@
     "tags": [],
     "status": "draft",
     "shortDescription": "Усиление защиты реакцией",
-    "finalCost": 310,
+    "finalCost": null,
     "usage": {
       "actions": "Реакция",
       "frequency": "1/сцену",
@@ -448,7 +448,7 @@
     "tags": [],
     "status": "draft",
     "shortDescription": "Создайте малый портал между собой и выбранной точкой.",
-    "finalCost": 310,
+    "finalCost": null,
     "usage": {
       "actions": "Действие",
       "frequency": "1/сцену",
@@ -466,7 +466,7 @@
     "tags": [],
     "status": "draft",
     "shortDescription": "Вы усиливаете воздействие времени на снаряжение противника, состаривая его.",
-    "finalCost": 350,
+    "finalCost": null,
     "usage": {
       "actions": "Действие",
       "frequency": "1/сцену",
@@ -487,7 +487,7 @@
     "tags": [],
     "status": "draft",
     "shortDescription": "Вы анализируете цель, получая информацию.",
-    "finalCost": 310,
+    "finalCost": null,
     "usage": {
       "actions": "Действие",
       "frequency": "1/сцену",

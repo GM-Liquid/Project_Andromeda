@@ -22,7 +22,7 @@
       "physicalDefense": "2",
       "shield": "3"
     },
-    "finalCost": 110
+    "finalCost": null
   },
   {
     "id": "patrul",
@@ -47,7 +47,7 @@
       "magicalDefense": "2",
       "speed": "Скорость +5 м"
     },
-    "finalCost": 110
+    "finalCost": null
   },
   {
     "id": "ozk",
@@ -77,7 +77,7 @@
       "physicalDefense": "1",
       "psychicDefense": "1"
     },
-    "finalCost": 100
+    "finalCost": null
   },
   {
     "id": "shans",
@@ -108,7 +108,7 @@
       "magicalDefense": "1",
       "shield": "6"
     },
-    "finalCost": 400
+    "finalCost": null
   },
   {
     "id": "pravosudie",
@@ -139,7 +139,7 @@
       "magicalDefense": "3",
       "speed": "Скорость +15 м"
     },
-    "finalCost": 410
+    "finalCost": null
   },
   {
     "id": "khimik",
@@ -169,7 +169,7 @@
       "physicalDefense": "1",
       "psychicDefense": "3"
     },
-    "finalCost": 370
+    "finalCost": null
   },
   {
     "id": "korund",
@@ -201,7 +201,7 @@
       "shield": "15",
       "speed": "Скорость -50 м"
     },
-    "finalCost": 1340
+    "finalCost": null
   },
   {
     "id": "vektor",
@@ -231,7 +231,7 @@
       "physicalDefense": "2",
       "magicalDefense": "4"
     },
-    "finalCost": 1320
+    "finalCost": null
   },
   {
     "id": "piroman",
@@ -261,6 +261,6 @@
       "physicalDefense": "2",
       "psychicDefense": "4"
     },
-    "finalCost": 1290
+    "finalCost": null
   }
 ]
