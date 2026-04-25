@@ -100,6 +100,160 @@ test("syncBook injects chapter 04 gear catalogs from JSON sources instead of aut
   assert.match(generated, /^## Способности$/m)
 })
 
+test("syncBook renders chapter 04 from the mechanics-based catalog schema", { concurrency: false }, async () => {
+  const catalogNames = ["armor", "equipment", "abilities"]
+  const backups = []
+  const previousDocsRepoEnv = process.env.PROJECT_ANDROMEDA_DOCS_REPO
+
+  for (const catalogName of catalogNames) {
+    const path = resolve(repoRoot, "data", "gear", "catalog", `${catalogName}.json`)
+    const backupPath = `${path}.codex-backup`
+    await rename(path, backupPath)
+    backups.push({ path, backupPath })
+  }
+
+  const mechanicsCatalogs = {
+    armor: [
+      {
+        id: "test-armor",
+        name: "Тестовая броня",
+        type: "armor",
+        rank: 2,
+        skill: null,
+        mechanics: {
+          usage: {
+            activation: "passive",
+            frequency: "passive",
+          },
+          properties: {
+            fortitudeBonus: 3,
+            controlBonus: 1,
+            shield: 6,
+          },
+          effects: [
+            {
+              key: "grantTempStress",
+              trigger: "battleStart",
+              amount: 6,
+            },
+          ],
+        },
+        description: "Полное описание тестовой брони.",
+        shortDescription: "Краткое описание тестовой брони.",
+        price: 410,
+      },
+    ],
+    equipment: [
+      {
+        id: "test-rifle",
+        name: "Тестовая винтовка",
+        type: "equipment",
+        rank: 2,
+        skill: "strelba",
+        mechanics: {
+          usage: {
+            activation: "active",
+            frequency: "unlimited",
+            actionCost: "action",
+            range: {
+              type: "meters",
+              value: 30,
+            },
+            targets: {
+              type: "single",
+              value: 1,
+            },
+          },
+          properties: {
+            damage: 3,
+            armorPiercing: 1,
+          },
+          effects: [],
+        },
+        description: "Полное описание тестовой винтовки.",
+        shortDescription: "Краткое описание тестовой винтовки.",
+        price: 360,
+      },
+    ],
+    abilities: [
+      {
+        id: "test-ability",
+        name: "Тестовая способность",
+        type: "ability",
+        rank: 1,
+        skill: "mistika",
+        mechanics: {
+          usage: {
+            activation: "active",
+            frequency: "oncePerScene",
+            actionCost: "freeAction",
+            range: {
+              type: "touch",
+            },
+            targets: {
+              type: "single",
+              value: 1,
+            },
+            defense: "fortitude",
+          },
+          properties: {},
+          effects: [
+            {
+              key: "applyStatus",
+              trigger: "onSuccess",
+              status: "poisoned",
+              duration: {
+                type: "untilEndOfScene",
+              },
+            },
+          ],
+        },
+        description: "Полное описание тестовой способности.",
+        shortDescription: "Краткое описание тестовой способности.",
+        price: 120,
+      },
+    ],
+  }
+
+  try {
+    process.env.PROJECT_ANDROMEDA_DOCS_REPO = resolve(repoRoot, "__missing_docs_repo__")
+
+    for (const [catalogName, items] of Object.entries(mechanicsCatalogs)) {
+      const path = resolve(repoRoot, "data", "gear", "catalog", `${catalogName}.json`)
+      await writeFile(path, `${JSON.stringify(items, null, 2)}\n`, "utf8")
+    }
+
+    const { generatedFiles } = await syncBook()
+    const chapterPath = generatedFiles.find((filePath) =>
+      filePath.endsWith("04-sposobnosti-i-snaryazhenie.md"),
+    )
+
+    assert.ok(chapterPath, "expected the abilities and equipment chapter to be generated")
+
+    const generated = await readFile(resolve(chapterPath), "utf8")
+
+    assert.match(generated, /Тестовая броня/u)
+    assert.match(generated, /Тестовая винтовка/u)
+    assert.match(generated, /Тестовая способность/u)
+    assert.match(generated, /Стрельба/u)
+    assert.match(generated, /Мистика/u)
+    assert.match(generated, /\|.*410.*\|/u)
+    assert.match(generated, /\|.*360.*\|/u)
+    assert.match(generated, /\|.*120.*\|/u)
+  } finally {
+    if (previousDocsRepoEnv === undefined) {
+      delete process.env.PROJECT_ANDROMEDA_DOCS_REPO
+    } else {
+      process.env.PROJECT_ANDROMEDA_DOCS_REPO = previousDocsRepoEnv
+    }
+
+    for (const { path, backupPath } of backups) {
+      await rm(path, { force: true })
+      await rename(backupPath, path)
+    }
+  }
+})
+
 test("syncBook keeps chapter 04 equipment and abilities sections populated when catalogs are draft-only", { concurrency: false }, async () => {
   const { generatedFiles } = await syncBook()
   const chapterPath = generatedFiles.find((filePath) =>

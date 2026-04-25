@@ -1,1121 +1,1478 @@
 [
-  {
-    "id": "okhotnichiy-drobovik",
-    "name": "Охотничий дробовик",
-    "type": "equipment",
-    "rank": 2,
-    "skill": "Стрельба",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "targets": "До 2 целей"
+    {
+        "id":  "okhotnichiy-drobovik",
+        "name":  "Охотничий дробовик",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  "strelba",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "targets":  {
+                                                        "type":  "upTo",
+                                                        "value":  2
+                                                    }
+                                    },
+                          "properties":  {
+                                             "damage":  2
+                                         },
+                          "effects":  [
+
+                                      ]
+                      },
+        "description":  "Урон: 2. Одним действием вы можете атаковать до двух целей в соседних клетках. Обе атаки получают штраф -2.",
+        "shortDescription":  "Дробовик для удара по двум целям сразу",
+        "price":  null
     },
-    "properties": [],
-    "description": "Урон: 2. Одним действием вы можете атаковать до двух целей в соседних клетках. Обе атаки получают штраф -2.",
-    "shortDescription": "Дробовик для удара по двум целям сразу",
-    "tags": [
-      "strelkovoe"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "reyderskaya-snayperskaya-vintovka",
-    "name": "Рейдерская снайперская винтовка",
-    "type": "equipment",
-    "rank": 1,
-    "skill": "Стрельба",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие"
+    {
+        "id":  "reyderskaya-snayperskaya-vintovka",
+        "name":  "Рейдерская снайперская винтовка",
+        "type":  "equipment",
+        "rank":  1,
+        "skill":  "strelba",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "reload":  2
+                                    },
+                          "properties":  {
+                                             "stabilization":  1,
+                                             "damage":  2
+                                         },
+                          "effects":  [
+
+                                      ]
+                      },
+        "description":  "Урон: 2. Перезарядка 2. Стабилизация 1.",
+        "shortDescription":  "Легкая снайперская винтовка",
+        "price":  null
     },
-    "properties": [
-      {
-        "key": "reload-x",
-        "value": 2,
-        "label": "Перезарядка 2"
-      },
-      {
-        "key": "stabilization-x",
-        "value": 1,
-        "label": "Стабилизация 1"
-      }
-    ],
-    "description": "Урон: 2. Перезарядка 2. Стабилизация 1.",
-    "shortDescription": "Легкая снайперская винтовка",
-    "tags": [
-      "strelkovoe"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "vintovka-shturmovaya-ares",
-    "name": "Винтовка штурмовая \"Арес\"",
-    "type": "equipment",
-    "rank": 2,
-    "skill": "Стрельба",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие"
+    {
+        "id":  "vintovka-shturmovaya-ares",
+        "name":  "Винтовка штурмовая \"Арес\"",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  "strelba",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action"
+                                    },
+                          "properties":  {
+                                             "damage":  3,
+                                             "armorPiercing":  1
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "ignoreMeleePenalty"
+                                          },
+                                          {
+                                              "key":  "extraAttack",
+                                              "trigger":  "reactionWindow",
+                                              "text":  "Если вы видите цель, по которой в последний раз стреляли из этого оружия, и она совершает действие, вы можете потратить реакцию, чтобы атаковать ее этим оружием."
+                                          }
+                                      ]
+                      },
+        "description":  "Урон: 3. Бронебойность 1. Это оружие не получает штрафов за стрельбу в ближнем бою. Если вы видите цель, по которой в последний раз стреляли из этого оружия, и она совершает действие, вы можете потратить реакцию, чтобы атаковать ее этим оружием.",
+        "shortDescription":  "Штурмовая винтовка",
+        "price":  null
     },
-    "properties": [],
-    "description": "Урон: 3. Бронебойность 1. Это оружие не получает штрафов за стрельбу в ближнем бою. Если вы видите цель, по которой в последний раз стреляли из этого оружия, и она совершает действие, вы можете потратить реакцию, чтобы атаковать ее этим оружием.",
-    "shortDescription": "Штурмовая винтовка",
-    "tags": [
-      "strelkovoe"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "snayperskaya-vintovka-igla",
-    "name": "Снайперская винтовка \"Игла\"",
-    "type": "equipment",
-    "rank": 2,
-    "skill": "Стрельба",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие"
+    {
+        "id":  "snayperskaya-vintovka-igla",
+        "name":  "Снайперская винтовка \"Игла\"",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  "strelba",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action"
+                                    },
+                          "properties":  {
+                                             "escalation":  1,
+                                             "stabilization":  1,
+                                             "concealable":  true,
+                                             "damage":  4
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Скрытное."
+                                          }
+                                      ]
+                      },
+        "description":  "Урон: 4. Эскалация 1. Скрытное. Стабилизация 1.",
+        "shortDescription":  "Скрытная снайперская винтовка",
+        "price":  null
     },
-    "properties": [
-      {
-        "key": "escalation-x",
-        "value": 1,
-        "label": "Эскалация 1"
-      },
-      {
-        "key": "stabilization-x",
-        "value": 1,
-        "label": "Стабилизация 1"
-      },
-      {
-        "key": "concealable",
-        "value": true,
-        "label": "Скрытное"
-      }
-    ],
-    "description": "Урон: 4. Эскалация 1. Скрытное. Стабилизация 1.",
-    "shortDescription": "Скрытная снайперская винтовка",
-    "tags": [
-      "strelkovoe"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "vibroklinok",
-    "name": "Виброклинок",
-    "type": "equipment",
-    "rank": 2,
-    "skill": "Ближний бой",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "range": "Ближний бой",
-      "targets": "1 цель"
+    {
+        "id":  "vibroklinok",
+        "name":  "Виброклинок",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  "blizhniy_boy",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "range":  {
+                                                      "type":  "melee"
+                                                  },
+                                        "targets":  {
+                                                        "type":  "single",
+                                                        "value":  1
+                                                    }
+                                    },
+                          "properties":  {
+                                             "concealable":  true,
+                                             "damage":  5
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Скрытное."
+                                          }
+                                      ]
+                      },
+        "description":  "Урон: 5. Скрытное.",
+        "shortDescription":  "Скрытый клинок для ближнего боя и незаметного ношения.",
+        "price":  null
     },
-    "properties": [
-      {
-        "key": "concealable",
-        "value": true,
-        "label": "Скрытное"
-      }
-    ],
-    "description": "Урон: 5. Скрытное.",
-    "shortDescription": "Скрытый клинок для ближнего боя и незаметного ношения.",
-    "tags": [
-      "blizhnee"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "raketnitsa-ptr-3",
-    "name": "Ракетница ПТР-3",
-    "type": "equipment",
-    "rank": 2,
-    "skill": "Стрельба",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "targets": "1 цель"
+    {
+        "id":  "raketnitsa-ptr-3",
+        "name":  "Ракетница ПТР-3",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  "strelba",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "targets":  {
+                                                        "type":  "single",
+                                                        "value":  1
+                                                    },
+                                        "reload":  2,
+                                        "area":  {
+                                                     "type":  "blast",
+                                                     "value":  10
+                                                 }
+                                    },
+                          "properties":  {
+                                             "escalation":  3,
+                                             "damage":  2
+                                         },
+                          "effects":  [
+
+                                      ]
+                      },
+        "description":  "Урон: 2. Взрыв 10м. Перезарядка 2. Эскалация 3.",
+        "shortDescription":  "Ракетница для взрывного урона по группе целей с редкой перезарядкой.",
+        "price":  null
     },
-    "properties": [
-      {
-        "key": "escalation-x",
-        "value": 3,
-        "label": "Эскалация 3"
-      },
-      {
-        "key": "reload-x",
-        "value": 2,
-        "label": "Перезарядка 2"
-      }
-    ],
-    "description": "Урон: 2. Взрыв 10м. Перезарядка 2. Эскалация 3.",
-    "shortDescription": "Ракетница для взрывного урона по группе целей с редкой перезарядкой.",
-    "tags": [
-      "strelkovoe"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "ognemet-ifrit",
-    "name": "Огнемет Ифрит",
-    "type": "equipment",
-    "rank": 2,
-    "skill": "Стрельба",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "area": "Линия 10 м",
-      "targets": "Все цели на линии"
+    {
+        "id":  "ognemet-ifrit",
+        "name":  "Огнемет Ифрит",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  "strelba",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "targets":  {
+                                                        "type":  "allInArea",
+                                                        "value":  "Все цели на линии"
+                                                    },
+                                        "area":  {
+                                                     "type":  "line",
+                                                     "value":  10
+                                                 }
+                                    },
+                          "properties":  {
+                                             "damage":  2
+                                         },
+                          "effects":  [
+
+                                      ]
+                      },
+        "description":  "Урон: 2. Поражает всех на линии длиной до 10 м.",
+        "shortDescription":  "Огнемет, который выжигает прямую линию перед вами.",
+        "price":  null
     },
-    "properties": [],
-    "description": "Урон: 2. Поражает всех на линии длиной до 10 м.",
-    "shortDescription": "Огнемет, который выжигает прямую линию перед вами.",
-    "tags": [
-      "strelkovoe"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "karabin-s-impulsnym-modulem",
-    "name": "Двустволка с импульсным модулем",
-    "type": "equipment",
-    "rank": 2,
-    "skill": "Стрельба",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "targets": "1 цель"
+    {
+        "id":  "karabin-s-impulsnym-modulem",
+        "name":  "Двустволка с импульсным модулем",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  "strelba",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "targets":  {
+                                                        "type":  "single",
+                                                        "value":  1
+                                                    }
+                                    },
+                          "properties":  {
+                                             "damage":  4
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "extraAttack",
+                                              "trigger":  "onUse",
+                                              "attacks":  2
+                                          },
+                                          {
+                                              "key":  "moveTarget",
+                                              "trigger":  "onHit",
+                                              "mode":  "push",
+                                              "distance":  10
+                                          }
+                                      ]
+                      },
+        "description":  "Урон: 4. Действием вы совершаете 2 атаки, а не одну. Каждое попадание отталкивает цель на 10м.",
+        "shortDescription":  "Карабин, который отбрасывает цель мощным попаданием.",
+        "price":  null
     },
-    "properties": [],
-    "description": "Урон: 4. Действием вы совершаете 2 атаки, а не одну. Каждое попадание отталкивает цель на 10м.",
-    "shortDescription": "Карабин, который отбрасывает цель мощным попаданием.",
-    "tags": [
-      "strelkovoe"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "plazmennaya-rapira-spektralis",
-    "name": "Плазменная рапира \"Спектралис\"",
-    "type": "equipment",
-    "rank": 3,
-    "skill": "Ближний бой",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "range": "Ближний бой",
-      "targets": "1 цель"
+    {
+        "id":  "plazmennaya-rapira-spektralis",
+        "name":  "Плазменная рапира \"Спектралис\"",
+        "type":  "equipment",
+        "rank":  3,
+        "skill":  "blizhniy_boy",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "range":  {
+                                                      "type":  "melee"
+                                                  },
+                                        "targets":  {
+                                                        "type":  "single",
+                                                        "value":  1
+                                                    }
+                                    },
+                          "properties":  {
+                                             "armorPiercing":  2,
+                                             "damage":  6
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Когда по вашей Стойкости совершают атаку, вы можете реакцией совершить проверку Ближнего боя."
+                                          }
+                                      ]
+                      },
+        "description":  "Урон: 6. Бронебойность 2. Когда по вашей Стойкости совершают атаку, вы можете реакцией совершить проверку Ближнего боя. Если ваш результат выше броска атаки, вы получаете +2 к защите.",
+        "shortDescription":  "Бронебойная рапира с защитной опцией",
+        "price":  null
     },
-    "properties": [
-      {
-        "key": "armor-piercing-x",
-        "value": 0,
-        "label": "Бронебойность 0"
-      }
-    ],
-    "description": "Урон: 6. Бронебойность 2. Когда по вашей Стойкости совершают атаку, вы можете реакцией совершить проверку Ближнего боя. Если ваш результат выше броска атаки, вы получаете +2 к защите.",
-    "shortDescription": "Бронебойная рапира с защитной опцией",
-    "tags": [
-      "blizhnee"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "snayperskaya-vintovka-kope",
-    "name": "Снайперская винтовка \"Копье\"",
-    "type": "equipment",
-    "rank": 3,
-    "skill": "Стрельба",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "targets": "1 цель"
+    {
+        "id":  "snayperskaya-vintovka-kope",
+        "name":  "Снайперская винтовка \"Копье\"",
+        "type":  "equipment",
+        "rank":  3,
+        "skill":  "strelba",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "targets":  {
+                                                        "type":  "single",
+                                                        "value":  1
+                                                    },
+                                        "reload":  2
+                                    },
+                          "properties":  {
+                                             "armorPiercing":  2,
+                                             "escalation":  1,
+                                             "stabilization":  1,
+                                             "damage":  5
+                                         },
+                          "effects":  [
+
+                                      ]
+                      },
+        "description":  "Урон: 5. Бронебойность 2. Эскалация 1. Перезарядка 2. Стабилизация 1.",
+        "shortDescription":  "Тяжелая снайперская винтовка, требующая перезарядки",
+        "price":  null
     },
-    "properties": [
-      {
-        "key": "armor-piercing-x",
-        "value": 2,
-        "label": "Бронебойность 2"
-      },
-      {
-        "key": "escalation-x",
-        "value": 1,
-        "label": "Эскалация 1"
-      },
-      {
-        "key": "stabilization-x",
-        "value": 1,
-        "label": "Стабилизация 1"
-      },
-      {
-        "key": "reload-x",
-        "value": 2,
-        "label": "Перезарядка 2"
-      }
-    ],
-    "description": "Урон: 5. Бронебойность 2. Эскалация 1. Перезарядка 2. Стабилизация 1.",
-    "shortDescription": "Тяжелая снайперская винтовка, требующая перезарядки",
-    "tags": [
-      "strelkovoe"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "dvuruchnyy-vibromech",
-    "name": "Двуручный вибромеч",
-    "type": "equipment",
-    "rank": 3,
-    "skill": "Ближний бой",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "range": "Ближний бой",
-      "targets": "1 цель"
+    {
+        "id":  "dvuruchnyy-vibromech",
+        "name":  "Двуручный вибромеч",
+        "type":  "equipment",
+        "rank":  3,
+        "skill":  "blizhniy_boy",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "range":  {
+                                                      "type":  "melee"
+                                                  },
+                                        "targets":  {
+                                                        "type":  "single",
+                                                        "value":  1
+                                                    }
+                                    },
+                          "properties":  {
+                                             "armorPiercing":  2,
+                                             "damage":  7
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Если вы попадаете этим оружием и на кубе выпало 10, противник получает состояние «Отрубленная конечность»."
+                                          },
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "До получения медпомощи 3 ранга или выше он либо получает -2 ко всем проверкам, либо его скорость становится равной 4 м."
+                                          }
+                                      ]
+                      },
+        "description":  "Урон: 7. Бронебойность 2. Если вы попадаете этим оружием и на кубе выпало 10, противник получает состояние «Отрубленная конечность». До получения медпомощи 3 ранга или выше он либо получает -2 ко всем проверкам, либо его скорость становится равной 4 м.",
+        "shortDescription":  "Тяжелый меч с шансом нанести калечащее ранение.",
+        "price":  null
     },
-    "properties": [
-      {
-        "key": "armor-piercing-x",
-        "value": 2,
-        "label": "Бронебойность 2"
-      }
-    ],
-    "description": "Урон: 7. Бронебойность 2. Если вы попадаете этим оружием и на кубе выпало 10, противник получает состояние «Отрубленная конечность». До получения медпомощи 3 ранга или выше он либо получает -2 ко всем проверкам, либо его скорость становится равной 4 м.",
-    "shortDescription": "Тяжелый меч с шансом нанести калечащее ранение.",
-    "tags": [
-      "blizhnee"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "kompaktnyy-plazmorez",
-    "name": "Компактный плазморез",
-    "type": "equipment",
-    "rank": 3,
-    "skill": "Ближний бой",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "range": "Ближний бой",
-      "targets": "1 цель"
+    {
+        "id":  "kompaktnyy-plazmorez",
+        "name":  "Компактный плазморез",
+        "type":  "equipment",
+        "rank":  3,
+        "skill":  "blizhniy_boy",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "range":  {
+                                                      "type":  "melee"
+                                                  },
+                                        "targets":  {
+                                                        "type":  "single",
+                                                        "value":  1
+                                                    },
+                                        "reload":  1
+                                    },
+                          "properties":  {
+                                             "armorPiercing":  4,
+                                             "damage":  5
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Позволяет атаковать в ближнем бою и резать прочные материалы."
+                                          },
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Материал 1 ранга режется за действие, 2 ранга - за 10 минут, 3 ранга - за час."
+                                          }
+                                      ]
+                      },
+        "description":  "Урон: 5. Бронебойность 4. Перезарядка 1. Позволяет атаковать в ближнем бою и резать прочные материалы. Материал 1 ранга режется за действие, 2 ранга - за 10 минут, 3 ранга - за час.",
+        "shortDescription":  "Плазморез для ближнего боя и вскрытия прочных материалов.",
+        "price":  null
     },
-    "properties": [
-      {
-        "key": "armor-piercing-x",
-        "value": 4,
-        "label": "Бронебойность 4"
-      },
-      {
-        "key": "reload-x",
-        "value": 1,
-        "label": "Перезарядка 1"
-      }
-    ],
-    "description": "Урон: 5. Бронебойность 4. Перезарядка 1. Позволяет атаковать в ближнем бою и резать прочные материалы. Материал 1 ранга режется за действие, 2 ранга - за 10 минут, 3 ранга - за час.",
-    "shortDescription": "Плазморез для ближнего боя и вскрытия прочных материалов.",
-    "tags": [
-      "blizhnee"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "kineticheskiy-molot",
-    "name": "Кинетический молот \"Раскол\"",
-    "type": "equipment",
-    "rank": 2,
-    "skill": "Ближний бой",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "range": "Ближний бой",
-      "targets": "1 цель"
+    {
+        "id":  "kineticheskiy-molot",
+        "name":  "Кинетический молот \"Раскол\"",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  "blizhniy_boy",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "range":  {
+                                                      "type":  "melee"
+                                                  },
+                                        "targets":  {
+                                                        "type":  "single",
+                                                        "value":  1
+                                                    }
+                                    },
+                          "properties":  {
+                                             "armorPiercing":  2,
+                                             "damage":  2
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Этот молот атакует сразу каждую цель, находящуюся рядом с вами."
+                                          }
+                                      ]
+                      },
+        "description":  "Урон: 2. Бронебойность 2. Этот молот атакует сразу каждую цель, находящуюся рядом с вами.",
+        "shortDescription":  "Молот, наносящий урон всем вокруг.",
+        "price":  null
     },
-    "properties": [
-      {
-        "key": "armor-piercing-x",
-        "value": 2,
-        "label": "Бронебойность 2"
-      }
-    ],
-    "description": "Урон: 2. Бронебойность 2. Этот молот атакует сразу каждую цель, находящуюся рядом с вами.",
-    "shortDescription": "Молот, наносящий урон всем вокруг.",
-    "tags": [
-      "blizhnee"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "vintovka-spets-naznacheniya-loza",
-    "name": "Винтовка спец. назначения \"Лоза\"",
-    "type": "equipment",
-    "rank": 3,
-    "skill": "Стрельба",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "targets": "1 цель"
+    {
+        "id":  "vintovka-spets-naznacheniya-loza",
+        "name":  "Винтовка спец. назначения \"Лоза\"",
+        "type":  "equipment",
+        "rank":  3,
+        "skill":  "strelba",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "targets":  {
+                                                        "type":  "single",
+                                                        "value":  1
+                                                    }
+                                    },
+                          "properties":  {
+                                             "concealable":  true,
+                                             "damage":  6
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Скрытное."
+                                          },
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "При попадании цель оказывается опутана металлическими канатами."
+                                          },
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Чтобы освободиться, нужна проверка Мощи со сложностью 10."
+                                          },
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Пока цель опутана, она получает -1 ко всем проверкам, а ее скорость становится равной 0."
+                                          }
+                                      ]
+                      },
+        "description":  "Урон: 6. Скрытное. При попадании цель оказывается опутана металлическими канатами. Чтобы освободиться, нужна проверка Мощи со сложностью 10. Пока цель опутана, она получает -1 ко всем проверкам, а ее скорость становится равной 0.",
+        "shortDescription":  "Скрытная винтовка, которая спутывает цель металлическими тросами.",
+        "price":  null
     },
-    "properties": [
-      {
-        "key": "concealable",
-        "value": true,
-        "label": "Скрытное"
-      }
-    ],
-    "description": "Урон: 6. Скрытное. При попадании цель оказывается опутана металлическими канатами. Чтобы освободиться, нужна проверка Мощи со сложностью 10. Пока цель опутана, она получает -1 ко всем проверкам, а ее скорость становится равной 0.",
-    "shortDescription": "Скрытная винтовка, которая спутывает цель металлическими тросами.",
-    "tags": [
-      "strelkovoe"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "tyazhelyy-raketomet-vulkan",
-    "name": "Тяжелый ракетомет \"Вулкан\"",
-    "type": "equipment",
-    "rank": 3,
-    "skill": "Стрельба",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "area": "Круг 30м"
+    {
+        "id":  "tyazhelyy-raketomet-vulkan",
+        "name":  "Тяжелый ракетомет \"Вулкан\"",
+        "type":  "equipment",
+        "rank":  3,
+        "skill":  "strelba",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "area":  {
+                                                     "type":  "circle",
+                                                     "value":  30
+                                                 },
+                                        "reload":  1
+                                    },
+                          "properties":  {
+                                             "damage":  5
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Снаряд взрывается в зоне 30 м и наносит урон каждой цели внутри."
+                                          }
+                                      ]
+                      },
+        "description":  "Урон: 5. Перезарядка 1. Снаряд взрывается в зоне 30 м и наносит урон каждой цели внутри.",
+        "shortDescription":  "Тяжелый ракетомет для удара по большой зоне. Требует частую перезарядку.",
+        "price":  null
     },
-    "properties": [
-      {
-        "key": "reload-x",
-        "value": 1,
-        "label": "Перезарядка 1"
-      }
-    ],
-    "description": "Урон: 5. Перезарядка 1. Снаряд взрывается в зоне 30 м и наносит урон каждой цели внутри.",
-    "shortDescription": "Тяжелый ракетомет для удара по большой зоне. Требует частую перезарядку.",
-    "tags": [
-      "strelkovoe"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "fazovyy-klinok",
-    "name": "Фазовый клинок",
-    "type": "equipment",
-    "rank": 3,
-    "skill": "Ближний бой",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "range": "10 м",
-      "targets": "1 цель"
+    {
+        "id":  "fazovyy-klinok",
+        "name":  "Фазовый клинок",
+        "type":  "equipment",
+        "rank":  3,
+        "skill":  "blizhniy_boy",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "range":  {
+                                                      "type":  "meters",
+                                                      "value":  20
+                                                  },
+                                        "targets":  {
+                                                        "type":  "single",
+                                                        "value":  1
+                                                    }
+                                    },
+                          "properties":  {
+                                             "damage":  8
+                                         },
+                          "effects":  [
+
+                                      ]
+                      },
+        "description":  "Урон: 8. Дальность атаки этим клинком до 20м.",
+        "shortDescription":  "Удлинняющийся клинок.",
+        "price":  null
     },
-    "properties": [],
-    "description": "Урон: 8. Дальность атаки этим клинком до 20м.",
-    "shortDescription": "Удлинняющийся клинок.",
-    "tags": [
-      "blizhnee"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "kereznikov",
-    "name": "Керезников",
-    "type": "equipment",
-    "rank": 1,
-    "skill": null,
-    "usage": {
-      "frequency": "Постоянно",
-      "targets": "На себя"
+    {
+        "id":  "kereznikov",
+        "name":  "Керезников",
+        "type":  "equipment",
+        "rank":  1,
+        "skill":  null,
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "passive",
+                                        "frequency":  "passive",
+                                        "targets":  {
+                                                        "type":  "self"
+                                                    }
+                                    },
+                          "properties":  {
+                                             "initiativeBonus":  2
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Постоянный ускоритель реакции."
+                                          }
+                                      ]
+                      },
+        "description":  "Постоянный ускоритель реакции. Дает +2 к броскам инициативы. Одновременно может быть установлен только один ускоритель.",
+        "shortDescription":  "Пассивный ускоритель реакции",
+        "price":  160
     },
-    "properties": [],
-    "description": "Постоянный ускоритель реакции. Дает +2 к броскам инициативы. Одновременно может быть установлен только один ускоритель.",
-    "shortDescription": "Пассивный ускоритель реакции",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": 160,
-    "status": "draft"
-  },
-  {
-    "id": "sandevistan",
-    "name": "Сандевистан",
-    "type": "equipment",
-    "rank": 2,
-    "skill": null,
-    "usage": {
-      "frequency": "1/сессию",
-      "actions": "Свободное действие",
-      "targets": "На себя",
-      "duration": "До конца сцены"
+    {
+        "id":  "sandevistan",
+        "name":  "Сандевистан",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  null,
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "oncePerSession",
+                                        "actionCost":  "freeAction",
+                                        "targets":  {
+                                                        "type":  "self"
+                                                    },
+                                        "duration":  "untilEndOfScene"
+                                    },
+                          "properties":  {
+
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "На 1 минуту дает максимальное значение на кубе инициативы."
+                                          }
+                                      ]
+                      },
+        "description":  "Кратковременный ускоритель. На 1 минуту дает максимальное значение на кубе инициативы. Одновременно может быть установлен только один ускоритель.",
+        "shortDescription":  "Разовый боевой разгон, гарантирующий право первого хода в бою",
+        "price":  360
     },
-    "properties": [],
-    "description": "Кратковременный ускоритель. На 1 минуту дает максимальное значение на кубе инициативы. Одновременно может быть установлен только один ускоритель.",
-    "shortDescription": "Разовый боевой разгон, гарантирующий право первого хода в бою",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": 360,
-    "status": "draft"
-  },
-  {
-    "id": "gasitel-inertsii",
-    "name": "Гаситель инерции",
-    "type": "equipment",
-    "rank": 2,
-    "skill": "Ловкость",
-    "usage": {
-      "frequency": "Постоянно",
-      "targets": "На себя"
+    {
+        "id":  "gasitel-inertsii",
+        "name":  "Гаситель инерции",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  "lovkost",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "passive",
+                                        "frequency":  "passive",
+                                        "targets":  {
+                                                        "type":  "self"
+                                                    }
+                                    },
+                          "properties":  {
+
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Вы наносите дополнительный урон в зависимости от пройденного перед этим расстояния."
+                                          },
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "После передвижения ваша следующая атака дополнительно наносит 1 урон за каждые полные 10 м, которые вы прошли перед ней."
+                                          }
+                                      ]
+                      },
+        "description":  "Вы наносите дополнительный урон в зависимости от пройденного перед этим расстояния. После передвижения ваша следующая атака дополнительно наносит 1 урон за каждые полные 10 м, которые вы прошли перед ней. Для использования требуется Ловкость 3.",
+        "shortDescription":  "После передвижения вы усиливаете следующую атаку в зависимости от пройденного расстояния.",
+        "price":  null
     },
-    "properties": [],
-    "description": "Вы наносите дополнительный урон в зависимости от пройденного перед этим расстояния. После передвижения ваша следующая атака дополнительно наносит 1 урон за каждые полные 10 м, которые вы прошли перед ней. Для использования требуется Ловкость 3.",
-    "shortDescription": "После передвижения вы усиливаете следующую атаку в зависимости от пройденного расстояния.",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "maglev-botinki",
-    "name": "Маглев ботинки",
-    "type": "equipment",
-    "rank": 2,
-    "skill": "Ловкость",
-    "usage": {
-      "frequency": "Постоянно",
-      "targets": "На себя"
+    {
+        "id":  "maglev-botinki",
+        "name":  "Маглев ботинки",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  "lovkost",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "passive",
+                                        "frequency":  "passive",
+                                        "targets":  {
+                                                        "type":  "self"
+                                                    }
+                                    },
+                          "properties":  {
+
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "wallRun"
+                                          },
+                                          {
+                                              "key":  "ignoreTerrainSpeedPenalty"
+                                          }
+                                      ]
+                      },
+        "description":  "Позволяют перемещаться по отвесным стенам и потолку, тратя на это вашу обычную скорость передвижения. Вы также игнорируете штраф к скорости от пересеченной местности. Другие эффекты этой местности остаются в силе. Для использования требуется Ловкость 3.",
+        "shortDescription":  "Позволяют ходить по стенам и потолку и игнорировать штраф к скорости от пересеченной местности.",
+        "price":  null
     },
-    "properties": [],
-    "description": "Позволяют перемещаться по отвесным стенам и потолку, тратя на это вашу обычную скорость передвижения. Вы также игнорируете штраф к скорости от пересеченной местности. Другие эффекты этой местности остаются в силе. Для использования требуется Ловкость 3.",
-    "shortDescription": "Позволяют ходить по стенам и потолку и игнорировать штраф к скорости от пересеченной местности.",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "khimicheskiy-analizator",
-    "name": "Химический анализатор",
-    "type": "equipment",
-    "rank": 3,
-    "skill": null,
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "range": "Касание",
-      "targets": "1 вещество"
+    {
+        "id":  "khimicheskiy-analizator",
+        "name":  "Химический анализатор",
+        "type":  "equipment",
+        "rank":  3,
+        "skill":  null,
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "range":  {
+                                                      "type":  "touch"
+                                                  },
+                                        "targets":  {
+                                                        "type":  "single",
+                                                        "value":  1
+                                                    }
+                                    },
+                          "properties":  {
+
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Позволяет без проверки опознавать химические вещества из обширной базы образцов."
+                                          }
+                                      ]
+                      },
+        "description":  "Позволяет без проверки опознавать химические вещества из обширной базы образцов.",
+        "shortDescription":  "Опознает химические вещества без проверки.",
+        "price":  null
     },
-    "properties": [],
-    "description": "Позволяет без проверки опознавать химические вещества из обширной базы образцов.",
-    "shortDescription": "Опознает химические вещества без проверки.",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "redaktor-boli",
-    "name": "Редактор боли",
-    "type": "equipment",
-    "rank": 2,
-    "skill": null,
-    "usage": {
-      "frequency": "Постоянно",
-      "targets": "На себя"
+    {
+        "id":  "redaktor-boli",
+        "name":  "Редактор боли",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  null,
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "passive",
+                                        "frequency":  "passive",
+                                        "targets":  {
+                                                        "type":  "self"
+                                                    }
+                                    },
+                          "properties":  {
+
+                                         },
+                          "effects":  [
+
+                                      ]
+                      },
+        "description":  "Отключает восприятие боли и усталости. Дает 4 временные ячейки стресса, которые очищаются в начале каждой сцены.",
+        "shortDescription":  "Отключает восприятие боли и усталости, увеличивая запас стресса",
+        "price":  null
     },
-    "properties": [],
-    "description": "Отключает восприятие боли и усталости. Дает 4 временные ячейки стресса, которые очищаются в начале каждой сцены.",
-    "shortDescription": "Отключает восприятие боли и усталости, увеличивая запас стресса",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "dartgan",
-    "name": "Дартган",
-    "type": "equipment",
-    "rank": 2,
-    "skill": "Стрельба",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "targets": "1 цель"
+    {
+        "id":  "dartgan",
+        "name":  "Дартган",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  "strelba",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "targets":  {
+                                                        "type":  "single",
+                                                        "value":  1
+                                                    },
+                                        "reload":  1
+                                    },
+                          "properties":  {
+                                             "concealable":  true,
+                                             "armorPiercing":  2,
+                                             "damage":  6
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Скрытое однозарядное оружие, устанавливаемое в глазницу."
+                                          }
+                                      ]
+                      },
+        "description":  "Скрытое однозарядное оружие, устанавливаемое в глазницу. Урон: 6. Бронебойность 2. Перезарядка 1.",
+        "shortDescription":  "Скрытый однозарядный имплант-выстрел.",
+        "price":  null
     },
-    "properties": [
-      {
-        "key": "concealable",
-        "value": true,
-        "label": "Скрытное"
-      },
-      {
-        "key": "armor-piercing-x",
-        "value": 2,
-        "label": "Бронебойность 2"
-      },
-      {
-        "key": "reload-x",
-        "value": 1,
-        "label": "Перезарядка 1"
-      }
-    ],
-    "description": "Скрытое однозарядное оружие, устанавливаемое в глазницу. Урон: 6. Бронебойность 2. Перезарядка 1.",
-    "shortDescription": "Скрытый однозарядный имплант-выстрел.",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "mikro-optika",
-    "name": "Микро-оптика",
-    "type": "equipment",
-    "rank": 2,
-    "skill": null,
-    "usage": {
-      "frequency": "Постоянно"
+    {
+        "id":  "mikro-optika",
+        "name":  "Микро-оптика",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  null,
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "passive",
+                                        "frequency":  "passive"
+                                    },
+                          "properties":  {
+
+                                         },
+                          "effects":  [
+
+                                      ]
+                      },
+        "description":  "Позволяет увеличивать изображение до 10x. Вы можете прицеливаться до трех ходов подряд.",
+        "shortDescription":  "Мечта любого снайпера",
+        "price":  null
     },
-    "properties": [],
-    "description": "Позволяет увеличивать изображение до 10x. Вы можете прицеливаться до трех ходов подряд.",
-    "shortDescription": "Мечта любого снайпера",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "detektor-magii",
-    "name": "Детектор магии",
-    "type": "equipment",
-    "rank": 2,
-    "skill": "Резонанс",
-    "usage": {
-      "frequency": "Неограниченно",
-      "range": "30 м"
+    {
+        "id":  "detektor-magii",
+        "name":  "Детектор магии",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  "rezonans",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "range":  {
+                                                      "type":  "meters",
+                                                      "value":  30
+                                                  }
+                                    },
+                          "properties":  {
+
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Позволяет проходить проверки Резонанса для обнаружения магии и магических существ."
+                                          }
+                                      ]
+                      },
+        "description":  "Позволяет проходить проверки Резонанса для обнаружения магии и магических существ.",
+        "shortDescription":  "Обнаруживает магию",
+        "price":  null
     },
-    "properties": [],
-    "description": "Позволяет проходить проверки Резонанса для обнаружения магии и магических существ.",
-    "shortDescription": "Обнаруживает магию",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "takticheskiy-pritsel",
-    "name": "Тактический прицел",
-    "type": "equipment",
-    "rank": 1,
-    "skill": null,
-    "usage": {
-      "frequency": "Постоянно"
+    {
+        "id":  "takticheskiy-pritsel",
+        "name":  "Тактический прицел",
+        "type":  "equipment",
+        "rank":  1,
+        "skill":  null,
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "passive",
+                                        "frequency":  "passive"
+                                    },
+                          "properties":  {
+
+                                         },
+                          "effects":  [
+
+                                      ]
+                      },
+        "description":  "Усиливает ваш прицел. Действие «прицелиться» дополнительно дает +1.",
+        "shortDescription":  "Усиливает ваш прицел.",
+        "price":  null
     },
-    "properties": [],
-    "description": "Усиливает ваш прицел. Действие «прицелиться» дополнительно дает +1.",
-    "shortDescription": "Усиливает ваш прицел.",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "radio-skaner",
-    "name": "Сканер \"Светоч\"",
-    "type": "equipment",
-    "rank": 2,
-    "skill": null,
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Свободное действие",
-      "range": "100 м",
-      "targets": "Все техустройства в радиусе"
+    {
+        "id":  "radio-skaner",
+        "name":  "Сканер \"Светоч\"",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  null,
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "freeAction",
+                                        "range":  {
+                                                      "type":  "meters",
+                                                      "value":  100
+                                                  },
+                                        "targets":  {
+                                                        "type":  "allInArea",
+                                                        "value":  "Все техустройства в радиусе"
+                                                    }
+                                    },
+                          "properties":  {
+
+                                         },
+                          "effects":  [
+
+                                      ]
+                      },
+        "description":  "Распознает все технические устройства в радиусе 100 м.",
+        "shortDescription":  "Распознает все технические устройства в радиусе 100 м.",
+        "price":  null
     },
-    "properties": [],
-    "description": "Распознает все технические устройства в радиусе 100 м.",
-    "shortDescription": "Распознает все технические устройства в радиусе 100 м.",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "analizator-golosa",
-    "name": "Анализатор голоса",
-    "type": "equipment",
-    "rank": 2,
-    "skill": null,
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Свободное действие",
-      "duration": "До конца сцены"
+    {
+        "id":  "analizator-golosa",
+        "name":  "Анализатор голоса",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  null,
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "freeAction",
+                                        "duration":  "untilEndOfScene"
+                                    },
+                          "properties":  {
+
+                                         },
+                          "effects":  [
+
+                                      ]
+                      },
+        "description":  "На 1 минуту активирует функцию «Детектор лжи». В это время вам невозможно соврать.",
+        "shortDescription":  "Детектор лжи",
+        "price":  null
     },
-    "properties": [],
-    "description": "На 1 минуту активирует функцию «Детектор лжи». В это время вам невозможно соврать.",
-    "shortDescription": "Детектор лжи",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "radar-sonar",
-    "name": "Сонар ближнего радиуса",
-    "type": "equipment",
-    "rank": 2,
-    "skill": null,
-    "usage": {
-      "frequency": "Постоянно",
-      "range": "50 м"
+    {
+        "id":  "radar-sonar",
+        "name":  "Сонар ближнего радиуса",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  null,
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "passive",
+                                        "frequency":  "passive",
+                                        "range":  {
+                                                      "type":  "meters",
+                                                      "value":  50
+                                                  }
+                                    },
+                          "properties":  {
+
+                                         },
+                          "effects":  [
+
+                                      ]
+                      },
+        "description":  "Постоянно сканирует местность в радиусе 50 м. Раз в минуту или при входе объекта в зону ведущий сообщает обо всех движущихся целях. Стены не считаются помехой.",
+        "shortDescription":  "Детектор движения, даже сквозь стены",
+        "price":  null
     },
-    "properties": [],
-    "description": "Постоянно сканирует местность в радиусе 50 м. Раз в минуту или при входе объекта в зону ведущий сообщает обо всех движущихся целях. Стены не считаются помехой.",
-    "shortDescription": "Детектор движения, даже сквозь стены",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "kiber-zmeya",
-    "name": "Кибер-змея",
-    "type": "equipment",
-    "rank": 3,
-    "skill": "Ближний бой",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "range": "Ближний бой",
-      "targets": "1 цель"
+    {
+        "id":  "kiber-zmeya",
+        "name":  "Кибер-змея",
+        "type":  "equipment",
+        "rank":  3,
+        "skill":  "blizhniy_boy",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "range":  {
+                                                      "type":  "melee"
+                                                  },
+                                        "targets":  {
+                                                        "type":  "single",
+                                                        "value":  1
+                                                    },
+                                        "reload":  1
+                                    },
+                          "properties":  {
+                                             "damage":  6
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Жутковатое щупальце-имплант, скрытое в пищеводе."
+                                          },
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "При попадании цель оказывается схваченной и получает -2 к следующей проверке до начала вашего следующего хода."
+                                          }
+                                      ]
+                      },
+        "description":  "Жутковатое щупальце-имплант, скрытое в пищеводе. Урон: 6. При попадании цель оказывается схваченной и получает -2 к следующей проверке до начала вашего следующего хода. Перезарядка 1.",
+        "shortDescription":  "Жутковатое щупальце-имплант, скрытое в пищеводе.",
+        "price":  null
     },
-    "properties": [
-      {
-        "key": "reload-x",
-        "value": 1,
-        "label": "Перезарядка 1"
-      }
-    ],
-    "description": "Жутковатое щупальце-имплант, скрытое в пищеводе. Урон: 6. При попадании цель оказывается схваченной и получает -2 к следующей проверке до начала вашего следующего хода. Перезарядка 1.",
-    "shortDescription": "Жутковатое щупальце-имплант, скрытое в пищеводе.",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "avtoinektor",
-    "name": "Автоинъектор",
-    "type": "equipment",
-    "rank": 1,
-    "skill": null,
-    "usage": {
-      "frequency": "1/сессию",
-      "actions": "Свободное действие"
+    {
+        "id":  "avtoinektor",
+        "name":  "Автоинъектор",
+        "type":  "equipment",
+        "rank":  1,
+        "skill":  null,
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "oncePerSession",
+                                        "actionCost":  "freeAction"
+                                    },
+                          "properties":  {
+
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Адреналиновая версия дает +2 к следующей проверке."
+                                          }
+                                      ]
+                      },
+        "description":  "Поставляется в двух версиях: лечебной и адреналиновой. Выбор делается при покупке, взять обе сразу нельзя. Адреналиновая версия дает +2 к следующей проверке. Лечебная восполняет 6 стресса.",
+        "shortDescription":  "Автоматически вводит адреналин или лечебный препарат.",
+        "price":  null
     },
-    "properties": [],
-    "description": "Поставляется в двух версиях: лечебной и адреналиновой. Выбор делается при покупке, взять обе сразу нельзя. Адреналиновая версия дает +2 к следующей проверке. Лечебная восполняет 6 стресса.",
-    "shortDescription": "Автоматически вводит адреналин или лечебный препарат.",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "rukokhvat",
-    "name": "Рукохват",
-    "type": "equipment",
-    "rank": 2,
-    "skill": null,
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Свободное действие",
-      "range": "50 м",
-      "targets": "1 объект"
+    {
+        "id":  "rukokhvat",
+        "name":  "Рукохват",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  null,
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "freeAction",
+                                        "range":  {
+                                                      "type":  "meters",
+                                                      "value":  50
+                                                  },
+                                        "targets":  {
+                                                        "type":  "single",
+                                                        "value":  1
+                                                    }
+                                    },
+                          "properties":  {
+
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "По тросу можно двигаться с половиной скорости или подтянуть к себе объект на один размер меньше вас."
+                                          }
+                                      ]
+                      },
+        "description":  "Запускает крюк в объект на расстоянии до 50 м. По тросу можно двигаться с половиной скорости или подтянуть к себе объект на один размер меньше вас.",
+        "shortDescription":  "Крюк-кошка для быстрого зацепа, подъема и подтягивания объектов.",
+        "price":  null
     },
-    "properties": [],
-    "description": "Запускает крюк в объект на расстоянии до 50 м. По тросу можно двигаться с половиной скорости или подтянуть к себе объект на один размер меньше вас.",
-    "shortDescription": "Крюк-кошка для быстрого зацепа, подъема и подтягивания объектов.",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "vykidnoe-oruzhie-blizhnego-boya",
-    "name": "Выкидное Оружие Ближнего Боя",
-    "type": "equipment",
-    "rank": 2,
-    "skill": "Ближний бой",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Свободное действие"
+    {
+        "id":  "vykidnoe-oruzhie-blizhnego-boya",
+        "name":  "Выкидное Оружие Ближнего Боя",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  "blizhniy_boy",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "freeAction"
+                                    },
+                          "properties":  {
+                                             "concealable":  true
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Одноручное оружие ближнего боя можно спрятать внутри руки и мгновенно раскрыть при необходимости."
+                                          }
+                                      ]
+                      },
+        "description":  "Одноручное оружие ближнего боя можно спрятать внутри руки и мгновенно раскрыть при необходимости.",
+        "shortDescription":  "Прячет одноручное оружие ближнего боя в руке и раскрывает его мгновенно.",
+        "price":  null
     },
-    "properties": [
-      {
-        "key": "concealable",
-        "value": true,
-        "label": "Скрытное"
-      }
-    ],
-    "description": "Одноручное оружие ближнего боя можно спрятать внутри руки и мгновенно раскрыть при необходимости.",
-    "shortDescription": "Прячет одноручное оружие ближнего боя в руке и раскрывает его мгновенно.",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "proektsionnyy-modul-iskra-30",
-    "name": "Модуль «Искра-30»",
-    "type": "equipment",
-    "rank": 2,
-    "skill": "Резонанс",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "range": "30 м",
-      "targets": "Все противники на линии",
-      "area": "Линия",
-      "defense": "Стойкость"
+    {
+        "id":  "proektsionnyy-modul-iskra-30",
+        "name":  "Модуль «Искра-30»",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  "rezonans",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "range":  {
+                                                      "type":  "meters",
+                                                      "value":  30
+                                                  },
+                                        "targets":  {
+                                                        "type":  "allInArea",
+                                                        "value":  "Все противники на линии"
+                                                    },
+                                        "area":  {
+                                                     "type":  "line"
+                                                 },
+                                        "defense":  "fortitude",
+                                        "reload":  2
+                                    },
+                          "properties":  {
+                                             "damage":  5
+                                         },
+                          "effects":  [
+
+                                      ]
+                      },
+        "description":  "Выпускает струю пламени по линии. Атака Резонанса против Стойкости всех противников на линии. Урон: 5. Перезарядка 2.",
+        "shortDescription":  "Модуль Резонанса, выжигающий линию огнем.",
+        "price":  null
     },
-    "properties": [
-      {
-        "key": "reload-x",
-        "value": 2,
-        "label": "Перезарядка 2"
-      }
-    ],
-    "description": "Выпускает струю пламени по линии. Атака Резонанса против Стойкости всех противников на линии. Урон: 5. Перезарядка 2.",
-    "shortDescription": "Модуль Резонанса, выжигающий линию огнем.",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "manipulyator-kulak-keplera",
-    "name": "Манипулятор «Кулак Кеплера»",
-    "type": "equipment",
-    "rank": 2,
-    "skill": "Мощь",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "range": "50 м",
-      "targets": "1 цель",
-      "defense": "Стойкость"
+    {
+        "id":  "manipulyator-kulak-keplera",
+        "name":  "Манипулятор «Кулак Кеплера»",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  "moshch",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "range":  {
+                                                      "type":  "meters",
+                                                      "value":  50
+                                                  },
+                                        "targets":  {
+                                                        "type":  "single",
+                                                        "value":  1
+                                                    },
+                                        "defense":  "fortitude"
+                                    },
+                          "properties":  {
+                                             "armorPiercing":  1,
+                                             "damage":  4
+                                         },
+                          "effects":  [
+
+                                      ]
+                      },
+        "description":  "Вырвите кусок материи не выше 2 ранга размером с кулак и выстрелите им по цели. Атака Мощи против Стойкости. Урон: 4. Бронебойность 1. Дополнительно вы можете свободно левитировать такие куски в радиусе 30 м и взаимодействовать ими с окружением, но не менять их форму или структуру.",
+        "shortDescription":  "Модуль Мощи, вырывающий куски материи из объектов и выстреливающий ими во врагов.",
+        "price":  null
     },
-    "properties": [
-      {
-        "key": "armor-piercing-x",
-        "value": 1,
-        "label": "Бронебойность 1"
-      }
-    ],
-    "description": "Вырвите кусок материи не выше 2 ранга размером с кулак и выстрелите им по цели. Атака Мощи против Стойкости. Урон: 4. Бронебойность 1. Дополнительно вы можете свободно левитировать такие куски в радиусе 30 м и взаимодействовать ими с окружением, но не менять их форму или структуру.",
-    "shortDescription": "Модуль Мощи, вырывающий куски материи из объектов и выстреливающий ими во врагов.",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "amplifikator-shepot",
-    "name": "Амплификатор «Шёпот»",
-    "type": "equipment",
-    "rank": 2,
-    "skill": "Доминирование",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "range": "30 м",
-      "targets": "1 живая цель",
-      "defense": "Воля"
+    {
+        "id":  "amplifikator-shepot",
+        "name":  "Амплификатор «Шёпот»",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  "dominirovanie",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "range":  {
+                                                      "type":  "meters",
+                                                      "value":  30
+                                                  },
+                                        "targets":  {
+                                                        "type":  "single",
+                                                        "value":  1
+                                                    },
+                                        "defense":  "will"
+                                    },
+                          "properties":  {
+                                             "concealable":  true,
+                                             "escalation":  1,
+                                             "damage":  4
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Скрытное."
+                                          }
+                                      ]
+                      },
+        "description":  "Нанесите удар пси-полем по живому существу. Атака Доминирования против Воли. Урон: 4. Скрытное. Эскалация 1.",
+        "shortDescription":  "Модуль Доминирования, дающий скрытные удары пси-полем.",
+        "price":  null
     },
-    "properties": [
-      {
-        "key": "concealable",
-        "value": true,
-        "label": "Скрытное"
-      },
-      {
-        "key": "escalation-x",
-        "value": 1,
-        "label": "Эскалация 1"
-      }
-    ],
-    "description": "Нанесите удар пси-полем по живому существу. Атака Доминирования против Воли. Урон: 4. Скрытное. Эскалация 1.",
-    "shortDescription": "Модуль Доминирования, дающий скрытные удары пси-полем.",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "bioinvertor-zimniy-son",
-    "name": "Биоинвертор «Зимний Сон»",
-    "type": "equipment",
-    "rank": 2,
-    "skill": "Мистика",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "range": "50 м",
-      "targets": "1 цель",
-      "defense": "Воля"
+    {
+        "id":  "bioinvertor-zimniy-son",
+        "name":  "Биоинвертор «Зимний Сон»",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  "mistika",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "range":  {
+                                                      "type":  "meters",
+                                                      "value":  50
+                                                  },
+                                        "targets":  {
+                                                        "type":  "single",
+                                                        "value":  1
+                                                    },
+                                        "defense":  "will"
+                                    },
+                          "properties":  {
+                                             "damage":  3
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Если итоговый урон 5 или выше, цель получает состояние «Уязвим»."
+                                          }
+                                      ]
+                      },
+        "description":  "Нарушает обмен веществ цели. Атака Мистики против Воли. Урон: 3. Если итоговый урон 5 или выше, цель получает состояние «Уязвим».",
+        "shortDescription":  "Модуль Мистики, ломающий обмен веществ цели и может сделать ее уязвимой.",
+        "price":  null
     },
-    "properties": [],
-    "description": "Нарушает обмен веществ цели. Атака Мистики против Воли. Урон: 3. Если итоговый урон 5 или выше, цель получает состояние «Уязвим».",
-    "shortDescription": "Модуль Мистики, ломающий обмен веществ цели и может сделать ее уязвимой.",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "prognosticheskiy-uzel-orakul",
-    "name": "Прогностический узел «Оракул»",
-    "type": "equipment",
-    "rank": 2,
-    "skill": "Анализ",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "targets": "1 цель",
-      "defense": "Контроль",
-      "duration": "До начала вашего следующего хода"
+    {
+        "id":  "prognosticheskiy-uzel-orakul",
+        "name":  "Прогностический узел «Оракул»",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  "analiz",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "targets":  {
+                                                        "type":  "single",
+                                                        "value":  1
+                                                    },
+                                        "defense":  "control",
+                                        "duration":  "untilStartOfYourNextTurn"
+                                    },
+                          "properties":  {
+
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Проверка Анализа против Контроля."
+                                          },
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "При успехе следующая проверка или атака против этой цели до начала вашего следующего хода получает +3."
+                                          }
+                                      ]
+                      },
+        "description":  "Проверка Анализа против Контроля. При успехе следующая проверка или атака против этой цели до начала вашего следующего хода получает +3.",
+        "shortDescription":  "Модуль Анализа, подсвечивающий окно для следующего точного удара по цели.",
+        "price":  null
     },
-    "properties": [],
-    "description": "Проверка Анализа против Контроля. При успехе следующая проверка или атака против этой цели до начала вашего следующего хода получает +3.",
-    "shortDescription": "Модуль Анализа, подсвечивающий окно для следующего точного удара по цели.",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "vykidnoy-shchit",
-    "name": "Выкидной щит",
-    "type": "equipment",
-    "rank": 2,
-    "skill": null,
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Свободное действие"
+    {
+        "id":  "vykidnoy-shchit",
+        "name":  "Выкидной щит",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  null,
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "freeAction"
+                                    },
+                          "properties":  {
+                                             "concealable":  true
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Пуленепробиваемый складной щит скрыт внутри руки."
+                                          },
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "В раскрытом состоянии щит дает +2 к Стойкости."
+                                          }
+                                      ]
+                      },
+        "description":  "Пуленепробиваемый складной щит скрыт внутри руки. После выдвижения рука считается занятой, и другие действия этой рукой невозможны. В раскрытом состоянии щит дает +2 к Стойкости.",
+        "shortDescription":  "Складной щит в руке, который быстро раскрывается под огнем.",
+        "price":  null
     },
-    "properties": [
-      {
-        "key": "concealable",
-        "value": true,
-        "label": "Скрытное"
-      }
-    ],
-    "description": "Пуленепробиваемый складной щит скрыт внутри руки. После выдвижения рука считается занятой, и другие действия этой рукой невозможны. В раскрытом состоянии щит дает +2 к Стойкости.",
-    "shortDescription": "Складной щит в руке, который быстро раскрывается под огнем.",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "vykidnoe-oruzhie-dalnego-boya",
-    "name": "Выкидное Оружие Дальнего Боя",
-    "type": "equipment",
-    "rank": 2,
-    "skill": "Стрельба",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Свободное действие"
+    {
+        "id":  "vykidnoe-oruzhie-dalnego-boya",
+        "name":  "Выкидное Оружие Дальнего Боя",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  "strelba",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "freeAction"
+                                    },
+                          "properties":  {
+                                             "concealable":  true
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Одноручное дальнобойное оружие можно спрятать внутри руки и мгновенно раскрыть при необходимости."
+                                          }
+                                      ]
+                      },
+        "description":  "Одноручное дальнобойное оружие можно спрятать внутри руки и мгновенно раскрыть при необходимости.",
+        "shortDescription":  "Прячет одноручное дальнобойное оружие в руке и раскрывает его мгновенно.",
+        "price":  null
     },
-    "properties": [
-      {
-        "key": "concealable",
-        "value": true,
-        "label": "Скрытное"
-      }
-    ],
-    "description": "Одноручное дальнобойное оружие можно спрятать внутри руки и мгновенно раскрыть при необходимости.",
-    "shortDescription": "Прячет одноручное дальнобойное оружие в руке и раскрывает его мгновенно.",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "spufer-fantom",
-    "name": "Кибердека «Фантом»",
-    "type": "equipment",
-    "rank": 2,
-    "skill": "Хакерство",
-    "usage": {
-      "frequency": "1/сессию",
-      "duration": "До провала или конца сцены"
+    {
+        "id":  "spufer-fantom",
+        "name":  "Кибердека «Фантом»",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  "khakerstvo",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "oncePerSession",
+                                        "duration":  {
+                                                         "type":  "custom",
+                                                         "value":  "До провала или конца сцены"
+                                                     }
+                                    },
+                          "properties":  {
+
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Вне боя вы проходите проверки Хакерства с преимуществом."
+                                          }
+                                      ]
+                      },
+        "description":  "Маскирует вашу цифровую сигнатуру под авторизованного пользователя. Вне боя вы проходите проверки Хакерства с преимуществом.",
+        "shortDescription":  "Вне боя маскирует вашу цифровую сигнатуру под авторизованного пользователя.",
+        "price":  null
     },
-    "properties": [],
-    "description": "Маскирует вашу цифровую сигнатуру под авторизованного пользователя. Вне боя вы проходите проверки Хакерства с преимуществом.",
-    "shortDescription": "Вне боя маскирует вашу цифровую сигнатуру под авторизованного пользователя.",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "povodok-drona-pastukh",
-    "name": "Поводок «Пастух»",
-    "type": "equipment",
-    "rank": 2,
-    "skill": "Хакерство",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "range": "50 м",
-      "targets": "1 единица техники",
-      "defense": "Контроль"
+    {
+        "id":  "povodok-drona-pastukh",
+        "name":  "Поводок «Пастух»",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  "khakerstvo",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "range":  {
+                                                      "type":  "meters",
+                                                      "value":  50
+                                                  },
+                                        "targets":  {
+                                                        "type":  "single",
+                                                        "value":  1
+                                                    },
+                                        "defense":  "control"
+                                    },
+                          "properties":  {
+
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Перехватывает управление над техникой, отдавая приказы."
+                                          },
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Проверка Хакерства против Контроля."
+                                          },
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Два раунда подряд воздействовать на одну и ту же цель нельзя."
+                                          }
+                                      ]
+                      },
+        "description":  "Перехватывает управление над техникой, отдавая приказы. Проверка Хакерства против Контроля. При успехе вы определяете, какое следующее действие она совершит. Два раунда подряд воздействовать на одну и ту же цель нельзя.",
+        "shortDescription":  "Перехватывает управление над техникой, отдавая приказы.",
+        "price":  null
     },
-    "properties": [],
-    "description": "Перехватывает управление над техникой, отдавая приказы. Проверка Хакерства против Контроля. При успехе вы определяете, какое следующее действие она совершит. Два раунда подряд воздействовать на одну и ту же цель нельзя.",
-    "shortDescription": "Перехватывает управление над техникой, отдавая приказы.",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "kontur-tishiny-glush",
-    "name": "Контур тишины «Глушь»",
-    "type": "equipment",
-    "rank": 2,
-    "skill": "Сокрытие",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "targets": "Вы и союзники вплотную",
-      "duration": "До конца сцены"
+    {
+        "id":  "kontur-tishiny-glush",
+        "name":  "Контур тишины «Глушь»",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  "sokrytie",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "targets":  {
+                                                        "type":  "custom",
+                                                        "value":  "Вы и союзники вплотную"
+                                                    },
+                                        "duration":  "untilEndOfScene"
+                                    },
+                          "properties":  {
+
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Пока контур работает, вы и стоящие вплотную союзники получаете преимущество к проверкам Сокрытия, связанным с передвижением и короткими взаимодействиями."
+                                          }
+                                      ]
+                      },
+        "description":  "Пока контур работает, вы и стоящие вплотную союзники получаете преимущество к проверкам Сокрытия, связанным с передвижением и короткими взаимодействиями. Эффект заканчивается, если кто-то из вас атакует или поднимает явный шум.",
+        "shortDescription":  "Заглушает звуки издаваемые вами и окружающими",
+        "price":  null
     },
-    "properties": [],
-    "description": "Пока контур работает, вы и стоящие вплотную союзники получаете преимущество к проверкам Сокрытия, связанным с передвижением и короткими взаимодействиями. Эффект заканчивается, если кто-то из вас атакует или поднимает явный шум.",
-    "shortDescription": "Заглушает звуки издаваемые вами и окружающими",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "servisnyy-roy-stezhok",
-    "name": "Рой нанороботов «Стежок»",
-    "type": "equipment",
-    "rank": 2,
-    "skill": "Инженерия",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "range": "30 м",
-      "targets": "1 техсистема"
+    {
+        "id":  "servisnyy-roy-stezhok",
+        "name":  "Рой нанороботов «Стежок»",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  "inzheneriya",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "range":  {
+                                                      "type":  "meters",
+                                                      "value":  30
+                                                  },
+                                        "targets":  {
+                                                        "type":  "single",
+                                                        "value":  1
+                                                    }
+                                    },
+                          "properties":  {
+
+                                         },
+                          "effects":  [
+
+                                      ]
+                      },
+        "description":  "Почините выбранную техсистему. Если применить рой к техсистеме с разряженным запасом временных ячеек стресса, он восстановит его до максимума. Для использования этого снаряжения требуется Инженерия 3.",
+        "shortDescription":  "Чинит техсистемы и восстанавливает их запас временных ячеек стресса.",
+        "price":  null
     },
-    "properties": [],
-    "description": "Почините выбранную техсистему. Если применить рой к техсистеме с разряженным запасом временных ячеек стресса, он восстановит его до максимума. Для использования этого снаряжения требуется Инженерия 3.",
-    "shortDescription": "Чинит техсистемы и восстанавливает их запас временных ячеек стресса.",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "proektor-ukrytiya-rigel",
-    "name": "Проектор укрытия «Ригель»",
-    "type": "equipment",
-    "rank": 3,
-    "skill": "Инженерия",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "area": "Участок 10 м перед вами"
+    {
+        "id":  "proektor-ukrytiya-rigel",
+        "name":  "Проектор укрытия «Ригель»",
+        "type":  "equipment",
+        "rank":  3,
+        "skill":  "inzheneriya",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "area":  {
+                                                     "type":  "custom",
+                                                     "value":  "Участок 10 м перед вами"
+                                                 }
+                                    },
+                          "properties":  {
+
+                                         },
+                          "effects":  [
+
+                                      ]
+                      },
+        "description":  "Перед вами разворачивается защитная точка шириной 10 м. Она дает Укрытие и запас временных ячеек стресса, равный вашей Инженерии, умноженной на 3.",
+        "shortDescription":  "Разворачивает укрытие с запасом временных ячеек стресса для удержания позиции.",
+        "price":  null
     },
-    "properties": [],
-    "description": "Перед вами разворачивается защитная точка шириной 10 м. Она дает Укрытие и запас временных ячеек стресса, равный вашей Инженерии, умноженной на 3.",
-    "shortDescription": "Разворачивает укрытие с запасом временных ячеек стресса для удержания позиции.",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "sotsialnaya-lichina-maska",
-    "name": "Социальная личина «Маска»",
-    "type": "equipment",
-    "rank": 2,
-    "skill": "Обаяние",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Свободное действие",
-      "duration": "Пока держится образ"
+    {
+        "id":  "sotsialnaya-lichina-maska",
+        "name":  "Социальная личина «Маска»",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  "obayanie",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "freeAction",
+                                        "duration":  {
+                                                         "type":  "custom",
+                                                         "value":  "Пока держится образ"
+                                                     }
+                                    },
+                          "properties":  {
+
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "Пока у вас есть правдоподобная легенда и доступ к роли, вы получаете преимущество к проверкам Обаяния, связанным с этим образом."
+                                          }
+                                      ]
+                      },
+        "description":  "Подстраивает ваш голос, мимику и мелкие черты под выбранный образ. Пока у вас есть правдоподобная легенда и доступ к роли, вы получаете преимущество к проверкам Обаяния, связанным с этим образом. Личина срывается после жесткого досмотра, открытого конфликта или грубой ошибки.",
+        "shortDescription":  "Подстраивает ваш голос, мимику и мелкие черты под выбранный образ.",
+        "price":  null
     },
-    "properties": [],
-    "description": "Подстраивает ваш голос, мимику и мелкие черты под выбранный образ. Пока у вас есть правдоподобная легенда и доступ к роли, вы получаете преимущество к проверкам Обаяния, связанным с этим образом. Личина срывается после жесткого досмотра, открытого конфликта или грубой ошибки.",
-    "shortDescription": "Подстраивает ваш голос, мимику и мелкие черты под выбранный образ.",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  },
-  {
-    "id": "ekzozakhvat-taran",
-    "name": "Экзозахват «Таран»",
-    "type": "equipment",
-    "rank": 2,
-    "skill": "Мощь",
-    "usage": {
-      "frequency": "Неограниченно",
-      "actions": "Действие",
-      "targets": "1 цель",
-      "duration": "До конца сцены"
-    },
-    "properties": [],
-    "description": "При попытке сломать или выбить что-либо вы совершаете проверку Мощи с преимуществом. В бою успешный удар таким тараном ломает кости противнику, уменьшая скорость передвижения в два раза до конца сцены. Урон: 1.",
-    "shortDescription": "Ломает преграды и кости врагов.",
-    "tags": [
-      "snaryazhenie"
-    ],
-    "finalCost": null,
-    "status": "draft"
-  }
+    {
+        "id":  "ekzozakhvat-taran",
+        "name":  "Экзозахват «Таран»",
+        "type":  "equipment",
+        "rank":  2,
+        "skill":  "moshch",
+        "mechanics":  {
+                          "usage":  {
+                                        "activation":  "active",
+                                        "frequency":  "unlimited",
+                                        "actionCost":  "action",
+                                        "targets":  {
+                                                        "type":  "single",
+                                                        "value":  1
+                                                    },
+                                        "duration":  "untilEndOfScene"
+                                    },
+                          "properties":  {
+                                             "damage":  1
+                                         },
+                          "effects":  [
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "При попытке сломать или выбить что-либо вы совершаете проверку Мощи с преимуществом."
+                                          },
+                                          {
+                                              "key":  "legacyRuleText",
+                                              "text":  "В бою успешный удар таким тараном ломает кости противнику, уменьшая скорость передвижения в два раза до конца сцены."
+                                          }
+                                      ]
+                      },
+        "description":  "При попытке сломать или выбить что-либо вы совершаете проверку Мощи с преимуществом. В бою успешный удар таким тараном ломает кости противнику, уменьшая скорость передвижения в два раза до конца сцены. Урон: 1.",
+        "shortDescription":  "Ломает преграды и кости врагов.",
+        "price":  null
+    }
 ]

@@ -25,6 +25,69 @@ const gearCatalogFiles = {
   abilities: 'abilities.json'
 };
 
+const skillLabels = {
+  analiz: 'Анализ',
+  blizhniy_boy: 'Ближний бой',
+  bionika: 'Бионика',
+  dominirovanie: 'Доминирование',
+  inzheneriya: 'Инженерия',
+  khakerstvo: 'Хакерство',
+  lovkost: 'Ловкость',
+  mistika: 'Мистика',
+  moshch: 'Мощь',
+  nablyudatelnost: 'Наблюдательность',
+  obayanie: 'Обаяние',
+  programmirovanie: 'Программирование',
+  rezonans: 'Резонанс',
+  sokrytie: 'Сокрытие',
+  strelba: 'Стрельба'
+};
+
+const skillKeysByLabel = Object.fromEntries(
+  Object.entries(skillLabels).map(([key, label]) => [label, key])
+);
+
+const legacyUsageKeyMap = {
+  actions: 'actionCost'
+};
+
+const usageValueLabels = {
+  frequency: {
+    passive: 'Постоянно',
+    unlimited: 'Неограниченно',
+    oncePerScene: '1/сцену',
+    oncePerSession: '1/сессию'
+  },
+  actionCost: {
+    action: 'Действие',
+    freeAction: 'Свободное действие',
+    reaction: 'Реакция',
+    maneuver: 'Маневр'
+  },
+  defense: {
+    control: 'Контроль',
+    fortitude: 'Стойкость',
+    will: 'Воля'
+  }
+};
+
+const legacyPropertyKeyMap = {
+  'armor-piercing-x': 'armorPiercing',
+  concealable: 'concealable',
+  'control-bonus-x': 'controlBonus',
+  damage: 'damage',
+  escalation: 'escalation',
+  'escalation-x': 'escalation',
+  'fortitude-bonus-x': 'fortitudeBonus',
+  reload: 'reload',
+  'reload-x': 'reload',
+  shield: 'shield',
+  speed: 'speedBonus',
+  stabilization: 'stabilization',
+  'stabilization-x': 'stabilization',
+  'will-bonus-x': 'willBonus'
+};
+
 function formatDate(date) {
   const year = date.getFullYear();
   const month = `${date.getMonth() + 1}`.padStart(2, '0');
@@ -190,7 +253,170 @@ function getGearQuartzValue(item, key) {
   return String(value).trim();
 }
 
+function getGearSkillKey(value) {
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  const normalized = String(value).trim();
+  if (!normalized) {
+    return '';
+  }
+
+  return skillKeysByLabel[normalized] || normalized;
+}
+
+function getGearSkillLabel(value) {
+  const skillKey = getGearSkillKey(value);
+  if (!skillKey) {
+    return '';
+  }
+
+  return skillLabels[skillKey] || skillKey;
+}
+
+function getMechanicsUsageValue(item, key) {
+  const mechanicsKey = legacyUsageKeyMap[key] || key;
+  const value = item?.mechanics?.usage?.[mechanicsKey];
+  return value === null || value === undefined ? null : value;
+}
+
+function formatRangeValue(value) {
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  if (typeof value === 'string') {
+    return value.trim();
+  }
+
+  switch (value.type) {
+    case 'custom':
+      return String(value.value ?? '').trim();
+    case 'lineOfSight':
+      return 'Зона видимости';
+    case 'melee':
+      return 'Ближний бой';
+    case 'meters':
+      return value.value ? `${value.value} м` : '';
+    case 'self':
+      return 'На себя';
+    case 'touch':
+      return 'Касание';
+    default:
+      return '';
+  }
+}
+
+function formatTargetsValue(value) {
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  if (typeof value === 'string') {
+    return value.trim();
+  }
+
+  switch (value.type) {
+    case 'allInArea':
+      return 'Все цели в зоне';
+    case 'custom':
+      return String(value.value ?? '').trim();
+    case 'self':
+      return 'Вы';
+    case 'single':
+      return `${value.value ?? 1} цель`;
+    case 'upTo':
+      return value.value ? `До ${value.value} целей` : '';
+    default:
+      return '';
+  }
+}
+
+function formatAreaValue(value) {
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  if (typeof value === 'string') {
+    return value.trim();
+  }
+
+  switch (value.type) {
+    case 'circle':
+      return value.value ? `Круг ${value.value} м` : 'Круг';
+    case 'custom':
+      return String(value.value ?? '').trim();
+    case 'line':
+      return value.value ? `Линия ${value.value} м` : 'Линия';
+    case 'ray':
+      return value.value ? `Луч ${value.value} м` : 'Луч';
+    case 'radius':
+      return value.value ? `Радиус ${value.value} м` : 'Радиус';
+    default:
+      return '';
+  }
+}
+
+function formatDurationValue(value) {
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  if (typeof value === 'string') {
+    return value.trim();
+  }
+
+  switch (value.type) {
+    case 'custom':
+      return String(value.value ?? '').trim();
+    case 'minutes':
+      return value.value ? `${value.value} минута` : '';
+    case 'untilEndOfScene':
+      return 'До конца сцены';
+    case 'untilEndOfTurn':
+      return 'До конца хода';
+    case 'untilStartOfYourNextTurn':
+      return 'До начала вашего следующего хода';
+    case 'whileMaintained':
+      return 'Пока вы поддерживаете эффект';
+    default:
+      return '';
+  }
+}
+
+function formatUsageValue(key, value) {
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  if (typeof value === 'string') {
+    const label = usageValueLabels[key]?.[value];
+    return label || value.trim();
+  }
+
+  switch (key) {
+    case 'area':
+      return formatAreaValue(value);
+    case 'defense':
+      return usageValueLabels.defense?.[value] || '';
+    case 'duration':
+      return formatDurationValue(value);
+    case 'range':
+      return formatRangeValue(value);
+    case 'targets':
+      return formatTargetsValue(value);
+    default:
+      return '';
+  }
+}
+
 function getGearUsageValue(item, key) {
+  const mechanicsValue = getMechanicsUsageValue(item, key);
+  if (mechanicsValue !== null) {
+    return formatUsageValue(legacyUsageKeyMap[key] || key, mechanicsValue);
+  }
+
   const value = item?.usage?.[key];
   if (value === null || value === undefined) {
     return '';
@@ -206,13 +432,13 @@ function getGearUsageOrQuartzValue(item, key) {
 function getGearSkillValue(item) {
   const skill = item?.skill;
   if (skill !== null && skill !== undefined) {
-    const normalized = String(skill).trim();
+    const normalized = getGearSkillLabel(skill);
     if (normalized) {
       return normalized;
     }
   }
 
-  return getGearQuartzValue(item, 'skill');
+  return getGearSkillLabel(getGearQuartzValue(item, 'skill'));
 }
 
 function buildDescriptionPreview(description, maxLength = 110) {
@@ -240,6 +466,10 @@ function buildDescriptionPreview(description, maxLength = 110) {
 }
 
 function getGearDescription(item) {
+  if (item?.description) {
+    return String(item.description).trim();
+  }
+
   if (Object.hasOwn(item?.quartz ?? {}, 'fullDescription')) {
     return getGearQuartzValue(item, 'fullDescription');
   }
@@ -283,7 +513,7 @@ function buildStructuredGearPreview(item) {
   const physicalDefense = getArmorDefenseValue(item, 'physicalDefense', 'fortitude-bonus-x');
   const magicalDefense = getArmorDefenseValue(item, 'magicalDefense', 'control-bonus-x');
   const psychicDefense = getArmorDefenseValue(item, 'psychicDefense', 'will-bonus-x');
-  const shield = getGearQuartzValue(item, 'shield');
+  const shield = getGearPropertyValue(item, 'shield') || getGearQuartzValue(item, 'shield');
 
   if (physicalDefense || magicalDefense || psychicDefense || shield) {
     const parts = [];
@@ -310,14 +540,20 @@ function buildStructuredGearPreview(item) {
 }
 
 function getGearShortDescription(item) {
-  const explicitPreview = Object.hasOwn(item?.quartz ?? {}, 'previewDescription')
-    ? getGearQuartzValue(item, 'previewDescription')
-    : (item.shortDescription ?? '').trim();
+  const explicitPreview = item?.shortDescription
+    ? String(item.shortDescription).trim()
+    : Object.hasOwn(item?.quartz ?? {}, 'previewDescription')
+      ? getGearQuartzValue(item, 'previewDescription')
+      : '';
 
   return resolvePreviewDescription(explicitPreview, getGearDescription(item), buildStructuredGearPreview(item));
 }
 
 function getGearCatalogPrice(item) {
+  if (item?.price !== null && item?.price !== undefined) {
+    return String(item.price);
+  }
+
   if (item.finalCost === null || item.finalCost === undefined) {
     return '';
   }
@@ -331,6 +567,10 @@ function isPublishedGearCatalogItem(item) {
 
 function getRenderableGearCatalogItems(catalog) {
   const items = Array.isArray(catalog?.items) ? catalog.items : [];
+  if (!items.some((item) => item?.status !== undefined)) {
+    return items.filter((item) => item?.id && item?.name);
+  }
+
   const publishedItems = items.filter(isPublishedGearCatalogItem);
 
   if (publishedItems.length > 0) {
@@ -342,6 +582,12 @@ function getRenderableGearCatalogItems(catalog) {
 }
 
 function getGearPropertyValue(item, propertyKey) {
+  const normalizedPropertyKey = legacyPropertyKeyMap[propertyKey] || propertyKey;
+  const mechanicsValue = item?.mechanics?.properties?.[normalizedPropertyKey];
+  if (mechanicsValue !== null && mechanicsValue !== undefined) {
+    return String(mechanicsValue);
+  }
+
   const property = item.properties?.find((candidate) => candidate.key === propertyKey);
   if (!property || property.value === null || property.value === undefined) {
     return '';
@@ -350,11 +596,33 @@ function getGearPropertyValue(item, propertyKey) {
   return String(property.value);
 }
 
+function getGearSpeedValue(item) {
+  const mechanicsSpeedBonus = item?.mechanics?.properties?.speedBonus;
+  if (mechanicsSpeedBonus !== null && mechanicsSpeedBonus !== undefined && mechanicsSpeedBonus !== '') {
+    const numericValue = Number(mechanicsSpeedBonus);
+    if (Number.isFinite(numericValue) && numericValue !== 0) {
+      const sign = numericValue > 0 ? '+' : '';
+      return `Скорость ${sign}${numericValue} м`;
+    }
+  }
+
+  return getGearQuartzValue(item, 'speed');
+}
+
 function getArmorDefenseValue(item, quartzKey, propertyKey) {
   return getGearQuartzValue(item, quartzKey) || getGearPropertyValue(item, propertyKey);
 }
 
 function getEquipmentTypeLabel(item) {
+  const skillKey = getGearSkillKey(item?.skill || getGearQuartzValue(item, 'skill'));
+  if (skillKey === 'blizhniy_boy') {
+    return 'Ближнее';
+  }
+
+  if (skillKey === 'strelba') {
+    return 'Стрелковое';
+  }
+
   const tags = new Set(item.tags ?? []);
   if (tags.has('blizhnee')) {
     return 'Ближнее';
@@ -372,8 +640,13 @@ function getEquipmentTypeLabel(item) {
 }
 
 function getEquipmentDamageValue(item) {
+  const propertyDamage = getGearPropertyValue(item, 'damage');
+  if (propertyDamage) {
+    return propertyDamage;
+  }
+
   const description = getGearDescription(item);
-  const damageMatch = description.match(/\bУрон:\s*([^.;]+)/u);
+  const damageMatch = description.match(/Урон:\s*([^.;]+)/u);
   return damageMatch ? damageMatch[1].trim() : '';
 }
 
@@ -384,8 +657,8 @@ function buildArmorCatalogTable(catalog) {
       getArmorDefenseValue(item, 'physicalDefense', 'fortitude-bonus-x'),
       getArmorDefenseValue(item, 'magicalDefense', 'control-bonus-x'),
       getArmorDefenseValue(item, 'psychicDefense', 'will-bonus-x'),
-      getGearQuartzValue(item, 'shield'),
-      getGearQuartzValue(item, 'speed'),
+      getGearPropertyValue(item, 'shield') || getGearQuartzValue(item, 'shield'),
+      getGearSpeedValue(item),
       getGearUsageOrQuartzValue(item, 'frequency'),
       getGearUsageOrQuartzValue(item, 'actions'),
       getGearUsageOrQuartzValue(item, 'duration'),
