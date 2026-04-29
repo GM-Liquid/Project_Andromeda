@@ -1488,6 +1488,789 @@ select[name='type'] optgroup {
   opacity: 1 !important;
 }
 
+/* Actor sheet sci-fi shell ------------------------------------- */
+.project-andromeda.sheet.actor {
+  --andromeda-bg: #0b0f14;
+  --andromeda-chrome: #151b22;
+  --andromeda-surface: #111820;
+  --andromeda-surface-2: #17212b;
+  --andromeda-surface-3: #1e2a36;
+  --andromeda-border: #2d3a46;
+  --andromeda-border-soft: rgba(255, 255, 255, 0.08);
+  --andromeda-text: #edf4f7;
+  --andromeda-muted: #9caab5;
+  --andromeda-subtle: #65737f;
+  --andromeda-accent: #49d4e8;
+  --andromeda-accent-2: #93f2cf;
+  --andromeda-danger: #ff5c7a;
+  --andromeda-warning: #f2c14e;
+  --andromeda-radius: 8px;
+  --inventory-section-gap: 1rem;
+  background: var(--andromeda-bg);
+  color: var(--andromeda-text);
+}
+
+.window-app.project-andromeda.sheet.actor .window-content {
+  background:
+    radial-gradient(circle at 20% 0%, rgba(73, 212, 232, 0.16), transparent 24rem),
+    linear-gradient(135deg, var(--andromeda-bg), #05080b 72%);
+  color: var(--andromeda-text);
+  padding: 0;
+}
+
+.window-app.project-andromeda.sheet.actor .window-header {
+  min-height: 42px;
+  border-bottom: 1px solid var(--andromeda-border);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), transparent), var(--andromeda-chrome) !important;
+  color: var(--andromeda-text) !important;
+}
+
+.window-app.project-andromeda.sheet.actor .window-header .window-title {
+  color: var(--andromeda-text) !important;
+  font-weight: 800;
+  text-shadow: none;
+}
+
+.window-app.project-andromeda.sheet.actor .window-header .header-button,
+.window-app.project-andromeda.sheet.actor .window-header a {
+  color: var(--andromeda-muted) !important;
+  text-shadow: none;
+}
+
+.window-app.project-andromeda.sheet.actor .window-header .header-button:hover,
+.window-app.project-andromeda.sheet.actor .window-header a:hover {
+  color: var(--andromeda-text) !important;
+}
+
+.project-andromeda.sheet.actor form {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  color: var(--andromeda-text);
+  background: transparent;
+  box-sizing: border-box;
+}
+
+.project-andromeda .andromeda-sheet-shell {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--andromeda-radius);
+  overflow: hidden;
+  background: var(--andromeda-chrome);
+}
+
+.project-andromeda .andromeda-sheet-shell .sheet-scrollable {
+  position: relative;
+  top: auto;
+  left: auto;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(73, 212, 232, 0.36) transparent;
+}
+
+.project-andromeda .andromeda-sheet-shell .sheet-scrollable::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.project-andromeda .andromeda-sheet-shell .sheet-scrollable::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.project-andromeda .andromeda-sheet-shell .sheet-scrollable::-webkit-scrollbar-thumb {
+  border: 2px solid var(--andromeda-chrome);
+  border-radius: 999px;
+  background-color: rgba(73, 212, 232, 0.36);
+}
+
+.project-andromeda .andromeda-sheet-body {
+  min-height: 100%;
+  padding: 0;
+  background:
+    linear-gradient(90deg, transparent 0, transparent 31px, rgba(255, 255, 255, 0.025) 32px),
+    var(--andromeda-surface);
+  background-size: 32px 32px;
+}
+
+.project-andromeda .andromeda-sheet-tabs {
+  display: flex;
+  align-items: end;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 12px 18px 0;
+  border-bottom: 1px solid var(--andromeda-border);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent), var(--andromeda-chrome);
+}
+
+.project-andromeda .andromeda-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-height: 40px;
+  min-width: 108px;
+  width: auto;
+  margin: 0;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: var(--andromeda-radius) var(--andromeda-radius) 0 0;
+  background: transparent;
+  color: var(--andromeda-muted);
+  font-size: 0.86rem;
+  font-weight: 800;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.project-andromeda .andromeda-sheet-tabs .andromeda-tab {
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.project-andromeda .andromeda-tab:hover,
+.project-andromeda .andromeda-tab:focus-visible {
+  color: var(--andromeda-text);
+  border-color: var(--andromeda-border);
+  outline: none;
+}
+
+.project-andromeda .andromeda-tab.active {
+  color: var(--andromeda-text);
+  border-color: var(--andromeda-border);
+  background: var(--andromeda-surface);
+  box-shadow: inset 0 3px 0 var(--andromeda-accent);
+}
+
+.project-andromeda .andromeda-main-tab,
+.project-andromeda .andromeda-item-tab,
+.project-andromeda .andromeda-personality-tab {
+  padding: 18px;
+}
+
+.project-andromeda .andromeda-identity {
+  display: grid;
+  grid-template-columns: minmax(360px, 1fr) minmax(300px, 0.85fr) minmax(252px, 0.85fr);
+  gap: 18px;
+  padding: 18px;
+  border-bottom: 1px solid var(--andromeda-border);
+  background:
+    linear-gradient(180deg, rgba(73, 212, 232, 0.08), transparent), var(--andromeda-surface);
+}
+
+.project-andromeda .andromeda-portrait-card,
+.project-andromeda .andromeda-metric,
+.project-andromeda .andromeda-track-card,
+.project-andromeda .andromeda-panel,
+.project-andromeda .andromeda-ability-card {
+  border: 1px solid var(--andromeda-border);
+  border-radius: var(--andromeda-radius);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent), var(--andromeda-surface-2);
+}
+
+.project-andromeda .andromeda-portrait-card {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  gap: 12px;
+  padding: 10px;
+  min-width: 0;
+  min-height: 116px;
+}
+
+.project-andromeda .andromeda-portrait-card .profile-img {
+  display: block;
+  width: 82px !important;
+  height: 82px !important;
+  max-width: 82px;
+  max-height: 82px;
+  object-fit: cover;
+  border: 1px solid var(--andromeda-border);
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px rgba(73, 212, 232, 0.16);
+}
+
+.project-andromeda .andromeda-identity-fields,
+.project-andromeda .andromeda-resource-stack,
+.project-andromeda .andromeda-side-stack,
+.project-andromeda .andromeda-overview-main {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.project-andromeda .andromeda-meta-row,
+.project-andromeda .andromeda-identity-metrics,
+.project-andromeda .andromeda-resources-grid {
+  display: grid;
+  gap: 10px;
+  align-items: end;
+}
+
+.project-andromeda .andromeda-meta-row {
+  grid-template-columns: minmax(110px, 1.4fr) repeat(2, minmax(74px, 0.8fr));
+}
+
+.project-andromeda .andromeda-identity-metrics,
+.project-andromeda .andromeda-resources-grid {
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.project-andromeda .andromeda-field,
+.project-andromeda .andromeda-metric,
+.project-andromeda .andromeda-defense,
+.project-andromeda .temp-bonus-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.project-andromeda .andromeda-field span,
+.project-andromeda .andromeda-metric span,
+.project-andromeda .andromeda-defense span,
+.project-andromeda .temp-bonus-field span,
+.project-andromeda .form-group span {
+  color: var(--andromeda-muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.project-andromeda .andromeda-field--name input {
+  min-height: 42px;
+  font-size: 1.75rem;
+  font-weight: 850;
+  text-align: left !important;
+}
+
+.project-andromeda .andromeda-field--compact input {
+  text-align: center !important;
+}
+
+.project-andromeda .andromeda-sheet-shell input[type='text'],
+.project-andromeda .andromeda-sheet-shell input[type='number'],
+.project-andromeda .andromeda-sheet-shell textarea {
+  border: 1px solid var(--andromeda-border);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--andromeda-text);
+  font-family: inherit;
+  box-shadow: none;
+}
+
+.project-andromeda .andromeda-sheet-shell input:focus,
+.project-andromeda .andromeda-sheet-shell textarea:focus {
+  border-color: var(--andromeda-accent);
+  outline: 2px solid rgba(73, 212, 232, 0.24);
+  outline-offset: 0;
+}
+
+.project-andromeda .andromeda-sheet-shell input[readonly] {
+  background: rgba(73, 212, 232, 0.08);
+  color: var(--andromeda-text);
+}
+
+.project-andromeda .andromeda-rank-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.project-andromeda .andromeda-rank-legend span {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.project-andromeda .andromeda-metric {
+  min-height: 116px;
+  padding: 12px;
+  display: grid;
+  align-content: space-between;
+}
+
+.project-andromeda .andromeda-metric input,
+.project-andromeda .andromeda-metric > strong,
+.project-andromeda .andromeda-defense input {
+  min-height: 40px;
+  padding: 0;
+  border: 0;
+  background: transparent !important;
+  color: var(--andromeda-text) !important;
+  font-size: 1.65rem;
+  font-weight: 900;
+  text-align: left !important;
+}
+
+.project-andromeda .andromeda-metric small {
+  color: var(--andromeda-subtle);
+  font-size: 0.74rem;
+  line-height: 1.25;
+}
+
+.project-andromeda .andromeda-metric small strong {
+  min-height: 0;
+  color: var(--andromeda-text);
+  font-size: inherit;
+}
+
+.project-andromeda .andromeda-metric--progress input {
+  color: var(--andromeda-accent) !important;
+}
+
+.project-andromeda .andromeda-metric--static strong {
+  display: block;
+  min-height: 40px;
+  line-height: 1.2;
+}
+
+.project-andromeda .andromeda-track-card {
+  padding: 12px;
+  min-height: 68px;
+}
+
+.project-andromeda .andromeda-track-card header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 9px;
+  color: var(--andromeda-muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.project-andromeda .andromeda-track-card strong {
+  color: var(--andromeda-text);
+}
+
+.project-andromeda .health-track,
+.project-andromeda .stress-track,
+.project-andromeda .force-shield-track {
+  width: auto;
+  min-width: 0;
+  justify-content: flex-start;
+  gap: 6px;
+}
+
+.project-andromeda .health-cell,
+.project-andromeda .stress-cell,
+.project-andromeda .force-shield-cell {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--andromeda-border);
+  background: transparent;
+}
+
+.project-andromeda .stress-cell.filled,
+.project-andromeda .force-shield-cell.filled {
+  background: var(--andromeda-danger);
+  border-color: var(--andromeda-danger);
+  box-shadow: 0 0 12px rgba(255, 92, 122, 0.26);
+}
+
+.project-andromeda .force-shield-cell.filled {
+  background: var(--andromeda-accent-2);
+  border-color: var(--andromeda-accent-2);
+  box-shadow: 0 0 12px rgba(147, 242, 207, 0.22);
+}
+
+.project-andromeda .stress-cell.marked {
+  background: var(--andromeda-accent);
+  border-color: var(--andromeda-accent);
+  box-shadow: 0 0 12px rgba(73, 212, 232, 0.28);
+}
+
+.project-andromeda .andromeda-overview-grid {
+  display: grid;
+  grid-template-columns: minmax(430px, 1fr) minmax(260px, 320px);
+  gap: 16px;
+  align-items: start;
+}
+
+.project-andromeda .andromeda-panel {
+  padding: 14px;
+  min-width: 0;
+}
+
+.project-andromeda .andromeda-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.project-andromeda .andromeda-panel__header h2 {
+  margin: 0;
+  border: 0;
+  color: var(--andromeda-text);
+  font-size: 0.92rem;
+  font-weight: 900;
+  text-align: left;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.project-andromeda .andromeda-panel__header span {
+  color: var(--andromeda-subtle);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.project-andromeda .andromeda-ability-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.project-andromeda .andromeda-ability-card {
+  min-height: 118px;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 8px;
+  padding: 12px;
+}
+
+.project-andromeda .andromeda-ability-roll {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 78px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--andromeda-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.project-andromeda .andromeda-ability-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.project-andromeda .andromeda-ability-title,
+.project-andromeda .andromeda-ability-code {
+  color: var(--andromeda-muted);
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.project-andromeda .andromeda-ability-code {
+  color: #b7d3e3;
+  font-weight: 900;
+}
+
+.project-andromeda .andromeda-ability-body {
+  display: grid;
+  gap: 4px;
+}
+
+.project-andromeda .ability-die-value {
+  min-width: 0;
+  padding: 0;
+  border: 0 !important;
+  background: transparent !important;
+  text-transform: none;
+}
+
+.project-andromeda .andromeda-ability-roll .ability-die-value {
+  color: var(--andromeda-accent) !important;
+  font-size: 2rem;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.project-andromeda .andromeda-ability-summary {
+  color: var(--andromeda-subtle);
+  font-size: 0.75rem;
+  line-height: 1.25;
+}
+
+.project-andromeda .ability-die-control {
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.project-andromeda .ability-step {
+  width: 28px;
+  height: 26px;
+  border: 1px solid var(--andromeda-border);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--andromeda-text);
+}
+
+.project-andromeda .ability-step:hover,
+.project-andromeda .ability-step:focus-visible {
+  border-color: var(--andromeda-accent);
+  background: rgba(73, 212, 232, 0.12);
+  outline: none;
+}
+
+.project-andromeda .andromeda-skills-panel {
+  margin-top: 16px;
+}
+
+.project-andromeda .andromeda-skills-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.project-andromeda .andromeda-skill-column {
+  gap: 7px;
+}
+
+.project-andromeda .skills-column-header {
+  justify-content: flex-start;
+  padding: 0;
+}
+
+.project-andromeda .skills-column-title {
+  color: var(--andromeda-accent);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.project-andromeda .andromeda-skill-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 54px;
+  min-height: 34px;
+  gap: 8px;
+  margin: 0;
+  padding: 0 8px;
+  border: 1px solid var(--andromeda-border-soft);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.project-andromeda .andromeda-skill-row .skill-name {
+  width: auto;
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+  color: var(--andromeda-text);
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-andromeda .andromeda-skill-row .skill-value {
+  width: auto;
+  margin: 0;
+}
+
+.project-andromeda .andromeda-skill-row .skill-value input {
+  height: 25px;
+  min-height: 25px;
+  padding: 0;
+  border-radius: 5px;
+  color: #061018 !important;
+  font-weight: 850;
+  text-align: center !important;
+}
+
+.project-andromeda .andromeda-skill-row .skill-value input.rank1 {
+  background: #7bd88f !important;
+  border-color: #7bd88f !important;
+}
+
+.project-andromeda .andromeda-skill-row .skill-value input.rank2 {
+  background: #aab4c2 !important;
+  border-color: #aab4c2 !important;
+}
+
+.project-andromeda .andromeda-skill-row .skill-value input.rank3 {
+  background: #ffd866 !important;
+  border-color: #ffd866 !important;
+}
+
+.project-andromeda .andromeda-skill-row .skill-value input.rank4 {
+  background: #65c7ff !important;
+  border-color: #65c7ff !important;
+}
+
+.project-andromeda .andromeda-defense-grid,
+.project-andromeda .andromeda-temp-panel .temp-bonus-grid {
+  display: grid;
+  gap: 9px;
+}
+
+.project-andromeda .andromeda-defense {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 64px;
+  align-items: center;
+  min-height: 38px;
+  border-bottom: 1px solid var(--andromeda-border-soft);
+}
+
+.project-andromeda .andromeda-defense:last-child {
+  border-bottom: 0;
+}
+
+.project-andromeda .andromeda-defense input {
+  min-height: 32px;
+  font-size: 1.4rem;
+  text-align: right !important;
+}
+
+.project-andromeda .andromeda-temp-panel .temp-bonus-grid {
+  grid-template-columns: 1fr;
+}
+
+.project-andromeda .temp-bonus-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px;
+  align-items: center;
+  gap: 10px;
+}
+
+.project-andromeda .temp-bonus-field label,
+.project-andromeda .temp-bonus-field span {
+  min-width: 0;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.project-andromeda .temp-bonus-field input {
+  min-height: 32px;
+  text-align: center !important;
+}
+
+.project-andromeda .andromeda-item-tab .item-groups,
+.project-andromeda .personality-item-groups {
+  margin-bottom: var(--inventory-section-gap);
+}
+
+.project-andromeda .item-group {
+  border-color: var(--andromeda-border);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent), var(--andromeda-surface-2);
+  color: var(--andromeda-text);
+}
+
+.project-andromeda .item-group__capacity,
+.project-andromeda .item-row__summary,
+.project-andromeda .item-group__empty {
+  color: var(--andromeda-muted);
+}
+
+.project-andromeda .item-group__title i,
+.project-andromeda .item-group__header i {
+  color: var(--andromeda-accent);
+}
+
+.project-andromeda .item-row {
+  border-color: var(--andromeda-border-soft);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.project-andromeda .item-row--equipped {
+  border-color: var(--andromeda-accent-2);
+  box-shadow: 0 0 0 1px rgba(147, 242, 207, 0.18);
+}
+
+.project-andromeda .item-badge,
+.project-andromeda .item-quantity-control {
+  border: 1px solid var(--andromeda-border-soft);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--andromeda-muted);
+}
+
+.project-andromeda .item-control:hover,
+.project-andromeda .item-control:focus {
+  color: var(--andromeda-accent);
+}
+
+.project-andromeda .andromeda-resources-panel {
+  margin-top: var(--inventory-section-gap);
+}
+
+.project-andromeda .personality-grid {
+  gap: 0.9rem;
+}
+
+.project-andromeda .personality-grid .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+@media (max-width: 980px) {
+  .project-andromeda .andromeda-identity,
+  .project-andromeda .andromeda-overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .project-andromeda .andromeda-identity-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .project-andromeda .andromeda-sheet-tabs,
+  .project-andromeda .andromeda-meta-row,
+  .project-andromeda .andromeda-identity-metrics,
+  .project-andromeda .andromeda-ability-grid,
+  .project-andromeda .andromeda-skills-grid,
+  .project-andromeda .andromeda-resources-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .project-andromeda .andromeda-sheet-tabs {
+    display: grid;
+    align-items: stretch;
+    padding: 10px;
+  }
+
+  .project-andromeda .andromeda-tab {
+    border: 1px solid var(--andromeda-border);
+    border-radius: var(--andromeda-radius);
+  }
+
+  .project-andromeda .andromeda-portrait-card {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Google Sheets sync ---------------------------------------------------- */
 .google-sheets-sync-app .window-content {
   background: linear-gradient(180deg, #f7f1e6 0%, #efe5d4 100%);

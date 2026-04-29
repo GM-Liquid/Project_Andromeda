@@ -128,10 +128,7 @@ function buildRulebookInternalLinkMap(chapters) {
   return new Map(
     chapters
       .filter((chapter) => chapter.source)
-      .map((chapter) => [
-        chapter.source.replace(/\.md$/i, ''),
-        basename(chapter.slug)
-      ])
+      .map((chapter) => [chapter.source.replace(/\.md$/i, ''), basename(chapter.slug)])
   );
 }
 
@@ -169,22 +166,25 @@ export function rewriteRulebookInternalLinks(body, chapters = getGeneratedRulebo
   }
 
   return body
-    .replace(/\[\[([^\]|#]+)?(#[^\]|]+)?(\|[^\]]*)?\]\]/g, (full, rawTarget = '', rawAnchor = '', rawAlias = '') => {
-      if (!rawTarget) {
-        return full;
+    .replace(
+      /\[\[([^\]|#]+)?(#[^\]|]+)?(\|[^\]]*)?\]\]/g,
+      (full, rawTarget = '', rawAnchor = '', rawAlias = '') => {
+        if (!rawTarget) {
+          return full;
+        }
+
+        const rewrittenTarget = rewriteRulebookLinkTarget(
+          `${rawTarget}${rawAnchor ?? ''}`,
+          linkMap
+        );
+
+        if (rewrittenTarget === `${rawTarget}${rawAnchor ?? ''}`) {
+          return full;
+        }
+
+        return `[[${rewrittenTarget}${rawAlias ?? ''}]]`;
       }
-
-      const rewrittenTarget = rewriteRulebookLinkTarget(
-        `${rawTarget}${rawAnchor ?? ''}`,
-        linkMap
-      );
-
-      if (rewrittenTarget === `${rawTarget}${rawAnchor ?? ''}`) {
-        return full;
-      }
-
-      return `[[${rewrittenTarget}${rawAlias ?? ''}]]`;
-    })
+    )
     .replace(/(?<!!)\[([^\]]+)\]\(([^)]+)\)/g, (full, text, rawTarget) => {
       if (/^(?:[a-z]+:)?\/\//i.test(rawTarget) || rawTarget.startsWith('#')) {
         return full;
@@ -238,9 +238,7 @@ function renderMarkdownTable(headers, rows) {
   return [
     `| ${headers.map((header) => escapeMarkdownTableCell(header)).join(' | ')} |`,
     `| ${headers.map(() => '---').join(' | ')} |`,
-    ...rows.map(
-      (row) => `| ${row.map((cell) => escapeMarkdownTableCell(cell)).join(' | ')} |`
-    )
+    ...rows.map((row) => `| ${row.map((cell) => escapeMarkdownTableCell(cell)).join(' | ')} |`)
   ].join('\n');
 }
 
@@ -281,6 +279,39 @@ function getMechanicsUsageValue(item, key) {
   return value === null || value === undefined ? null : value;
 }
 
+function getEffectActivationType(effect) {
+  const activation = effect?.activation;
+  if (activation === null || activation === undefined) {
+    return null;
+  }
+
+  if (typeof activation === 'string') {
+    return activation.trim() || null;
+  }
+
+  return activation.type ?? null;
+}
+
+function getEffectUsageValue(effect, key) {
+  switch (key) {
+    case 'actionCost':
+      return getEffectActivationType(effect);
+    case 'frequency':
+      return (
+        effect?.conditions?.frequency ??
+        (getEffectActivationType(effect) === 'passive' ? 'passive' : null)
+      );
+    case 'area':
+    case 'defense':
+    case 'duration':
+    case 'range':
+    case 'targets':
+      return effect?.conditions?.[key] ?? null;
+    default:
+      return null;
+  }
+}
+
 function formatRangeValue(value) {
   if (value === null || value === undefined) {
     return '';
@@ -314,7 +345,22 @@ function formatTargetsValue(value) {
   }
 
   if (typeof value === 'string') {
-    return value.trim();
+    const normalized = value.trim();
+    const upToMatch = normalized.match(/^upTo(\d+)$/u);
+    if (upToMatch) {
+      return `До ${upToMatch[1]} целей`;
+    }
+
+    switch (normalized) {
+      case 'allInArea':
+        return 'Все цели в зоне';
+      case 'self':
+        return 'Вы';
+      case 'single':
+        return '1 цель';
+      default:
+        return normalized;
+    }
   }
 
   switch (value.type) {
@@ -343,6 +389,8 @@ function formatAreaValue(value) {
   }
 
   switch (value.type) {
+    case 'blast':
+      return value.value ? `Взрыв ${value.value} м` : 'Взрыв';
     case 'circle':
       return value.value ? `Круг ${value.value} м` : 'Круг';
     case 'custom':
@@ -364,7 +412,18 @@ function formatDurationValue(value) {
   }
 
   if (typeof value === 'string') {
-    return value.trim();
+    switch (value.trim()) {
+      case 'untilEndOfScene':
+        return 'До конца сцены';
+      case 'untilEndOfTurn':
+        return 'До конца хода';
+      case 'untilStartOfYourNextTurn':
+        return 'До начала вашего следующего хода';
+      case 'whileMaintained':
+        return 'Пока вы поддерживаете эффект';
+      default:
+        return value.trim();
+    }
   }
 
   switch (value.type) {
@@ -390,16 +449,9 @@ function formatUsageValue(key, value) {
     return '';
   }
 
-  if (typeof value === 'string') {
-    const label = usageValueLabels[key]?.[value];
-    return label || value.trim();
-  }
-
   switch (key) {
     case 'area':
       return formatAreaValue(value);
-    case 'defense':
-      return usageValueLabels.defense?.[value] || '';
     case 'duration':
       return formatDurationValue(value);
     case 'range':
@@ -407,14 +459,58 @@ function formatUsageValue(key, value) {
     case 'targets':
       return formatTargetsValue(value);
     default:
+      break;
+  }
+
+  if (typeof value === 'string') {
+    const label = usageValueLabels[key]?.[value];
+    return label || value.trim();
+  }
+
+  switch (key) {
+    case 'defense':
+      return usageValueLabels.defense?.[value] || '';
+    default:
       return '';
   }
 }
 
+function formatEffectUsageValue(key, value) {
+  if (key === 'actionCost' && value === 'passive') {
+    return '';
+  }
+
+  return formatUsageValue(key, value);
+}
+
+function getMechanicsEffectUsageValue(item, key) {
+  const effects = Array.isArray(item?.mechanics?.effects) ? item.mechanics.effects : [];
+  const values = [];
+  const seen = new Set();
+
+  for (const effect of effects) {
+    const formatted = formatEffectUsageValue(key, getEffectUsageValue(effect, key));
+    if (!formatted || seen.has(formatted)) {
+      continue;
+    }
+
+    seen.add(formatted);
+    values.push(formatted);
+  }
+
+  return values.join('; ');
+}
+
 function getGearUsageValue(item, key) {
+  const mechanicsKey = legacyUsageKeyMap[key] || key;
   const mechanicsValue = getMechanicsUsageValue(item, key);
   if (mechanicsValue !== null) {
-    return formatUsageValue(legacyUsageKeyMap[key] || key, mechanicsValue);
+    return formatUsageValue(mechanicsKey, mechanicsValue);
+  }
+
+  const effectValue = getMechanicsEffectUsageValue(item, mechanicsKey);
+  if (effectValue) {
+    return effectValue;
   }
 
   const value = item?.usage?.[key];
@@ -442,7 +538,9 @@ function getGearSkillValue(item) {
 }
 
 function buildDescriptionPreview(description, maxLength = 110) {
-  const normalized = String(description ?? '').replace(/\s+/g, ' ').trim();
+  const normalized = String(description ?? '')
+    .replace(/\s+/g, ' ')
+    .trim();
   if (!normalized) {
     return '';
   }
@@ -546,7 +644,11 @@ function getGearShortDescription(item) {
       ? getGearQuartzValue(item, 'previewDescription')
       : '';
 
-  return resolvePreviewDescription(explicitPreview, getGearDescription(item), buildStructuredGearPreview(item));
+  return resolvePreviewDescription(
+    explicitPreview,
+    getGearDescription(item),
+    buildStructuredGearPreview(item)
+  );
 }
 
 function getGearCatalogPrice(item) {
@@ -598,7 +700,11 @@ function getGearPropertyValue(item, propertyKey) {
 
 function getGearSpeedValue(item) {
   const mechanicsSpeedBonus = item?.mechanics?.properties?.speedBonus;
-  if (mechanicsSpeedBonus !== null && mechanicsSpeedBonus !== undefined && mechanicsSpeedBonus !== '') {
+  if (
+    mechanicsSpeedBonus !== null &&
+    mechanicsSpeedBonus !== undefined &&
+    mechanicsSpeedBonus !== ''
+  ) {
     const numericValue = Number(mechanicsSpeedBonus);
     if (Number.isFinite(numericValue) && numericValue !== 0) {
       const sign = numericValue > 0 ? '+' : '';
@@ -652,68 +758,98 @@ function getEquipmentDamageValue(item) {
 
 function buildArmorCatalogTable(catalog) {
   const rows = getRenderableGearCatalogItems(catalog).map((item) => [
-      item.name,
-      item.rank,
-      getArmorDefenseValue(item, 'physicalDefense', 'fortitude-bonus-x'),
-      getArmorDefenseValue(item, 'magicalDefense', 'control-bonus-x'),
-      getArmorDefenseValue(item, 'psychicDefense', 'will-bonus-x'),
-      getGearPropertyValue(item, 'shield') || getGearQuartzValue(item, 'shield'),
-      getGearSpeedValue(item),
-      getGearUsageOrQuartzValue(item, 'frequency'),
-      getGearUsageOrQuartzValue(item, 'actions'),
-      getGearUsageOrQuartzValue(item, 'duration'),
-      getGearShortDescription(item),
-      getGearDescription(item),
-      getGearCatalogPrice(item)
-    ]);
+    item.name,
+    item.rank,
+    getArmorDefenseValue(item, 'physicalDefense', 'fortitude-bonus-x'),
+    getArmorDefenseValue(item, 'magicalDefense', 'control-bonus-x'),
+    getArmorDefenseValue(item, 'psychicDefense', 'will-bonus-x'),
+    getGearPropertyValue(item, 'shield') || getGearQuartzValue(item, 'shield'),
+    getGearSpeedValue(item),
+    getGearUsageOrQuartzValue(item, 'frequency'),
+    getGearUsageOrQuartzValue(item, 'actions'),
+    getGearUsageOrQuartzValue(item, 'duration'),
+    getGearShortDescription(item),
+    getGearDescription(item),
+    getGearCatalogPrice(item)
+  ]);
 
   return renderMarkdownTable(
-    ['Название', 'Ранг', 'Стойкость', 'Контроль', 'Воля', 'Силовой щит', 'Скорость', 'Частота использования', 'Цена в действиях', 'Длительность', 'Краткое описание', 'Полное описание', 'Цена'],
+    [
+      'Название',
+      'Ранг',
+      'Стойкость',
+      'Контроль',
+      'Воля',
+      'Силовой щит',
+      'Скорость',
+      'Частота использования',
+      'Цена в действиях',
+      'Длительность',
+      'Краткое описание',
+      'Полное описание',
+      'Цена'
+    ],
     rows
   );
 }
 
 function buildEquipmentCatalogTable(catalog) {
   const rows = getRenderableGearCatalogItems(catalog).map((item) => [
-      getEquipmentTypeLabel(item),
-      item.name,
-      item.rank,
-      getGearSkillValue(item),
-      getGearQuartzValue(item, 'damage') || getEquipmentDamageValue(item),
-      getGearUsageOrQuartzValue(item, 'frequency'),
-      getGearUsageOrQuartzValue(item, 'actions'),
-      getGearUsageOrQuartzValue(item, 'range'),
-      getGearUsageOrQuartzValue(item, 'targets'),
-      getGearUsageOrQuartzValue(item, 'area'),
-      getGearUsageOrQuartzValue(item, 'defense'),
-      getGearUsageOrQuartzValue(item, 'duration'),
-      getGearShortDescription(item),
-      getGearDescription(item),
-      getGearCatalogPrice(item)
-    ]);
+    getEquipmentTypeLabel(item),
+    item.name,
+    item.rank,
+    getGearSkillValue(item),
+    getGearQuartzValue(item, 'damage') || getEquipmentDamageValue(item),
+    getGearUsageOrQuartzValue(item, 'frequency'),
+    getGearUsageOrQuartzValue(item, 'actions'),
+    getGearUsageOrQuartzValue(item, 'range'),
+    getGearUsageOrQuartzValue(item, 'targets'),
+    getGearUsageOrQuartzValue(item, 'area'),
+    getGearUsageOrQuartzValue(item, 'defense'),
+    getGearUsageOrQuartzValue(item, 'duration'),
+    getGearShortDescription(item),
+    getGearDescription(item),
+    getGearCatalogPrice(item)
+  ]);
 
   return renderMarkdownTable(
-    ['Тип', 'Название', 'Ранг', 'Навык', 'Урон', 'Частота использования', 'Цена в действиях', 'Дальность', 'Цели', 'Зона', 'Защита', 'Длительность', 'Краткое описание', 'Полное описание', 'Цена'],
+    [
+      'Тип',
+      'Название',
+      'Ранг',
+      'Навык',
+      'Урон',
+      'Частота использования',
+      'Цена в действиях',
+      'Дальность',
+      'Цели',
+      'Зона',
+      'Защита',
+      'Длительность',
+      'Краткое описание',
+      'Полное описание',
+      'Цена'
+    ],
     rows
   );
 }
 
 function buildAbilityCatalogTable(catalog) {
   const rows = getRenderableGearCatalogItems(catalog).map((item) => [
-      item.name,
-      item.rank,
-      getGearShortDescription(item),
-      getGearDescription(item),
-      getGearUsageOrQuartzValue(item, 'frequency'),
-      getGearSkillValue(item),
-      getGearUsageOrQuartzValue(item, 'actions'),
-      getGearUsageOrQuartzValue(item, 'range'),
-      getGearUsageOrQuartzValue(item, 'targets'),
-      getGearUsageOrQuartzValue(item, 'area'),
-      getGearUsageOrQuartzValue(item, 'defense'),
-      getGearUsageOrQuartzValue(item, 'duration'),
-      getGearCatalogPrice(item)
-    ]);
+    item.name,
+    item.rank,
+    getGearShortDescription(item),
+    getGearDescription(item),
+    getGearUsageOrQuartzValue(item, 'frequency'),
+    getGearSkillValue(item),
+    getGearUsageOrQuartzValue(item, 'actions'),
+    getGearUsageOrQuartzValue(item, 'range'),
+    getGearUsageOrQuartzValue(item, 'targets'),
+    getGearUsageOrQuartzValue(item, 'area'),
+    getGearUsageOrQuartzValue(item, 'defense'),
+    getGearUsageOrQuartzValue(item, 'duration'),
+    getGearCatalogPrice(item)
+  ]);
 
   return renderMarkdownTable(
     [
@@ -861,7 +997,6 @@ function normalizeBody(body, chapter, chapters, options = {}) {
   if (chapter.id === 'rulebook-abilities-equipment') {
     normalized = transformAbilitiesEquipmentSource(normalized, options.gearCatalogs);
   }
-
 
   if (chapter.title === 'Бой') {
     normalized = normalized.replace(

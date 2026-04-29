@@ -1,262 +1,372 @@
 [
-    {
-        "id":  "kd-2",
-        "name":  "КД-2",
-        "type":  "armor",
-        "rank":  1,
-        "skill":  null,
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "passive",
-                                        "frequency":  "passive"
-                                    },
-                          "properties":  {
-                                             "fortitudeBonus":  2,
-                                             "shield":  3
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Базовая общевойсковая броня для прямого боя и первого размена под огнем."
-                                          },
-                                          {
-                                              "key":  "grantTempStress",
-                                              "trigger":  "battleStart",
-                                              "amount":  3
-                                          }
-                                      ]
-                      },
-        "description":  "Базовая общевойсковая броня для прямого боя и первого размена под огнем. Стойкость +2. В начале каждого боя броня дает вам 3 временные ячейки стресса.",
-        "shortDescription":  "Базовая общевойсковая броня для прямого боя и первого размена под огнем",
-        "price":  null
+  {
+    "id": "kd-2",
+    "name": "КД-2",
+    "type": "armor",
+    "rank": 1,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "fortitudeBonus",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "trigger": "battleStart"
+          },
+          "outcomes": [
+            {
+              "key": "grantTempStress",
+              "amount": 3
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "patrul",
-        "name":  "Патруль",
-        "type":  "armor",
-        "rank":  1,
-        "skill":  null,
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "passive",
-                                        "frequency":  "passive"
-                                    },
-                          "properties":  {
-                                             "controlBonus":  2,
-                                             "speedBonus":  5
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Легкая патрульная броня для преследования и смены позиций."
-                                          }
-                                      ]
-                      },
-        "description":  "Легкая патрульная броня для преследования и смены позиций. Контроль +2. Скорость передвижения увеличивается на 5 м.",
-        "shortDescription":  "Легкая патрульная броня для преследования и смены позиций",
-        "price":  null
+    "description": "Базовая общевойсковая броня для прямого боя и первого размена под огнем. Стойкость +2. В начале каждого боя броня дает вам 3 временные ячейки стресса.",
+    "shortDescription": "Базовая общевойсковая броня для прямого боя и первого размена под огнем",
+    "price": 1
+  },
+  {
+    "id": "patrul",
+    "name": "Патруль",
+    "type": "armor",
+    "rank": 1,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "controlBonus",
+              "value": 2
+            },
+            {
+              "key": "speedBonus",
+              "value": 5
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "ozk",
-        "name":  "ОЗК",
-        "type":  "armor",
-        "rank":  1,
-        "skill":  null,
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "passive",
-                                        "frequency":  "passive"
-                                    },
-                          "properties":  {
-                                             "fortitudeBonus":  1,
-                                             "willBonus":  1
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "ignoreEnvironmentalStates",
-                                              "rank":  1
-                                          }
-                                      ]
-                      },
-        "description":  "Облегченный изоляционный комплект для грязной среды и слабых аномалий. Стойкость +1, Воля +1. Состояния окружающей среды 1-го ранга не влияют на вас.",
-        "shortDescription":  "Облегченный изоляционный комплект для грязной среды и слабых аномалий",
-        "price":  null
+    "description": "Легкая патрульная броня для преследования и смены позиций. Контроль +2. Скорость передвижения увеличивается на 5 м.",
+    "shortDescription": "Легкая патрульная броня для преследования и смены позиций",
+    "price": 1
+  },
+  {
+    "id": "ozk",
+    "name": "ОЗК",
+    "type": "armor",
+    "rank": 1,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "fortitudeBonus",
+              "value": 1
+            },
+            {
+              "key": "willBonus",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "ignoreEnvironmentalStates"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "shans",
-        "name":  "Шанс",
-        "type":  "armor",
-        "rank":  2,
-        "skill":  null,
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "passive",
-                                        "frequency":  "passive"
-                                    },
-                          "properties":  {
-                                             "fortitudeBonus":  3,
-                                             "controlBonus":  1,
-                                             "shield":  6
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "grantTempStress",
-                                              "trigger":  "battleStart",
-                                              "amount":  6
-                                          }
-                                      ]
-                      },
-        "description":  "Штурмовой комплект для входа под огонь и удержания линии. Стойкость +3. Контроль +1. В начале каждого боя броня дает вам 6 временных ячеек стресса.",
-        "shortDescription":  "Штурмовой комплект для входа под огонь и удержания линии",
-        "price":  null
+    "description": "Облегченный изоляционный комплект для грязной среды и слабых аномалий. Стойкость +1, Воля +1. Состояния окружающей среды 1-го ранга не влияют на вас.",
+    "shortDescription": "Облегченный изоляционный комплект для грязной среды и слабых аномалий",
+    "price": 1
+  },
+  {
+    "id": "shans",
+    "name": "Шанс",
+    "type": "armor",
+    "rank": 2,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "fortitudeBonus",
+              "value": 3
+            },
+            {
+              "key": "controlBonus",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "trigger": "battleStart"
+          },
+          "outcomes": [
+            {
+              "key": "grantTempStress",
+              "amount": 6
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "pravosudie",
-        "name":  "Правосудие",
-        "type":  "armor",
-        "rank":  2,
-        "skill":  null,
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "passive",
-                                        "frequency":  "passive"
-                                    },
-                          "properties":  {
-                                             "fortitudeBonus":  1,
-                                             "controlBonus":  3,
-                                             "speedBonus":  15
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Подвижный доспех для преследования и контроля дистанции."
-                                          }
-                                      ]
-                      },
-        "description":  "Подвижный доспех для преследования и контроля дистанции. Контроль +3. Стойкость +1. Скорость передвижения увеличивается на 15 м.",
-        "shortDescription":  "Подвижный доспех для преследования и контроля дистанции",
-        "price":  null
+    "description": "Штурмовой комплект для входа под огонь и удержания линии. Стойкость +3. Контроль +1. В начале каждого боя броня дает вам 6 временных ячеек стресса.",
+    "shortDescription": "Штурмовой комплект для входа под огонь и удержания линии",
+    "price": 3
+  },
+  {
+    "id": "pravosudie",
+    "name": "Правосудие",
+    "type": "armor",
+    "rank": 2,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "fortitudeBonus",
+              "value": 1
+            },
+            {
+              "key": "controlBonus",
+              "value": 3
+            },
+            {
+              "key": "speedBonus",
+              "value": 15
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "khimik",
-        "name":  "Химик",
-        "type":  "armor",
-        "rank":  2,
-        "skill":  null,
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "passive",
-                                        "frequency":  "passive"
-                                    },
-                          "properties":  {
-                                             "fortitudeBonus":  1,
-                                             "willBonus":  3
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "removeStatus",
-                                              "trigger":  "onUse",
-                                              "target":  "self"
-                                          }
-                                      ]
-                      },
-        "description":  "Герметичный костюм для опасной среды и долгой работы в аномальных очагах. Стойкость +1, Воля +3. 1/сцену, реакцией, снимите с себя состояние.",
-        "shortDescription":  "Герметичный костюм для опасной среды и долгой работы в аномальных очагах",
-        "price":  null
+    "description": "Подвижный доспех для преследования и контроля дистанции. Контроль +3. Стойкость +1. Скорость передвижения увеличивается на 15 м.",
+    "shortDescription": "Подвижный доспех для преследования и контроля дистанции",
+    "price": 3
+  },
+  {
+    "id": "khimik",
+    "name": "Химик",
+    "type": "armor",
+    "rank": 2,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "fortitudeBonus",
+              "value": 1
+            },
+            {
+              "key": "willBonus",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "trigger": "onUse"
+          },
+          "outcomes": [
+            {
+              "key": "removeStatus"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "korund",
-        "name":  "Корунд",
-        "type":  "armor",
-        "rank":  3,
-        "skill":  null,
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "passive",
-                                        "frequency":  "passive"
-                                    },
-                          "properties":  {
-                                             "fortitudeBonus":  4,
-                                             "controlBonus":  3,
-                                             "speedBonus":  -50,
-                                             "shield":  15
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Тяжелая штурмовая броня для авангарда и пролома под плотным огнем."
-                                          },
-                                          {
-                                              "key":  "grantTempStress",
-                                              "trigger":  "battleStart",
-                                              "amount":  15
-                                          }
-                                      ]
-                      },
-        "description":  "Тяжелая штурмовая броня для авангарда и пролома под плотным огнем. Стойкость +4. Контроль +3. В начале каждого боя броня дает вам 15 временных ячеек стресса. Скорость передвижения уменьшается на 50 м.",
-        "shortDescription":  "Тяжелая штурмовая броня для авангарда и пролома под плотным огнем",
-        "price":  null
+    "description": "Герметичный костюм для опасной среды и долгой работы в аномальных очагах. Стойкость +1, Воля +3. 1/сцену, реакцией, снимите с себя состояние.",
+    "shortDescription": "Герметичный костюм для опасной среды и долгой работы в аномальных очагах",
+    "price": 3
+  },
+  {
+    "id": "korund",
+    "name": "Корунд",
+    "type": "armor",
+    "rank": 3,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "fortitudeBonus",
+              "value": 4
+            },
+            {
+              "key": "controlBonus",
+              "value": 3
+            },
+            {
+              "key": "speedBonus",
+              "value": -50
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "trigger": "battleStart"
+          },
+          "outcomes": [
+            {
+              "key": "grantTempStress",
+              "amount": 15
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "vektor",
-        "name":  "Вектор",
-        "type":  "armor",
-        "rank":  3,
-        "skill":  null,
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "passive",
-                                        "frequency":  "passive"
-                                    },
-                          "properties":  {
-                                             "fortitudeBonus":  2,
-                                             "controlBonus":  4,
-                                             "initiativeBonus":  5
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Элитная мобильная броня для быстрого входа в бой и захвата ключевой позиции."
-                                          }
-                                      ]
-                      },
-        "description":  "Элитная мобильная броня для быстрого входа в бой и захвата ключевой позиции. Контроль +4. Стойкость +2. Вы получаете +5 к броску инициативы в начале боя.",
-        "shortDescription":  "Элитная мобильная броня для быстрого входа в бой и захвата ключевой позиции",
-        "price":  null
+    "description": "Тяжелая штурмовая броня для авангарда и пролома под плотным огнем. Стойкость +4. Контроль +3. В начале каждого боя броня дает вам 15 временных ячеек стресса. Скорость передвижения уменьшается на 50 м.",
+    "shortDescription": "Тяжелая штурмовая броня для авангарда и пролома под плотным огнем",
+    "price": 9
+  },
+  {
+    "id": "vektor",
+    "name": "Вектор",
+    "type": "armor",
+    "rank": 3,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "fortitudeBonus",
+              "value": 2
+            },
+            {
+              "key": "controlBonus",
+              "value": 4
+            },
+            {
+              "key": "initiativeBonus",
+              "value": 5
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "piroman",
-        "name":  "Пироман",
-        "type":  "armor",
-        "rank":  3,
-        "skill":  null,
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "passive",
-                                        "frequency":  "passive"
-                                    },
-                          "properties":  {
-                                             "fortitudeBonus":  2,
-                                             "willBonus":  4
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Тяжелый изоляционный доспех для пожаров, утечек и сильных аномальных зон."
-                                          },
-                                          {
-                                              "key":  "ignoreEnvironmentalStates",
-                                              "rank":  3
-                                          },
-                                          {
-                                              "key":  "removeStatus",
-                                              "trigger":  "onUse",
-                                              "target":  "self"
-                                          }
-                                      ]
-                      },
-        "description":  "Тяжелый изоляционный доспех для пожаров, утечек и сильных аномальных зон. Стойкость +2, Воля +4. Состояния окружающей среды 3-го ранга не влияют на вас. 1/сцену, реакцией, снимите с себя состояние.",
-        "shortDescription":  "Тяжелый изоляционный доспех для пожаров, утечек и сильных аномальных зон",
-        "price":  null
-    }
+    "description": "Элитная мобильная броня для быстрого входа в бой и захвата ключевой позиции. Контроль +4. Стойкость +2. Вы получаете +5 к броску инициативы в начале боя.",
+    "shortDescription": "Элитная мобильная броня для быстрого входа в бой и захвата ключевой позиции",
+    "price": 9
+  },
+  {
+    "id": "piroman",
+    "name": "Пироман",
+    "type": "armor",
+    "rank": 3,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "fortitudeBonus",
+              "value": 2
+            },
+            {
+              "key": "willBonus",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "ignoreEnvironmentalStates"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "trigger": "onUse"
+          },
+          "outcomes": [
+            {
+              "key": "removeStatus"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Тяжелый изоляционный доспех для пожаров, утечек и сильных аномальных зон. Стойкость +2, Воля +4. Состояния окружающей среды 3-го ранга не влияют на вас. 1/сцену, реакцией, снимите с себя состояние.",
+    "shortDescription": "Тяжелый изоляционный доспех для пожаров, утечек и сильных аномальных зон",
+    "price": 9
+  }
 ]
