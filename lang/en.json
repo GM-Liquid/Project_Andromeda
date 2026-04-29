@@ -73,11 +73,12 @@
     "SheetLabels": {
       "Actor": "Character Sheet",
       "AbilitiesAndMods": "Abilities",
-      "Features": "Main Sheet",
+      "Features": "Main",
       "Abilities": "Genomes",
       "Parameters": "Parameters",
       "Attributes": "Attributes",
       "Skills": "Skills",
+      "Defenses": "Defenses",
       "KeyInfo": "Key Information",
       "Biography": "Personality",
       "Personality": "Personality",
@@ -171,6 +172,14 @@
     },
     "TempSpeed": {
       "Label": "Temp. Speed"
+    },
+    "SheetHints": {
+      "ClickToRoll": "click to roll",
+      "ReadOnly": "read-only",
+      "Editable": "editable",
+      "SpeedFormula": "rank base + armor + temp.",
+      "Progress": "Progress",
+      "AvailableTotal": "available / total"
     },
     "SendToChat": "Send to Chat",
     "MinimalBonus": "minimal bonus",

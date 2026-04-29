@@ -95,18 +95,134 @@ test('localization renames the abilities tab and unified group in both languages
   );
 });
 
-test('key info layout uses two four-column rows and a centered advancement row', () => {
+test('actor sheet uses an integrated sci-fi shell with internal tab navigation', () => {
   const actorSheet = readText('templates/actor/partials/actor-sheet-content.hbs');
   const css = readText('css/project-andromeda.css');
+  const actorSheetClass = readText('module/sheets/actor-sheet.mjs');
 
-  assert.match(actorSheet, /key-info-grid__row key-info-grid__row--four/);
-  assert.match(actorSheet, /key-info-grid__row key-info-grid__row--two-centered/);
+  assert.match(actorSheet, /class='andromeda-sheet-shell'/);
+  assert.match(actorSheet, /class='[^']*andromeda-sheet-tabs[^']*'/);
+  assert.match(actorSheet, /class='[^']*andromeda-tab[^']*'/);
+  assert.ok(
+    actorSheet.indexOf("class='andromeda-identity'") < actorSheet.indexOf('andromeda-sheet-tabs')
+  );
+  assert.ok(
+    actorSheet.indexOf('andromeda-sheet-tabs') < actorSheet.indexOf("class='sheet-scrollable'")
+  );
+  assert.doesNotMatch(actorSheet, /sheet-tabs-hex-container/);
+  assert.doesNotMatch(actorSheet, /hex-button/);
+
+  assert.match(css, /\.andromeda-sheet-shell/);
+  assert.match(css, /\.andromeda-sheet-tabs/);
+  assert.match(css, /--andromeda-bg:/);
+  assert.match(css, /--andromeda-accent:/);
+
+  assert.doesNotMatch(actorSheetClass, /project-andromeda-hex-tabs/);
+  assert.match(actorSheetClass, /navSelector: '\.andromeda-sheet-tabs'/);
+  assert.match(actorSheetClass, /controlSelector: 'a\.andromeda-tab'/);
+});
+
+test('actor sheet overrides Foundry chrome and keeps internal tabs compact', () => {
+  const css = readText('css/project-andromeda.css');
+  const actorSheetClass = readText('module/sheets/actor-sheet.mjs');
+
+  assert.match(css, /\.window-app\.project-andromeda\.sheet\.actor \.window-header/);
+  assert.match(
+    css,
+    /background:\s*linear-gradient\([^;]+var\(--andromeda-chrome\)[^;]*!important;/
+  );
+  assert.match(css, /\.project-andromeda \.andromeda-tab\s*\{[^}]*flex:\s*0 0 auto;/s);
+  assert.match(css, /\.project-andromeda \.andromeda-sheet-tabs \.andromeda-tab\s*\{/);
+  assert.match(
+    css,
+    /\.project-andromeda \.andromeda-sheet-tabs \.andromeda-tab\s*\{[^}]*display:\s*inline-flex\s*!important;/s
+  );
+  assert.match(actorSheetClass, /width: 1180/);
+  assert.match(actorSheetClass, /height: 860/);
+});
+
+test('ability cards match the mockup structure instead of looking like dice inputs', () => {
+  const actorSheet = readText('templates/actor/partials/actor-sheet-content.hbs');
+  const actorSheetClass = readText('module/sheets/actor-sheet.mjs');
+  const css = readText('css/project-andromeda.css');
+
+  assert.match(actorSheet, /class='andromeda-ability-title'/);
+  assert.match(actorSheet, /class='andromeda-ability-code'/);
+  assert.match(actorSheet, /class='andromeda-ability-summary'/);
+  assert.match(actorSheet, /{{ability\.code}}/);
+  assert.match(actorSheet, /{{ability\.skillSummary}}/);
+  assert.match(actorSheetClass, /code: abilityCodes\[abilityKey\]/);
+  assert.match(actorSheetClass, /skillSummary:/);
+  assert.match(css, /\.project-andromeda \.ability-die-value\s*\{[^}]*background:\s*transparent/s);
+  assert.match(css, /\.project-andromeda \.ability-die-value\s*\{[^}]*border:\s*0/s);
+});
+
+test('main sheet presents identity, resources, abilities, and skills as overview panels', () => {
+  const actorSheet = readText('templates/actor/partials/actor-sheet-content.hbs');
+
+  assert.match(actorSheet, /class='andromeda-identity'/);
+  assert.match(actorSheet, /class='andromeda-resource-stack'/);
+  assert.match(actorSheet, /class='andromeda-overview-grid'/);
+  assert.match(actorSheet, /class='andromeda-ability-card/);
+  assert.match(actorSheet, /class='andromeda-skills-panel/);
+  assert.match(actorSheet, /class='andromeda-temp-panel/);
   assert.match(actorSheet, /name='system\.speed\.value'/);
   assert.match(actorSheet, /name='system\.defenses\.physical'/);
   assert.match(actorSheet, /name='system\.defenses\.azure'/);
   assert.match(actorSheet, /name='system\.defenses\.mental'/);
-  assert.match(actorSheet, /name='system\.advancement\.totalSpent'/);
-  assert.match(css, /\.key-info-grid__row--two-centered/);
+  assert.match(actorSheet, /name='system\.progressPoints'/);
+  assert.match(actorSheet, /data-field='system\.advancement\.totalSpent'/);
+  assert.doesNotMatch(actorSheet, /MY_RPG\.KeyInfo\.ActorType/);
+  assert.doesNotMatch(actorSheet, /actorTypeCode/);
+  assert.doesNotMatch(actorSheet, /actorTypeLabel/);
+  assert.match(actorSheet, /shared-hero-pool-input/);
+  assert.doesNotMatch(actorSheet, /rank-hint-table/);
+  assert.doesNotMatch(actorSheet, /key-info-grid__row/);
+});
+
+test('skill rank numbers keep readable dark text on colored badges', () => {
+  const css = readText('css/project-andromeda.css');
+
+  assert.match(
+    css,
+    /\.project-andromeda \.andromeda-skill-row \.skill-value input\s*\{[^}]*color:\s*#061018 !important;/s
+  );
+  assert.match(css, /\.project-andromeda \.andromeda-skill-row \.skill-value input\.rank1/s);
+  assert.match(css, /background:\s*#7bd88f !important;/);
+});
+
+test('actor sheet scrollbars stay subtle and never create horizontal chrome', () => {
+  const css = readText('css/project-andromeda.css');
+
+  assert.match(
+    css,
+    /\.project-andromeda \.andromeda-sheet-shell \.sheet-scrollable\s*\{[^}]*overflow-x:\s*hidden;/s
+  );
+  assert.match(
+    css,
+    /\.project-andromeda \.andromeda-sheet-shell \.sheet-scrollable\s*\{[^}]*scrollbar-color:\s*rgba\(73,\s*212,\s*232,\s*0\.36\)\s*transparent;/s
+  );
+  assert.doesNotMatch(
+    css,
+    /\.project-andromeda \.andromeda-sheet-shell \.sheet-scrollable\s*\{[^}]*scrollbar-color:\s*var\(--andromeda-accent\)/s
+  );
+});
+
+test('incremental sheet refresh updates new overview card state without full rerender', () => {
+  const actorSheetClass = readText('module/sheets/actor-sheet.mjs');
+
+  assert.match(actorSheetClass, /\.andromeda-ability-card/);
+  assert.match(actorSheetClass, /andromeda-track-card\.health-resource--stress strong/);
+  assert.match(actorSheetClass, /andromeda-track-card\.health-resource--shield strong/);
+});
+
+test('item tabs carry their own groups so actor sheet stays formatter-compatible', () => {
+  const actorSheet = readText('templates/actor/partials/actor-sheet-content.hbs');
+  const actorSheetClass = readText('module/sheets/actor-sheet.mjs');
+
+  assert.doesNotMatch(actorSheet, /lookup \.\.\/itemGroups/);
+  assert.match(actorSheet, /{{#each tab\.groups as \|group\|}}/);
+  assert.match(actorSheetClass, /groups: itemGroupsByTab\[tab\.key\] \?\? \[\]/);
 });
 
 test('temporary bonuses use a responsive grid instead of the old vertical table', () => {
@@ -115,8 +231,32 @@ test('temporary bonuses use a responsive grid instead of the old vertical table'
 
   assert.match(actorSheet, /class='temp-bonus-grid'/);
   assert.match(actorSheet, /class='temp-bonus-field'/);
+  assert.match(actorSheet, /MY_RPG\.SheetLabels\.Defenses/);
+  assert.doesNotMatch(
+    actorSheet,
+    /MY_RPG\.Defenses\.FortitudeLabel[^<]+\/[^<]+MY_RPG\.Defenses\.ControlLabel/
+  );
   assert.doesNotMatch(actorSheet, /<h2>\{\{localize 'MY_RPG.TempBonus.Label'\}\}<\/h2>\s*<table>/);
   assert.match(css, /\.temp-bonus-grid/);
+  assert.match(
+    css,
+    /\.project-andromeda \.andromeda-temp-panel \.temp-bonus-grid\s*\{[^}]*grid-template-columns:\s*1fr;/s
+  );
+});
+
+test('overview helper labels are localized instead of hard-coded English', () => {
+  const actorSheet = readText('templates/actor/partials/actor-sheet-content.hbs');
+  const en = readJson('lang/en.json').MY_RPG;
+  const ru = readJson('lang/ru.json').MY_RPG;
+
+  assert.doesNotMatch(actorSheet, />click to roll</);
+  assert.doesNotMatch(actorSheet, />read-only</);
+  assert.doesNotMatch(actorSheet, />editable</);
+  assert.match(actorSheet, /MY_RPG\.SheetHints\.ClickToRoll/);
+  assert.match(actorSheet, /MY_RPG\.SheetHints\.ReadOnly/);
+  assert.match(actorSheet, /MY_RPG\.SheetHints\.Editable/);
+
+  assert.deepEqual(Object.keys(en.SheetHints).sort(), Object.keys(ru.SheetHints).sort());
 });
 
 test('localization renames progress labels and shortens the speed label in both languages', () => {

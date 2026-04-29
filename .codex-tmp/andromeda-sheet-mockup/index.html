@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Project Andromeda Character Sheet Mockup</title>
+    <style>
+      :root {
+        --bg: #0b0f14;
+        --chrome: #151b22;
+        --surface: #111820;
+        --surface-2: #17212b;
+        --surface-3: #1e2a36;
+        --line: #2d3a46;
+        --line-soft: rgba(255, 255, 255, 0.08);
+        --text: #edf4f7;
+        --muted: #9caab5;
+        --subtle: #65737f;
+        --accent: #49d4e8;
+        --accent-2: #93f2cf;
+        --warning: #f2c14e;
+        --danger: #ff5c7a;
+        --rank-1: #7bd88f;
+        --rank-2: #aab4c2;
+        --rank-3: #ffd866;
+        --rank-4: #65c7ff;
+        --shadow: rgba(0, 0, 0, 0.42);
+        --radius: 8px;
+        --font-ui:
+          Inter, "Segoe UI", Roboto, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        --font-data: "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
+      }
+
+      body[data-theme="amber"] {
+        --bg: #0e0c08;
+        --chrome: #19140b;
+        --surface: #14110b;
+        --surface-2: #20180c;
+        --surface-3: #2a210f;
+        --line: #554526;
+        --text: #fff4cf;
+        --muted: #c4ae7d;
+        --subtle: #887348;
+        --accent: #ffb000;
+        --accent-2: #f3e78b;
+        --warning: #ffda66;
+        --danger: #ff5b5b;
+      }
+
+      body[data-theme="light"] {
+        --bg: #d9dde1;
+        --chrome: #e8ebee;
+        --surface: #f8fafb;
+        --surface-2: #eef3f6;
+        --surface-3: #e4ebef;
+        --line: #bec9d1;
+        --line-soft: rgba(12, 20, 28, 0.1);
+        --text: #16212a;
+        --muted: #52616d;
+        --subtle: #77848f;
+        --accent: #007c91;
+        --accent-2: #147c5d;
+        --warning: #b77900;
+        --danger: #b42342;
+        --shadow: rgba(22, 33, 42, 0.18);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--text);
+        background:
+          radial-gradient(circle at 18% 10%, rgba(73, 212, 232, 0.13), transparent 28rem),
+          linear-gradient(135deg, var(--bg), #05080b 62%);
+        font-family: var(--font-ui);
+        font-size: 14px;
+      }
+
+      .page {
+        min-height: 100vh;
+        padding: 28px;
+        display: grid;
+        place-items: center;
+      }
+
+      .design-note {
+        width: min(1180px, 100%);
+        margin: 0 auto 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        color: var(--muted);
+      }
+
+      .design-note strong {
+        color: var(--text);
+        font-weight: 750;
+      }
+
+      .theme-switcher {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .theme-switcher button {
+        min-height: 34px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 0 12px;
+        color: var(--muted);
+        background: var(--surface);
+        font: 700 12px var(--font-ui);
+        cursor: pointer;
+      }
+
+      .theme-switcher button:hover,
+      .theme-switcher button:focus-visible {
+        color: var(--text);
+        border-color: var(--accent);
+        outline: none;
+      }
+
+      .window {
+        width: min(1180px, 100%);
+        min-height: 760px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 24px 70px var(--shadow);
+        background: var(--chrome);
+      }
+
+      .window-bar {
+        min-height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 0 14px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), transparent), var(--chrome);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .window-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 750;
+        letter-spacing: 0;
+      }
+
+      .sigil {
+        width: 22px;
+        height: 22px;
+        border: 2px solid var(--accent);
+        border-radius: 50%;
+        position: relative;
+        box-shadow: 0 0 18px rgba(73, 212, 232, 0.25);
+      }
+
+      .sigil::before,
+      .sigil::after {
+        content: "";
+        position: absolute;
+        inset: 5px;
+        border: 1px solid var(--accent);
+        transform: rotate(45deg);
+      }
+
+      .sigil::after {
+        inset: 8px;
+        border-color: var(--accent-2);
+      }
+
+      .window-actions {
+        display: flex;
+        gap: 10px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .window-action {
+        min-height: 28px;
+        padding: 0 8px;
+        display: inline-flex;
+        align-items: center;
+        border-radius: 6px;
+      }
+
+      .window-action:hover {
+        background: var(--surface-2);
+        color: var(--text);
+      }
+
+      .sheet {
+        display: grid;
+        grid-template-rows: auto 1fr;
+        min-height: 718px;
+      }
+
+      .identity {
+        display: grid;
+        grid-template-columns: 250px 1fr 270px;
+        gap: 18px;
+        padding: 18px;
+        background:
+          linear-gradient(180deg, rgba(73, 212, 232, 0.08), transparent),
+          var(--surface);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .portrait-card,
+      .panel,
+      .metric,
+      .track-card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent), var(--surface-2);
+      }
+
+      .portrait-card {
+        display: grid;
+        grid-template-columns: 82px 1fr;
+        gap: 12px;
+        padding: 10px;
+        min-height: 116px;
+      }
+
+      .portrait {
+        width: 82px;
+        aspect-ratio: 1;
+        border-radius: 6px;
+        border: 1px solid var(--line);
+        background:
+          radial-gradient(circle at 50% 36%, rgba(147, 242, 207, 0.8), transparent 13px),
+          radial-gradient(circle at 50% 56%, rgba(73, 212, 232, 0.35), transparent 37px),
+          linear-gradient(145deg, #1b2433, #111016 56%, #2b1f38);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .portrait::before {
+        content: "";
+        position: absolute;
+        inset: 13px 24px 8px;
+        border: 2px solid rgba(237, 244, 247, 0.72);
+        border-top: 0;
+        border-radius: 0 0 999px 999px;
+      }
+
+      .portrait::after {
+        content: "";
+        position: absolute;
+        left: 16px;
+        right: 16px;
+        top: 51px;
+        height: 2px;
+        background: var(--accent);
+        box-shadow: 0 0 14px var(--accent);
+      }
+
+      .character-name {
+        margin: 0;
+        font-size: clamp(22px, 3vw, 36px);
+        line-height: 1;
+        font-weight: 850;
+      }
+
+      .identity-meta {
+        margin-top: 8px;
+        color: var(--muted);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+      }
+
+      .pill {
+        min-height: 26px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0 9px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--muted);
+        font: 700 12px var(--font-ui);
+      }
+
+      .rank-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--rank-3);
+        box-shadow: 0 0 12px var(--rank-3);
+      }
+
+      .top-metrics {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        align-items: stretch;
+      }
+
+      .metric {
+        padding: 12px;
+        display: grid;
+        gap: 8px;
+      }
+
+      .metric-label {
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .metric-value {
+        font: 850 26px/1 var(--font-data);
+      }
+
+      .metric-value.accent {
+        color: var(--accent);
+      }
+
+      .metric-sub {
+        color: var(--subtle);
+        font-size: 12px;
+      }
+
+      .resource-stack {
+        display: grid;
+        gap: 10px;
+      }
+
+      .track-card {
+        padding: 11px 12px;
+      }
+
+      .track-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 9px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 750;
+      }
+
+      .track-value {
+        color: var(--text);
+        font-family: var(--font-data);
+      }
+
+      .dots {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .dot {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 2px solid var(--line);
+        background: transparent;
+      }
+
+      .dot.filled {
+        border-color: var(--danger);
+        background: var(--danger);
+        box-shadow: 0 0 10px rgba(255, 92, 122, 0.26);
+      }
+
+      .dot.azure {
+        border-color: var(--accent);
+        background: var(--accent);
+        box-shadow: 0 0 10px rgba(73, 212, 232, 0.25);
+      }
+
+      .dot.shield {
+        border-color: var(--accent-2);
+        background: var(--accent-2);
+        box-shadow: 0 0 10px rgba(147, 242, 207, 0.2);
+      }
+
+      .tabs {
+        display: flex;
+        gap: 6px;
+        padding: 12px 18px 0;
+        background: var(--chrome);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .tab {
+        min-height: 40px;
+        padding: 0 16px;
+        border: 1px solid transparent;
+        border-bottom: 0;
+        border-radius: 8px 8px 0 0;
+        color: var(--muted);
+        background: transparent;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      .tab.active {
+        color: var(--text);
+        border-color: var(--line);
+        background: var(--surface);
+        box-shadow: inset 0 3px 0 var(--accent);
+      }
+
+      .content {
+        padding: 18px;
+        background:
+          linear-gradient(90deg, transparent 0, transparent 31px, rgba(255, 255, 255, 0.025) 32px),
+          var(--surface);
+        background-size: 32px 32px;
+      }
+
+      .overview-grid {
+        display: grid;
+        grid-template-columns: minmax(360px, 1.1fr) minmax(300px, 0.9fr) 270px;
+        gap: 16px;
+        align-items: start;
+      }
+
+      .panel {
+        padding: 14px;
+      }
+
+      .panel + .panel {
+        margin-top: 16px;
+      }
+
+      .panel-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .panel-title {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 850;
+        text-transform: uppercase;
+      }
+
+      .panel-kicker {
+        color: var(--subtle);
+        font: 700 11px var(--font-data);
+      }
+
+      .ability-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .ability {
+        min-height: 118px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.03);
+        display: grid;
+        align-content: space-between;
+        gap: 14px;
+      }
+
+      .ability-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .ability-die {
+        font: 900 31px/1 var(--font-data);
+        color: var(--accent);
+      }
+
+      .ability-roll {
+        color: var(--subtle);
+        font-size: 12px;
+      }
+
+      .defense-row,
+      .bonus-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 10px;
+        min-height: 38px;
+        border-bottom: 1px solid var(--line-soft);
+      }
+
+      .defense-row:last-child,
+      .bonus-row:last-child {
+        border-bottom: 0;
+      }
+
+      .defense-name,
+      .bonus-name {
+        color: var(--muted);
+        font-weight: 700;
+      }
+
+      .defense-value,
+      .bonus-value {
+        min-width: 44px;
+        text-align: right;
+        font: 850 20px/1 var(--font-data);
+      }
+
+      .skills {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .skill-column {
+        display: grid;
+        gap: 6px;
+      }
+
+      .skill-column h3 {
+        margin: 0 0 5px;
+        color: var(--accent);
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+
+      .skill {
+        display: grid;
+        grid-template-columns: 1fr 46px;
+        align-items: center;
+        min-height: 32px;
+        gap: 8px;
+        padding: 0 8px;
+        border: 1px solid var(--line-soft);
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.025);
+      }
+
+      .skill-name {
+        color: var(--text);
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .skill-value {
+        height: 24px;
+        display: grid;
+        place-items: center;
+        border-radius: 5px;
+        font: 850 13px var(--font-data);
+        color: #061018;
+      }
+
+      .rank1 {
+        background: var(--rank-1);
+      }
+
+      .rank2 {
+        background: var(--rank-2);
+      }
+
+      .rank3 {
+        background: var(--rank-3);
+      }
+
+      .quick-actions {
+        display: grid;
+        gap: 9px;
+      }
+
+      .action-button {
+        min-height: 42px;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        display: grid;
+        grid-template-columns: 28px 1fr auto;
+        align-items: center;
+        gap: 8px;
+        padding: 0 10px;
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.035);
+        cursor: pointer;
+      }
+
+      .action-button:hover,
+      .action-button:focus-visible {
+        border-color: var(--accent);
+        background: rgba(73, 212, 232, 0.08);
+        outline: none;
+      }
+
+      .action-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 1px solid var(--accent);
+        box-shadow: inset 0 0 0 4px rgba(73, 212, 232, 0.1);
+      }
+
+      .action-meta {
+        color: var(--subtle);
+        font: 700 11px var(--font-data);
+      }
+
+      .list {
+        display: grid;
+        gap: 8px;
+      }
+
+      .item {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 10px;
+        min-height: 38px;
+        padding: 0 10px;
+        border: 1px solid var(--line-soft);
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.025);
+      }
+
+      .item-name {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-weight: 720;
+      }
+
+      .item-tag {
+        color: var(--muted);
+        font: 700 11px var(--font-data);
+      }
+
+      @media (max-width: 1040px) {
+        .identity,
+        .overview-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .top-metrics,
+        .skills {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 720px) {
+        .page {
+          padding: 12px;
+        }
+
+        .design-note,
+        .tabs,
+        .top-metrics,
+        .ability-grid,
+        .skills {
+          grid-template-columns: 1fr;
+        }
+
+        .design-note,
+        .tabs {
+          display: grid;
+        }
+
+        .portrait-card {
+          grid-template-columns: 1fr;
+        }
+
+        .portrait {
+          width: 100%;
+          max-width: 180px;
+        }
+      }
+    </style>
+  </head>
+  <body data-theme="andromeda">
+    <main class="page">
+      <div>
+        <div class="design-note">
+          <div>
+            <strong>Базовый макет листа персонажа</strong>
+            <span>структура как рабочий инструмент, настроение как спокойный sci-fi HUD</span>
+          </div>
+          <div class="theme-switcher" aria-label="Color theme">
+            <button type="button" data-theme="andromeda">Andromeda</button>
+            <button type="button" data-theme="amber">Amber</button>
+            <button type="button" data-theme="light">Light</button>
+          </div>
+        </div>
+
+        <section class="window" aria-label="Project Andromeda character sheet mockup">
+          <header class="window-bar">
+            <div class="window-title">
+              <span class="sigil" aria-hidden="true"></span>
+              <span>Аур</span>
+            </div>
+            <div class="window-actions" aria-hidden="true">
+              <span class="window-action">Сменить тип</span>
+              <span class="window-action">Sheet</span>
+              <span class="window-action">Token</span>
+              <span class="window-action">Close</span>
+            </div>
+          </header>
+
+          <div class="sheet">
+            <section class="identity">
+              <article class="portrait-card">
+                <div class="portrait" aria-hidden="true"></div>
+                <div>
+                  <h1 class="character-name">Аур</h1>
+                  <div class="identity-meta">
+                    <span class="pill">Тень</span>
+                    <span class="pill"><span class="rank-dot"></span>Ранг 2</span>
+                    <span class="pill">Очки героя 1</span>
+                  </div>
+                </div>
+              </article>
+
+              <div class="top-metrics">
+                <article class="metric">
+                  <span class="metric-label">Скорость</span>
+                  <span class="metric-value">50</span>
+                  <span class="metric-sub">база ранга + броня + врем.</span>
+                </article>
+                <article class="metric">
+                  <span class="metric-label">Прогресс</span>
+                  <span class="metric-value accent">40</span>
+                  <span class="metric-sub">доступно / всего 40</span>
+                </article>
+                <article class="metric">
+                  <span class="metric-label">Тип</span>
+                  <span class="metric-value">PC</span>
+                  <span class="metric-sub">персонаж игрока</span>
+                </article>
+              </div>
+
+              <div class="resource-stack">
+                <article class="track-card">
+                  <div class="track-head">
+                    <span>Стресс</span>
+                    <span class="track-value">3 / 8</span>
+                  </div>
+                  <div class="dots" aria-hidden="true">
+                    <span class="dot azure"></span>
+                    <span class="dot azure"></span>
+                    <span class="dot filled"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                  </div>
+                </article>
+                <article class="track-card">
+                  <div class="track-head">
+                    <span>Силовой щит</span>
+                    <span class="track-value">2 / 4</span>
+                  </div>
+                  <div class="dots" aria-hidden="true">
+                    <span class="dot shield"></span>
+                    <span class="dot shield"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <nav class="tabs" aria-label="Sheet tabs">
+              <button class="tab active" type="button">Основное</button>
+              <button class="tab" type="button">Способности</button>
+              <button class="tab" type="button">Инвентарь</button>
+              <button class="tab" type="button">Личность</button>
+            </nav>
+
+            <section class="content">
+              <div class="overview-grid">
+                <div>
+                  <article class="panel">
+                    <div class="panel-head">
+                      <h2 class="panel-title">Характеристики</h2>
+                      <span class="panel-kicker">click to roll</span>
+                    </div>
+                    <div class="ability-grid">
+                      <section class="ability">
+                        <div class="ability-top">
+                          <span>Тело</span>
+                          <span>CON</span>
+                        </div>
+                        <div>
+                          <div class="ability-die">d8</div>
+                          <div class="ability-roll">Мощь, стрельба, ближний бой</div>
+                        </div>
+                      </section>
+                      <section class="ability">
+                        <div class="ability-top">
+                          <span>Разум</span>
+                          <span>INT</span>
+                        </div>
+                        <div>
+                          <div class="ability-die">d6</div>
+                          <div class="ability-roll">Анализ, инженерия, наблюдение</div>
+                        </div>
+                      </section>
+                      <section class="ability">
+                        <div class="ability-top">
+                          <span>Дух</span>
+                          <span>SPI</span>
+                        </div>
+                        <div>
+                          <div class="ability-die">d6</div>
+                          <div class="ability-roll">Резонанс, мистика, обаяние</div>
+                        </div>
+                      </section>
+                    </div>
+                  </article>
+
+                  <article class="panel">
+                    <div class="panel-head">
+                      <h2 class="panel-title">Навыки</h2>
+                      <span class="panel-kicker">rank color</span>
+                    </div>
+                    <div class="skills">
+                      <div class="skill-column">
+                        <h3>Тело</h3>
+                        <div class="skill"><span class="skill-name">Мощь</span><span class="skill-value rank1">0</span></div>
+                        <div class="skill"><span class="skill-name">Ловкость</span><span class="skill-value rank2">3</span></div>
+                        <div class="skill"><span class="skill-name">Сокрытие</span><span class="skill-value rank2">3</span></div>
+                        <div class="skill"><span class="skill-name">Стрельба</span><span class="skill-value rank1">0</span></div>
+                        <div class="skill"><span class="skill-name">Ближний бой</span><span class="skill-value rank2">2</span></div>
+                      </div>
+                      <div class="skill-column">
+                        <h3>Разум</h3>
+                        <div class="skill"><span class="skill-name">Наблюдательность</span><span class="skill-value rank1">1</span></div>
+                        <div class="skill"><span class="skill-name">Анализ</span><span class="skill-value rank1">1</span></div>
+                        <div class="skill"><span class="skill-name">Хакерство</span><span class="skill-value rank1">0</span></div>
+                        <div class="skill"><span class="skill-name">Инженерия</span><span class="skill-value rank1">0</span></div>
+                      </div>
+                      <div class="skill-column">
+                        <h3>Дух</h3>
+                        <div class="skill"><span class="skill-name">Доминирование</span><span class="skill-value rank1">0</span></div>
+                        <div class="skill"><span class="skill-name">Резонанс</span><span class="skill-value rank1">0</span></div>
+                        <div class="skill"><span class="skill-name">Мистика</span><span class="skill-value rank2">3</span></div>
+                        <div class="skill"><span class="skill-name">Обаяние</span><span class="skill-value rank1">0</span></div>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+
+                <div>
+                  <article class="panel">
+                    <div class="panel-head">
+                      <h2 class="panel-title">Защиты</h2>
+                      <span class="panel-kicker">read-only</span>
+                    </div>
+                    <div class="defense-row">
+                      <span class="defense-name">Стойкость</span>
+                      <span class="defense-value">4</span>
+                    </div>
+                    <div class="defense-row">
+                      <span class="defense-name">Контроль</span>
+                      <span class="defense-value">3</span>
+                    </div>
+                    <div class="defense-row">
+                      <span class="defense-name">Воля</span>
+                      <span class="defense-value">3</span>
+                    </div>
+                  </article>
+
+                  <article class="panel">
+                    <div class="panel-head">
+                      <h2 class="panel-title">Быстрые действия</h2>
+                      <span class="panel-kicker">primary rolls</span>
+                    </div>
+                    <div class="quick-actions">
+                      <button class="action-button" type="button">
+                        <span class="action-icon" aria-hidden="true"></span>
+                        <span>Бросок атаки</span>
+                        <span class="action-meta">d8 + 2</span>
+                      </button>
+                      <button class="action-button" type="button">
+                        <span class="action-icon" aria-hidden="true"></span>
+                        <span>Скрыться</span>
+                        <span class="action-meta">d8 + 3</span>
+                      </button>
+                      <button class="action-button" type="button">
+                        <span class="action-icon" aria-hidden="true"></span>
+                        <span>Потратить очко героя</span>
+                        <span class="action-meta">+half die</span>
+                      </button>
+                    </div>
+                  </article>
+
+                  <article class="panel">
+                    <div class="panel-head">
+                      <h2 class="panel-title">Временные бонусы</h2>
+                      <span class="panel-kicker">editable</span>
+                    </div>
+                    <div class="bonus-row">
+                      <span class="bonus-name">Врем. стресс</span>
+                      <span class="bonus-value">0</span>
+                    </div>
+                    <div class="bonus-row">
+                      <span class="bonus-name">Врем. скорость</span>
+                      <span class="bonus-value">0</span>
+                    </div>
+                    <div class="bonus-row">
+                      <span class="bonus-name">Врем. защита</span>
+                      <span class="bonus-value">0</span>
+                    </div>
+                  </article>
+                </div>
+
+                <aside>
+                  <article class="panel">
+                    <div class="panel-head">
+                      <h2 class="panel-title">Снаряжение</h2>
+                      <span class="panel-kicker">equipped</span>
+                    </div>
+                    <div class="list">
+                      <div class="item">
+                        <span class="item-name">Пульсарный клинок</span>
+                        <span class="item-tag">+2</span>
+                      </div>
+                      <div class="item">
+                        <span class="item-name">Лёгкая броня “Ореол”</span>
+                        <span class="item-tag">ON</span>
+                      </div>
+                      <div class="item">
+                        <span class="item-name">Имплант: предиктор</span>
+                        <span class="item-tag">INT</span>
+                      </div>
+                    </div>
+                  </article>
+
+                  <article class="panel">
+                    <div class="panel-head">
+                      <h2 class="panel-title">Заметки</h2>
+                      <span class="panel-kicker">personality</span>
+                    </div>
+                    <div class="list">
+                      <div class="item">
+                        <span class="item-name">Призвание: Тень</span>
+                      </div>
+                      <div class="item">
+                        <span class="item-name">Внешность: холодное сияние под кожей</span>
+                      </div>
+                      <div class="item">
+                        <span class="item-name">Ценность: не бросать своих</span>
+                      </div>
+                    </div>
+                  </article>
+                </aside>
+              </div>
+            </section>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      const themeButtons = document.querySelectorAll("[data-theme]");
+      themeButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          document.body.dataset.theme = button.dataset.theme;
+        });
+      });
+    </script>
+  </body>
+</html>

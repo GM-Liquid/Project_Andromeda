@@ -259,16 +259,16 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
 
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
-      classes: ['project-andromeda', 'sheet', 'actor', 'project-andromeda-hex-tabs'],
-      width: 800,
-      height: 1000,
-      resizable: false,
+      classes: ['project-andromeda', 'sheet', 'actor'],
+      width: 1180,
+      height: 860,
+      resizable: true,
       tabs: [
         {
-          navSelector: '.sheet-tabs-hex',
+          navSelector: '.andromeda-sheet-tabs',
           contentSelector: '.sheet-body',
           initial: 'features',
-          controlSelector: 'a.hex-button'
+          controlSelector: 'a.andromeda-tab'
         }
       ]
     });
@@ -309,21 +309,25 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
 
     this._preparePersonalityData(context);
 
-    context.rollData = context.actor.getRollData();
-    context.itemTabs = ITEM_TABS.map((tab) => ({
-      key: tab.key,
-      label: game.i18n.localize(getItemTabLabel(tab.key))
-    }));
-
     const itemGroups = this._buildItemGroups();
     context.personalityValueGroup =
       itemGroups.find((group) => group.key === 'personalityValues') ?? null;
-    context.itemGroups = itemGroups
+    const itemGroupsByTab = itemGroups
       .filter((group) => group.key !== 'personalityValues')
       .reduce((acc, group) => {
         (acc[group.tab] ??= []).push(group);
         return acc;
       }, {});
+    context.itemGroups = itemGroupsByTab;
+    context.rollData = context.actor.getRollData();
+    context.itemTabs = ITEM_TABS.map((tab) => ({
+      key: tab.key,
+      label: game.i18n.localize(getItemTabLabel(tab.key)),
+      groups: itemGroupsByTab[tab.key] ?? [],
+      isInventory: tab.key === 'inventory',
+      supplies: context.system?.supplies ?? 0,
+      money: context.system?.money ?? 0
+    }));
     context.itemControls = this._getItemControlLabels();
 
     return context;
@@ -348,26 +352,41 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const abilityOrder = ['con', 'int', 'spi'];
     context.system.skills ??= {};
 
-    const sortedAbilities = {};
-    for (const abilityKey of abilityOrder) {
-      const ability = context.system.abilities?.[abilityKey];
-      if (!ability) continue;
-      const normalizedValue = normalizeAbilityDie(ability.value);
-      sortedAbilities[abilityKey] = {
-        ...foundry.utils.duplicate(ability),
-        value: normalizedValue,
-        label: game.i18n.localize(CONFIG.ProjectAndromeda.abilities[abilityKey]) ?? abilityKey,
-        rankClass: 'rank' + getColorRank(normalizedValue, 'ability'),
-        dieLabel: getAbilityDieLabel(normalizedValue)
-      };
-    }
-    context.system.abilities = sortedAbilities;
-
     const skillOrderByAbility = {
       con: ['moshch', 'lovkost', 'sokrytie', 'strelba', 'blizhniy_boy'],
       int: ['nablyudatelnost', 'analiz', 'programmirovanie', 'inzheneriya'],
       spi: ['dominirovanie', 'rezonans', 'bionika', 'obayanie']
     };
+    const abilityCodes = {
+      con: 'CON',
+      int: 'INT',
+      spi: 'SPI'
+    };
+    const summarySkillsByAbility = {
+      con: ['moshch', 'strelba', 'blizhniy_boy'],
+      int: ['analiz', 'inzheneriya', 'nablyudatelnost'],
+      spi: ['rezonans', 'bionika', 'obayanie']
+    };
+
+    const sortedAbilities = {};
+    for (const abilityKey of abilityOrder) {
+      const ability = context.system.abilities?.[abilityKey];
+      if (!ability) continue;
+      const normalizedValue = normalizeAbilityDie(ability.value);
+      const summarySkillLabels = (summarySkillsByAbility[abilityKey] ?? [])
+        .map((skillKey) => game.i18n.localize(CONFIG.ProjectAndromeda.skills[skillKey]) ?? skillKey)
+        .filter(Boolean);
+      sortedAbilities[abilityKey] = {
+        ...foundry.utils.duplicate(ability),
+        value: normalizedValue,
+        label: game.i18n.localize(CONFIG.ProjectAndromeda.abilities[abilityKey]) ?? abilityKey,
+        code: abilityCodes[abilityKey],
+        rankClass: 'rank' + getColorRank(normalizedValue, 'ability'),
+        dieLabel: getAbilityDieLabel(normalizedValue).toLowerCase(),
+        skillSummary: summarySkillLabels.join(', ')
+      };
+    }
+    context.system.abilities = sortedAbilities;
 
     const sortedSkills = {};
     const skillColumns = [];
@@ -435,10 +454,13 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const markedCells = allowMarked ? this._normalizeStressMarked(marked, boundedMax) : [];
     return Array.from({ length: boundedMax }, (_, index) => {
       const isMarked = allowMarked && markedCells.includes(index);
+      const filled = index < boundedValue && !isMarked;
       return {
         index,
-        filled: index < boundedValue && !isMarked,
+        filled,
         marked: isMarked,
+        stateClass: [filled ? 'filled' : '', isMarked ? 'marked' : ''].filter(Boolean).join(' '),
+        ariaPressed: filled ? 'true' : 'false',
         ariaLabel: game.i18n.format(ariaKey, { index: index + 1 })
       };
     });
@@ -583,11 +605,13 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     for (const key of abilityKeys) {
       const dieValue = this._getAbilityDieValue(key);
       const rankClass = 'rank' + getColorRank(dieValue, 'ability');
-      const $container = $root.find(`[data-ability-key="${key}"]`);
+      const $container = $root.find(`.andromeda-ability-card[data-ability-key="${key}"]`);
+
+      $container.removeClass(rankClasses.join(' ')).addClass(rankClass);
 
       $container
         .find('.ability-die-value')
-        .text(getAbilityDieLabel(dieValue))
+        .text(getAbilityDieLabel(dieValue).toLowerCase())
         .removeClass(rankClasses.join(' '))
         .addClass(rankClass);
 
@@ -654,10 +678,14 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const setVal = (name, val) => {
       $root.find(`input[name="${name}"]`).val(val ?? 0);
     };
+    const setText = (field, val) => {
+      $root.find(`[data-field="${field}"]`).text(val ?? 0);
+    };
 
     // Speed
     setVal('system.speed.value', s?.speed?.value);
     setVal('system.advancement.totalSpent', s?.advancement?.totalSpent);
+    setText('system.advancement.totalSpent', s?.advancement?.totalSpent);
     // Defenses
     setVal('system.defenses.physical', s?.defenses?.physical);
     setVal('system.defenses.azure', s?.defenses?.azure);
@@ -686,6 +714,9 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       : [];
     const $track = $root.find('.stress-track');
     if (!$track.length) return;
+    $root
+      .find('.andromeda-track-card.health-resource--stress strong')
+      .text(`${boundedValue} / ${max}`);
     const cells = this._syncStressTrackCells($track, max);
     cells.forEach((el, i) => {
       const isMarked = marked.includes(i);
@@ -736,6 +767,9 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const boundedValue = Math.min(Math.max(Number(value) || 0, 0), max);
     const $track = $root.find('.force-shield-track');
     if (!$track.length) return;
+    $root
+      .find('.andromeda-track-card.health-resource--shield strong')
+      .text(`${boundedValue} / ${max}`);
     const cells = this._syncForceShieldTrackCells($track, max);
     cells.forEach((el, i) => {
       const filled = i < boundedValue;

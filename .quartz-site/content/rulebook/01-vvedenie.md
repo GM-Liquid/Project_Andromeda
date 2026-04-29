@@ -10,8 +10,8 @@ heroAlt: null
 showHero: true
 showToc: true
 parent: null
-created: "2026-04-22"
-modified: "2026-04-22"
+created: "2026-04-27"
+modified: "2026-04-27"
 ---
 
 # Обзор игры

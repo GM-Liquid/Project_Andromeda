@@ -1,1552 +1,1884 @@
 [
-    {
-        "id":  "raspad",
-        "name":  "Распад",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  "mistika",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerSession",
-                                        "actionCost":  "action",
-                                        "range":  {
-                                                      "type":  "touch"
-                                                  },
-                                        "targets":  {
-                                                        "type":  "single",
-                                                        "value":  1
-                                                    },
-                                        "requirements":  [
-                                                             {
-                                                                 "type":  "skillRank",
-                                                                 "skill":  "mistika",
-                                                                 "rank":  3
-                                                             }
-                                                         ],
-                                        "checkMode":  "none"
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Проверка не требуется."
-                                          }
-                                      ]
-                      },
-        "description":  "Превращает небольшой объект 2го ранга в порошок. Для активации способности необходимо иметь навык Мистика 3. Проверка не требуется.",
-        "shortDescription":  "Превращает небольшой объект в порошок",
-        "price":  null
+  {
+    "id": "raspad",
+    "name": "Распад",
+    "type": "ability",
+    "rank": 2,
+    "skill": "mistika",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerSession",
+            "range": {
+              "type": "melee"
+            },
+            "targets": "single"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 2
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "strukturnyy-golod",
-        "name":  "Структурный голод",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  "moshch",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "action",
-                                        "range":  {
-                                                      "type":  "meters",
-                                                      "value":  30
-                                                  },
-                                        "targets":  {
-                                                        "type":  "single",
-                                                        "value":  1
-                                                    },
-                                        "defense":  "fortitude",
-                                        "duration":  {
-                                                         "type":  "custom",
-                                                         "value":  "1 минута"
-                                                     }
-                                    },
-                          "properties":  {
-                                             "damage":  2
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Пол и стены оживают, хватая и обездвиживая цель."
-                                          },
-                                          {
-                                              "key":  "applyStatus",
-                                              "trigger":  "onSuccess",
-                                              "status":  "immobilized"
-                                          }
-                                      ]
-                      },
-        "description":  "Пол и стены оживают, хватая и обездвиживая цель. Атака Мощи против Стойкости. 2 урона. При успехе цель становится обездвиженной до конца действия эффекта.",
-        "shortDescription":  "Пол и стены оживают, хватая и обездвиживая цель.",
-        "price":  null
+    "description": "Превращает небольшой объект 2го ранга в порошок. Для активации способности необходимо иметь навык Мистика 3. Проверка не требуется.",
+    "shortDescription": "Превращает небольшой объект в порошок",
+    "price": 3
+  },
+  {
+    "id": "strukturnyy-golod",
+    "name": "Структурный голод",
+    "type": "ability",
+    "rank": 2,
+    "skill": "moshch",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "single",
+            "defense": "fortitude",
+            "duration": "untilEndOfScene",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "single",
+            "defense": "fortitude",
+            "duration": "untilEndOfScene",
+            "check": "successBonus",
+            "trigger": "onSuccess"
+          },
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "immobilized"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "gravitatsionnyy-kollaps",
-        "name":  "Гравитационный коллапс",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  "moshch",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerSession",
-                                        "actionCost":  "action",
-                                        "range":  {
-                                                      "type":  "meters",
-                                                      "value":  30
-                                                  },
-                                        "targets":  {
-                                                        "type":  "single",
-                                                        "value":  1
-                                                    },
-                                        "defense":  "fortitude"
-                                    },
-                          "properties":  {
-                                             "damage":  6
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Вы сжимаете пространство вокруг цели тисками гравитации, ломая её кости и броню."
-                                          },
-                                          {
-                                              "key":  "applyStatus",
-                                              "trigger":  "onSuccess",
-                                              "status":  "vulnerable"
-                                          }
-                                      ]
-                      },
-        "description":  "Вы сжимаете пространство вокруг цели тисками гравитации, ломая её кости и броню. Атака Мощи против Стойкости. 6 урона. При успехе цель становится уязвима до конца вашего следующего хода.",
-        "shortDescription":  "Вы сжимаете пространство вокруг цели тисками гравитации, ломая её кости и броню.",
-        "price":  null
+    "description": "Пол и стены оживают, хватая и обездвиживая цель. Атака Мощи против Стойкости. 2 урона. При успехе цель становится обездвиженной до конца действия эффекта.",
+    "shortDescription": "Пол и стены оживают, хватая и обездвиживая цель.",
+    "price": 3
+  },
+  {
+    "id": "gravitatsionnyy-kollaps",
+    "name": "Гравитационный коллапс",
+    "type": "ability",
+    "rank": 2,
+    "skill": "moshch",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerSession",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "single",
+            "defense": "fortitude",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": 6
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerSession",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "single",
+            "defense": "fortitude",
+            "check": "successBonus",
+            "trigger": "onSuccess"
+          },
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "vulnerable"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "obemnyy-vzryv",
-        "name":  "Объемный взрыв",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  "moshch",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "action",
-                                        "range":  {
-                                                      "type":  "meters",
-                                                      "value":  30
-                                                  },
-                                        "targets":  {
-                                                        "type":  "allInArea",
-                                                        "value":  "Каждая цель в зоне"
-                                                    },
-                                        "area":  {
-                                                     "type":  "radius",
-                                                     "value":  10
-                                                 },
-                                        "defense":  "fortitude"
-                                    },
-                          "properties":  {
-                                             "damage":  3
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Стяните всех в зоне к центру и нанесите урон."
-                                          },
-                                          {
-                                              "key":  "moveTarget",
-                                              "trigger":  "onSuccess",
-                                              "mode":  "pullToCenter"
-                                          }
-                                      ]
-                      },
-        "description":  "Стяните всех в зоне к центру и нанесите урон. Атака Мощи против Стойкости всех целей в зоне. 3 урона. При успехе цель также сдвигается в центр круга.",
-        "shortDescription":  "Стяните всех в зоне к центру и нанесите урон.",
-        "price":  null
+    "description": "Вы сжимаете пространство вокруг цели тисками гравитации, ломая её кости и броню. Атака Мощи против Стойкости. 6 урона. При успехе цель становится уязвима до конца вашего следующего хода.",
+    "shortDescription": "Вы сжимаете пространство вокруг цели тисками гравитации, ломая её кости и броню.",
+    "price": 3
+  },
+  {
+    "id": "obemnyy-vzryv",
+    "name": "Объемный взрыв",
+    "type": "ability",
+    "rank": 2,
+    "skill": "moshch",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "allInArea",
+            "area": {
+              "type": "circle",
+              "value": 15
+            },
+            "defense": "fortitude",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "allInArea",
+            "area": {
+              "type": "circle",
+              "value": 15
+            },
+            "defense": "fortitude",
+            "check": "successBonus",
+            "trigger": "onSuccess"
+          },
+          "outcomes": [
+            {
+              "key": "moveTarget"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "ognesmes",
-        "name":  "Огнесмесь",
-        "type":  "ability",
-        "rank":  3,
-        "skill":  "rezonans",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "action",
-                                        "range":  {
-                                                      "type":  "meters",
-                                                      "value":  30
-                                                  },
-                                        "targets":  {
-                                                        "type":  "allInArea",
-                                                        "value":  "Каждая цель в зоне"
-                                                    },
-                                        "area":  {
-                                                     "type":  "radius",
-                                                     "value":  10
-                                                 },
-                                        "defense":  "will",
-                                        "duration":  "whileMaintained"
-                                    },
-                          "properties":  {
-                                             "damage":  5
-                                         },
-                          "effects":  [
-
-                                      ]
-                      },
-        "description":  "Вы создаете пылающую зону, обжигающую тех, кто входит в неё. Атака Резонанса против Воли каждого существа, которое впервые за ход оказывается в зоне. 5 урона. Эффект длится, пока вы его поддерживаете. Вы не можете одновременно поддерживать больше одного такого эффекта. Если вы добровольно прекращаете поддержание или теряете возможность действовать, эффект заканчивается.",
-        "shortDescription":  "Вы создаете пылающую зону, обжигающую тех, кто входит в неё.",
-        "price":  null
+    "description": "Стяните всех в зоне к центру и нанесите урон. Атака Мощи против Стойкости всех целей в зоне. 3 урона. При успехе цель также сдвигается в центр круга.",
+    "shortDescription": "Стяните всех в зоне к центру и нанесите урон.",
+    "price": 3
+  },
+  {
+    "id": "ognesmes",
+    "name": "Огнесмесь",
+    "type": "ability",
+    "rank": 3,
+    "skill": "rezonans",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "allInArea",
+            "area": {
+              "type": "circle",
+              "value": 15
+            },
+            "defense": "will",
+            "duration": "untilEndOfScene",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": 5
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "blackout",
-        "name":  "Blackout",
-        "type":  "ability",
-        "rank":  1,
-        "skill":  null,
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "freeAction",
-                                        "range":  {
-                                                      "type":  "meters",
-                                                      "value":  30
-                                                  },
-                                        "area":  {
-                                                     "type":  "radius",
-                                                     "value":  15
-                                                 },
-                                        "duration":  "untilEndOfScene"
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "applyStatus",
-                                              "trigger":  "whileActive",
-                                              "status":  "hidden",
-                                              "target":  "targetsInArea"
-                                          }
-                                      ]
-                      },
-        "description":  "Все источники света в зоне начинают поглощать свет. Все цели, находящиеся в зоне, считаются скрытыми.",
-        "shortDescription":  "Все источники света в зоне начинают поглощать свет.",
-        "price":  null
+    "description": "Вы создаете пылающую зону, обжигающую тех, кто входит в неё. Атака Резонанса против Воли каждого существа, которое впервые за ход оказывается в зоне. 5 урона.",
+    "shortDescription": "Вы создаете пылающую зону, обжигающую тех, кто входит в неё.",
+    "price": 9
+  },
+  {
+    "id": "blackout",
+    "name": "Blackout",
+    "type": "ability",
+    "rank": 1,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "area": {
+              "type": "circle",
+              "value": 15
+            },
+            "duration": "untilEndOfScene",
+            "trigger": "whileActive"
+          },
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "hidden"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "kristallizatsiya",
-        "name":  "Кристаллизация",
-        "type":  "ability",
-        "rank":  1,
-        "skill":  "obayanie",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "freeAction",
-                                        "range":  {
-                                                      "type":  "touch"
-                                                  },
-                                        "targets":  {
-                                                        "type":  "single",
-                                                        "value":  1
-                                                    }
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Заключите воспоминание цели в кристалл."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Вы можете просмотреть это воспоминание в любой момент позже."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Проверка Обаяния против Воли цели."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Проверка не требуется, если цель согласна."
-                                          }
-                                      ]
-                      },
-        "description":  "Заключите воспоминание цели в кристалл. Вы можете просмотреть это воспоминание в любой момент позже. Проверка Обаяния против Воли цели. Проверка не требуется, если цель согласна.",
-        "shortDescription":  "Заключите воспоминание цели в кристалл. Вы можете просмотреть это воспоминание в любой момент позже.",
-        "price":  null
+    "description": "Все источники света в зоне начинают поглощать свет. Все цели, находящиеся в зоне, считаются скрытыми.",
+    "shortDescription": "Все источники света в зоне начинают поглощать свет.",
+    "price": 1
+  },
+  {
+    "id": "kristallizatsiya",
+    "name": "Кристаллизация",
+    "type": "ability",
+    "rank": 1,
+    "skill": "obayanie",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "melee"
+            },
+            "targets": "single"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 1
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "razrez-realnosti",
-        "name":  "Разрез реальности",
-        "type":  "ability",
-        "rank":  3,
-        "skill":  "blizhniy_boy",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "action",
-                                        "range":  {
-                                                      "type":  "touch"
-                                                  },
-                                        "targets":  {
-                                                        "type":  "single",
-                                                        "value":  1
-                                                    },
-                                        "defense":  "fortitude"
-                                    },
-                          "properties":  {
-                                             "damage":  6
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Клинок прорезает любой материал 3-го ранга и ниже, наносит 6 урона и распадается после удара."
-                                          }
-                                      ]
-                      },
-        "description":  "Создайте сверхострый клинок и ударьте перед собой. Атака Ближнего боя против Стойкости. Клинок прорезает любой материал 3-го ранга и ниже, наносит 6 урона и распадается после удара.",
-        "shortDescription":  "Создайте сверхострый клинок и ударьте перед собой.",
-        "price":  null
+    "description": "Заключите воспоминание цели в кристалл. Вы можете просмотреть это воспоминание в любой момент позже. Проверка Обаяния против Воли цели. Проверка не требуется, если цель согласна.",
+    "shortDescription": "Заключите воспоминание цели в кристалл. Вы можете просмотреть это воспоминание в любой момент позже.",
+    "price": 1
+  },
+  {
+    "id": "razrez-realnosti",
+    "name": "Разрез реальности",
+    "type": "ability",
+    "rank": 3,
+    "skill": "blizhniy_boy",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "melee"
+            },
+            "targets": "single",
+            "defense": "fortitude",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": 6
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "zakon-prevyshe-vsego",
-        "name":  "Закон превыше всего",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  "dominirovanie",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "action",
-                                        "targets":  {
-                                                        "type":  "custom",
-                                                        "value":  "Все, кто вас слышат"
-                                                    },
-                                        "defense":  "will",
-                                        "duration":  {
-                                                         "type":  "custom",
-                                                         "value":  "1 минута"
-                                                     }
-                                    },
-                          "properties":  {
-                                             "damage":  7
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Произнесите короткий приказ."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Все, кто слышат вас и отказываются выполнить приказ, получают 7 урона."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Проверка Доминирования против Воли всех."
-                                          }
-                                      ]
-                      },
-        "description":  "Произнесите короткий приказ. Все, кто слышат вас и отказываются выполнить приказ, получают 7 урона. Проверка Доминирования против Воли всех.",
-        "shortDescription":  "Произнесите короткий приказ. Все, кто слышат вас и отказываются выполнить приказ, получают 7 урона.",
-        "price":  null
+    "description": "Создайте сверхострый клинок и ударьте перед собой. Атака Ближнего боя против Стойкости. Клинок прорезает любой материал 3-го ранга и ниже, наносит 6 урона и распадается после удара.",
+    "shortDescription": "Создайте сверхострый клинок и ударьте перед собой.",
+    "price": 9
+  },
+  {
+    "id": "zakon-prevyshe-vsego",
+    "name": "Закон превыше всего",
+    "type": "ability",
+    "rank": 2,
+    "skill": "dominirovanie",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "targets": "allInArea",
+            "defense": "will",
+            "duration": "untilEndOfScene",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": 7
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "davlenie",
-        "name":  "Давление",
-        "type":  "ability",
-        "rank":  3,
-        "skill":  "moshch",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "action",
-                                        "range":  {
-                                                      "type":  "meters",
-                                                      "value":  30
-                                                  },
-                                        "targets":  {
-                                                        "type":  "single",
-                                                        "value":  1
-                                                    },
-                                        "defense":  "fortitude"
-                                    },
-                          "properties":  {
-                                             "damage":  2
-                                         },
-                          "effects":  [
-
-                                      ]
-                      },
-        "description":  "Снаряжение цели сдавливает её. Атака Мощи против Стойкости. 2 урона + 1 урон за каждые 2 очка Стойкости цели.",
-        "shortDescription":  "Снаряжение цели сдавливает её.",
-        "price":  null
+    "description": "Произнесите короткий приказ. Проверка Доминирования против Воли всех. Все, цели, для которых проверка успешна, должны выполнить приказ.",
+    "shortDescription": "Произнесите короткий приказ. Все, кто слышат вас, должны его выполнить.",
+    "price": 3
+  },
+  {
+    "id": "davlenie",
+    "name": "Давление",
+    "type": "ability",
+    "rank": 3,
+    "skill": "moshch",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "single",
+            "defense": "fortitude",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": 2
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "yadovitoe-oblako",
-        "name":  "Ядовитое облако",
-        "type":  "ability",
-        "rank":  1,
-        "skill":  "mistika",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "action",
-                                        "targets":  {
-                                                        "type":  "allInArea",
-                                                        "value":  "Каждое существо в зоне"
-                                                    },
-                                        "defense":  "fortitude",
-                                        "duration":  "untilEndOfScene"
-                                    },
-                          "properties":  {
-                                             "damage":  2
-                                         },
-                          "effects":  [
-
-                                      ]
-                      },
-        "description":  "Создайте ядовитое облако. Атака Мистики против Стойкости каждого существа, которое впервые за ход оказывается в зоне. 2 урона.",
-        "shortDescription":  "Создайте ядовитое облако.",
-        "price":  null
+    "description": "Снаряжение цели сдавливает её. Атака Мощи против Стойкости. 2 урона + 1 урон за каждые 2 очка Стойкости цели.",
+    "shortDescription": "Снаряжение цели сдавливает её.",
+    "price": 9
+  },
+  {
+    "id": "yadovitoe-oblako",
+    "name": "Ядовитое облако",
+    "type": "ability",
+    "rank": 1,
+    "skill": "mistika",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "targets": "allInArea",
+            "defense": "fortitude",
+            "duration": "untilEndOfScene",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": 2
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "rychag",
-        "name":  "Бустер",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  null,
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "freeAction",
-                                        "targets":  {
-                                                        "type":  "self"
-                                                    }
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "В этом ходу ваши проверки навыков получают +2, а в следующем -1."
-                                          }
-                                      ]
-                      },
-        "description":  "Краткий всплеск сил и небольшой откат после. В этом ходу ваши проверки навыков получают +2, а в следующем -1.",
-        "shortDescription":  "Краткий всплеск сил и небольшой откат после.",
-        "price":  null
+    "description": "Создайте ядовитое облако. Атака Мистики против Стойкости каждого существа, которое впервые за ход оказывается в зоне. 2 урона.",
+    "shortDescription": "Создайте ядовитое облако.",
+    "price": 1
+  },
+  {
+    "id": "rychag",
+    "name": "Бустер",
+    "type": "ability",
+    "rank": 2,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "targets": "self"
+          },
+          "outcomes": [
+            {
+              "key": "specialRule"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "unichtozhenie",
-        "name":  "Уничтожение",
-        "type":  "ability",
-        "rank":  3,
-        "skill":  "moshch",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "action",
-                                        "range":  {
-                                                      "type":  "meters",
-                                                      "value":  30
-                                                  },
-                                        "targets":  {
-                                                        "type":  "single",
-                                                        "value":  1
-                                                    },
-                                        "defense":  "fortitude"
-                                    },
-                          "properties":  {
-                                             "damage":  7
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Из материи под рукой вы создаете облако острейших игл, направляя их в цель."
-                                          }
-                                      ]
-                      },
-        "description":  "Из материи под рукой вы создаете облако острейших игл, направляя их в цель. Атака Мощи против Стойкости. 7 урона.",
-        "shortDescription":  "Из материи под рукой вы создаете облако острейших игл, направляя их в цель.",
-        "price":  null
+    "description": "Краткий всплеск сил и небольшой откат после. В этом ходу ваши проверки навыков получают +2, а в следующем -1.",
+    "shortDescription": "Краткий всплеск сил и небольшой откат после.",
+    "price": 3
+  },
+  {
+    "id": "unichtozhenie",
+    "name": "Уничтожение",
+    "type": "ability",
+    "rank": 3,
+    "skill": "moshch",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "single",
+            "defense": "fortitude",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": 7
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "kriticheskaya-temperatura",
-        "name":  "Критическая температура",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  "rezonans",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "action",
-                                        "range":  {
-                                                      "type":  "meters",
-                                                      "value":  30
-                                                  },
-                                        "targets":  {
-                                                        "type":  "single",
-                                                        "value":  1
-                                                    },
-                                        "defense":  "will"
-                                    },
-                          "properties":  {
-                                             "damage":  3
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Поднимите температуру доспеха цели до немыслимых значений."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "При успехе цель также получает -1 к Стойкости до конца сцены или пока носит этот доспех."
-                                          }
-                                      ]
-                      },
-        "description":  "Поднимите температуру доспеха цели до немыслимых значений. Атака Резонанса против Стойкости. 3 урона. При успехе цель также получает -1 к Стойкости до конца сцены или пока носит этот доспех.",
-        "shortDescription":  "Поднимите температуру цели до немыслимых значений.",
-        "price":  null
+    "description": "Из материи под рукой вы создаете облако острейших игл, направляя их в цель. Атака Мощи против Стойкости. 7 урона.",
+    "shortDescription": "Из материи под рукой вы создаете облако острейших игл, направляя их в цель.",
+    "price": 9
+  },
+  {
+    "id": "kriticheskaya-temperatura",
+    "name": "Критическая температура",
+    "type": "ability",
+    "rank": 2,
+    "skill": "rezonans",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "single",
+            "defense": "will",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": 3
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "magnitnoe-yadro",
-        "name":  "Магнитное ядро",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  "rezonans",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "action",
-                                        "range":  {
-                                                      "type":  "meters",
-                                                      "value":  30
-                                                  },
-                                        "area":  {
-                                                     "type":  "radius",
-                                                     "value":  10
-                                                 },
-                                        "duration":  {
-                                                         "type":  "minutes",
-                                                         "value":  10
-                                                     }
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Вы создаете магнитную сферу, мешающую передвижению и стрельбе."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "В радиусе её действия проверки Стрельбы получают −2, а цели в броне теряют половину скорости."
-                                          }
-                                      ]
-                      },
-        "description":  "Вы создаете магнитную сферу, мешающую передвижению и стрельбе. В радиусе её действия проверки Стрельбы получают −2, а цели в броне теряют половину скорости.",
-        "shortDescription":  "Вы создаете магнитную сферу, мешающую передвижению и стрельбе.",
-        "price":  null
+    "description": "Поднимите температуру доспеха цели до немыслимых значений. Атака Резонанса против Стойкости. 3 урона. При успехе цель также получает -1 к Стойкости до конца сцены или пока носит этот доспех.",
+    "shortDescription": "Поднимите температуру цели до немыслимых значений.",
+    "price": 3
+  },
+  {
+    "id": "magnitnoe-yadro",
+    "name": "Магнитное ядро",
+    "type": "ability",
+    "rank": 2,
+    "skill": "rezonans",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "area": {
+              "type": "circle",
+              "value": 15
+            },
+            "duration": "untilEndOfScene"
+          },
+          "outcomes": [
+            {
+              "key": "specialRule"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "radarnaya-travma",
-        "name":  "Радарная травма",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  "rezonans",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "action",
-                                        "targets":  {
-                                                        "type":  "allInArea",
-                                                        "value":  "Каждая цель в зоне"
-                                                    },
-                                        "area":  {
-                                                     "type":  "ray",
-                                                     "value":  30
-                                                 },
-                                        "defense":  "will",
-                                        "duration":  "untilStartOfYourNextTurn"
-                                    },
-                          "properties":  {
-                                             "damage":  3
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Вы излучаете концентрированный луч радиации, нанося урон и делая всех пораженных врагов уязвимыми."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Все, кто получают урон, также становятся уязвимы до начала вашего следующего хода."
-                                          }
-                                      ]
-                      },
-        "description":  "Вы излучаете концентрированный луч радиации, нанося урон и делая всех пораженных врагов уязвимыми. Атака Резонанса против Воли. 3 урона. Все, кто получают урон, также становятся уязвимы до начала вашего следующего хода.",
-        "shortDescription":  "Вы излучаете концентрированный луч радиации, нанося урон и делая всех пораженных врагов уязвимыми.",
-        "price":  null
+    "description": "Вы создаете магнитную сферу, мешающую передвижению и стрельбе. В радиусе её действия проверки Стрельбы получают −2, а цели в броне теряют половину скорости.",
+    "shortDescription": "Вы создаете магнитную сферу, мешающую передвижению и стрельбе.",
+    "price": 3
+  },
+  {
+    "id": "radarnaya-travma",
+    "name": "Радарная травма",
+    "type": "ability",
+    "rank": 2,
+    "skill": "rezonans",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "targets": "allInArea",
+            "area": {
+              "type": "ray",
+              "value": 30
+            },
+            "defense": "will",
+            "duration": "untilStartOfYourNextTurn",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": 3
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "zhivaya-stena",
-        "name":  "Живая стена",
-        "type":  "ability",
-        "rank":  1,
-        "skill":  "mistika",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "reaction",
-                                        "range":  {
-                                                      "type":  "meters",
-                                                      "value":  30
-                                                  },
-                                        "targets":  {
-                                                        "type":  "single",
-                                                        "value":  1
-                                                    },
-                                        "requirements":  [
-                                                             {
-                                                                 "type":  "skillRank",
-                                                                 "skill":  "mistika",
-                                                                 "rank":  1
-                                                             }
-                                                         ]
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "На пути удара вырастает стена, поглощающая урон."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "В ответ на получение урона целью вы можете активировать эту способность."
-                                          },
-                                          {
-                                              "key":  "damageReduction",
-                                              "trigger":  "reaction",
-                                              "amount":  4
-                                          }
-                                      ]
-                      },
-        "description":  "На пути удара вырастает стена, поглощающая урон. В ответ на получение урона целью вы можете активировать эту способность. Получаемый целью урон уменьшается на 4. Для активации способности необходимо иметь навык Мистика 1.",
-        "shortDescription":  "На пути удара вырастает стена, поглощающая урон.",
-        "price":  null
+    "description": "Вы излучаете концентрированный луч радиации, нанося урон и делая всех пораженных врагов уязвимыми. Атака Резонанса против Воли. 3 урона. Все, кто получают урон, также становятся уязвимы до начала вашего следующего хода.",
+    "shortDescription": "Вы излучаете концентрированный луч радиации, нанося урон и делая всех пораженных врагов уязвимыми.",
+    "price": 3
+  },
+  {
+    "id": "zhivaya-stena",
+    "name": "Живая стена",
+    "type": "ability",
+    "rank": 1,
+    "skill": "mistika",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "single",
+            "trigger": "reaction"
+          },
+          "outcomes": [
+            {
+              "key": "damageReduction",
+              "amount": 4
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "Ocharovanie",
-        "name":  "Очарование",
-        "type":  "ability",
-        "rank":  1,
-        "skill":  "obayanie",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "action",
-                                        "range":  {
-                                                      "type":  "meters",
-                                                      "value":  10
-                                                  },
-                                        "targets":  {
-                                                        "type":  "single",
-                                                        "value":  1
-                                                    },
-                                        "defense":  "will"
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Очаруйте цель, заставив считать вас своим другом."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Проверка Обаяния против Воли цели."
-                                          },
-                                          {
-                                              "key":  "applyStatus",
-                                              "trigger":  "onSuccess",
-                                              "status":  "charmed"
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Пока заклинание не окончиться или вы не причините вред цели, цель считает вас своим другом."
-                                          }
-                                      ]
-                      },
-        "description":  "Очаруйте цель, заставив считать вас своим другом. Проверка Обаяния против Воли цели. При успехе цель очаровывается вами. Пока заклинание не окончиться или вы не причините вред цели, цель считает вас своим другом.",
-        "shortDescription":  "Очаруйте цель, заставив считать вас своим другом.",
-        "price":  null
+    "description": "На пути удара вырастает стена, поглощающая урон. В ответ на получение урона целью вы можете активировать эту способность. Получаемый целью урон уменьшается на 4. Для активации способности необходимо иметь навык Мистика 1.",
+    "shortDescription": "На пути удара вырастает стена, поглощающая урон.",
+    "price": 1
+  },
+  {
+    "id": "Ocharovanie",
+    "name": "Очарование",
+    "type": "ability",
+    "rank": 1,
+    "skill": "obayanie",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 15
+            },
+            "targets": "single",
+            "defense": "will",
+            "check": "successBonus",
+            "trigger": "onSuccess"
+          },
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "charmed"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "gallyutsinatsii",
-        "name":  "Галлюцинации",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  "dominirovanie",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "action",
-                                        "range":  {
-                                                      "type":  "touch"
-                                                  },
-                                        "targets":  {
-                                                        "type":  "single",
-                                                        "value":  1
-                                                    },
-                                        "defense":  "will",
-                                        "duration":  {
-                                                         "type":  "upToMinutes",
-                                                         "value":  1
-                                                     }
-                                    },
-                          "properties":  {
-                                             "damage":  3
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "При успехе вы создаете иллюзию, видимую только целью."
-                                          },
-                                          {
-                                              "key":  "suppressReactions",
-                                              "trigger":  "whileActive"
-                                          }
-                                      ]
-                      },
-        "description":  "Вы внушаете цели ужасающие галлюцинации. Совершите атаку Доминирования против Воли. 3 урона. При успехе вы создаете иллюзию, видимую только целью. Пока способность активна, цель теряет возможность совершать реакции, до тех пор пока проверкой или иным способом не распознает иллюзию.",
-        "shortDescription":  "Вы внушаете цели ужасающие галлюцинации.",
-        "price":  null
+    "description": "Очаруйте цель, заставив считать вас своим другом. Проверка Обаяния против Воли цели. При успехе цель очаровывается вами. Пока заклинание не окончиться или вы не причините вред цели, цель считает вас своим другом.",
+    "shortDescription": "Очаруйте цель, заставив считать вас своим другом.",
+    "price": 1
+  },
+  {
+    "id": "gallyutsinatsii",
+    "name": "Галлюцинации",
+    "type": "ability",
+    "rank": 2,
+    "skill": "dominirovanie",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "melee"
+            },
+            "targets": "single",
+            "defense": "will",
+            "duration": "untilEndOfScene",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "melee"
+            },
+            "targets": "single",
+            "defense": "will",
+            "duration": "untilEndOfScene",
+            "check": "required",
+            "trigger": "whileActive"
+          },
+          "outcomes": [
+            {
+              "key": "suppressReactions"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "otkrytyy-razum",
-        "name":  "Открытый разум",
-        "type":  "ability",
-        "rank":  1,
-        "skill":  "obayanie",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "action",
-                                        "range":  {
-                                                      "type":  "meters",
-                                                      "value":  30
-                                                  },
-                                        "targets":  {
-                                                        "type":  "single",
-                                                        "value":  1
-                                                    },
-                                        "defense":  "will"
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Считайте поверхностные мысли и эмоции цели."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Проверка Обаяния против Воли цели."
-                                          },
-                                          {
-                                              "key":  "readThoughts",
-                                              "trigger":  "onSuccess"
-                                          }
-                                      ]
-                      },
-        "description":  "Считайте поверхностные мысли и эмоции цели. Проверка Обаяния против Воли цели. При успехе вы читаете её поверхностные мысли и эмоции; ведущий сообщает их одной фразой.",
-        "shortDescription":  "Считайте поверхностные мысли и эмоции цели.",
-        "price":  null
+    "description": "Вы внушаете цели ужасающие галлюцинации. Совершите атаку Доминирования против Воли. 3 урона. При успехе вы создаете иллюзию, видимую только целью. Пока способность активна, цель теряет возможность совершать реакции, до тех пор пока проверкой или иным способом не распознает иллюзию.",
+    "shortDescription": "Вы внушаете цели ужасающие галлюцинации.",
+    "price": 3
+  },
+  {
+    "id": "otkrytyy-razum",
+    "name": "Открытый разум",
+    "type": "ability",
+    "rank": 1,
+    "skill": "obayanie",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "single",
+            "defense": "will",
+            "check": "successBonus",
+            "trigger": "onSuccess"
+          },
+          "outcomes": [
+            {
+              "key": "readThoughts"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "ekstrennyy-teleport",
-        "name":  "Экстренный телепорт",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  null,
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "reaction",
-                                        "range":  {
-                                                      "type":  "meters",
-                                                      "value":  15
-                                                  }
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-
-                                      ]
-                      },
-        "description":  "Немедленно телепортируйтесь на 15 м в видимую точку.",
-        "shortDescription":  "Немедленно телепортируйтесь на 15 м.",
-        "price":  null
+    "description": "Считайте поверхностные мысли и эмоции цели. Проверка Обаяния против Воли цели. При успехе вы читаете её поверхностные мысли и эмоции; ведущий сообщает их одной фразой.",
+    "shortDescription": "Считайте поверхностные мысли и эмоции цели.",
+    "price": 1
+  },
+  {
+    "id": "ekstrennyy-teleport",
+    "name": "Экстренный телепорт",
+    "type": "ability",
+    "rank": 2,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 15
+            }
+          },
+          "outcomes": [
+            {
+              "key": "specialRule"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "zashchita",
-        "name":  "Защита",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  null,
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "reaction",
-                                        "targets":  {
-                                                        "type":  "self"
-                                                    },
-                                        "duration":  "untilStartOfYourNextTurn"
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-
-                                      ]
-                      },
-        "description":  "До конца этого хода прибавьте свой ранг к одной из ваших Защит по вашему выбору.",
-        "shortDescription":  "Усиление защиты реакцией",
-        "price":  null
+    "description": "Немедленно телепортируйтесь на 15 м в видимую точку.",
+    "shortDescription": "Немедленно телепортируйтесь на 15 м.",
+    "price": 3
+  },
+  {
+    "id": "zashchita",
+    "name": "Защита",
+    "type": "ability",
+    "rank": 2,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "targets": "self",
+            "duration": "untilStartOfYourNextTurn"
+          },
+          "outcomes": [
+            {
+              "key": "specialRule"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "vrata",
-        "name":  "Врата",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  null,
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "action",
-                                        "range":  {
-                                                      "type":  "meters",
-                                                      "value":  50
-                                                  }
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-
-                                      ]
-                      },
-        "description":  "Создайте малый портал между собой и выбранной точкой. Использование портала не тратит движение.",
-        "shortDescription":  "Создайте малый портал между собой и выбранной точкой.",
-        "price":  null
+    "description": "До конца этого хода прибавьте свой ранг к одной из ваших Защит по вашему выбору.",
+    "shortDescription": "Усиление защиты реакцией",
+    "price": 3
+  },
+  {
+    "id": "vrata",
+    "name": "Врата",
+    "type": "ability",
+    "rank": 2,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 50
+            }
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 2
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "degradatsiya",
-        "name":  "Деградация",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  "mistika",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "action",
-                                        "range":  {
-                                                      "type":  "meters",
-                                                      "value":  30
-                                                  },
-                                        "targets":  {
-                                                        "type":  "single",
-                                                        "value":  1
-                                                    },
-                                        "defense":  "will",
-                                        "duration":  "untilStartOfYourNextTurn"
-                                    },
-                          "properties":  {
-                                             "damage":  4
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Вы усиливаете воздействие времени на снаряжение противника, состаривая его."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "При нанесении урона таким образом, до начала вашего следующего хода противник получает -2 к одной из защит на ваш выбор."
-                                          }
-                                      ]
-                      },
-        "description":  "Вы усиливаете воздействие времени на снаряжение противника, состаривая его. Атака Мистики против Воли. 4 урона. При нанесении урона таким образом, до начала вашего следующего хода противник получает -2 к одной из защит на ваш выбор.",
-        "shortDescription":  "Вы усиливаете воздействие времени на снаряжение противника, состаривая его.",
-        "price":  null
+    "description": "Создайте малый портал между собой и выбранной точкой. Использование портала не тратит движение.",
+    "shortDescription": "Создайте малый портал между собой и выбранной точкой.",
+    "price": 3
+  },
+  {
+    "id": "degradatsiya",
+    "name": "Деградация",
+    "type": "ability",
+    "rank": 2,
+    "skill": "mistika",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "single",
+            "defense": "will",
+            "duration": "untilStartOfYourNextTurn",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": 4
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "tsena-znaniya",
-        "name":  "Цена знания",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  "analiz",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "action",
-                                        "range":  {
-                                                      "type":  "meters",
-                                                      "value":  30
-                                                  },
-                                        "targets":  {
-                                                        "type":  "single",
-                                                        "value":  1
-                                                    }
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Вы анализируете цель, получая информацию."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Проверка Анализа против Контроля."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "При провале узнайте 1 и получите 2 урона."
-                                          }
-                                      ]
-                      },
-        "description":  "Вы анализируете цель, получая информацию. Проверка Анализа против Контроля. При успехе узнайте 2 факта о цели: 2 её способности, слабости или параметра, например Защиты. При провале узнайте 1 и получите 2 урона.",
-        "shortDescription":  "Вы анализируете цель, получая информацию.",
-        "price":  null
+    "description": "Вы усиливаете воздействие времени на снаряжение противника, состаривая его. Атака Мистики против Воли. 4 урона. При нанесении урона таким образом, до начала вашего следующего хода противник получает -2 к одной из защит на ваш выбор.",
+    "shortDescription": "Вы усиливаете воздействие времени на снаряжение противника, состаривая его.",
+    "price": 3
+  },
+  {
+    "id": "tsena-znaniya",
+    "name": "Цена знания",
+    "type": "ability",
+    "rank": 2,
+    "skill": "analiz",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "single",
+            "defense": "control",
+            "check": "none"
+          },
+          "outcomes": [
+            {
+              "key": "learnFacts",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "single",
+            "defense": "control",
+            "check": "successBonus"
+          },
+          "outcomes": [
+            {
+              "key": "learnFacts",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "self",
+            "check": "failureRisk"
+          },
+          "outcomes": [
+            {
+              "key": "selfDamage",
+              "value": 2
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "aktivnaya-adaptatsiya",
-        "name":  "Активная адаптация",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  "analiz",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "reaction",
-                                        "range":  {
-                                                      "type":  "lineOfSight"
-                                                  },
-                                        "targets":  {
-                                                        "type":  "single",
-                                                        "value":  1
-                                                    },
-                                        "defense":  "control",
-                                        "duration":  "untilEndOfScene"
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Запомните действие противника, чтобы защититься от него в следующий раз."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Каждый раз, когда противник в первый раз за сцену выполняет действие, направленное на вас, вы можете совершить проверку Анализа против Контроля, чтобы запомнить его."
-                                          }
-                                      ]
-                      },
-        "description":  "Запомните действие противника, чтобы защититься от него в следующий раз. Каждый раз, когда противник в первый раз за сцену выполняет действие, направленное на вас, вы можете совершить проверку Анализа против Контроля, чтобы запомнить его. При успехе вы получаете +2 к защите против последующих применений этого действия до конца сцены. При провале способность не расходуется.",
-        "shortDescription":  "Запомните действие противника, чтобы защититься от него в следующий раз.",
-        "price":  null
+    "description": "Вы анализируете цель, получая информацию. Проверка Анализа против Контроля. При успехе узнайте 2 факта о цели: 2 её способности, слабости или параметра, например Защиты. При провале узнайте 1 и получите 2 урона.",
+    "shortDescription": "Вы анализируете цель, получая информацию.",
+    "price": 3
+  },
+  {
+    "id": "aktivnaya-adaptatsiya",
+    "name": "Активная адаптация",
+    "type": "ability",
+    "rank": 2,
+    "skill": "analiz",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 500
+            },
+            "targets": "single",
+            "defense": "control",
+            "duration": "untilEndOfScene",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "specialRule"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "tsepkiy-glaz",
-        "name":  "Цепкий глаз",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  "analiz",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "action",
-                                        "range":  {
-                                                      "type":  "meters",
-                                                      "value":  30
-                                                  },
-                                        "targets":  {
-                                                        "type":  "single",
-                                                        "value":  1
-                                                    },
-                                        "defense":  "control",
-                                        "duration":  "untilEndOfScene"
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Проанализируйте противника, найдя его уязвимость."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Проверка Анализа против Контроля."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "При успехе до конца сцены раз за ход, когда этот противник получает урон, он получает еще 2 урона."
-                                          }
-                                      ]
-                      },
-        "description":  "Проанализируйте противника, найдя его уязвимость. Проверка Анализа против Контроля. При успехе до конца сцены раз за ход, когда этот противник получает урон, он получает еще 2 урона. При провале способность не расходуется.",
-        "shortDescription":  "Проанализируйте противника, найдя его уязвимость. Этот противник получает дополнительный урон от всех атак.",
-        "price":  null
+    "description": "Запомните действие противника, чтобы защититься от него в следующий раз. Каждый раз, когда противник в первый раз за сцену выполняет действие, направленное на вас, вы можете совершить проверку Анализа против Контроля, чтобы запомнить его. При успехе вы получаете +2 к защите против последующих применений этого действия до конца сцены. При провале способность не расходуется.",
+    "shortDescription": "Запомните действие противника, чтобы защититься от него в следующий раз.",
+    "price": 3
+  },
+  {
+    "id": "tsepkiy-glaz",
+    "name": "Цепкий глаз",
+    "type": "ability",
+    "rank": 2,
+    "skill": "analiz",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "single",
+            "defense": "control",
+            "duration": "untilEndOfScene",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "specialRule"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "perenapravlenie",
-        "name":  "Перенаправление",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  "analiz",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "reaction",
-                                        "targets":  {
-                                                        "type":  "custom",
-                                                        "value":  "Вы и 1 противник рядом с вами"
-                                                    }
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Перенаправьте промахнувшуюся по вам атаку дальнего боя в противника рядом с вами."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "При успехе атака перенаправляется в противника рядом с вами и наносит минимальный урон."
-                                          }
-                                      ]
-                      },
-        "description":  "Перенаправьте промахнувшуюся по вам атаку дальнего боя в противника рядом с вами. Когда атака дальнего боя по вам проваливается, совершите проверку Анализа против результата этой атаки. При успехе атака перенаправляется в противника рядом с вами и наносит минимальный урон. При провале способность не расходуется.",
-        "shortDescription":  "Перенаправьте промахнувшуюся по вам атаку дальнего боя в противника рядом с вами.",
-        "price":  null
+    "description": "Проанализируйте противника, найдя его уязвимость. Проверка Анализа против Контроля. При успехе до конца сцены раз за ход, когда этот противник получает урон, он получает еще 2 урона. При провале способность не расходуется.",
+    "shortDescription": "Проанализируйте противника, найдя его уязвимость. Этот противник получает дополнительный урон от всех атак.",
+    "price": 3
+  },
+  {
+    "id": "perenapravlenie",
+    "name": "Перенаправление",
+    "type": "ability",
+    "rank": 2,
+    "skill": "analiz",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "targets": "allInArea"
+          },
+          "outcomes": [
+            {
+              "key": "specialRule"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "filtr-vospriyatia",
-        "name":  "Фильтр восприятия",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  "sokrytie",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "freeAction",
-                                        "duration":  "untilEndOfScene"
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-
-                                      ]
-                      },
-        "description":  "Наложите на себя \"фильтр\" для окружающих людей и аппаратуры. Вы невидимы для любых средств обнаружения, до тех пор пока не выдадите себя атакой или другим способом.",
-        "shortDescription":  "Наложите на себя \"фильтр\" для окружающих людей и аппаратуры.",
-        "price":  null
+    "description": "Перенаправьте промахнувшуюся по вам атаку дальнего боя в противника рядом с вами. Когда атака дальнего боя по вам проваливается, совершите проверку Анализа против результата этой атаки. При успехе атака перенаправляется в противника рядом с вами и наносит минимальный урон. При провале способность не расходуется.",
+    "shortDescription": "Перенаправьте промахнувшуюся по вам атаку дальнего боя в противника рядом с вами.",
+    "price": 3
+  },
+  {
+    "id": "filtr-vospriyatia",
+    "name": "Фильтр восприятия",
+    "type": "ability",
+    "rank": 2,
+    "skill": "sokrytie",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "duration": "untilEndOfScene"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 2
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "nyrok-v-ten",
-        "name":  "Нырок в тень",
-        "type":  "ability",
-        "rank":  3,
-        "skill":  "sokrytie",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "reaction",
-                                        "targets":  {
-                                                        "type":  "self"
-                                                    }
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Когда вас атакуют, совершите проверку Сокрытия против атаки противника."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "При успехе вы уходите из вида, а атака проваливается."
-                                          }
-                                      ]
-                      },
-        "description":  "Когда вас атакуют, совершите проверку Сокрытия против атаки противника. При успехе вы уходите из вида, а атака проваливается.",
-        "shortDescription":  "Реакцией уйдите из вида и сорвите атаку при успехе проверки Сокрытия.",
-        "price":  null
+    "description": "Наложите на себя \"фильтр\" для окружающих людей и аппаратуры. Вы невидимы для любых средств обнаружения, до тех пор пока не выдадите себя атакой или другим способом.",
+    "shortDescription": "Наложите на себя \"фильтр\" для окружающих людей и аппаратуры.",
+    "price": 3
+  },
+  {
+    "id": "nyrok-v-ten",
+    "name": "Нырок в тень",
+    "type": "ability",
+    "rank": 3,
+    "skill": "sokrytie",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "targets": "self"
+          },
+          "outcomes": [
+            {
+              "key": "specialRule"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "desh",
-        "name":  "Дэш",
-        "type":  "ability",
-        "rank":  1,
-        "skill":  "lovkost",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "freeAction",
-                                        "range":  {
-                                                      "type":  "meters",
-                                                      "value":  10
-                                                  },
-                                        "requirements":  [
-                                                             {
-                                                                 "type":  "skillRank",
-                                                                 "skill":  "lovkost",
-                                                                 "rank":  1
-                                                             }
-                                                         ]
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-
-                                      ]
-                      },
-        "description":  "Совершите рывок на 20 м в горизонтальном направлении. Для активации способности необходимо иметь навык Ловкость 1.",
-        "shortDescription":  "Совершите рывок на 20 м.",
-        "price":  null
+    "description": "Когда вас атакуют, совершите проверку Сокрытия против атаки противника. При успехе вы уходите из вида, а атака проваливается.",
+    "shortDescription": "Реакцией уйдите из вида и сорвите атаку при успехе проверки Сокрытия.",
+    "price": 9
+  },
+  {
+    "id": "desh",
+    "name": "Дэш",
+    "type": "ability",
+    "rank": 1,
+    "skill": "lovkost",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 15
+            }
+          },
+          "outcomes": [
+            {
+              "key": "specialRule"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "vikhr",
-        "name":  "Вихрь",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  "lovkost",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "action",
-                                        "range":  {
-                                                      "type":  "melee"
-                                                  },
-                                        "targets":  {
-                                                        "type":  "allInArea",
-                                                        "value":  "Каждый противник рядом с вами"
-                                                    },
-                                        "defense":  "fortitude"
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Вы совершаете вихрь ударов, нанося урон всем вокруг."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Совершите атаку Ближнего боя против Стойкости каждого противника рядом с вами."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Сравнивайте результат со Стойкостью каждого противника отдельно."
-                                          }
-                                      ]
-                      },
-        "description":  "Вы совершаете вихрь ударов, нанося урон всем вокруг. Совершите атаку Ближнего боя против Стойкости каждого противника рядом с вами. Сравнивайте результат со Стойкостью каждого противника отдельно.",
-        "shortDescription":  "Вы совершаете вихрь ударов, нанося урон всем вокруг.",
-        "price":  null
+    "description": "Совершите рывок на 20 м в горизонтальном направлении. Для активации способности необходимо иметь навык Ловкость 1.",
+    "shortDescription": "Совершите рывок на 20 м.",
+    "price": 1
+  },
+  {
+    "id": "vikhr",
+    "name": "Вихрь",
+    "type": "ability",
+    "rank": 2,
+    "skill": "lovkost",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "melee"
+            },
+            "targets": "allInArea",
+            "defense": "fortitude",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "specialRule"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "smertelnyy-vystrel",
-        "name":  "Смертельный выстрел",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  "strelba",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "maneuver",
-                                        "duration":  "untilEndOfTurn"
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Ваша следующая атака Стрельбой считается как максимально выпавшее значение на кубе."
-                                          }
-                                      ]
-                      },
-        "description":  "Ваша следующая атака Стрельбой считается как максимально выпавшее значение на кубе.",
-        "shortDescription":  "Сделайте следующую атаку Стрельбой максимальным значением куба.",
-        "price":  null
+    "description": "Вы совершаете вихрь ударов, нанося урон всем вокруг. Совершите атаку Ближнего боя против Стойкости каждого противника рядом с вами. Сравнивайте результат со Стойкостью каждого противника отдельно.",
+    "shortDescription": "Вы совершаете вихрь ударов, нанося урон всем вокруг.",
+    "price": 3
+  },
+  {
+    "id": "smertelnyy-vystrel",
+    "name": "Смертельный выстрел",
+    "type": "ability",
+    "rank": 2,
+    "skill": "strelba",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "maneuver"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "duration": "untilEndOfTurn"
+          },
+          "outcomes": [
+            {
+              "key": "specialRule"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "unichtozhitelnyy-ogon",
-        "name":  "Уничтожительный огонь",
-        "type":  "ability",
-        "rank":  3,
-        "skill":  "strelba",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "action",
-                                        "targets":  {
-                                                        "type":  "upTo",
-                                                        "value":  4
-                                                    }
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-
-                                      ]
-                      },
-        "description":  "Проведите по одной атаке Стрельбой по четырём разным целям.",
-        "shortDescription":  "Проведите по одной атаке Стрельбой по четырём разным целям.",
-        "price":  null
+    "description": "Ваша следующая атака Стрельбой считается как максимально выпавшее значение на кубе.",
+    "shortDescription": "Сделайте следующую атаку Стрельбой максимальным значением куба.",
+    "price": 3
+  },
+  {
+    "id": "unichtozhitelnyy-ogon",
+    "name": "Уничтожительный огонь",
+    "type": "ability",
+    "rank": 3,
+    "skill": "strelba",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "targets": "upTo2"
+          },
+          "outcomes": [
+            {
+              "key": "specialRule"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "emi",
-        "name":  "ЭМИ",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  "inzheneriya",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerSession",
-                                        "actionCost":  "action",
-                                        "targets":  {
-                                                        "type":  "allInArea",
-                                                        "value":  "Все цели в зоне"
-                                                    },
-                                        "area":  {
-                                                     "type":  "radius",
-                                                     "value":  10
-                                                 },
-                                        "defense":  "control"
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Проверка Инженерии против Контроля."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Запертые двери открываются, а механические противники пропускают свой ход."
-                                          }
-                                      ]
-                      },
-        "description":  "Выведите из строя технику коротким ЭМИ-импульсом. Проверка Инженерии против Контроля. При успехе вся техника в радиусе выключается на 1 раунд. Запертые двери открываются, а механические противники пропускают свой ход.",
-        "shortDescription":  "Коротким ЭМИ-импульсом выведите из строя технику 1 ранга.",
-        "price":  null
+    "description": "Проведите по одной атаке Стрельбой по четырём разным целям.",
+    "shortDescription": "Проведите по одной атаке Стрельбой по четырём разным целям.",
+    "price": 9
+  },
+  {
+    "id": "emi",
+    "name": "ЭМИ",
+    "type": "ability",
+    "rank": 2,
+    "skill": "inzheneriya",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerSession",
+            "targets": "allInArea",
+            "area": {
+              "type": "circle",
+              "value": 15
+            },
+            "defense": "control",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 2
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "perezaryadka-kartridzha",
-        "name":  "Перезарядка способности",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  "inzheneriya",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "freeAction",
-                                        "range":  {
-                                                      "type":  "touch"
-                                                  },
-                                        "targets":  {
-                                                        "type":  "single",
-                                                        "value":  1
-                                                    },
-                                        "requirements":  [
-                                                             {
-                                                                 "type":  "skillRank",
-                                                                 "skill":  "inzheneriya",
-                                                                 "rank":  3
-                                                             }
-                                                         ]
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Перезарядите выбранную способность, используемую \"1/сцену\" у себя или союзника."
-                                          }
-                                      ]
-                      },
-        "description":  "Перезарядите выбранную способность, используемую \"1/сцену\" у себя или союзника. Для активации способности необходимо иметь навык Инженерия 3.",
-        "shortDescription":  "Перезарядите выбранную способность, используемую \"1/сцену\" у себя или союзника.",
-        "price":  null
+    "description": "Выведите из строя технику коротким ЭМИ-импульсом. Проверка Инженерии против Контроля. При успехе вся техника в радиусе выключается на 1 раунд. Запертые двери открываются, а механические противники пропускают свой ход.",
+    "shortDescription": "Коротким ЭМИ-импульсом выведите из строя технику 1 ранга.",
+    "price": 3
+  },
+  {
+    "id": "perezaryadka-kartridzha",
+    "name": "Перезарядка способности",
+    "type": "ability",
+    "rank": 2,
+    "skill": "inzheneriya",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "melee"
+            },
+            "targets": "single"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 2
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "sboy-navedeniya",
-        "name":  "Сбой наведения",
-        "type":  "ability",
-        "rank":  3,
-        "skill":  "khakerstvo",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "reaction",
-                                        "targets":  {
-                                                        "type":  "single",
-                                                        "value":  1
-                                                    }
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Проверка Хакерства против Контроля."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "При успехе воздействие прерывается, а атака проваливается."
-                                          }
-                                      ]
-                      },
-        "description":  "Когда любое техническое устройство, атакует или воздействует на вас, внесите помехи в его контур. Проверка Хакерства против Контроля. При успехе воздействие прерывается, а атака проваливается.",
-        "shortDescription":  "Реакцией, когда техническое устройство, атакует или воздействует на вас, внесите помехи в его контур.",
-        "price":  null
+    "description": "Перезарядите выбранную способность, используемую \"1/сцену\" у себя или союзника. Для активации способности необходимо иметь навык Инженерия 3.",
+    "shortDescription": "Перезарядите выбранную способность, используемую \"1/сцену\" у себя или союзника.",
+    "price": 3
+  },
+  {
+    "id": "sboy-navedeniya",
+    "name": "Сбой наведения",
+    "type": "ability",
+    "rank": 3,
+    "skill": "khakerstvo",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "targets": "single"
+          },
+          "outcomes": [
+            {
+              "key": "specialRule"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "prikaz",
-        "name":  "Приказ",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  "khakerstvo",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "freeAction",
-                                        "range":  {
-                                                      "type":  "meters",
-                                                      "value":  30
-                                                  },
-                                        "targets":  {
-                                                        "type":  "single",
-                                                        "value":  1
-                                                    },
-                                        "defense":  "control"
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Отдайте быстрый приказ техническому устройству."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Проверка Хакерства против Контроля."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "При успехе вы отдаете один приказ, который устройство мгновенно выполняет."
-                                          }
-                                      ]
-                      },
-        "description":  "Отдайте быстрый приказ техническому устройству. Проверка Хакерства против Контроля. При успехе вы отдаете один приказ, который устройство мгновенно выполняет.",
-        "shortDescription":  "Отдайте быстрый приказ техническому устройству.",
-        "price":  null
+    "description": "Когда любое техническое устройство, атакует или воздействует на вас, внесите помехи в его контур. Проверка Хакерства против Контроля. При успехе воздействие прерывается, а атака проваливается.",
+    "shortDescription": "Реакцией, когда техническое устройство, атакует или воздействует на вас, внесите помехи в его контур.",
+    "price": 9
+  },
+  {
+    "id": "prikaz",
+    "name": "Приказ",
+    "type": "ability",
+    "rank": 2,
+    "skill": "khakerstvo",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "single",
+            "defense": "control",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "specialRule"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "korotkoe-zamykanie",
-        "name":  "Короткое замыкание",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  "khakerstvo",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "action",
-                                        "range":  {
-                                                      "type":  "meters",
-                                                      "value":  30
-                                                  },
-                                        "targets":  {
-                                                        "type":  "single",
-                                                        "value":  1
-                                                    },
-                                        "defense":  "control",
-                                        "duration":  "untilStartOfYourNextTurn"
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Замкните энергию в противнике, нанося ему урон за каждую единицу снаряжения."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Проверка Хакерства против Контроля."
-                                          },
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "При успехе противник получает 1 урон за каждую единицу своего снаряжения и становится уязвим до начала вашего следующего хода."
-                                          }
-                                      ]
-                      },
-        "description":  "Замкните энергию в противнике, нанося ему урон за каждую единицу снаряжения. Проверка Хакерства против Контроля. При успехе противник получает 1 урон за каждую единицу своего снаряжения и становится уязвим до начала вашего следующего хода.",
-        "shortDescription":  "Замкните энергию в противнике, нанося ему урон за каждую единицу снаряжения.",
-        "price":  null
+    "description": "Отдайте быстрый приказ техническому устройству. Проверка Хакерства против Контроля. При успехе вы отдаете один приказ, который устройство мгновенно выполняет.",
+    "shortDescription": "Отдайте быстрый приказ техническому устройству.",
+    "price": 3
+  },
+  {
+    "id": "korotkoe-zamykanie",
+    "name": "Короткое замыкание",
+    "type": "ability",
+    "rank": 2,
+    "skill": "khakerstvo",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "single",
+            "defense": "control",
+            "duration": "untilStartOfYourNextTurn",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "specialRule"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "nevidimost",
-        "name":  "Невидимость",
-        "type":  "ability",
-        "rank":  1,
-        "skill":  "sokrytie",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "action",
-                                        "duration":  "untilStartOfYourNextTurn"
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-
-                                      ]
-                      },
-        "description":  "Станьте невидимы до начала вашего следующего хода, или пока не совершите атаку или иначе не выдадете себя.",
-        "shortDescription":  "Станьте невидимы до начала вашего следующего хода, или пока не совершите атаку или иначе не выдадете себя.",
-        "price":  null
+    "description": "Замкните энергию в противнике, нанося ему урон за каждую единицу снаряжения. Проверка Хакерства против Контроля. При успехе противник получает 1 урон за каждую единицу своего снаряжения и становится уязвим до начала вашего следующего хода.",
+    "shortDescription": "Замкните энергию в противнике, нанося ему урон за каждую единицу снаряжения.",
+    "price": 3
+  },
+  {
+    "id": "nevidimost",
+    "name": "Невидимость",
+    "type": "ability",
+    "rank": 1,
+    "skill": "sokrytie",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "duration": "untilStartOfYourNextTurn"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 1
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "psikhicheskiy-mayachok",
-        "name":  "Маячок",
-        "type":  "ability",
-        "rank":  2,
-        "skill":  "nablyudatelnost",
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "action",
-                                        "range":  {
-                                                      "type":  "touch"
-                                                  },
-                                        "targets":  {
-                                                        "type":  "single",
-                                                        "value":  1
-                                                    },
-                                        "defense":  "control",
-                                        "duration":  "untilEndOfScene"
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Совершите проверку Наблюдательности против Контроля."
-                                          }
-                                      ]
-                      },
-        "description":  "Запомните сигнатуру цели. Совершите проверку Наблюдательности против Контроля. При успехе вы понимаете направление и близость этой цели. даже если не видите её.",
-        "shortDescription":  "Установите маячок на цель",
-        "price":  null
+    "description": "Станьте невидимы до начала вашего следующего хода, или пока не совершите атаку или иначе не выдадете себя.",
+    "shortDescription": "Станьте невидимы до начала вашего следующего хода, или пока не совершите атаку или иначе не выдадете себя.",
+    "price": 1
+  },
+  {
+    "id": "psikhicheskiy-mayachok",
+    "name": "Маячок",
+    "type": "ability",
+    "rank": 2,
+    "skill": "nablyudatelnost",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "melee"
+            },
+            "targets": "single",
+            "defense": "control",
+            "duration": "untilEndOfScene",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 2
+            }
+          ]
+        }
+      ]
     },
-    {
-        "id":  "spasitel",
-        "name":  "Спаситель",
-        "type":  "ability",
-        "rank":  1,
-        "skill":  null,
-        "mechanics":  {
-                          "usage":  {
-                                        "activation":  "active",
-                                        "frequency":  "oncePerScene",
-                                        "actionCost":  "reaction",
-                                        "range":  {
-                                                      "type":  "meters",
-                                                      "value":  3
-                                                  }
-                                    },
-                          "properties":  {
-
-                                         },
-                          "effects":  [
-                                          {
-                                              "key":  "legacyRuleText",
-                                              "text":  "Реакцией сдвиньтесь на 3 м и уйдите из-под атаки."
-                                          }
-                                      ]
-                      },
-        "description":  "Реакцией сдвиньтесь на 3 м и уйдите из-под атаки. Если новая точка выводит вас из-под удара, вы избегаете его полностью.",
-        "shortDescription":  "Реакцией сдвиньтесь на 3 м и уйдите из-под удара.",
-        "price":  null
-    }
+    "description": "Запомните сигнатуру цели. Совершите проверку Наблюдательности против Контроля. При успехе вы понимаете направление и близость этой цели. даже если не видите её.",
+    "shortDescription": "Установите маячок на цель",
+    "price": 3
+  },
+  {
+    "id": "spasitel",
+    "name": "Спаситель",
+    "type": "ability",
+    "rank": 1,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 15
+            }
+          },
+          "outcomes": [
+            {
+              "key": "specialRule"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Реакцией сдвиньтесь на 3 м и уйдите из-под атаки. Если новая точка выводит вас из-под удара, вы избегаете его полностью.",
+    "shortDescription": "Реакцией сдвиньтесь на 3 м и уйдите из-под удара.",
+    "price": 1
+  },
+  {
+    "id": "prikaz-ostanovis",
+    "name": "Приказ: Остановись",
+    "type": "ability",
+    "rank": 2,
+    "skill": "dominirovanie",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": { "type": "reaction" },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": { "type": "meters", "value": 30 },
+            "targets": "single",
+            "trigger": "reaction",
+            "check": "required"
+          },
+          "outcomes": [{ "key": "cancelAction" }]
+        },
+        {
+          "activation": { "type": "reaction" },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": { "type": "meters", "value": 30 },
+            "targets": "single",
+            "trigger": "onFailure"
+          },
+          "outcomes": [{ "key": "penalty", "value": -2 }]
+        }
+      ]
+    },
+    "description": "Когда цель в пределах 30 м совершает действие, вы можете реакцией вмешаться. Проверка Доминирования против результата действия. При успехе действие прерывается. При провале действие получает −2.",
+    "shortDescription": "Реакцией прервите действие цели или ослабьте его.",
+    "price": 3
+  },
+  {
+    "id": "cherez-tvoi-glaza",
+    "name": "Через твои глаза",
+    "type": "ability",
+    "rank": 2,
+    "skill": "obayanie",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": { "type": "freeAction" },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": { "type": "meters", "value": 100 },
+            "targets": "single",
+            "duration": "untilEndOfScene"
+          },
+          "outcomes": [{ "key": "specialRule" }]
+        }
+      ]
+    },
+    "description": "Вы видите глазами цели и слышите её ушами. Вы можете свободно переключаться между своими чувствами и чувствами цели. Эффект длится до конца сцены или пока вы его не отмените. Требуется Обаяние 3.",
+    "shortDescription": "Видите и слышите через цель.",
+    "price": 3
+  },
+  {
+    "id": "ne-govori-lzhi",
+    "name": "Не говори лжи",
+    "type": "ability",
+    "rank": 2,
+    "skill": "dominirovanie",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": { "type": "freeAction" },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": { "type": "melee" },
+            "targets": "single",
+            "defense": "will",
+            "duration": "untilEndOfScene",
+            "check": "required"
+          },
+          "outcomes": [{ "key": "applyStatus", "status": "truthBound" }]
+        },
+        {
+          "activation": { "type": "freeAction" },
+          "conditions": {
+            "targets": "single",
+            "trigger": "onRefuseAnswer"
+          },
+          "outcomes": [{ "key": "damage", "value": 5 }]
+        }
+      ]
+    },
+    "description": "Касанием наложите запрет на ложь. Проверка Доминирования против Воли. При успехе цель не может лгать вам, но не обязана говорить. Если цель отказывается отвечать на ваш вопрос, она получает 5 урона и эффект заканчивается. Обычно цель не знает об эффекте, пока он не заставляет её произнести правду.",
+    "shortDescription": "Цель не может лгать вам.",
+    "price": 3
+  },
+  {
+    "id": "uspokaivayushchaya-rech",
+    "name": "Успокаивающая речь",
+    "type": "ability",
+    "rank": 2,
+    "skill": "obayanie",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": { "type": "action" },
+          "conditions": {
+            "frequency": "oncePerSession",
+            "targets": "allInArea",
+            "defense": "will",
+            "check": "required"
+          },
+          "outcomes": [{ "key": "healStress", "value": 2 }]
+        },
+        {
+          "activation": { "type": "action" },
+          "conditions": {
+            "targets": "allInArea",
+            "trigger": "onSuccess"
+          },
+          "outcomes": [{ "key": "bonus", "value": 1 }]
+        }
+      ]
+    },
+    "description": "Произнесите речь. Атака Обаяния против Воли всех, кто вас слышит. Вы восстанавливаете стресс всем поражённым целям, кроме себя, как если бы эта способность наносила 2 урона. Все, кто восстановил стресс таким образом, получают +1 к следующей проверке до конца сцены.",
+    "shortDescription": "Массовое восстановление стресса и бонус.",
+    "price": 3
+  },
+  {
+    "id": "ugrozhayushchaya-rech",
+    "name": "Угрожающая речь",
+    "type": "ability",
+    "rank": 2,
+    "skill": "dominirovanie",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": { "type": "action" },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "targets": "allInArea",
+            "defense": "will",
+            "duration": "untilStartOfYourNextTurn",
+            "check": "required"
+          },
+          "outcomes": [{ "key": "applyStatus", "status": "cannotTargetYou" }]
+        }
+      ]
+    },
+    "description": "Произнесите угрожающую речь. Проверка Доминирования против Воли всех, кто вас слышит. При успехе цели не могут атаковать вас до начала вашего следующего хода.",
+    "shortDescription": "Цели не могут атаковать вас.",
+    "price": 3
+  },
+  {
+    "id": "ty-ne-proydesh",
+    "name": "Ты не пройдешь!",
+    "type": "ability",
+    "rank": 2,
+    "skill": "moshch",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": { "type": "action" },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "targets": "self",
+            "duration": "untilMove"
+          },
+          "outcomes": [{ "key": "specialRule" }]
+        },
+        {
+          "activation": { "type": "reaction" },
+          "conditions": {
+            "trigger": "onMovePast",
+            "targets": "single",
+            "check": "required"
+          },
+          "outcomes": [{ "key": "applyStatus", "status": "immobilized" }]
+        }
+      ]
+    },
+    "description": "Вы становитесь непробиваемым бастионом. Пока вы не смените позицию, когда враг проходит мимо вас, вы можете реакцией совершить проверку Мощи. При успехе его движение заканчивается рядом с вами, и он становится обездвиженным до начала своего следующего хода.",
+    "shortDescription": "Останавливайте врагов, пытающихся пройти мимо.",
+    "price": 3
+  },
+  {
+    "id": "na-taran",
+    "name": "На таран!",
+    "type": "ability",
+    "rank": 2,
+    "skill": "moshch",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": { "type": "action" },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": { "type": "meters", "value": 50 },
+            "targets": "allInLine",
+            "defense": "fortitude",
+            "check": "required"
+          },
+          "outcomes": [{ "key": "damage", "value": 3 }]
+        },
+        {
+          "activation": { "type": "action" },
+          "conditions": {
+            "targets": "allInLine",
+            "trigger": "onHit",
+            "duration": "untilStartOfYourNextTurn"
+          },
+          "outcomes": [{ "key": "applyStatus", "status": "immobilized" }]
+        }
+      ]
+    },
+    "description": "Вы разгоняетесь и перемещаетесь по прямой на 50 м, разрушая препятствия на пути. Против всех целей на траектории движения совершите атаку Мощи против Стойкости. 3 урона. Если атака наносит урон, цель становится обездвиженной до начала вашего следующего хода.",
+    "shortDescription": "Проломитесь через врагов по линии.",
+    "price": 3
+  },
+  {
+    "id": "vtoroe-dykhanie",
+    "name": "Второе дыхание",
+    "type": "ability",
+    "rank": 2,
+    "skill": "moshch",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": { "type": "freeAction" },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "targets": "self"
+          },
+          "outcomes": [{ "key": "healStressBySkill", "multiplier": 2 }]
+        }
+      ]
+    },
+    "description": "Восполните количество ячеек стресса, равное вашему навыку Мощи, умноженному на 2.",
+    "shortDescription": "Восстановление стресса от Мощи.",
+    "price": 3
+  },
+  {
+    "id": "pokrov-nochi",
+    "name": "Покров Ночи",
+    "type": "ability",
+    "rank": 2,
+    "skill": "mistika",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": { "type": "freeAction" },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": { "type": "meters", "value": 30 },
+            "targets": "area",
+            "duration": "untilEndOfScene"
+          },
+          "outcomes": [{ "key": "specialRule" }]
+        }
+      ]
+    },
+    "description": "Создайте занавес тьмы между двумя точками в пределах 30 м. Только вы можете видеть сквозь эту тьму. Для противников по ту сторону завесы вы считаетесь скрытым. Эффект длится до конца сцены.",
+    "shortDescription": "Создайте завесу тьмы, сквозь которую видите только вы.",
+    "price": 3
+  },
+  {
+    "id": "ten-sluzhit",
+    "name": "Тень служит",
+    "type": "ability",
+    "rank": 2,
+    "skill": "mistika",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": { "type": "freeAction" },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "targets": "self",
+            "duration": "untilEndOfScene"
+          },
+          "outcomes": [{ "key": "createShadowAnchor" }]
+        },
+        {
+          "activation": { "type": "maneuver" },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "targets": "self",
+            "trigger": "whileActive"
+          },
+          "outcomes": [{ "key": "swapWithAnchor" }]
+        }
+      ]
+    },
+    "description": "Оставьте свою тень в текущем местоположении. Один раз до конца сцены вы можете манёвром поменяться с ней местами, если вы и тень всё ещё находитесь в рамках одной сцены.",
+    "shortDescription": "Оставьте тень и один раз поменяйтесь с ней местами.",
+    "price": 3
+  },
+  {
+    "id": "tsepi-mefistofelya",
+    "name": "Цепи Мефистофеля",
+    "type": "ability",
+    "rank": 2,
+    "skill": "mistika",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": { "type": "action" },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": { "type": "meters", "value": 30 },
+            "targets": "upTo3",
+            "defense": "will",
+            "duration": "untilEndOfScene",
+            "check": "required"
+          },
+          "outcomes": [{ "key": "applyStatus", "status": "immobilized" }]
+        }
+      ]
+    },
+    "description": "Цели обвивают цепи, сотканные из тьмы. Совершите проверку Мистики против Воли до трёх целей в пределах 30 м. При успехе цель становится обездвиженной до конца сцены или пока не разрушит цепи.",
+    "shortDescription": "Обездвижьте до трёх целей цепями из тьмы.",
+    "price": 3
+  },
+  {
+    "id": "tsss",
+    "name": "ТССС",
+    "type": "ability",
+    "rank": 2,
+    "skill": "sokrytie",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": { "type": "action" },
+          "conditions": {
+            "frequency": "oncePerSession",
+            "range": { "type": "melee" },
+            "targets": "allInArea",
+            "area": { "type": "circle", "value": 10 },
+            "defense": "will",
+            "duration": "untilEndOfScene",
+            "check": "required"
+          },
+          "outcomes": [{ "key": "applyStatus", "status": "silenced" }]
+        },
+        {
+          "activation": { "type": "action" },
+          "conditions": {
+            "frequency": "oncePerSession",
+            "range": { "type": "melee" },
+            "targets": "area",
+            "area": { "type": "circle", "value": 10 },
+            "duration": "untilEndOfScene"
+          },
+          "outcomes": [{ "key": "suppressSound" }]
+        }
+      ]
+    },
+    "description": "Создайте стационарную зону тишины радиусом 10 м рядом с собой. Проверка Сокрытия против Воли. При успехе цель и всё, что находится в зоне, заглушаются. Пока существа находятся в тишине, они не могут издавать шум и накладывать заклинания. Зона существует до конца сцены.",
+    "shortDescription": "Создайте зону тишины, запрещающую шум и заклинания.",
+    "price": 3
+  }
 ]
