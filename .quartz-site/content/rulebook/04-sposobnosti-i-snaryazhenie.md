@@ -10,11 +10,9 @@ heroAlt: null
 showHero: true
 showToc: true
 parent: null
-created: "2026-04-24"
-modified: "2026-04-24"
+created: "2026-04-29"
+modified: "2026-04-29"
 ---
-
-СОДЕРЖАНИЕ УСТАРЕЛО, СЮДА НЕ СМОТРЕТЬ БЕЗ РАЗРЕШЕНИЯ МАСТЕРА
 
 ## Свойства
 
