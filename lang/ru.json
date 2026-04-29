@@ -98,11 +98,12 @@
     "SheetLabels": {
       "Actor": "Лист персонажа",
       "AbilitiesAndMods": "Способности",
-      "Features": "Основной лист",
+      "Features": "Основное",
       "Abilities": "Геномы",
       "Parameters": "Параметры",
       "Attributes": "Характеристики",
       "Skills": "Навыки",
+      "Defenses": "Защиты",
       "KeyInfo": "Ключевая информация",
       "Biography": "Личность",
       "Personality": "Личность",
@@ -171,6 +172,14 @@
     },
     "TempSpeed": {
       "Label": "Врем. скорость"
+    },
+    "SheetHints": {
+      "ClickToRoll": "клик для броска",
+      "ReadOnly": "только чтение",
+      "Editable": "редактируемо",
+      "SpeedFormula": "база ранга + броня + врем.",
+      "Progress": "Прогресс",
+      "AvailableTotal": "доступно / всего"
     },
     "SendToChat": "Отправить в чат",
     "MinimalBonus": "минимальный бонус",
