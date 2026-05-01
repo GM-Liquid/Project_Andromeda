@@ -22,6 +22,9 @@ build/
 .eslintcache
 coverage/
 __pycache__/
+.npm-cache/
+pip/
+.codex-tmp/
 *.tgz
 *.zip
 Microsoft/Windows/PowerShell/
@@ -29,3 +32,10 @@ Microsoft/Windows/PowerShell/
 # Foundry (optional)
 packs/
 user-data/
+
+# Local secrets
+.env
+.env.*
+
+# Obsidian workspace settings (keep book content, ignore editor state)
+Книга правил v0.4/.obsidian/
