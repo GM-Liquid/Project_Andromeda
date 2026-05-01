@@ -92,11 +92,58 @@ function scheduleSessionPresenceEvaluation(delayMs = 250) {
   sessionStats.schedulePresenceEvaluation(delayMs);
 }
 
-function getContextMessage(li) {
-  const messageId =
-    li?.data?.('messageId') ?? li?.attr?.('data-message-id') ?? li?.[0]?.dataset?.messageId ?? '';
+function isDomElement(value) {
+  return Boolean(value && typeof value === 'object' && value.nodeType === 1);
+}
+
+function isSelectElement(value) {
+  return Boolean(isDomElement(value) && String(value.tagName || '').toUpperCase() === 'SELECT');
+}
+
+function getContextTargetElement(target) {
+  if (isDomElement(target)) return target;
+  if (isDomElement(target?.[0])) return target[0];
+  if (typeof target?.get === 'function') {
+    const element = target.get(0);
+    if (isDomElement(element)) return element;
+  }
+  return null;
+}
+
+function getContextTargetDataValue(target, datasetKey, attributeName) {
+  const directValue =
+    target?.data?.(datasetKey) ??
+    target?.attr?.(attributeName) ??
+    target?.[0]?.dataset?.[datasetKey] ??
+    target?.[0]?.getAttribute?.(attributeName);
+  if (directValue != null && `${directValue}`.trim()) {
+    return `${directValue}`.trim();
+  }
+
+  const element = getContextTargetElement(target);
+  if (!element) return '';
+
+  const datasetValue = element.dataset?.[datasetKey];
+  if (datasetValue?.trim()) return datasetValue.trim();
+
+  const attributeValue = element.getAttribute?.(attributeName);
+  if (attributeValue?.trim()) return attributeValue.trim();
+
+  return '';
+}
+
+function getContextMessage(target) {
+  const messageId = getContextTargetDataValue(target, 'messageId', 'data-message-id');
   if (!messageId) return null;
   return game.messages?.get(messageId) ?? null;
+}
+
+function getContextActor(target) {
+  const messageId =
+    getContextTargetDataValue(target, 'documentId', 'data-document-id') ||
+    getContextTargetDataValue(target, 'entryId', 'data-entry-id');
+  if (!messageId) return null;
+  return game.actors?.get(messageId) ?? null;
 }
 
 function getMessageActor(message) {
@@ -397,11 +444,10 @@ async function applyMomentOfGloryRerollToMessage(message, actor) {
   return { spent: true, nextHeroPoints };
 }
 
-function buildItemTypeOptions({ select, allowedTypes }) {
-  const selectElement = select.get(0);
-  if (!selectElement) return;
+function buildItemTypeOptions({ selectElement, allowedTypes }) {
+  if (!isSelectElement(selectElement)) return;
 
-  const currentValue = select.val();
+  const currentValue = String(selectElement.value ?? '').trim();
   const groupLabels = new Map();
   const orderedLabels = [];
 
@@ -494,11 +540,10 @@ function buildItemTypeOptions({ select, allowedTypes }) {
   }, 50);
 }
 
-function buildActorTypeOptions({ select, allowedTypes }) {
-  const selectElement = select.get(0);
-  if (!selectElement) return;
+function buildActorTypeOptions({ selectElement, allowedTypes }) {
+  if (!isSelectElement(selectElement)) return;
 
-  const currentValue = select.val();
+  const currentValue = String(selectElement.value ?? '').trim();
   const availableTypes = SUPPORTED_ACTOR_TYPES.filter((type) => allowedTypes.has(type));
   if (!availableTypes.length) return;
 
@@ -516,13 +561,13 @@ function buildActorTypeOptions({ select, allowedTypes }) {
 
   setTimeout(() => {
     if (currentValue && availableTypes.includes(currentValue)) {
-      select.val(currentValue);
+      selectElement.value = currentValue;
       return;
     }
 
     const firstType = availableTypes[0];
     if (firstType) {
-      select.val(firstType);
+      selectElement.value = firstType;
     }
   }, 50);
 }
@@ -567,6 +612,159 @@ function isEnvironmentItem(item) {
 
 function hasItemLibrarySyncOption(options = {}) {
   return Boolean(options?.[ITEM_LIBRARY_SYNC_OPTION_KEY]);
+}
+
+function updateDocumentTypeSelectOptions(dialog, selectElement) {
+  if (!isSelectElement(selectElement)) return;
+
+  const allowedActorTypes = new Set(game.documentTypes?.Actor ?? []);
+  if (
+    allowedActorTypes.size &&
+    shouldCustomizeActorTypeDialog(dialog, selectElement, allowedActorTypes)
+  ) {
+    buildActorTypeOptions({ selectElement, allowedTypes: allowedActorTypes });
+    return;
+  }
+
+  const allowedItemTypes = new Set(game.documentTypes?.Item ?? []);
+  if (!allowedItemTypes.size) return;
+  if (!shouldCustomizeItemTypeDialog(dialog, selectElement, allowedItemTypes)) return;
+
+  buildItemTypeOptions({ selectElement, allowedTypes: allowedItemTypes });
+}
+
+function pushUniqueContextOption(options, entry) {
+  if (!Array.isArray(options) || !entry?.name) return;
+  if (options.some((option) => option?.name === entry.name)) return;
+  options.push(entry);
+}
+
+function registerActorDirectoryContextOptions(options) {
+  pushUniqueContextOption(options, {
+    name: 'MY_RPG.ActorTypeChange.Context',
+    icon: '<i class="fas fa-shapes"></i>',
+    condition: (target) => {
+      if (!game.user?.isGM) return false;
+      return Boolean(getContextActor(target));
+    },
+    callback: async (target) => {
+      const actor = getContextActor(target);
+      if (!actor) return;
+
+      const nextType = await promptForActorTypeSelection(actor, {
+        title: game.i18n.format('MY_RPG.ActorTypeChange.TitleWithName', {
+          name: actor.name || game.i18n.localize('MY_RPG.KeyInfo.Name')
+        })
+      });
+      if (!nextType) return;
+      await updateActorDocumentType(actor, nextType);
+    }
+  });
+}
+
+function registerChatMessageContextOptions(options) {
+  pushUniqueContextOption(options, {
+    name: 'MY_RPG.MomentOfGloryBonus.ContextLabel',
+    icon: '<i class="fas fa-dice"></i>',
+    condition: (target) => {
+      const message = getContextMessage(target);
+      return canUseMomentOfGloryBonus(message);
+    },
+    callback: async (target) => {
+      const message = getContextMessage(target);
+      if (!message) {
+        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.NoMessage'));
+        return;
+      }
+      const actor = getMessageActor(message);
+      if (!actor) {
+        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.NoActor'));
+        return;
+      }
+      if (!canSpendHeroPoints(actor)) {
+        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.NoPermission'));
+        return;
+      }
+      if (getActorHeroPoints(actor) <= 0) {
+        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.NoPoints'));
+        return;
+      }
+
+      try {
+        const result = await applyMomentOfGloryBonusToMessage(message, actor);
+        if (!result?.spent) {
+          const errorKey = result?.totalBonus === 0 ? 'NoDice' : 'NoPoints';
+          ui.notifications.warn(game.i18n.localize(`MY_RPG.MomentOfGloryBonus.Errors.${errorKey}`));
+          return;
+        }
+        ui.notifications.info(
+          game.i18n.format('MY_RPG.MomentOfGloryBonus.Success', {
+            bonus: formatMomentOfGloryBonus(result.totalBonus),
+            value: result.nextHeroPoints
+          })
+        );
+      } catch (error) {
+        debugLog('Highlight Point bonus failed', {
+          messageId: message.id,
+          actorId: actor.id,
+          error
+        });
+        ui.notifications.error(game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.Failed'));
+      }
+    }
+  });
+
+  pushUniqueContextOption(options, {
+    name: 'MY_RPG.MomentOfGloryReroll.ContextLabel',
+    icon: '<i class="fas fa-rotate-right"></i>',
+    condition: (target) => {
+      const message = getContextMessage(target);
+      return canUseMomentOfGloryReroll(message);
+    },
+    callback: async (target) => {
+      const message = getContextMessage(target);
+      if (!message) {
+        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoMessage'));
+        return;
+      }
+      const actor = getMessageActor(message);
+      if (!actor) {
+        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoActor'));
+        return;
+      }
+      if (!canSpendHeroPoints(actor)) {
+        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoPermission'));
+        return;
+      }
+      if (getActorHeroPoints(actor) <= 0) {
+        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoPoints'));
+        return;
+      }
+
+      try {
+        const result = await applyMomentOfGloryRerollToMessage(message, actor);
+        if (!result?.spent) {
+          const errorKey = result?.noRolls ? 'NoRoll' : 'NoPoints';
+          ui.notifications.warn(
+            game.i18n.localize(`MY_RPG.MomentOfGloryReroll.Errors.${errorKey}`)
+          );
+          return;
+        }
+        ui.notifications.info(
+          game.i18n.format('MY_RPG.MomentOfGloryReroll.Success', {
+            value: result.nextHeroPoints
+          })
+        );
+      } catch (error) {
+        debugLog('Highlight Point reroll failed', {
+          messageId: message.id,
+          actorId: actor.id,
+          error
+        });
+        ui.notifications.error(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.Failed'));
+      }
+    }
+  });
 }
 
 async function handleActorOwnedItemCreate(item, options = {}) {
@@ -1317,166 +1515,29 @@ Hooks.on('renderDialog', (dialog, html) => {
   if (!select.length) return;
 
   const selectElement = select.get(0);
+  updateDocumentTypeSelectOptions(dialog, selectElement);
+});
+
+Hooks.on('renderApplicationV2', (application, element) => {
+  const selectElement = isDomElement(element) ? element.querySelector('select[name="type"]') : null;
   if (!selectElement) return;
-
-  const allowedActorTypes = new Set(game.documentTypes?.Actor ?? []);
-  if (
-    allowedActorTypes.size &&
-    shouldCustomizeActorTypeDialog(dialog, selectElement, allowedActorTypes)
-  ) {
-    buildActorTypeOptions({ select, allowedTypes: allowedActorTypes });
-    return;
-  }
-
-  // Get the allowed item types from the game
-  const allowedTypes = new Set(game.documentTypes?.Item ?? []);
-  if (!allowedTypes.size) return;
-
-  if (!shouldCustomizeItemTypeDialog(dialog, selectElement, allowedTypes)) return;
-
-  buildItemTypeOptions({ select, allowedTypes });
+  updateDocumentTypeSelectOptions(application, selectElement);
 });
 
 Hooks.on('getActorDirectoryEntryContext', (_html, options) => {
-  options.push({
-    name: 'MY_RPG.ActorTypeChange.Context',
-    icon: '<i class="fas fa-shapes"></i>',
-    condition: (li) => {
-      if (!game.user?.isGM) return false;
-      const actorId =
-        li?.data?.('documentId') ??
-        li?.data?.('entryId') ??
-        li?.attr?.('data-document-id') ??
-        li?.attr?.('data-entry-id') ??
-        li?.[0]?.dataset?.documentId ??
-        li?.[0]?.dataset?.entryId;
-      return Boolean(actorId && game.actors?.get(actorId));
-    },
-    callback: async (li) => {
-      const actorId =
-        li?.data?.('documentId') ??
-        li?.data?.('entryId') ??
-        li?.attr?.('data-document-id') ??
-        li?.attr?.('data-entry-id') ??
-        li?.[0]?.dataset?.documentId ??
-        li?.[0]?.dataset?.entryId;
-      const actor = actorId ? (game.actors?.get(actorId) ?? null) : null;
-      if (!actor) return;
+  registerActorDirectoryContextOptions(options);
+});
 
-      const nextType = await promptForActorTypeSelection(actor, {
-        title: game.i18n.format('MY_RPG.ActorTypeChange.TitleWithName', {
-          name: actor.name || game.i18n.localize('MY_RPG.KeyInfo.Name')
-        })
-      });
-      if (!nextType) return;
-      await updateActorDocumentType(actor, nextType);
-    }
-  });
+Hooks.on('getActorContextOptions', (_application, options) => {
+  registerActorDirectoryContextOptions(options);
 });
 
 Hooks.on('getChatLogEntryContext', (_html, options) => {
-  options.push({
-    name: 'MY_RPG.MomentOfGloryBonus.ContextLabel',
-    icon: '<i class="fas fa-dice"></i>',
-    condition: (li) => {
-      const message = getContextMessage(li);
-      return canUseMomentOfGloryBonus(message);
-    },
-    callback: async (li) => {
-      const message = getContextMessage(li);
-      if (!message) {
-        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.NoMessage'));
-        return;
-      }
-      const actor = getMessageActor(message);
-      if (!actor) {
-        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.NoActor'));
-        return;
-      }
-      if (!canSpendHeroPoints(actor)) {
-        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.NoPermission'));
-        return;
-      }
-      if (getActorHeroPoints(actor) <= 0) {
-        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.NoPoints'));
-        return;
-      }
+  registerChatMessageContextOptions(options);
+});
 
-      try {
-        const result = await applyMomentOfGloryBonusToMessage(message, actor);
-        if (!result?.spent) {
-          const errorKey = result?.totalBonus === 0 ? 'NoDice' : 'NoPoints';
-          ui.notifications.warn(game.i18n.localize(`MY_RPG.MomentOfGloryBonus.Errors.${errorKey}`));
-          return;
-        }
-        ui.notifications.info(
-          game.i18n.format('MY_RPG.MomentOfGloryBonus.Success', {
-            bonus: formatMomentOfGloryBonus(result.totalBonus),
-            value: result.nextHeroPoints
-          })
-        );
-      } catch (error) {
-        debugLog('Highlight Point bonus failed', {
-          messageId: message.id,
-          actorId: actor.id,
-          error
-        });
-        ui.notifications.error(game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.Failed'));
-      }
-    }
-  });
-
-  options.push({
-    name: 'MY_RPG.MomentOfGloryReroll.ContextLabel',
-    icon: '<i class="fas fa-rotate-right"></i>',
-    condition: (li) => {
-      const message = getContextMessage(li);
-      return canUseMomentOfGloryReroll(message);
-    },
-    callback: async (li) => {
-      const message = getContextMessage(li);
-      if (!message) {
-        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoMessage'));
-        return;
-      }
-      const actor = getMessageActor(message);
-      if (!actor) {
-        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoActor'));
-        return;
-      }
-      if (!canSpendHeroPoints(actor)) {
-        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoPermission'));
-        return;
-      }
-      if (getActorHeroPoints(actor) <= 0) {
-        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoPoints'));
-        return;
-      }
-
-      try {
-        const result = await applyMomentOfGloryRerollToMessage(message, actor);
-        if (!result?.spent) {
-          const errorKey = result?.noRolls ? 'NoRoll' : 'NoPoints';
-          ui.notifications.warn(
-            game.i18n.localize(`MY_RPG.MomentOfGloryReroll.Errors.${errorKey}`)
-          );
-          return;
-        }
-        ui.notifications.info(
-          game.i18n.format('MY_RPG.MomentOfGloryReroll.Success', {
-            value: result.nextHeroPoints
-          })
-        );
-      } catch (error) {
-        debugLog('Highlight Point reroll failed', {
-          messageId: message.id,
-          actorId: actor.id,
-          error
-        });
-        ui.notifications.error(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.Failed'));
-      }
-    }
-  });
+Hooks.on('getChatMessageContextOptions', (_application, options) => {
+  registerChatMessageContextOptions(options);
 });
 
 Hooks.on('createChatMessage', (message) => {

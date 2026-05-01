@@ -19,7 +19,7 @@
   "version": "0.3.4.10",
   "compatibility": {
     "minimum": "12",
-    "verified": "12"
+    "verified": "13"
   },
   "esmodules": ["module/project-andromeda.mjs"],
   "styles": ["css/project-andromeda.css"],
