@@ -1,5 +1,9 @@
 # Google Sheets Sync MVP
 
+> Legacy note: Foundry item sync now reads from `data/gear/catalog/*.json`.
+> See `docs/gear-catalog-sync.md` for the current workflow. This document is
+> kept only for the old Google Sheets Apps Script workflow.
+
 This MVP treats world `Item` documents as the source of truth.
 
 Flow:

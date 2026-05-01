@@ -1532,25 +1532,44 @@
     "mechanics": {
       "effects": [
         {
-          "activation": { "type": "reaction" },
+          "activation": {
+            "type": "reaction"
+          },
           "conditions": {
             "frequency": "oncePerScene",
-            "range": { "type": "meters", "value": 30 },
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
             "targets": "single",
             "trigger": "reaction",
             "check": "required"
           },
-          "outcomes": [{ "key": "cancelAction" }]
+          "outcomes": [
+            {
+              "key": "cancelAction"
+            }
+          ]
         },
         {
-          "activation": { "type": "reaction" },
+          "activation": {
+            "type": "reaction"
+          },
           "conditions": {
             "frequency": "oncePerScene",
-            "range": { "type": "meters", "value": 30 },
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
             "targets": "single",
             "trigger": "onFailure"
           },
-          "outcomes": [{ "key": "penalty", "value": -2 }]
+          "outcomes": [
+            {
+              "key": "penalty",
+              "value": -2
+            }
+          ]
         }
       ]
     },
@@ -1567,14 +1586,23 @@
     "mechanics": {
       "effects": [
         {
-          "activation": { "type": "freeAction" },
+          "activation": {
+            "type": "freeAction"
+          },
           "conditions": {
             "frequency": "oncePerScene",
-            "range": { "type": "meters", "value": 100 },
+            "range": {
+              "type": "meters",
+              "value": 100
+            },
             "targets": "single",
             "duration": "untilEndOfScene"
           },
-          "outcomes": [{ "key": "specialRule" }]
+          "outcomes": [
+            {
+              "key": "specialRule"
+            }
+          ]
         }
       ]
     },
@@ -1591,24 +1619,40 @@
     "mechanics": {
       "effects": [
         {
-          "activation": { "type": "freeAction" },
+          "activation": {
+            "type": "freeAction"
+          },
           "conditions": {
             "frequency": "oncePerScene",
-            "range": { "type": "melee" },
+            "range": {
+              "type": "melee"
+            },
             "targets": "single",
             "defense": "will",
             "duration": "untilEndOfScene",
             "check": "required"
           },
-          "outcomes": [{ "key": "applyStatus", "status": "truthBound" }]
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "truthBound"
+            }
+          ]
         },
         {
-          "activation": { "type": "freeAction" },
+          "activation": {
+            "type": "freeAction"
+          },
           "conditions": {
             "targets": "single",
             "trigger": "onRefuseAnswer"
           },
-          "outcomes": [{ "key": "damage", "value": 5 }]
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": 5
+            }
+          ]
         }
       ]
     },
@@ -1625,22 +1669,36 @@
     "mechanics": {
       "effects": [
         {
-          "activation": { "type": "action" },
+          "activation": {
+            "type": "action"
+          },
           "conditions": {
             "frequency": "oncePerSession",
             "targets": "allInArea",
             "defense": "will",
             "check": "required"
           },
-          "outcomes": [{ "key": "healStress", "value": 2 }]
+          "outcomes": [
+            {
+              "key": "healStress",
+              "value": 2
+            }
+          ]
         },
         {
-          "activation": { "type": "action" },
+          "activation": {
+            "type": "action"
+          },
           "conditions": {
             "targets": "allInArea",
             "trigger": "onSuccess"
           },
-          "outcomes": [{ "key": "bonus", "value": 1 }]
+          "outcomes": [
+            {
+              "key": "bonus",
+              "value": 1
+            }
+          ]
         }
       ]
     },
@@ -1657,7 +1715,9 @@
     "mechanics": {
       "effects": [
         {
-          "activation": { "type": "action" },
+          "activation": {
+            "type": "action"
+          },
           "conditions": {
             "frequency": "oncePerScene",
             "targets": "allInArea",
@@ -1665,7 +1725,12 @@
             "duration": "untilStartOfYourNextTurn",
             "check": "required"
           },
-          "outcomes": [{ "key": "applyStatus", "status": "cannotTargetYou" }]
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "cannotTargetYou"
+            }
+          ]
         }
       ]
     },
@@ -1682,22 +1747,35 @@
     "mechanics": {
       "effects": [
         {
-          "activation": { "type": "action" },
+          "activation": {
+            "type": "action"
+          },
           "conditions": {
             "frequency": "oncePerScene",
             "targets": "self",
             "duration": "untilMove"
           },
-          "outcomes": [{ "key": "specialRule" }]
+          "outcomes": [
+            {
+              "key": "specialRule"
+            }
+          ]
         },
         {
-          "activation": { "type": "reaction" },
+          "activation": {
+            "type": "reaction"
+          },
           "conditions": {
             "trigger": "onMovePast",
             "targets": "single",
             "check": "required"
           },
-          "outcomes": [{ "key": "applyStatus", "status": "immobilized" }]
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "immobilized"
+            }
+          ]
         }
       ]
     },
@@ -1714,24 +1792,41 @@
     "mechanics": {
       "effects": [
         {
-          "activation": { "type": "action" },
+          "activation": {
+            "type": "action"
+          },
           "conditions": {
             "frequency": "oncePerScene",
-            "range": { "type": "meters", "value": 50 },
+            "range": {
+              "type": "meters",
+              "value": 50
+            },
             "targets": "allInLine",
             "defense": "fortitude",
             "check": "required"
           },
-          "outcomes": [{ "key": "damage", "value": 3 }]
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": 3
+            }
+          ]
         },
         {
-          "activation": { "type": "action" },
+          "activation": {
+            "type": "action"
+          },
           "conditions": {
             "targets": "allInLine",
             "trigger": "onHit",
             "duration": "untilStartOfYourNextTurn"
           },
-          "outcomes": [{ "key": "applyStatus", "status": "immobilized" }]
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "immobilized"
+            }
+          ]
         }
       ]
     },
@@ -1748,12 +1843,19 @@
     "mechanics": {
       "effects": [
         {
-          "activation": { "type": "freeAction" },
+          "activation": {
+            "type": "freeAction"
+          },
           "conditions": {
             "frequency": "oncePerScene",
             "targets": "self"
           },
-          "outcomes": [{ "key": "healStressBySkill", "multiplier": 2 }]
+          "outcomes": [
+            {
+              "key": "healStressBySkill",
+              "multiplier": 2
+            }
+          ]
         }
       ]
     },
@@ -1770,14 +1872,23 @@
     "mechanics": {
       "effects": [
         {
-          "activation": { "type": "freeAction" },
+          "activation": {
+            "type": "freeAction"
+          },
           "conditions": {
             "frequency": "oncePerScene",
-            "range": { "type": "meters", "value": 30 },
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
             "targets": "area",
             "duration": "untilEndOfScene"
           },
-          "outcomes": [{ "key": "specialRule" }]
+          "outcomes": [
+            {
+              "key": "specialRule"
+            }
+          ]
         }
       ]
     },
@@ -1794,22 +1905,34 @@
     "mechanics": {
       "effects": [
         {
-          "activation": { "type": "freeAction" },
+          "activation": {
+            "type": "freeAction"
+          },
           "conditions": {
             "frequency": "oncePerScene",
             "targets": "self",
             "duration": "untilEndOfScene"
           },
-          "outcomes": [{ "key": "createShadowAnchor" }]
+          "outcomes": [
+            {
+              "key": "createShadowAnchor"
+            }
+          ]
         },
         {
-          "activation": { "type": "maneuver" },
+          "activation": {
+            "type": "maneuver"
+          },
           "conditions": {
             "frequency": "oncePerScene",
             "targets": "self",
             "trigger": "whileActive"
           },
-          "outcomes": [{ "key": "swapWithAnchor" }]
+          "outcomes": [
+            {
+              "key": "swapWithAnchor"
+            }
+          ]
         }
       ]
     },
@@ -1826,16 +1949,26 @@
     "mechanics": {
       "effects": [
         {
-          "activation": { "type": "action" },
+          "activation": {
+            "type": "action"
+          },
           "conditions": {
             "frequency": "oncePerScene",
-            "range": { "type": "meters", "value": 30 },
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
             "targets": "upTo3",
             "defense": "will",
             "duration": "untilEndOfScene",
             "check": "required"
           },
-          "outcomes": [{ "key": "applyStatus", "status": "immobilized" }]
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "immobilized"
+            }
+          ]
         }
       ]
     },
@@ -1852,28 +1985,51 @@
     "mechanics": {
       "effects": [
         {
-          "activation": { "type": "action" },
+          "activation": {
+            "type": "action"
+          },
           "conditions": {
             "frequency": "oncePerSession",
-            "range": { "type": "melee" },
+            "range": {
+              "type": "melee"
+            },
             "targets": "allInArea",
-            "area": { "type": "circle", "value": 10 },
+            "area": {
+              "type": "circle",
+              "value": 10
+            },
             "defense": "will",
             "duration": "untilEndOfScene",
             "check": "required"
           },
-          "outcomes": [{ "key": "applyStatus", "status": "silenced" }]
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "silenced"
+            }
+          ]
         },
         {
-          "activation": { "type": "action" },
+          "activation": {
+            "type": "action"
+          },
           "conditions": {
             "frequency": "oncePerSession",
-            "range": { "type": "melee" },
+            "range": {
+              "type": "melee"
+            },
             "targets": "area",
-            "area": { "type": "circle", "value": 10 },
+            "area": {
+              "type": "circle",
+              "value": 10
+            },
             "duration": "untilEndOfScene"
           },
-          "outcomes": [{ "key": "suppressSound" }]
+          "outcomes": [
+            {
+              "key": "suppressSound"
+            }
+          ]
         }
       ]
     },

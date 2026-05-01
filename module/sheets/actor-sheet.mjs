@@ -354,36 +354,20 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
 
     const skillOrderByAbility = {
       con: ['moshch', 'lovkost', 'sokrytie', 'strelba', 'blizhniy_boy'],
-      int: ['nablyudatelnost', 'analiz', 'programmirovanie', 'inzheneriya'],
-      spi: ['dominirovanie', 'rezonans', 'bionika', 'obayanie']
+      int: ['nablyudatelnost', 'analiz', 'khakerstvo', 'inzheneriya'],
+      spi: ['dominirovanie', 'rezonans', 'mistika', 'obayanie']
     };
-    const abilityCodes = {
-      con: 'CON',
-      int: 'INT',
-      spi: 'SPI'
-    };
-    const summarySkillsByAbility = {
-      con: ['moshch', 'strelba', 'blizhniy_boy'],
-      int: ['analiz', 'inzheneriya', 'nablyudatelnost'],
-      spi: ['rezonans', 'bionika', 'obayanie']
-    };
-
     const sortedAbilities = {};
     for (const abilityKey of abilityOrder) {
       const ability = context.system.abilities?.[abilityKey];
       if (!ability) continue;
       const normalizedValue = normalizeAbilityDie(ability.value);
-      const summarySkillLabels = (summarySkillsByAbility[abilityKey] ?? [])
-        .map((skillKey) => game.i18n.localize(CONFIG.ProjectAndromeda.skills[skillKey]) ?? skillKey)
-        .filter(Boolean);
       sortedAbilities[abilityKey] = {
         ...foundry.utils.duplicate(ability),
         value: normalizedValue,
         label: game.i18n.localize(CONFIG.ProjectAndromeda.abilities[abilityKey]) ?? abilityKey,
-        code: abilityCodes[abilityKey],
         rankClass: 'rank' + getColorRank(normalizedValue, 'ability'),
-        dieLabel: getAbilityDieLabel(normalizedValue).toLowerCase(),
-        skillSummary: summarySkillLabels.join(', ')
+        dieLabel: getAbilityDieLabel(normalizedValue).toLowerCase()
       };
     }
     context.system.abilities = sortedAbilities;
@@ -1482,11 +1466,11 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       blizhniy_boy: 'con',
       nablyudatelnost: 'int',
       analiz: 'int',
-      programmirovanie: 'int',
+      khakerstvo: 'int',
       inzheneriya: 'int',
       dominirovanie: 'spi',
       rezonans: 'spi',
-      bionika: 'spi',
+      mistika: 'spi',
       obayanie: 'spi'
     };
 

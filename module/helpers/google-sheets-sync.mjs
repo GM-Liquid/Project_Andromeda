@@ -64,6 +64,7 @@ const GOOGLE_SHEETS_SYNC_LEGACY_IMPORT_COLUMNS = new Set([
   'libraryActorId',
   'libraryActorItemId',
   'isActorLinked',
+  'folderPath',
   GOOGLE_SHEETS_SYNC_SYSTEM_JSON_COLUMN,
   'system.requiresRoll'
 ]);
@@ -80,18 +81,6 @@ function createSystemField(column, path, kind = 'string') {
 }
 
 const GOOGLE_SHEETS_SYNC_SHEET_CONFIGS = [
-  {
-    key: 'weapons',
-    labelKey: 'MY_RPG.GoogleSheetsSync.Sheets.Weapons',
-    typeLabelKey: GOOGLE_SHEETS_SYNC_TYPE_LABEL_KEYS.weapon,
-    types: ['weapon'],
-    fields: [
-      createSystemField('system.rank', 'rank', 'rank'),
-      createSystemField('system.skill', 'skill', 'skill'),
-      createSystemField('system.skillBonus', 'skillBonus', 'number'),
-      createSystemField('system.description', 'description', 'string')
-    ]
-  },
   {
     key: 'armor',
     labelKey: 'MY_RPG.GoogleSheetsSync.Sheets.Armor',
@@ -120,44 +109,15 @@ const GOOGLE_SHEETS_SYNC_SHEET_CONFIGS = [
     ]
   },
   {
-    key: 'traits',
-    labelKey: 'MY_RPG.GoogleSheetsSync.Sheets.Traits',
+    key: 'abilities',
+    labelKey: 'MY_RPG.GoogleSheetsSync.Sheets.Abilities',
     typeLabelKey: GOOGLE_SHEETS_SYNC_TYPE_LABEL_KEYS.trait,
-    types: [
-      'trait',
-      'trait-flaw',
-      'trait-general',
-      'trait-backstory',
-      'trait-social',
-      'trait-combat',
-      'trait-magical',
-      'trait-professional',
-      'trait-technological',
-      'trait-genome',
-      'trait-source-ability'
-    ],
+    types: ['trait-source-ability'],
     fields: [
-      createSystemField('system.usageFrequency', 'usageFrequency', 'usage-frequency'),
+      createSystemField('system.rank', 'rank', 'rank'),
       createSystemField('system.activationType', 'activationType', 'activation-type'),
       createSystemField('system.range', 'range', 'string'),
       createSystemField('system.skill', 'skill', 'skill'),
-      createSystemField('system.description', 'description', 'string')
-    ]
-  },
-  {
-    key: 'environment',
-    labelKey: 'MY_RPG.GoogleSheetsSync.Sheets.Environment',
-    typeLabelKey: GOOGLE_SHEETS_SYNC_TYPE_LABEL_KEYS.environment,
-    types: [
-      'environment-consumable',
-      'environment-interactive',
-      'environment-narrative',
-      'environment-resource',
-      'environment-trigger',
-      'environment-danger'
-    ],
-    fields: [
-      createSystemField('system.quantity', 'quantity', 'number'),
       createSystemField('system.description', 'description', 'string')
     ]
   }
@@ -174,7 +134,10 @@ const GOOGLE_SHEETS_SYNC_SHEET_CONFIG_BY_TYPE = GOOGLE_SHEETS_SYNC_SHEET_CONFIGS
 );
 
 function deepClone(value) {
-  return foundry.utils.deepClone(value);
+  if (typeof foundry !== 'undefined' && foundry.utils?.deepClone) {
+    return foundry.utils.deepClone(value);
+  }
+  return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
 }
 
 function sortValue(value) {
@@ -644,6 +607,237 @@ function buildExportPayload() {
   };
 }
 
+const GEAR_CATALOG_IMPORT_CONFIGS = [
+  {
+    catalogKey: 'armor',
+    sheetKey: 'armor',
+    itemType: 'armor',
+    folderName: 'Броня'
+  },
+  {
+    catalogKey: 'equipment',
+    sheetKey: 'equipment',
+    itemType: 'equipment',
+    folderName: 'Снаряжение'
+  },
+  {
+    catalogKey: 'abilities',
+    sheetKey: 'abilities',
+    itemType: 'trait-source-ability',
+    folderName: 'Способности'
+  }
+];
+
+function normalizeCatalogEntries(entries) {
+  return Array.isArray(entries)
+    ? entries.filter((entry) => entry && typeof entry === 'object' && entry.id && entry.name)
+    : [];
+}
+
+function getGearCatalogSyncId(catalogKey, entry) {
+  return `gear:${catalogKey}:${normalizeOptionalString(entry?.id)}`;
+}
+
+function getGearCatalogRank(entry) {
+  const rank = Number(entry?.rank);
+  return Number.isFinite(rank) && rank > 0 ? String(rank) : '';
+}
+
+function getGearCatalogFolderPath(entry, config) {
+  const rank = getGearCatalogRank(entry);
+  const rankFolder = rank ? `Ранг ${rank}` : 'Без ранга';
+  return `${config.folderName}/${rankFolder}`;
+}
+
+function getGearCatalogSkill(entry) {
+  return normalizeOptionalString(entry?.skill);
+}
+
+function getGearCatalogDescription(entry) {
+  return normalizeString(entry?.description);
+}
+
+function getGearCatalogShortDescription(entry) {
+  return normalizeString(entry?.shortDescription);
+}
+
+function getGearCatalogEffects(entry) {
+  return Array.isArray(entry?.mechanics?.effects) ? entry.mechanics.effects : [];
+}
+
+function getGearCatalogOutcomes(entry) {
+  return getGearCatalogEffects(entry).flatMap((effect) =>
+    Array.isArray(effect?.outcomes) ? effect.outcomes : []
+  );
+}
+
+function getOutcomeNumber(entry, keys) {
+  const keySet = new Set(keys);
+  return getGearCatalogOutcomes(entry).reduce((total, outcome) => {
+    if (!keySet.has(String(outcome?.key ?? ''))) return total;
+    const value = Number(outcome?.value ?? outcome?.amount ?? 0);
+    return Number.isFinite(value) ? total + value : total;
+  }, 0);
+}
+
+function getFirstOutcomeNumber(entry, keys) {
+  const keySet = new Set(keys);
+  for (const outcome of getGearCatalogOutcomes(entry)) {
+    if (!keySet.has(String(outcome?.key ?? ''))) continue;
+    const value = Number(outcome?.value ?? outcome?.amount ?? 0);
+    if (Number.isFinite(value)) return value;
+  }
+  return 0;
+}
+
+function getGearCatalogActivationType(entry) {
+  const activationType = normalizeOptionalString(
+    getGearCatalogEffects(entry).find((effect) => effect?.activation?.type)?.activation?.type
+  );
+  if (GOOGLE_SHEETS_SYNC_ALLOWED_ACTIVATION_TYPES.has(activationType)) return activationType;
+  if (activationType === 'freeAction') return 'action';
+  return 'passive';
+}
+
+function formatGearCatalogRange(range) {
+  if (!range || typeof range !== 'object') return '';
+  const type = normalizeOptionalString(range.type);
+  if (type === 'melee') return 'melee';
+  if (type === 'self') return 'self';
+  const value = Number(range.value);
+  if (type === 'meters' && Number.isFinite(value)) return `${value} m`;
+  return type;
+}
+
+function getGearCatalogRange(entry) {
+  for (const effect of getGearCatalogEffects(entry)) {
+    const range = formatGearCatalogRange(effect?.conditions?.range);
+    if (range) return range;
+  }
+  return '';
+}
+
+function buildGearCatalogDetails(catalogKey, entry) {
+  return {
+    gearCatalog: {
+      id: normalizeOptionalString(entry?.id),
+      catalog: catalogKey,
+      sourceType: normalizeOptionalString(entry?.type),
+      price: entry?.price ?? null,
+      shortDescription: getGearCatalogShortDescription(entry),
+      mechanics: deepClone(entry?.mechanics ?? {})
+    }
+  };
+}
+
+function buildGearCatalogSystemData(entry, config) {
+  const systemData = {
+    description: getGearCatalogDescription(entry),
+    rank: getGearCatalogRank(entry),
+    details: buildGearCatalogDetails(config.catalogKey, entry)
+  };
+
+  if (config.itemType === 'armor') {
+    return {
+      ...systemData,
+      itemPhys: getOutcomeNumber(entry, ['fortitudeBonus']),
+      itemAzure: getOutcomeNumber(entry, ['controlBonus']),
+      itemMental: getOutcomeNumber(entry, ['willBonus']),
+      itemShield: getOutcomeNumber(entry, ['shieldBonus', 'grantTempStress']),
+      itemSpeed: getOutcomeNumber(entry, ['speedBonus']),
+      quantity: 1
+    };
+  }
+
+  if (config.itemType === 'trait-source-ability') {
+    const skill = getGearCatalogSkill(entry);
+    return {
+      ...systemData,
+      activationType: getGearCatalogActivationType(entry),
+      range: getGearCatalogRange(entry),
+      requiresRoll: Boolean(skill),
+      skill
+    };
+  }
+
+  const skill = getGearCatalogSkill(entry);
+  return {
+    ...systemData,
+    requiresRoll: Boolean(skill),
+    skill,
+    skillBonus: getFirstOutcomeNumber(entry, ['damage'])
+  };
+}
+
+function buildGearCatalogImportRow(entry, config) {
+  const systemData = buildGearCatalogSystemData(entry, config);
+  const row = {
+    syncId: getGearCatalogSyncId(config.catalogKey, entry),
+    type: config.itemType,
+    name: normalizeString(entry?.name),
+    ownerName: '',
+    folderPath: getGearCatalogFolderPath(entry, config),
+    [GOOGLE_SHEETS_SYNC_SYSTEM_JSON_COLUMN]: stableStringify(systemData),
+    'system.rank': systemData.rank ?? '',
+    'system.description': systemData.description ?? ''
+  };
+
+  if (config.itemType === 'armor') {
+    row['system.itemPhys'] = systemData.itemPhys;
+    row['system.itemAzure'] = systemData.itemAzure;
+    row['system.itemMental'] = systemData.itemMental;
+    row['system.itemShield'] = systemData.itemShield;
+    row['system.itemSpeed'] = systemData.itemSpeed;
+    return row;
+  }
+
+  row['system.skill'] = systemData.skill ?? '';
+  row['system.requiresRoll'] = Boolean(systemData.requiresRoll);
+
+  if (config.itemType === 'trait-source-ability') {
+    row['system.activationType'] = systemData.activationType;
+    row['system.range'] = systemData.range;
+    return row;
+  }
+
+  row['system.skillBonus'] = systemData.skillBonus;
+  return row;
+}
+
+function buildGearCatalogRemoteDataFromCatalogs(catalogs = {}) {
+  const sheets = {};
+  for (const config of GEAR_CATALOG_IMPORT_CONFIGS) {
+    sheets[config.sheetKey] = normalizeCatalogEntries(catalogs[config.catalogKey]).map((entry) =>
+      buildGearCatalogImportRow(entry, config)
+    );
+  }
+
+  return {
+    meta: {
+      moduleId: MODULE_ID,
+      moduleVersion: typeof game === 'undefined' ? '' : String(game.system?.version ?? ''),
+      source: 'gear-catalog',
+      importedAt: new Date().toISOString()
+    },
+    sheets
+  };
+}
+
+async function fetchGearCatalog(filename) {
+  const response = await fetch(`systems/${MODULE_ID}/data/gear/catalog/${filename}`, {
+    cache: 'no-cache'
+  });
+  if (!response.ok) {
+    throw new Error(
+      game.i18n.format('MY_RPG.GoogleSheetsSync.Errors.CatalogFetchFailed', {
+        file: filename,
+        status: response.status
+      })
+    );
+  }
+  return response.json();
+}
+
 function getGoogleSheetsSyncSettings() {
   return {
     endpointUrl: normalizeOptionalString(
@@ -741,30 +935,20 @@ async function requestGoogleSheets(action, payload = {}, settings = null) {
   return parsed;
 }
 
-function normalizeRemotePayload(response) {
-  const payload = response?.payload ?? response?.data ?? response;
-  const sheets = payload?.sheets ?? payload;
-  if (!sheets || typeof sheets !== 'object') {
-    throw new Error(localize('MY_RPG.GoogleSheetsSync.Errors.MissingSheetsPayload'));
-  }
-
-  return {
-    meta: payload?.meta ?? {},
-    sheets
-  };
-}
-
 function getItemMaps() {
   const bySyncId = new Map();
   const byId = new Map();
+  const byNameAndType = new Map();
 
   for (const item of getAllWorldItems()) {
     byId.set(String(item.id ?? ''), item);
     const syncId = getGoogleSheetsSyncId(item);
     if (syncId) bySyncId.set(syncId, item);
+    const nameTypeKey = `${String(item.type ?? '')}\u0000${normalizeLookupValue(item.name)}`;
+    if (!byNameAndType.has(nameTypeKey)) byNameAndType.set(nameTypeKey, item);
   }
 
-  return { bySyncId, byId };
+  return { bySyncId, byId, byNameAndType };
 }
 
 function resolveFolderSpec(row, item) {
@@ -774,21 +958,28 @@ function resolveFolderSpec(row, item) {
   if (isActorLinkedItem) {
     return {
       folderId: getFolderId(item),
-      createFolderName: ''
+      createFolderName: '',
+      folderPath: []
     };
   }
 
   const hasFolderId = Object.hasOwn(row, 'folderId');
   const hasFolderName = Object.hasOwn(row, 'folderName');
-  if (!hasFolderId && !hasFolderName) {
+  const hasFolderPath = Object.hasOwn(row, 'folderPath');
+  if (!hasFolderId && !hasFolderName && !hasFolderPath) {
     return {
       folderId: getFolderId(item),
-      createFolderName: ''
+      createFolderName: '',
+      folderPath: []
     };
   }
 
   const folderId = normalizeOptionalString(row.folderId);
   const folderName = normalizeOptionalString(row.folderName);
+  const folderPath = normalizeOptionalString(row.folderPath)
+    .split('/')
+    .map((segment) => normalizeOptionalString(segment))
+    .filter(Boolean);
   const folders = getItemFolders();
 
   if (folderId) {
@@ -798,7 +989,15 @@ function resolveFolderSpec(row, item) {
         game.i18n.format('MY_RPG.GoogleSheetsSync.Errors.UnknownFolderId', { id: folderId })
       );
     }
-    return { folderId: existingById.id, createFolderName: '' };
+    return { folderId: existingById.id, createFolderName: '', folderPath: [] };
+  }
+
+  if (folderPath.length) {
+    return {
+      folderId: '',
+      createFolderName: '',
+      folderPath
+    };
   }
 
   if (folderName) {
@@ -810,13 +1009,13 @@ function resolveFolderSpec(row, item) {
             .localeCompare(folderName) === 0
       ) ?? null;
     if (existingByName) {
-      return { folderId: existingByName.id, createFolderName: '' };
+      return { folderId: existingByName.id, createFolderName: '', folderPath: [] };
     }
 
-    return { folderId: '', createFolderName: folderName };
+    return { folderId: '', createFolderName: folderName, folderPath: [] };
   }
 
-  return { folderId: '', createFolderName: '' };
+  return { folderId: '', createFolderName: '', folderPath: [] };
 }
 
 function buildComparableSnapshot(data) {
@@ -839,6 +1038,29 @@ function buildComparableSnapshotFromItem(item) {
     sort: Number(item?.sort) || 0,
     system: deepClone(item?.system ?? {})
   });
+}
+
+function getExistingFolderPathId(folderPath = []) {
+  let parentId = '';
+  for (const segment of folderPath) {
+    const normalized = normalizeOptionalString(segment);
+    const folder =
+      getItemFolders().find(
+        (candidate) =>
+          String(candidate.name ?? '')
+            .trim()
+            .localeCompare(normalized) === 0 && getFolderParentId(candidate) === parentId
+      ) ?? null;
+    if (!folder) return '';
+    parentId = String(folder.id ?? '').trim();
+  }
+  return parentId;
+}
+
+function resolveCandidateFolderId(folderSpec = {}) {
+  if (folderSpec.folderId) return folderSpec.folderId;
+  if (folderSpec.folderPath?.length) return getExistingFolderPathId(folderSpec.folderPath);
+  return '';
 }
 
 function ensureSyncIdForRow(row, item) {
@@ -885,7 +1107,7 @@ function buildImportDataForRow(row, sheetConfig, item) {
     systemData.requiresRoll = parseBoolean(row['system.requiresRoll']);
   } else if (type === 'cartridge' || type === 'implant') {
     systemData.requiresRoll = true;
-  } else if (!item && (sheetConfig.key === 'equipment' || sheetConfig.key === 'traits')) {
+  } else if (!item && (sheetConfig.key === 'equipment' || sheetConfig.key === 'abilities')) {
     systemData.requiresRoll = Boolean(String(systemData.skill ?? '').trim());
   }
 
@@ -975,7 +1197,7 @@ async function buildImportPlan(remoteSheets = {}) {
   const warnings = [];
   const duplicateSyncIds = new Set();
   const seenSyncIds = new Set();
-  const { bySyncId, byId } = getItemMaps();
+  const { bySyncId, byId, byNameAndType } = getItemMaps();
 
   for (const sheetConfig of GOOGLE_SHEETS_SYNC_SHEET_CONFIGS) {
     const rows = Array.isArray(remoteSheets?.[sheetConfig.key])
@@ -1037,6 +1259,9 @@ async function buildImportPlan(remoteSheets = {}) {
         (normalizeOptionalString(row.foundryId)
           ? byId.get(normalizeOptionalString(row.foundryId))
           : null) ??
+        byNameAndType.get(
+          `${normalizeItemTypeValue(row.type) || sheetConfig.types[0]}\u0000${normalizeLookupValue(row.name)}`
+        ) ??
         null;
 
       if (!item && hasActorLinkMetadata(row)) {
@@ -1066,7 +1291,7 @@ async function buildImportPlan(remoteSheets = {}) {
 
       try {
         const importData = buildImportDataForRow(row, sheetConfig, item);
-        const candidateFolderId = importData.folderSpec.folderId || '';
+        const candidateFolderId = resolveCandidateFolderId(importData.folderSpec);
         const candidateSnapshot = buildComparableSnapshot({
           type: importData.type,
           name: importData.name,
@@ -1076,7 +1301,10 @@ async function buildImportPlan(remoteSheets = {}) {
           system: importData.system
         });
 
-        if (importData.folderSpec.createFolderName) {
+        if (
+          importData.folderSpec.createFolderName ||
+          (importData.folderSpec.folderPath?.length && !candidateFolderId)
+        ) {
           addPlanCounter(summary, 'folderCreate');
           addPlanCounter(sheetSummary, 'folderCreate');
         }
@@ -1152,33 +1380,52 @@ async function buildImportPlan(remoteSheets = {}) {
   };
 }
 
-async function ensureFolderExistsByName(name, cache) {
+function getFolderParentId(folder) {
+  return String(folder?.folder?.id ?? folder?.folder ?? '').trim();
+}
+
+function getFolderCacheKey(name, parentId = '') {
+  return `${String(parentId ?? '').trim()}\u0000${normalizeOptionalString(name)}`;
+}
+
+async function ensureFolderExistsByName(name, cache, parentId = '') {
   const normalized = normalizeOptionalString(name);
   if (!normalized) return '';
-  if (cache.has(normalized)) return cache.get(normalized);
+  const normalizedParentId = String(parentId ?? '').trim();
+  const cacheKey = getFolderCacheKey(normalized, normalizedParentId);
+  if (cache.has(cacheKey)) return cache.get(cacheKey);
 
   const existing =
     getItemFolders().find(
       (folder) =>
         String(folder.name ?? '')
           .trim()
-          .localeCompare(normalized) === 0
+          .localeCompare(normalized) === 0 && getFolderParentId(folder) === normalizedParentId
     ) ?? null;
   if (existing) {
-    cache.set(normalized, existing.id);
+    cache.set(cacheKey, existing.id);
     return existing.id;
   }
 
   const created = await Folder.create(
     {
       name: normalized,
-      type: 'Item'
+      type: 'Item',
+      folder: normalizedParentId || null
     },
     { render: false }
   );
   const folderId = String(created?.id ?? '');
-  cache.set(normalized, folderId);
+  cache.set(cacheKey, folderId);
   return folderId;
+}
+
+async function ensureFolderPathExists(folderPath, cache) {
+  let parentId = '';
+  for (const segment of folderPath ?? []) {
+    parentId = await ensureFolderExistsByName(segment, cache, parentId);
+  }
+  return parentId;
 }
 
 function collectLinkedActorsForLibraryItems(items = []) {
@@ -1206,7 +1453,10 @@ function rerenderActorApps(actors = []) {
 
 async function applyImportPlan(plan) {
   const folderCache = new Map(
-    getItemFolders().map((folder) => [String(folder.name ?? '').trim(), String(folder.id ?? '')])
+    getItemFolders().map((folder) => [
+      getFolderCacheKey(folder.name, getFolderParentId(folder)),
+      String(folder.id ?? '')
+    ])
   );
   const createDocuments = [];
   const updateDocuments = [];
@@ -1216,6 +1466,9 @@ async function applyImportPlan(plan) {
 
     const resolvedFolderId =
       operation.importData.folderSpec.folderId ||
+      (operation.importData.folderSpec.folderPath?.length
+        ? await ensureFolderPathExists(operation.importData.folderSpec.folderPath, folderCache)
+        : '') ||
       (operation.importData.folderSpec.createFolderName
         ? await ensureFolderExistsByName(
             operation.importData.folderSpec.createFolderName,
@@ -1261,15 +1514,16 @@ async function applyImportPlan(plan) {
 }
 
 async function readGoogleSheetsRows(settings = null) {
-  const response = await requestGoogleSheets(
-    'read',
-    {
-      expectedSheets: GOOGLE_SHEETS_SYNC_SHEET_CONFIGS.map((config) => config.key)
-    },
-    settings
+  void settings;
+  const catalogs = Object.fromEntries(
+    await Promise.all(
+      GEAR_CATALOG_IMPORT_CONFIGS.map(async (config) => [
+        config.catalogKey,
+        await fetchGearCatalog(`${config.catalogKey}.json`)
+      ])
+    )
   );
-
-  const remoteData = normalizeRemotePayload(response);
+  const remoteData = buildGearCatalogRemoteDataFromCatalogs(catalogs);
   return {
     meta: remoteData.meta,
     sheets: Object.fromEntries(
@@ -1351,6 +1605,7 @@ export {
   GOOGLE_SHEETS_SYNC_SHEET_CONFIGS,
   GOOGLE_SHEETS_SYNC_SYSTEM_JSON_COLUMN,
   applyGoogleSheetsImport,
+  buildGearCatalogRemoteDataFromCatalogs,
   exportWorldItemsToGoogleSheets,
   getGoogleSheetsSyncId,
   getGoogleSheetsSyncSettings,

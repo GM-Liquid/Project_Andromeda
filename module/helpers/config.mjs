@@ -27,13 +27,13 @@ PROJECT_ANDROMEDA.skills = {
   // Mind-based
   nablyudatelnost: 'MY_RPG.Skill.Nablyudatelnost',
   analiz: 'MY_RPG.Skill.Analiz',
-  programmirovanie: 'MY_RPG.Skill.Programmirovanie',
+  khakerstvo: 'MY_RPG.Skill.Khakerstvo',
   inzheneriya: 'MY_RPG.Skill.Inzheneriya',
 
   // Spirit-based
   dominirovanie: 'MY_RPG.Skill.Dominirovanie',
   rezonans: 'MY_RPG.Skill.Rezonans',
-  bionika: 'MY_RPG.Skill.Bionika',
+  mistika: 'MY_RPG.Skill.Mistika',
   obayanie: 'MY_RPG.Skill.Obayanie'
 };
 

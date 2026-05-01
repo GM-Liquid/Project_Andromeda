@@ -36,6 +36,7 @@ import {
   isPlayerCharacterActorType
 } from './helpers/actor-types.mjs';
 import { SessionStatsService } from './helpers/session-stats.mjs';
+import { buildRollRerollSpec, rerollRollPreservingContext } from './helpers/roll-reroll.mjs';
 import {
   ensureActorItemLibraryLink,
   getLibraryItemUuid,
@@ -288,6 +289,15 @@ function canUseMomentOfGloryBonus(message) {
   return canSpendHeroPoints(actor);
 }
 
+function canUseMomentOfGloryReroll(message) {
+  if (!message) return false;
+  const rolls = getMessageRolls(message);
+  if (!rolls.some((roll) => buildRollRerollSpec(roll))) return false;
+  const actor = getMessageActor(message);
+  if (!actor) return false;
+  return canSpendHeroPoints(actor);
+}
+
 async function applyMomentOfGloryBonusToMessage(message, actor) {
   const sourceRolls = getMessageRolls(message);
   if (!sourceRolls.length) {
@@ -336,6 +346,55 @@ async function applyMomentOfGloryBonusToMessage(message, actor) {
   }
 
   return { spent: true, nextHeroPoints, totalBonus };
+}
+
+async function applyMomentOfGloryRerollToMessage(message, actor) {
+  const sourceRolls = getMessageRolls(message);
+  if (!sourceRolls.length) {
+    throw new Error('No roll data found on the source message.');
+  }
+
+  const currentHeroPoints = getActorHeroPoints(actor);
+  if (!currentHeroPoints) return { spent: false };
+
+  const rerolledRolls = [];
+  for (const roll of sourceRolls) {
+    const rerolledRoll = await rerollRollPreservingContext(roll);
+    if (rerolledRoll) rerolledRolls.push(rerolledRoll);
+  }
+  if (!rerolledRolls.length) return { spent: false, noRolls: true };
+
+  const nextHeroPoints = currentHeroPoints - 1;
+  await updateActorHeroPoints(actor, nextHeroPoints);
+
+  const flags = foundry.utils.deepClone(message.flags ?? {});
+  flags[MODULE_ID] ??= {};
+  flags[MODULE_ID].momentOfGlory = {
+    spent: 1,
+    action: 'reroll',
+    actorId: actor.id,
+    sourceMessageId: message.id,
+    timestamp: Date.now()
+  };
+
+  try {
+    await ChatMessage.create({
+      user: game.user?.id,
+      speaker: foundry.utils.deepClone(message.speaker ?? {}),
+      flavor: message.flavor ?? '',
+      rolls: rerolledRolls,
+      style: message.style,
+      type: message.type,
+      whisper: Array.from(message.whisper ?? []),
+      blind: Boolean(message.blind),
+      flags
+    });
+  } catch (error) {
+    await updateActorHeroPoints(actor, currentHeroPoints);
+    throw error;
+  }
+
+  return { spent: true, nextHeroPoints };
 }
 
 function buildItemTypeOptions({ select, allowedTypes }) {
@@ -1357,12 +1416,64 @@ Hooks.on('getChatLogEntryContext', (_html, options) => {
           })
         );
       } catch (error) {
-        debugLog('Moment of Glory bonus failed', {
+        debugLog('Highlight Point bonus failed', {
           messageId: message.id,
           actorId: actor.id,
           error
         });
         ui.notifications.error(game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.Failed'));
+      }
+    }
+  });
+
+  options.push({
+    name: 'MY_RPG.MomentOfGloryReroll.ContextLabel',
+    icon: '<i class="fas fa-rotate-right"></i>',
+    condition: (li) => {
+      const message = getContextMessage(li);
+      return canUseMomentOfGloryReroll(message);
+    },
+    callback: async (li) => {
+      const message = getContextMessage(li);
+      if (!message) {
+        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoMessage'));
+        return;
+      }
+      const actor = getMessageActor(message);
+      if (!actor) {
+        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoActor'));
+        return;
+      }
+      if (!canSpendHeroPoints(actor)) {
+        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoPermission'));
+        return;
+      }
+      if (getActorHeroPoints(actor) <= 0) {
+        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoPoints'));
+        return;
+      }
+
+      try {
+        const result = await applyMomentOfGloryRerollToMessage(message, actor);
+        if (!result?.spent) {
+          const errorKey = result?.noRolls ? 'NoRoll' : 'NoPoints';
+          ui.notifications.warn(
+            game.i18n.localize(`MY_RPG.MomentOfGloryReroll.Errors.${errorKey}`)
+          );
+          return;
+        }
+        ui.notifications.info(
+          game.i18n.format('MY_RPG.MomentOfGloryReroll.Success', {
+            value: result.nextHeroPoints
+          })
+        );
+      } catch (error) {
+        debugLog('Highlight Point reroll failed', {
+          messageId: message.id,
+          actorId: actor.id,
+          error
+        });
+        ui.notifications.error(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.Failed'));
       }
     }
   });

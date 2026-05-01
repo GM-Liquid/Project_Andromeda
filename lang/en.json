@@ -21,9 +21,9 @@
         "Hint": "Enable verbose Project Andromeda diagnostics in the browser console."
       },
       "GoogleSheetsSync": {
-        "Name": "Google Sheets Item Sync",
-        "Hint": "Configure export/import of world items through a Google Sheets Apps Script endpoint.",
-        "Label": "Open Sync Tool"
+        "Name": "Gear Catalog Item Sync",
+        "Hint": "Import world items from the packaged gear catalog JSON files.",
+        "Label": "Open Catalog Sync"
       },
       "SessionTrackerMaxHistory": {
         "Name": "Session Tracker: Max stored sessions",
@@ -44,8 +44,8 @@
       "CurrentRank": "Current Rank",
       "Name": "Name",
       "ActorType": "Character Type",
-      "MomentOfGlory": "Points of Heroism",
-      "SharedMomentOfGlory": "GM Heroism Pool",
+      "MomentOfGlory": "Highlight Points",
+      "SharedMomentOfGlory": "GM Highlight Points Pool",
       "ProgressPoints": "Available Advancement Points",
       "TotalAdvancementPoints": "Total Advancement Points"
     },
@@ -214,11 +214,11 @@
       "Blizhniy_boy": "Melee",
       "Nablyudatelnost": "Observation",
       "Analiz": "Analysis",
-      "Programmirovanie": "Hacking",
+      "Khakerstvo": "Hacking",
       "Inzheneriya": "Engineering",
       "Dominirovanie": "Dominance",
       "Rezonans": "Resonance",
-      "Bionika": "Mysticism",
+      "Mistika": "Mysticism",
       "Obayanie": "Charm"
     },
     "Biography": {
@@ -363,10 +363,10 @@
       "DeleteContent": "Are you sure you want to delete {name}? This action cannot be undone."
     },
     "GoogleSheetsSync": {
-      "Title": "Google Sheets Item Sync",
-      "Intro": "Use this window to export all world items into Google Sheets and import them back without recreating items.",
-      "IntroNote": "The MVP updates only world Items. Linked actor items are refreshed through the existing library sync, so links stay intact as long as imported rows update items in place.",
-      "SheetLayoutTitle": "Sheet Layout",
+      "Title": "Gear Catalog Item Sync",
+      "Intro": "Use this window to preview and import world items from the packaged armor, equipment, and abilities JSON catalogs.",
+      "IntroNote": "The import updates world Items in place when it can match an existing item by catalog sync id or by exact name and type. Linked actor items are refreshed through the existing library sync.",
+      "SheetLayoutTitle": "Catalog Layout",
       "AllowedTypes": "Allowed item types",
       "Columns": "Columns",
       "ResultSummary": "Summary",
@@ -398,6 +398,7 @@
         "Weapons": "Weapons",
         "Armor": "Armor",
         "Equipment": "Equipment",
+        "Abilities": "Abilities",
         "Traits": "Traits",
         "Environment": "Environment"
       },
@@ -421,14 +422,14 @@
       },
       "Messages": {
         "Working": "Working...",
-        "SettingsSaved": "Google Sheets sync settings saved.",
+        "SettingsSaved": "Catalog sync settings saved.",
         "ExportComplete": "Export completed.",
         "PreviewReady": "Import preview is ready.",
         "ApplyComplete": "Import completed.",
         "LastRun": "Last Run",
         "Failed": "The last operation failed.",
         "BlankRowSkipped": "Blank row skipped.",
-        "DeleteSkipped": "Rows marked as delete are skipped in the MVP.",
+        "DeleteSkipped": "Rows marked as delete are skipped.",
         "NoChanges": "No changes detected."
       },
       "Summary": {
@@ -453,13 +454,14 @@
         "RefreshedActors": "Actor sheets refreshed: {count}"
       },
       "Errors": {
-        "RequirePrimaryGM": "Only the primary active GM can run Google Sheets import/export.",
+        "RequirePrimaryGM": "Only the primary active GM can run gear catalog import.",
         "MissingEndpoint": "Set the Apps Script Web App URL before using the sync tool.",
         "RequestTimeout": "The request timed out after {seconds} seconds.",
         "HttpError": "The Google Sheets endpoint returned HTTP {status}.",
         "InvalidResponse": "The endpoint returned an unreadable JSON response: {error}",
         "RemoteError": "The Google Sheets endpoint returned an error.",
         "MissingSheetsPayload": "The endpoint response does not contain a sheets payload.",
+        "CatalogFetchFailed": "Could not load {file} from the packaged gear catalog. HTTP status: {status}.",
         "InvalidJson": "{field} contains invalid JSON: {error}",
         "UnsupportedItemType": "Unsupported item type: {type}",
         "TypeDoesNotMatchSheet": "Item type {type} does not belong to sheet {sheet}.",
@@ -476,15 +478,27 @@
       }
     },
     "MomentOfGloryBonus": {
-      "ContextLabel": "Heroism bonus. Costs 1 point of heroism.",
-      "Success": "Heroism bonus applied (+{bonus}). Points of Heroism remaining: {value}.",
+      "ContextLabel": "Highlight bonus. Costs 1 Highlight Point.",
+      "Success": "Highlight bonus applied (+{bonus}). Highlight Points remaining: {value}.",
       "Errors": {
         "NoMessage": "Could not find the chat message to enhance.",
         "NoActor": "This roll is not linked to a character.",
-        "NoPermission": "You do not have permission to spend this character's Points of Heroism.",
-        "NoPoints": "This character has no Points of Heroism left.",
-        "NoDice": "This roll has no dice to base a heroism bonus on.",
-        "Failed": "Failed to apply the heroism bonus."
+        "NoPermission": "You do not have permission to spend this character's Highlight Points.",
+        "NoPoints": "This character has no Highlight Points left.",
+        "NoDice": "This roll has no dice to base a Highlight bonus on.",
+        "Failed": "Failed to apply the Highlight bonus."
+      }
+    },
+    "MomentOfGloryReroll": {
+      "ContextLabel": "Reroll check. Costs 1 Highlight Point.",
+      "Success": "Check rerolled. Highlight Points remaining: {value}.",
+      "Errors": {
+        "NoMessage": "Could not find the chat message to reroll.",
+        "NoActor": "This roll is not linked to a character.",
+        "NoPermission": "You do not have permission to spend this character's Highlight Points.",
+        "NoPoints": "This character has no Highlight Points left.",
+        "NoRoll": "This chat message has no roll formula to reroll.",
+        "Failed": "Failed to reroll the check."
       }
     },
     "ActorTypeChange": {
@@ -520,10 +534,10 @@
         "EncountersEnded": "Encounters ended",
         "RoundAdvances": "Round advances",
         "TurnAdvances": "Turn advances",
-        "MomentOfGloryUsesTotal": "Points of Heroism spent",
+        "MomentOfGloryUsesTotal": "Highlight Points spent",
         "RollsByActor": "Rolls by actor",
         "RollsByFormula": "Rolls by formula",
-        "MomentOfGloryByActor": "Points of Heroism spent by actor",
+        "MomentOfGloryByActor": "Highlight Points spent by actor",
         "UnknownActor": "Unknown actor",
         "None": "None",
         "NotAvailable": "N/A",

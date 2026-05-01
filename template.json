@@ -76,7 +76,7 @@
             "value": 0,
             "ability": "int"
           },
-          "programmirovanie": {
+          "khakerstvo": {
             "value": 0,
             "ability": "int"
           },
@@ -93,7 +93,7 @@
             "value": 0,
             "ability": "spi"
           },
-          "bionika": {
+          "mistika": {
             "value": 0,
             "ability": "spi"
           },

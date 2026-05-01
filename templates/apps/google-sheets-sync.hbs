@@ -4,57 +4,7 @@
     <p class='google-sheets-sync__note'>{{localize 'MY_RPG.GoogleSheetsSync.IntroNote'}}</p>
   </section>
 
-  <section class='google-sheets-sync__settings'>
-    <div class='form-group'>
-      <label for='google-sheets-sync-endpoint'>{{localize
-          'MY_RPG.GoogleSheetsSync.Fields.EndpointUrl'
-        }}</label>
-      <input
-        id='google-sheets-sync-endpoint'
-        name='endpointUrl'
-        type='url'
-        value='{{settings.endpointUrl}}'
-        placeholder='https://script.google.com/macros/s/...'
-      />
-    </div>
-
-    <div class='form-group'>
-      <label for='google-sheets-sync-token'>{{localize
-          'MY_RPG.GoogleSheetsSync.Fields.Token'
-        }}</label>
-      <input
-        id='google-sheets-sync-token'
-        name='token'
-        type='password'
-        value='{{settings.token}}'
-        autocomplete='off'
-      />
-    </div>
-
-    <div class='form-group'>
-      <label for='google-sheets-sync-timeout'>{{localize
-          'MY_RPG.GoogleSheetsSync.Fields.TimeoutMs'
-        }}</label>
-      <input
-        id='google-sheets-sync-timeout'
-        name='timeoutMs'
-        type='number'
-        min='1000'
-        step='1000'
-        value='{{settings.timeoutMs}}'
-      />
-    </div>
-  </section>
-
   <section class='google-sheets-sync__actions'>
-    <button type='submit' class='google-sheets-sync__button'>
-      <i class='fas fa-save'></i>
-      {{localize 'MY_RPG.GoogleSheetsSync.Actions.SaveSettings'}}
-    </button>
-    <button type='button' class='google-sheets-sync__button' data-action='export'>
-      <i class='fas fa-file-export'></i>
-      {{localize 'MY_RPG.GoogleSheetsSync.Actions.Export'}}
-    </button>
     <button type='button' class='google-sheets-sync__button' data-action='preview'>
       <i class='fas fa-search'></i>
       {{localize 'MY_RPG.GoogleSheetsSync.Actions.Preview'}}

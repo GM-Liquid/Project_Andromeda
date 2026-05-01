@@ -10,13 +10,6 @@
           </label>
 
           <div class='andromeda-meta-row'>
-            {{#if isPlayerCharacter}}
-              <label class='andromeda-field'>
-                <span>{{localize 'MY_RPG.KeyInfo.Calling'}}</span>
-                <input type='text' name='system.calling' value='{{system.calling}}' />
-              </label>
-            {{/if}}
-
             <label class='andromeda-field andromeda-field--compact'>
               <span>{{localize 'MY_RPG.KeyInfo.CurrentRank'}}</span>
               <input
@@ -55,6 +48,23 @@
                 />
               </label>
             {{/if}}
+
+            {{#if isPlayerCharacter}}
+              <label class='andromeda-field andromeda-field--compact'>
+                <span>{{localize 'MY_RPG.SheetHints.Progress'}}</span>
+                <input
+                  type='number'
+                  name='system.progressPoints'
+                  value='{{system.progressPoints}}'
+                  step='1'
+                  inputmode='numeric'
+                />
+                <small>
+                  {{localize 'MY_RPG.SheetHints.AvailableTotal'}}
+                  <strong data-field='system.advancement.totalSpent'>{{system.advancement.totalSpent}}</strong>
+                </small>
+              </label>
+            {{/if}}
           </div>
 
           <div class='andromeda-rank-legend' aria-label='{{localize "MY_RPG.RankNumeric.Title"}}'>
@@ -64,39 +74,6 @@
             <span class='rank4'>{{rankLabel 4}}</span>
           </div>
         </div>
-      </div>
-
-      <div class='andromeda-identity-metrics'>
-        <label class='andromeda-metric andromeda-metric--speed'>
-          <span>{{localize 'MY_RPG.Speed.Label'}}</span>
-          <input
-            type='number'
-            name='system.speed.value'
-            value='{{system.speed.value}}'
-            step='1'
-            inputmode='numeric'
-            readonly
-            tabindex='-1'
-          />
-          <small>{{localize 'MY_RPG.SheetHints.SpeedFormula'}}</small>
-        </label>
-
-        {{#if isPlayerCharacter}}
-          <label class='andromeda-metric andromeda-metric--progress'>
-            <span>{{localize 'MY_RPG.SheetHints.Progress'}}</span>
-            <input
-              type='number'
-              name='system.progressPoints'
-              value='{{system.progressPoints}}'
-              step='1'
-              inputmode='numeric'
-            />
-            <small>
-              {{localize 'MY_RPG.SheetHints.AvailableTotal'}}
-              <strong data-field='system.advancement.totalSpent'>{{system.advancement.totalSpent}}</strong>
-            </small>
-          </label>
-        {{/if}}
       </div>
 
       <div class='andromeda-resource-stack'>
@@ -179,11 +156,9 @@
                       >
                         <span class='andromeda-ability-top'>
                           <span class='andromeda-ability-title'>{{ability.label}}</span>
-                          <span class='andromeda-ability-code'>{{ability.code}}</span>
                         </span>
                         <span class='andromeda-ability-body'>
                           <strong class='ability-die-value {{ability.rankClass}}'>{{ability.dieLabel}}</strong>
-                          <span class='andromeda-ability-summary'>{{ability.skillSummary}}</span>
                         </span>
                       </button>
                       <div class='ability-die-control'>
@@ -252,6 +227,25 @@
             </div>
 
             <aside class='andromeda-side-stack'>
+              <section class='andromeda-speed-panel andromeda-panel'>
+                <header class='andromeda-panel__header'>
+                  <h2>{{localize 'MY_RPG.Speed.Label'}}</h2>
+                  <span>{{localize 'MY_RPG.SheetHints.ReadOnly'}}</span>
+                </header>
+                <label class='andromeda-speed-field'>
+                  <input
+                    type='number'
+                    name='system.speed.value'
+                    value='{{system.speed.value}}'
+                    step='1'
+                    inputmode='numeric'
+                    readonly
+                    tabindex='-1'
+                  />
+                  <small>{{localize 'MY_RPG.SheetHints.SpeedFormula'}}</small>
+                </label>
+              </section>
+
               <section class='andromeda-panel'>
                 <header class='andromeda-panel__header'>
                   <h2>{{localize 'MY_RPG.SheetLabels.Defenses'}}</h2>

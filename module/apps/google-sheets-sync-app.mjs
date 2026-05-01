@@ -1,10 +1,7 @@
 import {
   applyGoogleSheetsImport,
-  exportWorldItemsToGoogleSheets,
-  getGoogleSheetsSyncSettings,
   getSheetDisplayConfigs,
-  previewGoogleSheetsImport,
-  saveGoogleSheetsSyncSettings
+  previewGoogleSheetsImport
 } from '../helpers/google-sheets-sync.mjs';
 
 function localize(key) {
@@ -109,27 +106,8 @@ export class GoogleSheetsSyncApp extends FormApplication {
   }
 
   _buildExportState(result) {
-    return {
-      busy: false,
-      title: localize('MY_RPG.GoogleSheetsSync.Actions.Export'),
-      status: localize('MY_RPG.GoogleSheetsSync.Messages.ExportComplete'),
-      summaryLines: [
-        game.i18n.format('MY_RPG.GoogleSheetsSync.Export.EnsuredSyncIds', {
-          count: Number(result.ensuredSyncIds) || 0
-        }),
-        ...(result.summary ?? []).map((entry) =>
-          game.i18n.format('MY_RPG.GoogleSheetsSync.Export.SheetCount', {
-            sheet: entry.label,
-            count: Number(entry.count) || 0
-          })
-        )
-      ],
-      sheetStats: [],
-      metaLines: formatMetaLines(result.payload?.meta ?? {}),
-      warnings: [],
-      errors: [],
-      details: String(result.response?.message ?? '')
-    };
+    void result;
+    return this._createIdleState();
   }
 
   _buildPreviewState(result) {
@@ -186,9 +164,7 @@ export class GoogleSheetsSyncApp extends FormApplication {
   }
 
   async getData() {
-    const settings = getGoogleSheetsSyncSettings();
     return {
-      settings,
       sheetConfigs: getSheetDisplayConfigs(),
       state: {
         ...this.syncState,
@@ -210,13 +186,11 @@ export class GoogleSheetsSyncApp extends FormApplication {
   }
 
   async _updateObject(_event, formData) {
-    await saveGoogleSheetsSyncSettings(formData);
-    ui.notifications.info(localize('MY_RPG.GoogleSheetsSync.Messages.SettingsSaved'));
+    void formData;
   }
 
   async _persistCurrentSettings() {
-    const formData = this._getSubmitData();
-    return saveGoogleSheetsSyncSettings(formData);
+    return {};
   }
 
   async _onAction(event) {
@@ -234,12 +208,6 @@ export class GoogleSheetsSyncApp extends FormApplication {
       const settings = await this._persistCurrentSettings();
       this.syncState = this._createBusyState(action);
       this.render();
-
-      if (action === 'export') {
-        const result = await exportWorldItemsToGoogleSheets(settings);
-        this.syncState = this._buildExportState(result);
-        ui.notifications.info(localize('MY_RPG.GoogleSheetsSync.Messages.ExportComplete'));
-      }
 
       if (action === 'preview') {
         const result = await previewGoogleSheetsImport(settings);

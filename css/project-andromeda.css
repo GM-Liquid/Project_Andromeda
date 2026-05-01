@@ -1671,7 +1671,7 @@ select[name='type'] optgroup {
 
 .project-andromeda .andromeda-identity {
   display: grid;
-  grid-template-columns: minmax(360px, 1fr) minmax(300px, 0.85fr) minmax(252px, 0.85fr);
+  grid-template-columns: minmax(360px, 1fr) minmax(252px, 0.72fr);
   gap: 18px;
   padding: 18px;
   border-bottom: 1px solid var(--andromeda-border);
@@ -1722,7 +1722,6 @@ select[name='type'] optgroup {
 }
 
 .project-andromeda .andromeda-meta-row,
-.project-andromeda .andromeda-identity-metrics,
 .project-andromeda .andromeda-resources-grid {
   display: grid;
   gap: 10px;
@@ -1730,10 +1729,9 @@ select[name='type'] optgroup {
 }
 
 .project-andromeda .andromeda-meta-row {
-  grid-template-columns: minmax(110px, 1.4fr) repeat(2, minmax(74px, 0.8fr));
+  grid-template-columns: repeat(auto-fit, minmax(108px, 1fr));
 }
 
-.project-andromeda .andromeda-identity-metrics,
 .project-andromeda .andromeda-resources-grid {
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
 }
@@ -1771,6 +1769,18 @@ select[name='type'] optgroup {
   text-align: center !important;
 }
 
+.project-andromeda .andromeda-field small {
+  color: var(--andromeda-subtle);
+  font-size: 0.7rem;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.project-andromeda .andromeda-field small strong {
+  color: var(--andromeda-text);
+  font-size: inherit;
+}
+
 .project-andromeda .andromeda-sheet-shell input[type='text'],
 .project-andromeda .andromeda-sheet-shell input[type='number'],
 .project-andromeda .andromeda-sheet-shell textarea {
@@ -1780,6 +1790,11 @@ select[name='type'] optgroup {
   color: var(--andromeda-text);
   font-family: inherit;
   box-shadow: none;
+}
+
+.project-andromeda .andromeda-sheet-shell input[type='number'] {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 
 .project-andromeda .andromeda-sheet-shell input:focus,
@@ -1829,7 +1844,7 @@ select[name='type'] optgroup {
   color: var(--andromeda-text) !important;
   font-size: 1.65rem;
   font-weight: 900;
-  text-align: left !important;
+  text-align: center !important;
 }
 
 .project-andromeda .andromeda-metric small {
@@ -1955,49 +1970,44 @@ select[name='type'] optgroup {
 }
 
 .project-andromeda .andromeda-ability-card {
-  min-height: 118px;
+  min-height: 88px;
   display: grid;
   grid-template-rows: 1fr auto;
-  gap: 8px;
-  padding: 12px;
+  gap: 7px;
+  padding: 10px;
 }
 
 .project-andromeda .andromeda-ability-roll {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 10px;
-  min-height: 78px;
+  justify-content: center;
+  gap: 6px;
+  min-height: 50px;
   border: 0;
   padding: 0;
   background: transparent;
   color: var(--andromeda-text);
-  text-align: left;
+  text-align: center;
   cursor: pointer;
 }
 
 .project-andromeda .andromeda-ability-top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 8px;
 }
 
-.project-andromeda .andromeda-ability-title,
-.project-andromeda .andromeda-ability-code {
+.project-andromeda .andromeda-ability-title {
   color: var(--andromeda-muted);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 850;
-}
-
-.project-andromeda .andromeda-ability-code {
-  color: #b7d3e3;
-  font-weight: 900;
+  text-align: center;
 }
 
 .project-andromeda .andromeda-ability-body {
   display: grid;
-  gap: 4px;
+  justify-items: center;
 }
 
 .project-andromeda .ability-die-value {
@@ -2010,15 +2020,10 @@ select[name='type'] optgroup {
 
 .project-andromeda .andromeda-ability-roll .ability-die-value {
   color: var(--andromeda-accent) !important;
-  font-size: 2rem;
+  font-size: 1.85rem;
   font-weight: 950;
   line-height: 1;
-}
-
-.project-andromeda .andromeda-ability-summary {
-  color: var(--andromeda-subtle);
-  font-size: 0.75rem;
-  line-height: 1.25;
+  text-align: center;
 }
 
 .project-andromeda .ability-die-control {
@@ -2134,6 +2139,31 @@ select[name='type'] optgroup {
   gap: 9px;
 }
 
+.project-andromeda .andromeda-speed-field {
+  display: grid;
+  grid-template-columns: 86px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.project-andromeda .andromeda-speed-field input {
+  min-height: 42px;
+  padding: 0;
+  border: 0;
+  background: rgba(73, 212, 232, 0.08) !important;
+  color: var(--andromeda-accent) !important;
+  font-size: 1.7rem;
+  font-weight: 950;
+  text-align: center !important;
+}
+
+.project-andromeda .andromeda-speed-field small {
+  color: var(--andromeda-subtle);
+  font-size: 0.74rem;
+  line-height: 1.25;
+  text-align: left;
+}
+
 .project-andromeda .andromeda-defense {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 64px;
@@ -2149,7 +2179,7 @@ select[name='type'] optgroup {
 .project-andromeda .andromeda-defense input {
   min-height: 32px;
   font-size: 1.4rem;
-  text-align: right !important;
+  text-align: center !important;
 }
 
 .project-andromeda .andromeda-temp-panel .temp-bonus-grid {
@@ -2239,16 +2269,11 @@ select[name='type'] optgroup {
   .project-andromeda .andromeda-overview-grid {
     grid-template-columns: 1fr;
   }
-
-  .project-andromeda .andromeda-identity-metrics {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 720px) {
   .project-andromeda .andromeda-sheet-tabs,
   .project-andromeda .andromeda-meta-row,
-  .project-andromeda .andromeda-identity-metrics,
   .project-andromeda .andromeda-ability-grid,
   .project-andromeda .andromeda-skills-grid,
   .project-andromeda .andromeda-resources-grid {
@@ -2268,6 +2293,14 @@ select[name='type'] optgroup {
 
   .project-andromeda .andromeda-portrait-card {
     grid-template-columns: 1fr;
+  }
+
+  .project-andromeda .andromeda-speed-field {
+    grid-template-columns: 1fr;
+  }
+
+  .project-andromeda .andromeda-speed-field small {
+    text-align: center;
   }
 }
 

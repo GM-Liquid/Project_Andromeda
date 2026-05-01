@@ -147,12 +147,12 @@ test('ability cards match the mockup structure instead of looking like dice inpu
   const css = readText('css/project-andromeda.css');
 
   assert.match(actorSheet, /class='andromeda-ability-title'/);
-  assert.match(actorSheet, /class='andromeda-ability-code'/);
-  assert.match(actorSheet, /class='andromeda-ability-summary'/);
-  assert.match(actorSheet, /{{ability\.code}}/);
-  assert.match(actorSheet, /{{ability\.skillSummary}}/);
-  assert.match(actorSheetClass, /code: abilityCodes\[abilityKey\]/);
-  assert.match(actorSheetClass, /skillSummary:/);
+  assert.doesNotMatch(actorSheet, /class='andromeda-ability-code'/);
+  assert.doesNotMatch(actorSheet, /class='andromeda-ability-summary'/);
+  assert.doesNotMatch(actorSheet, /{{ability\.code}}/);
+  assert.doesNotMatch(actorSheet, /{{ability\.skillSummary}}/);
+  assert.doesNotMatch(actorSheetClass, /code: abilityCodes\[abilityKey\]/);
+  assert.doesNotMatch(actorSheetClass, /skillSummary:/);
   assert.match(css, /\.project-andromeda \.ability-die-value\s*\{[^}]*background:\s*transparent/s);
   assert.match(css, /\.project-andromeda \.ability-die-value\s*\{[^}]*border:\s*0/s);
 });
@@ -178,6 +178,42 @@ test('main sheet presents identity, resources, abilities, and skills as overview
   assert.match(actorSheet, /shared-hero-pool-input/);
   assert.doesNotMatch(actorSheet, /rank-hint-table/);
   assert.doesNotMatch(actorSheet, /key-info-grid__row/);
+});
+
+test('main sheet removes calling and moves speed into the right overview stack', () => {
+  const actorSheet = readText('templates/actor/partials/actor-sheet-content.hbs');
+
+  assert.doesNotMatch(actorSheet, /system\.calling/);
+  assert.doesNotMatch(actorSheet, /andromeda-identity-metrics/);
+  assert.match(actorSheet, /class='andromeda-side-stack'/);
+  assert.ok(
+    actorSheet.indexOf("class='andromeda-side-stack'") <
+      actorSheet.indexOf("name='system.speed.value'")
+  );
+  assert.ok(
+    actorSheet.indexOf("name='system.speed.value'") <
+      actorSheet.indexOf("name='system.defenses.physical'")
+  );
+});
+
+test('main sheet centers numeric cells and keeps ability cards compact', () => {
+  const actorSheet = readText('templates/actor/partials/actor-sheet-content.hbs');
+  const css = readText('css/project-andromeda.css');
+
+  assert.doesNotMatch(actorSheet, /andromeda-ability-code/);
+  assert.doesNotMatch(actorSheet, /andromeda-ability-summary/);
+  assert.doesNotMatch(actorSheet, /{{ability\.code}}/);
+  assert.doesNotMatch(actorSheet, /{{ability\.skillSummary}}/);
+
+  assert.match(
+    css,
+    /\.project-andromeda \.andromeda-sheet-shell input\[type='number'\]\s*\{[^}]*text-align:\s*center/s
+  );
+  assert.match(css, /\.project-andromeda \.andromeda-ability-card\s*\{[^}]*min-height:\s*88px;/s);
+  assert.match(
+    css,
+    /\.project-andromeda \.andromeda-ability-roll \.ability-die-value\s*\{[^}]*text-align:\s*center/s
+  );
 });
 
 test('skill rank numbers keep readable dark text on colored badges', () => {
@@ -275,4 +311,36 @@ test('localization renames progress labels and shortens the speed label in both 
   );
   assert.equal(en.Speed.Label, 'Speed');
   assert.equal(ru.Speed.Label, '\u0421\u043a\u043e\u0440\u043e\u0441\u0442\u044c');
+});
+
+test('hero point labels are renamed to Highlight Points and Ochki Sversheniy', () => {
+  const en = readJson('lang/en.json').MY_RPG;
+  const ru = readJson('lang/ru.json').MY_RPG;
+
+  assert.equal(en.KeyInfo.MomentOfGlory, 'Highlight Points');
+  assert.equal(en.KeyInfo.SharedMomentOfGlory, 'GM Highlight Points Pool');
+  assert.equal(en.MomentOfGloryBonus.ContextLabel, 'Highlight bonus. Costs 1 Highlight Point.');
+  assert.equal(en.MomentOfGloryReroll.ContextLabel, 'Reroll check. Costs 1 Highlight Point.');
+  assert.equal(en.SessionTracker.Summary.MomentOfGloryUsesTotal, 'Highlight Points spent');
+
+  assert.equal(
+    ru.KeyInfo.MomentOfGlory,
+    '\u041e\u0447\u043a\u0438 \u0421\u0432\u0435\u0440\u0448\u0435\u043d\u0438\u0439'
+  );
+  assert.equal(
+    ru.KeyInfo.SharedMomentOfGlory,
+    '\u041e\u0431\u0449\u0438\u0439 \u0437\u0430\u043f\u0430\u0441 \u041e\u0447\u043a\u043e\u0432 \u0421\u0432\u0435\u0440\u0448\u0435\u043d\u0438\u0439 \u0413\u041c\u0430'
+  );
+  assert.equal(
+    ru.MomentOfGloryBonus.ContextLabel,
+    '\u0411\u043e\u043d\u0443\u0441 \u0421\u0432\u0435\u0440\u0448\u0435\u043d\u0438\u044f. \u0421\u0442\u043e\u0438\u0442 1 \u041e\u0447\u043a\u043e \u0421\u0432\u0435\u0440\u0448\u0435\u043d\u0438\u0439.'
+  );
+  assert.equal(
+    ru.MomentOfGloryReroll.ContextLabel,
+    '\u041f\u0435\u0440\u0435\u0431\u0440\u043e\u0441\u0438\u0442\u044c \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0443. \u0421\u0442\u043e\u0438\u0442 1 \u041e\u0447\u043a\u043e \u0421\u0432\u0435\u0440\u0448\u0435\u043d\u0438\u0439.'
+  );
+  assert.equal(
+    ru.SessionTracker.Summary.MomentOfGloryUsesTotal,
+    '\u041f\u043e\u0442\u0440\u0430\u0447\u0435\u043d\u043e \u041e\u0447\u043a\u043e\u0432 \u0421\u0432\u0435\u0440\u0448\u0435\u043d\u0438\u0439'
+  );
 });

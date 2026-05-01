@@ -11,7 +11,7 @@
 | ----------------------------- | --------------------------------------------------------------- |
 | **System name**               | **Project Andromeda**                                           |
 | **Foundry VTT compatibility** | v12 (verified 12)                                               |
-| **Current version**           | `0.3.4.3`                                                       |
+| **Current version**           | `0.3.4.10`                                                      |
 | **Current release line**      | `0.3.4.x`                                                       |
 | **Languages**                 | English, Русский (full parity required)                         |
 | **Main tech**                 | ES-module JavaScript (`*.mjs`), Handlebars (`*.hbs`), JSON, CSS |
@@ -77,8 +77,9 @@ project-andromeda/
 |  project-andromeda.css
 |
 +- docs/
-|  google-sheets-sync.md
-|  google-sheets-webapp.gs
+|  gear-catalog-sync.md
+|  google-sheets-sync.md <- legacy Google Sheets notes, not the current source of truth
+|  google-sheets-webapp.gs <- legacy Apps Script helper
 |
 '- .github/
    workflows/
@@ -256,16 +257,20 @@ Balance simulations and data-prep tooling live in the **private companion source
 
 ---
 
-## 6.2 Google Sheets Sync
+## 6.2 Gear Catalog Foundry Sync
 
-The Google Sheets sync MVP is part of the shipped Foundry system.
+The gear catalog sync is part of the shipped Foundry system.
 
-- **Source of truth:** import/export works on world `Item` documents, not directly on embedded actor items.
+- **Source of truth:** import reads `data/gear/catalog/armor.json`, `data/gear/catalog/equipment.json`, and `data/gear/catalog/abilities.json`, mirrored from `Docs_Project_Andromeda/data/gear/catalog/` when the private repo is available.
+- **Excluded catalog:** `concept-abilities.json` is not imported into Foundry world items.
+- **World item target:** sync works on world `Item` documents, not directly on embedded actor items.
 - **Link safety:** imports must update existing world items in place whenever possible; do not delete and recreate linked library items during normal sync.
-- **Stable identity:** spreadsheet round-trips use `flags.project-andromeda.sheetSyncId` as the stable external key.
-- **Type safety:** changing an existing item's `type` during sheet import is blocked in the MVP and should be handled as a dedicated migration, not a silent update.
-- **Round-trip coverage:** exports include typed columns for common editing plus a `systemJson` fallback so new or uncommon system fields survive round-trips.
-- **Actor updates:** after importing into world items, linked actor items should refresh through the existing item library sync so sheet links remain intact.
+- **Stable identity:** gear catalog imports use `flags.project-andromeda.sheetSyncId` with values like `gear:equipment:<catalog-id>` as the stable external key. The flag name remains for backward compatibility.
+- **Fallback matching:** first catalog import may match existing world items by exact item type and name, then replace the old sync id with the gear catalog sync id.
+- **Folder layout:** imported items are grouped into world Item folders by type and rank: `Броня/Ранг N`, `Снаряжение/Ранг N`, and `Способности/Ранг N`; entries without a valid rank go under `Без ранга`.
+- **Type safety:** changing an existing item's `type` during catalog import is blocked and should be handled as a dedicated migration, not a silent update.
+- **Round-trip coverage:** imports include a `systemJson` fallback so new or uncommon system fields from catalogs survive sync into Foundry item data.
+- **Actor updates:** after importing into world items, linked actor items should refresh through the existing item library sync so links remain intact.
 
 ---
 
@@ -286,4 +291,4 @@ The Google Sheets sync MVP is part of the shipped Foundry system.
 
 ---
 
-_Last updated: 2026-04-24_
+_Last updated: 2026-04-29_
