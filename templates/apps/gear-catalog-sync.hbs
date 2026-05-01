@@ -1,0 +1,130 @@
+<form class='gear-catalog-sync'>
+  <section class='gear-catalog-sync__intro'>
+    <p>{{localize 'MY_RPG.GearCatalogSync.Intro'}}</p>
+    <p class='gear-catalog-sync__note'>{{localize 'MY_RPG.GearCatalogSync.IntroNote'}}</p>
+  </section>
+
+  <section class='gear-catalog-sync__actions'>
+    <button type='button' class='gear-catalog-sync__button' data-action='preview'>
+      <i class='fas fa-search'></i>
+      {{localize 'MY_RPG.GearCatalogSync.Actions.Preview'}}
+    </button>
+    <button
+      type='button'
+      class='gear-catalog-sync__button gear-catalog-sync__button--primary'
+      data-action='apply'
+    >
+      <i class='fas fa-download'></i>
+      {{localize 'MY_RPG.GearCatalogSync.Actions.Apply'}}
+    </button>
+    <button type='button' class='gear-catalog-sync__button' data-action='clear'>
+      <i class='fas fa-eraser'></i>
+      {{localize 'MY_RPG.GearCatalogSync.Actions.Clear'}}
+    </button>
+  </section>
+
+  <section class='gear-catalog-sync__layout'>
+    <h2>{{localize 'MY_RPG.GearCatalogSync.SheetLayoutTitle'}}</h2>
+    <div class='gear-catalog-sync__cards'>
+      {{#each sheetConfigs}}
+        <article class='gear-catalog-sync__card'>
+          <h3>{{this.label}}</h3>
+          <p><strong>{{localize 'MY_RPG.GearCatalogSync.AllowedTypes'}}:</strong>
+            {{this.typeLabels}}</p>
+          <p><strong>{{localize 'MY_RPG.GearCatalogSync.Columns'}}:</strong></p>
+          <ul class='gear-catalog-sync__columns'>
+            {{#each this.columns}}
+              <li><code>{{this}}</code></li>
+            {{/each}}
+          </ul>
+        </article>
+      {{/each}}
+    </div>
+  </section>
+
+  {{#if state.hasContent}}
+    <section class='gear-catalog-sync__results'>
+      <h2>{{state.title}}</h2>
+      <p class='gear-catalog-sync__status'>{{state.status}}</p>
+
+      {{#if state.summaryLines.length}}
+        <div class='gear-catalog-sync__block'>
+          <h3>{{localize 'MY_RPG.GearCatalogSync.ResultSummary'}}</h3>
+          <ul>
+            {{#each state.summaryLines}}
+              <li>{{this}}</li>
+            {{/each}}
+          </ul>
+        </div>
+      {{/if}}
+
+      {{#if state.sheetStats.length}}
+        <div class='gear-catalog-sync__block'>
+          <h3>{{localize 'MY_RPG.GearCatalogSync.PerSheet'}}</h3>
+          <table class='gear-catalog-sync__table'>
+            <thead>
+              <tr>
+                <th>{{localize 'MY_RPG.GearCatalogSync.Table.Sheet'}}</th>
+                <th>{{localize 'MY_RPG.GearCatalogSync.Table.Create'}}</th>
+                <th>{{localize 'MY_RPG.GearCatalogSync.Table.Update'}}</th>
+                <th>{{localize 'MY_RPG.GearCatalogSync.Table.Skip'}}</th>
+                <th>{{localize 'MY_RPG.GearCatalogSync.Table.Error'}}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each state.sheetStats}}
+                <tr>
+                  <td>{{this.label}}</td>
+                  <td>{{this.create}}</td>
+                  <td>{{this.update}}</td>
+                  <td>{{this.skip}}</td>
+                  <td>{{this.error}}</td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+      {{/if}}
+
+      {{#if state.metaLines.length}}
+        <div class='gear-catalog-sync__block'>
+          <h3>{{localize 'MY_RPG.GearCatalogSync.RemoteMeta'}}</h3>
+          <ul>
+            {{#each state.metaLines}}
+              <li>{{this}}</li>
+            {{/each}}
+          </ul>
+        </div>
+      {{/if}}
+
+      {{#if state.warnings.length}}
+        <div class='gear-catalog-sync__block gear-catalog-sync__block--warning'>
+          <h3>{{localize 'MY_RPG.GearCatalogSync.Warnings'}}</h3>
+          <ul>
+            {{#each state.warnings}}
+              <li>{{this}}</li>
+            {{/each}}
+          </ul>
+        </div>
+      {{/if}}
+
+      {{#if state.errors.length}}
+        <div class='gear-catalog-sync__block gear-catalog-sync__block--error'>
+          <h3>{{localize 'MY_RPG.GearCatalogSync.ErrorsTitle'}}</h3>
+          <ul>
+            {{#each state.errors}}
+              <li>{{this}}</li>
+            {{/each}}
+          </ul>
+        </div>
+      {{/if}}
+
+      {{#if state.details}}
+        <div class='gear-catalog-sync__block'>
+          <h3>{{localize 'MY_RPG.GearCatalogSync.Details'}}</h3>
+          <p>{{state.details}}</p>
+        </div>
+      {{/if}}
+    </section>
+  {{/if}}
+</form>

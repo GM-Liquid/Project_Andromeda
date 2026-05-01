@@ -1,7 +1,4 @@
 import {
-  GOOGLE_SHEETS_SYNC_ENDPOINT_SETTING,
-  GOOGLE_SHEETS_SYNC_TIMEOUT_SETTING,
-  GOOGLE_SHEETS_SYNC_TOKEN_SETTING,
   MODULE_ID,
   debugLog
 } from '../config.mjs';
@@ -9,24 +6,22 @@ import {
   DEFAULT_ITEM_USAGE_FREQUENCY,
   ITEM_ACTIVATION_TYPE_LABEL_KEYS,
   ITEM_TYPE_CONFIGS,
-  ITEM_USAGE_FREQUENCY_LABEL_KEYS,
-  normalizeUsageFrequency
+  ITEM_USAGE_FREQUENCY_LABEL_KEYS
 } from './item-config.mjs';
-import { getLibraryItemUuid, getLibrarySyncOptionKey } from './item-library-sync.mjs';
+import { getLibraryItemUuid } from './item-library-sync.mjs';
 
-const GOOGLE_SHEETS_SYNC_ID_FLAG = 'sheetSyncId';
-const GOOGLE_SHEETS_SYNC_SYSTEM_JSON_COLUMN = 'systemJson';
-const GOOGLE_SHEETS_SYNC_OPTION_KEY = getLibrarySyncOptionKey();
-const GOOGLE_SHEETS_SYNC_SUPPORTED_ITEM_TYPES = new Set(
+const GEAR_CATALOG_SYNC_ID_FLAG = 'sheetSyncId';
+const GEAR_CATALOG_SYNC_SYSTEM_JSON_COLUMN = 'systemJson';
+const GEAR_CATALOG_SYNC_SUPPORTED_ITEM_TYPES = new Set(
   ITEM_TYPE_CONFIGS.map((config) => config.type)
 );
-const GOOGLE_SHEETS_SYNC_ALLOWED_USAGE_FREQUENCIES = new Set(
+const GEAR_CATALOG_SYNC_ALLOWED_USAGE_FREQUENCIES = new Set(
   Object.keys(ITEM_USAGE_FREQUENCY_LABEL_KEYS)
 );
-const GOOGLE_SHEETS_SYNC_ALLOWED_ACTIVATION_TYPES = new Set(
+const GEAR_CATALOG_SYNC_ALLOWED_ACTIVATION_TYPES = new Set(
   Object.keys(ITEM_ACTIVATION_TYPE_LABEL_KEYS)
 );
-const GOOGLE_SHEETS_SYNC_TYPE_LABEL_KEYS = {
+const GEAR_CATALOG_SYNC_TYPE_LABEL_KEYS = {
   weapon: 'TYPES.Item.weapon',
   armor: 'TYPES.Item.armor',
   equipment: 'TYPES.Item.equipment',
@@ -34,27 +29,27 @@ const GOOGLE_SHEETS_SYNC_TYPE_LABEL_KEYS = {
   environment: 'MY_RPG.ItemTypeGroups.Environment'
 };
 
-const GOOGLE_SHEETS_SYNC_COLUMN_LABEL_KEYS = {
-  type: 'MY_RPG.GoogleSheetsSync.Headers.Type',
-  name: 'MY_RPG.GoogleSheetsSync.Headers.Name',
-  ownerName: 'MY_RPG.GoogleSheetsSync.Headers.OwnerName',
-  'system.rank': 'MY_RPG.GoogleSheetsSync.Headers.Rank',
-  'system.skill': 'MY_RPG.GoogleSheetsSync.Headers.Skill',
-  'system.skillBonus': 'MY_RPG.GoogleSheetsSync.Headers.SkillBonus',
-  'system.description': 'MY_RPG.GoogleSheetsSync.Headers.Description',
-  'system.itemPhys': 'MY_RPG.GoogleSheetsSync.Headers.ItemFortitude',
-  'system.itemAzure': 'MY_RPG.GoogleSheetsSync.Headers.ItemControl',
-  'system.itemMental': 'MY_RPG.GoogleSheetsSync.Headers.ItemWill',
-  'system.itemShield': 'MY_RPG.GoogleSheetsSync.Headers.ItemShield',
-  'system.itemSpeed': 'MY_RPG.GoogleSheetsSync.Headers.ItemSpeed',
-  'system.usageFrequency': 'MY_RPG.GoogleSheetsSync.Headers.UsageFrequency',
-  'system.activationType': 'MY_RPG.GoogleSheetsSync.Headers.ActivationType',
-  'system.range': 'MY_RPG.GoogleSheetsSync.Headers.Range',
-  'system.quantity': 'MY_RPG.GoogleSheetsSync.Headers.Quantity'
+const GEAR_CATALOG_SYNC_COLUMN_LABEL_KEYS = {
+  type: 'MY_RPG.GearCatalogSync.Headers.Type',
+  name: 'MY_RPG.GearCatalogSync.Headers.Name',
+  ownerName: 'MY_RPG.GearCatalogSync.Headers.OwnerName',
+  'system.rank': 'MY_RPG.GearCatalogSync.Headers.Rank',
+  'system.skill': 'MY_RPG.GearCatalogSync.Headers.Skill',
+  'system.skillBonus': 'MY_RPG.GearCatalogSync.Headers.SkillBonus',
+  'system.description': 'MY_RPG.GearCatalogSync.Headers.Description',
+  'system.itemPhys': 'MY_RPG.GearCatalogSync.Headers.ItemFortitude',
+  'system.itemAzure': 'MY_RPG.GearCatalogSync.Headers.ItemControl',
+  'system.itemMental': 'MY_RPG.GearCatalogSync.Headers.ItemWill',
+  'system.itemShield': 'MY_RPG.GearCatalogSync.Headers.ItemShield',
+  'system.itemSpeed': 'MY_RPG.GearCatalogSync.Headers.ItemSpeed',
+  'system.usageFrequency': 'MY_RPG.GearCatalogSync.Headers.UsageFrequency',
+  'system.activationType': 'MY_RPG.GearCatalogSync.Headers.ActivationType',
+  'system.range': 'MY_RPG.GearCatalogSync.Headers.Range',
+  'system.quantity': 'MY_RPG.GearCatalogSync.Headers.Quantity'
 };
-const GOOGLE_SHEETS_SYNC_COMMON_COLUMNS = ['syncId', 'type', 'name', 'ownerName'];
-const GOOGLE_SHEETS_SYNC_HIDDEN_COLUMNS = new Set(['syncId']);
-const GOOGLE_SHEETS_SYNC_LEGACY_IMPORT_COLUMNS = new Set([
+const GEAR_CATALOG_SYNC_COMMON_COLUMNS = ['syncId', 'type', 'name', 'ownerName'];
+const GEAR_CATALOG_SYNC_HIDDEN_COLUMNS = new Set(['syncId']);
+const GEAR_CATALOG_SYNC_LEGACY_IMPORT_COLUMNS = new Set([
   'foundryId',
   'folderId',
   'folderName',
@@ -65,7 +60,7 @@ const GOOGLE_SHEETS_SYNC_LEGACY_IMPORT_COLUMNS = new Set([
   'libraryActorItemId',
   'isActorLinked',
   'folderPath',
-  GOOGLE_SHEETS_SYNC_SYSTEM_JSON_COLUMN,
+  GEAR_CATALOG_SYNC_SYSTEM_JSON_COLUMN,
   'system.requiresRoll'
 ]);
 
@@ -74,17 +69,17 @@ const GOOGLE_SHEETS_SYNC_LEGACY_IMPORT_COLUMNS = new Set([
 // Advanced fields such as sort/rules/traits/details stay inside Foundry data for now;
 // if they become routine content fields later, we can restore them as visible columns.
 
-const GOOGLE_SHEETS_SYNC_ROW_STATUSES = new Set(['active', 'draft', 'delete']);
+const GEAR_CATALOG_SYNC_ROW_STATUSES = new Set(['active', 'draft', 'delete']);
 
 function createSystemField(column, path, kind = 'string') {
   return { column, path, kind };
 }
 
-const GOOGLE_SHEETS_SYNC_SHEET_CONFIGS = [
+const GEAR_CATALOG_SYNC_SHEET_CONFIGS = [
   {
     key: 'armor',
-    labelKey: 'MY_RPG.GoogleSheetsSync.Sheets.Armor',
-    typeLabelKey: GOOGLE_SHEETS_SYNC_TYPE_LABEL_KEYS.armor,
+    labelKey: 'MY_RPG.GearCatalogSync.Sheets.Armor',
+    typeLabelKey: GEAR_CATALOG_SYNC_TYPE_LABEL_KEYS.armor,
     types: ['armor'],
     fields: [
       createSystemField('system.rank', 'rank', 'rank'),
@@ -98,8 +93,8 @@ const GOOGLE_SHEETS_SYNC_SHEET_CONFIGS = [
   },
   {
     key: 'equipment',
-    labelKey: 'MY_RPG.GoogleSheetsSync.Sheets.Equipment',
-    typeLabelKey: GOOGLE_SHEETS_SYNC_TYPE_LABEL_KEYS.equipment,
+    labelKey: 'MY_RPG.GearCatalogSync.Sheets.Equipment',
+    typeLabelKey: GEAR_CATALOG_SYNC_TYPE_LABEL_KEYS.equipment,
     types: ['equipment', 'equipment-consumable', 'implant', 'cartridge'],
     fields: [
       createSystemField('system.rank', 'rank', 'rank'),
@@ -110,8 +105,8 @@ const GOOGLE_SHEETS_SYNC_SHEET_CONFIGS = [
   },
   {
     key: 'abilities',
-    labelKey: 'MY_RPG.GoogleSheetsSync.Sheets.Abilities',
-    typeLabelKey: GOOGLE_SHEETS_SYNC_TYPE_LABEL_KEYS.trait,
+    labelKey: 'MY_RPG.GearCatalogSync.Sheets.Abilities',
+    typeLabelKey: GEAR_CATALOG_SYNC_TYPE_LABEL_KEYS.trait,
     types: ['trait-source-ability'],
     fields: [
       createSystemField('system.rank', 'rank', 'rank'),
@@ -122,16 +117,6 @@ const GOOGLE_SHEETS_SYNC_SHEET_CONFIGS = [
     ]
   }
 ];
-
-const GOOGLE_SHEETS_SYNC_SHEET_CONFIG_BY_TYPE = GOOGLE_SHEETS_SYNC_SHEET_CONFIGS.reduce(
-  (accumulator, config) => {
-    for (const type of config.types) {
-      accumulator[type] = config;
-    }
-    return accumulator;
-  },
-  {}
-);
 
 function deepClone(value) {
   if (typeof foundry !== 'undefined' && foundry.utils?.deepClone) {
@@ -159,6 +144,20 @@ function sortValue(value) {
 
 function stableStringify(value) {
   return JSON.stringify(sortValue(value ?? {}), null, 2);
+}
+
+function hashString(value) {
+  let hash = 2166136261;
+  const text = String(value ?? '');
+  for (let index = 0; index < text.length; index += 1) {
+    hash ^= text.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `fnv1a:${(hash >>> 0).toString(16).padStart(8, '0')}`;
+}
+
+function getGearCatalogSourceHash(remoteSheets = {}) {
+  return hashString(stableStringify(remoteSheets));
 }
 
 function sameValue(left, right) {
@@ -203,15 +202,15 @@ function isPrimaryActiveGM() {
 
 function ensurePrimaryActiveGM() {
   if (!isPrimaryActiveGM()) {
-    throw new Error(localize('MY_RPG.GoogleSheetsSync.Errors.RequirePrimaryGM'));
+    throw new Error(localize('MY_RPG.GearCatalogSync.Errors.RequirePrimaryGM'));
   }
 }
 
-function getGoogleSheetsSyncId(item) {
-  return getModuleFlagString(item, GOOGLE_SHEETS_SYNC_ID_FLAG);
+function getGearCatalogSyncId(item) {
+  return getModuleFlagString(item, GEAR_CATALOG_SYNC_ID_FLAG);
 }
 
-function createGoogleSheetsSyncId() {
+function createGearCatalogSyncId() {
   return `gsync-${foundry.utils.randomID(16)}`;
 }
 
@@ -219,24 +218,15 @@ function getFolderId(document) {
   return String(document?.folder?.id ?? document?.folder ?? '').trim();
 }
 
-function getFolderName(document) {
-  return String(document?.folder?.name ?? '').trim();
-}
-
 function getItemLabel(itemType) {
   return localize(`TYPES.Item.${itemType}`);
 }
 
-function getGoogleSheetsColumnLabel(columnKey) {
-  const labelKey = GOOGLE_SHEETS_SYNC_COLUMN_LABEL_KEYS[columnKey];
+function getGearCatalogColumnLabel(columnKey) {
+  const labelKey = GEAR_CATALOG_SYNC_COLUMN_LABEL_KEYS[columnKey];
   return labelKey ? localize(labelKey) : columnKey;
 }
 
-function getLinkedActorName(item) {
-  const actorId = getModuleFlagString(item, 'libraryActorId');
-  if (!actorId) return '';
-  return String(game.actors?.get(actorId)?.name ?? '').trim();
-}
 
 function normalizeLookupValue(value) {
   return normalizeOptionalString(value).toLowerCase();
@@ -245,18 +235,14 @@ function normalizeLookupValue(value) {
 function normalizeItemTypeValue(value) {
   const normalized = normalizeOptionalString(value);
   if (!normalized) return '';
-  if (GOOGLE_SHEETS_SYNC_SUPPORTED_ITEM_TYPES.has(normalized)) return normalized;
+  if (GEAR_CATALOG_SYNC_SUPPORTED_ITEM_TYPES.has(normalized)) return normalized;
 
   const normalizedLookup = normalizeLookupValue(normalized);
   return (
-    Array.from(GOOGLE_SHEETS_SYNC_SUPPORTED_ITEM_TYPES).find(
+    Array.from(GEAR_CATALOG_SYNC_SUPPORTED_ITEM_TYPES).find(
       (itemType) => normalizeLookupValue(getItemLabel(itemType)) === normalizedLookup
     ) ?? ''
   );
-}
-
-function getSheetConfigForType(type) {
-  return GOOGLE_SHEETS_SYNC_SHEET_CONFIG_BY_TYPE[String(type ?? '').trim()] ?? null;
 }
 
 function normalizeString(value) {
@@ -292,7 +278,7 @@ function parseJsonValue(rawValue, fallback, label) {
     return JSON.parse(normalized);
   } catch (error) {
     throw new Error(
-      game.i18n.format('MY_RPG.GoogleSheetsSync.Errors.InvalidJson', {
+      game.i18n.format('MY_RPG.GearCatalogSync.Errors.InvalidJson', {
         field: label,
         error: error?.message ?? 'JSON parse error'
       })
@@ -301,15 +287,15 @@ function parseJsonValue(rawValue, fallback, label) {
 }
 
 function validateTypeForSheet(sheetConfig, itemType) {
-  if (!GOOGLE_SHEETS_SYNC_SUPPORTED_ITEM_TYPES.has(itemType)) {
+  if (!GEAR_CATALOG_SYNC_SUPPORTED_ITEM_TYPES.has(itemType)) {
     throw new Error(
-      game.i18n.format('MY_RPG.GoogleSheetsSync.Errors.UnsupportedItemType', { type: itemType })
+      game.i18n.format('MY_RPG.GearCatalogSync.Errors.UnsupportedItemType', { type: itemType })
     );
   }
 
   if (!sheetConfig.types.includes(itemType)) {
     throw new Error(
-      game.i18n.format('MY_RPG.GoogleSheetsSync.Errors.TypeDoesNotMatchSheet', {
+      game.i18n.format('MY_RPG.GearCatalogSync.Errors.TypeDoesNotMatchSheet', {
         type: itemType,
         sheet: localize(sheetConfig.labelKey)
       })
@@ -321,7 +307,7 @@ function validateRank(value, label) {
   const normalized = normalizeOptionalString(value);
   if (!normalized) return '';
   if (['1', '2', '3', '4'].includes(normalized)) return normalized;
-  throw new Error(game.i18n.format('MY_RPG.GoogleSheetsSync.Errors.InvalidRank', { field: label }));
+  throw new Error(game.i18n.format('MY_RPG.GearCatalogSync.Errors.InvalidRank', { field: label }));
 }
 
 function validateSkill(value, label) {
@@ -334,7 +320,7 @@ function validateSkill(value, label) {
     '';
   if (matchedSkill) return matchedSkill;
   throw new Error(
-    game.i18n.format('MY_RPG.GoogleSheetsSync.Errors.InvalidSkill', {
+    game.i18n.format('MY_RPG.GearCatalogSync.Errors.InvalidSkill', {
       field: label,
       value: normalized
     })
@@ -345,16 +331,16 @@ function validateUsageFrequency(value, label) {
   const normalized = normalizeOptionalString(value);
   if (!normalized) return DEFAULT_ITEM_USAGE_FREQUENCY;
   if (normalized === 'atWill') return DEFAULT_ITEM_USAGE_FREQUENCY;
-  if (GOOGLE_SHEETS_SYNC_ALLOWED_USAGE_FREQUENCIES.has(normalized)) return normalized;
+  if (GEAR_CATALOG_SYNC_ALLOWED_USAGE_FREQUENCIES.has(normalized)) return normalized;
   const normalizedLookup = normalizeLookupValue(normalized);
   const matchedFrequency =
-    Array.from(GOOGLE_SHEETS_SYNC_ALLOWED_USAGE_FREQUENCIES).find(
+    Array.from(GEAR_CATALOG_SYNC_ALLOWED_USAGE_FREQUENCIES).find(
       (entry) =>
         normalizeLookupValue(localize(ITEM_USAGE_FREQUENCY_LABEL_KEYS[entry])) === normalizedLookup
     ) ?? '';
   if (matchedFrequency) return matchedFrequency;
   throw new Error(
-    game.i18n.format('MY_RPG.GoogleSheetsSync.Errors.InvalidEnumValue', {
+    game.i18n.format('MY_RPG.GearCatalogSync.Errors.InvalidEnumValue', {
       field: label,
       value: normalized
     })
@@ -364,36 +350,26 @@ function validateUsageFrequency(value, label) {
 function validateActivationType(value, label) {
   const normalized = normalizeOptionalString(value);
   if (!normalized) return 'passive';
-  if (GOOGLE_SHEETS_SYNC_ALLOWED_ACTIVATION_TYPES.has(normalized)) return normalized;
+  if (GEAR_CATALOG_SYNC_ALLOWED_ACTIVATION_TYPES.has(normalized)) return normalized;
   const normalizedLookup = normalizeLookupValue(normalized);
   const matchedActivationType =
-    Array.from(GOOGLE_SHEETS_SYNC_ALLOWED_ACTIVATION_TYPES).find(
+    Array.from(GEAR_CATALOG_SYNC_ALLOWED_ACTIVATION_TYPES).find(
       (entry) =>
         normalizeLookupValue(localize(ITEM_ACTIVATION_TYPE_LABEL_KEYS[entry])) ===
         normalizedLookup
     ) ?? '';
   if (matchedActivationType) return matchedActivationType;
   throw new Error(
-    game.i18n.format('MY_RPG.GoogleSheetsSync.Errors.InvalidEnumValue', {
+    game.i18n.format('MY_RPG.GearCatalogSync.Errors.InvalidEnumValue', {
       field: label,
       value: normalized
     })
   );
 }
 
-function getFieldResetValue(fieldKind) {
-  if (fieldKind === 'boolean') return false;
-  if (fieldKind === 'number') return 0;
-  if (fieldKind === 'rank') return '';
-  if (fieldKind === 'skill') return '';
-  if (fieldKind === 'usage-frequency') return DEFAULT_ITEM_USAGE_FREQUENCY;
-  if (fieldKind === 'activation-type') return 'passive';
-  return '';
-}
-
 function parseFieldValue(field, rawValue, itemType) {
   void itemType;
-  const fieldLabel = getGoogleSheetsColumnLabel(field.column);
+  const fieldLabel = getGearCatalogColumnLabel(field.column);
   if (field.kind === 'string') {
     return normalizeString(rawValue);
   }
@@ -419,39 +395,17 @@ function parseFieldValue(field, rawValue, itemType) {
   return rawValue;
 }
 
-function serializeFieldValue(systemData, field, itemType) {
-  void itemType;
-  const value = foundry.utils.getProperty(systemData, field.path);
-  if (field.kind === 'boolean') {
-    return Boolean(value);
-  }
-  if (field.kind === 'number') {
-    return Number(value) || 0;
-  }
-  if (field.kind === 'skill') {
-    return value ? getSkillLabel(String(value)) : '';
-  }
-  if (field.kind === 'usage-frequency') {
-    const normalized = normalizeUsageFrequency(value);
-    return normalized ? localize(ITEM_USAGE_FREQUENCY_LABEL_KEYS[normalized]) : '';
-  }
-  if (field.kind === 'activation-type') {
-    const normalized = String(value ?? '').trim() || 'passive';
-    return localize(ITEM_ACTIVATION_TYPE_LABEL_KEYS[normalized] ?? normalized);
-  }
-  return value ?? getFieldResetValue(field.kind);
-}
 
 function isBlankRow(row = {}) {
   return Object.values(row).every((value) => !normalizeOptionalString(value));
 }
 
 function getSheetColumnOrder(sheetConfig) {
-  return [...GOOGLE_SHEETS_SYNC_COMMON_COLUMNS, ...sheetConfig.fields.map((field) => field.column)];
+  return [...GEAR_CATALOG_SYNC_COMMON_COLUMNS, ...sheetConfig.fields.map((field) => field.column)];
 }
 
 function getRecognizedImportColumns(sheetConfig) {
-  return [...new Set([...getSheetColumnOrder(sheetConfig), ...GOOGLE_SHEETS_SYNC_LEGACY_IMPORT_COLUMNS])];
+  return [...new Set([...getSheetColumnOrder(sheetConfig), ...GEAR_CATALOG_SYNC_LEGACY_IMPORT_COLUMNS])];
 }
 
 function getSheetTypeLabels(sheetConfig) {
@@ -460,19 +414,19 @@ function getSheetTypeLabels(sheetConfig) {
 
 function getVisibleSheetColumns(sheetConfig) {
   return getSheetColumnOrder(sheetConfig).filter(
-    (column) => !GOOGLE_SHEETS_SYNC_HIDDEN_COLUMNS.has(column)
+    (column) => !GEAR_CATALOG_SYNC_HIDDEN_COLUMNS.has(column)
   );
 }
 
 function getVisibleSheetColumnLabels(sheetConfig) {
-  return getVisibleSheetColumns(sheetConfig).map((column) => getGoogleSheetsColumnLabel(column));
+  return getVisibleSheetColumns(sheetConfig).map((column) => getGearCatalogColumnLabel(column));
 }
 
 function getImportColumnAliasMap(sheetConfig) {
   const aliasMap = new Map();
   for (const column of getRecognizedImportColumns(sheetConfig)) {
     const aliases = [column];
-    const localizedLabel = getGoogleSheetsColumnLabel(column);
+    const localizedLabel = getGearCatalogColumnLabel(column);
     if (localizedLabel && localizedLabel !== column) aliases.push(localizedLabel);
 
     for (const alias of aliases) {
@@ -494,117 +448,13 @@ function normalizeImportedRow(row, sheetConfig) {
   }, {});
 }
 
-function buildExternalRow(internalRow, sheetConfig) {
-  return getSheetColumnOrder(sheetConfig).reduce((accumulator, column) => {
-    const exportedColumn = GOOGLE_SHEETS_SYNC_HIDDEN_COLUMNS.has(column)
-      ? column
-      : getGoogleSheetsColumnLabel(column);
-    accumulator[exportedColumn] = internalRow[column] ?? '';
-    return accumulator;
-  }, {});
-}
-
 function getSheetDisplayConfigs() {
-  return GOOGLE_SHEETS_SYNC_SHEET_CONFIGS.map((config) => ({
+  return GEAR_CATALOG_SYNC_SHEET_CONFIGS.map((config) => ({
     key: config.key,
     label: localize(config.labelKey),
     typeLabels: getSheetTypeLabels(config),
     columns: getVisibleSheetColumnLabels(config)
   }));
-}
-
-function buildExportRow(item) {
-  const sheetConfig = getSheetConfigForType(item.type);
-  if (!sheetConfig) return null;
-
-  const systemData = deepClone(item.system ?? {});
-  const row = {
-    syncId: getGoogleSheetsSyncId(item),
-    type: getItemLabel(String(item.type ?? '')),
-    name: String(item.name ?? ''),
-    ownerName: getLinkedActorName(item)
-  };
-
-  for (const field of sheetConfig.fields) {
-    row[field.column] = serializeFieldValue(systemData, field, item.type);
-  }
-  return row;
-}
-
-function summarizeSheets(sheets) {
-  return GOOGLE_SHEETS_SYNC_SHEET_CONFIGS.map((config) => ({
-    key: config.key,
-    label: localize(config.labelKey),
-    count: Array.isArray(sheets?.[config.key]) ? sheets[config.key].length : 0
-  }));
-}
-
-async function ensureWorldItemsHaveSyncIds() {
-  const updates = [];
-  for (const item of getAllWorldItems()) {
-    if (getGoogleSheetsSyncId(item)) continue;
-    updates.push({
-      _id: item.id,
-      [`flags.${MODULE_ID}.${GOOGLE_SHEETS_SYNC_ID_FLAG}`]: createGoogleSheetsSyncId()
-    });
-  }
-
-  if (!updates.length) return 0;
-
-  await Item.updateDocuments(updates, {
-    render: false,
-    [GOOGLE_SHEETS_SYNC_OPTION_KEY]: {
-      source: 'google-sheets-sync-ensure-id'
-    }
-  });
-
-  return updates.length;
-}
-
-function buildMetaPayload() {
-  return {
-    moduleId: MODULE_ID,
-    moduleVersion: String(game.system?.version ?? ''),
-    worldId: String(game.world?.id ?? ''),
-    worldTitle: String(game.world?.title ?? ''),
-    exportedAt: new Date().toISOString(),
-    itemTypes: Array.from(GOOGLE_SHEETS_SYNC_SUPPORTED_ITEM_TYPES),
-    sheetColumns: Object.fromEntries(
-      GOOGLE_SHEETS_SYNC_SHEET_CONFIGS.map((config) => [config.key, getVisibleSheetColumnLabels(config)])
-    ),
-    skillKeys: getSkillKeys(),
-    usageFrequencies: Array.from(GOOGLE_SHEETS_SYNC_ALLOWED_USAGE_FREQUENCIES),
-    activationTypes: Array.from(GOOGLE_SHEETS_SYNC_ALLOWED_ACTIVATION_TYPES)
-  };
-}
-
-function buildExportPayload() {
-  const sheets = Object.fromEntries(
-    GOOGLE_SHEETS_SYNC_SHEET_CONFIGS.map((config) => [config.key, []])
-  );
-  const items = [...getAllWorldItems()].sort((left, right) => {
-    const leftFolder = getFolderName(left);
-    const rightFolder = getFolderName(right);
-    if (leftFolder !== rightFolder) return leftFolder.localeCompare(rightFolder);
-
-    const leftSort = Number(left?.sort) || 0;
-    const rightSort = Number(right?.sort) || 0;
-    if (leftSort !== rightSort) return leftSort - rightSort;
-
-    return String(left?.name ?? '').localeCompare(String(right?.name ?? ''));
-  });
-
-  for (const item of items) {
-    const sheetConfig = getSheetConfigForType(item.type);
-    const row = buildExportRow(item);
-    if (!row || !sheetConfig) continue;
-    sheets[sheetConfig.key].push(buildExternalRow(row, sheetConfig));
-  }
-
-  return {
-    meta: buildMetaPayload(),
-    sheets
-  };
 }
 
 const GEAR_CATALOG_IMPORT_CONFIGS = [
@@ -634,7 +484,7 @@ function normalizeCatalogEntries(entries) {
     : [];
 }
 
-function getGearCatalogSyncId(catalogKey, entry) {
+function buildGearCatalogEntrySyncId(catalogKey, entry) {
   return `gear:${catalogKey}:${normalizeOptionalString(entry?.id)}`;
 }
 
@@ -694,7 +544,7 @@ function getGearCatalogActivationType(entry) {
   const activationType = normalizeOptionalString(
     getGearCatalogEffects(entry).find((effect) => effect?.activation?.type)?.activation?.type
   );
-  if (GOOGLE_SHEETS_SYNC_ALLOWED_ACTIVATION_TYPES.has(activationType)) return activationType;
+  if (GEAR_CATALOG_SYNC_ALLOWED_ACTIVATION_TYPES.has(activationType)) return activationType;
   if (activationType === 'freeAction') return 'action';
   return 'passive';
 }
@@ -772,12 +622,12 @@ function buildGearCatalogSystemData(entry, config) {
 function buildGearCatalogImportRow(entry, config) {
   const systemData = buildGearCatalogSystemData(entry, config);
   const row = {
-    syncId: getGearCatalogSyncId(config.catalogKey, entry),
+    syncId: buildGearCatalogEntrySyncId(config.catalogKey, entry),
     type: config.itemType,
     name: normalizeString(entry?.name),
     ownerName: '',
     folderPath: getGearCatalogFolderPath(entry, config),
-    [GOOGLE_SHEETS_SYNC_SYSTEM_JSON_COLUMN]: stableStringify(systemData),
+    [GEAR_CATALOG_SYNC_SYSTEM_JSON_COLUMN]: stableStringify(systemData),
     'system.rank': systemData.rank ?? '',
     'system.description': systemData.description ?? ''
   };
@@ -829,110 +679,13 @@ async function fetchGearCatalog(filename) {
   });
   if (!response.ok) {
     throw new Error(
-      game.i18n.format('MY_RPG.GoogleSheetsSync.Errors.CatalogFetchFailed', {
+      game.i18n.format('MY_RPG.GearCatalogSync.Errors.CatalogFetchFailed', {
         file: filename,
         status: response.status
       })
     );
   }
   return response.json();
-}
-
-function getGoogleSheetsSyncSettings() {
-  return {
-    endpointUrl: normalizeOptionalString(
-      game.settings.get(MODULE_ID, GOOGLE_SHEETS_SYNC_ENDPOINT_SETTING)
-    ),
-    token: normalizeString(game.settings.get(MODULE_ID, GOOGLE_SHEETS_SYNC_TOKEN_SETTING)),
-    timeoutMs: Math.max(
-      Number(game.settings.get(MODULE_ID, GOOGLE_SHEETS_SYNC_TIMEOUT_SETTING)) || 15000,
-      1000
-    )
-  };
-}
-
-async function saveGoogleSheetsSyncSettings(settings = {}) {
-  const endpointUrl = normalizeOptionalString(settings.endpointUrl);
-  const token = normalizeString(settings.token);
-  const timeoutMs = Math.max(Number(settings.timeoutMs) || 15000, 1000);
-
-  await game.settings.set(MODULE_ID, GOOGLE_SHEETS_SYNC_ENDPOINT_SETTING, endpointUrl);
-  await game.settings.set(MODULE_ID, GOOGLE_SHEETS_SYNC_TOKEN_SETTING, token);
-  await game.settings.set(MODULE_ID, GOOGLE_SHEETS_SYNC_TIMEOUT_SETTING, timeoutMs);
-
-  return { endpointUrl, token, timeoutMs };
-}
-
-async function waitForPromise(promise, timeoutMs) {
-  let timeoutHandle = null;
-  const timeoutPromise = new Promise((_, reject) => {
-    timeoutHandle = setTimeout(() => {
-      reject(
-        new Error(
-          game.i18n.format('MY_RPG.GoogleSheetsSync.Errors.RequestTimeout', {
-            seconds: Math.ceil(timeoutMs / 1000)
-          })
-        )
-      );
-    }, timeoutMs);
-  });
-
-  try {
-    return await Promise.race([promise, timeoutPromise]);
-  } finally {
-    if (timeoutHandle) clearTimeout(timeoutHandle);
-  }
-}
-
-async function requestGoogleSheets(action, payload = {}, settings = null) {
-  const resolvedSettings = settings ?? getGoogleSheetsSyncSettings();
-  if (!resolvedSettings.endpointUrl) {
-    throw new Error(localize('MY_RPG.GoogleSheetsSync.Errors.MissingEndpoint'));
-  }
-
-  const response = await waitForPromise(
-    fetch(resolvedSettings.endpointUrl, {
-      method: 'POST',
-      headers: {
-        // Apps Script web apps reject OPTIONS preflight requests with 405.
-        // Sending JSON as text/plain keeps this as a simple CORS request.
-        'Content-Type': 'text/plain;charset=utf-8'
-      },
-      body: JSON.stringify({
-        action,
-        token: resolvedSettings.token,
-        payload
-      })
-    }),
-    resolvedSettings.timeoutMs
-  );
-
-  if (!response.ok) {
-    throw new Error(
-      game.i18n.format('MY_RPG.GoogleSheetsSync.Errors.HttpError', {
-        status: response.status
-      })
-    );
-  }
-
-  let parsed = null;
-  try {
-    parsed = await response.json();
-  } catch (error) {
-    throw new Error(
-      game.i18n.format('MY_RPG.GoogleSheetsSync.Errors.InvalidResponse', {
-        error: error?.message ?? 'JSON parse error'
-      })
-    );
-  }
-
-  if (parsed?.ok === false) {
-    throw new Error(
-      String(parsed?.message ?? localize('MY_RPG.GoogleSheetsSync.Errors.RemoteError'))
-    );
-  }
-
-  return parsed;
 }
 
 function getItemMaps() {
@@ -942,7 +695,7 @@ function getItemMaps() {
 
   for (const item of getAllWorldItems()) {
     byId.set(String(item.id ?? ''), item);
-    const syncId = getGoogleSheetsSyncId(item);
+    const syncId = getGearCatalogSyncId(item);
     if (syncId) bySyncId.set(syncId, item);
     const nameTypeKey = `${String(item.type ?? '')}\u0000${normalizeLookupValue(item.name)}`;
     if (!byNameAndType.has(nameTypeKey)) byNameAndType.set(nameTypeKey, item);
@@ -986,7 +739,7 @@ function resolveFolderSpec(row, item) {
     const existingById = folders.find((folder) => folder.id === folderId);
     if (!existingById) {
       throw new Error(
-        game.i18n.format('MY_RPG.GoogleSheetsSync.Errors.UnknownFolderId', { id: folderId })
+        game.i18n.format('MY_RPG.GearCatalogSync.Errors.UnknownFolderId', { id: folderId })
       );
     }
     return { folderId: existingById.id, createFolderName: '', folderPath: [] };
@@ -1066,9 +819,9 @@ function resolveCandidateFolderId(folderSpec = {}) {
 function ensureSyncIdForRow(row, item) {
   const rowSyncId = normalizeOptionalString(row.syncId);
   if (rowSyncId) return rowSyncId;
-  const itemSyncId = getGoogleSheetsSyncId(item);
+  const itemSyncId = getGearCatalogSyncId(item);
   if (itemSyncId) return itemSyncId;
-  return createGoogleSheetsSyncId();
+  return createGearCatalogSyncId();
 }
 
 function buildImportDataForRow(row, sheetConfig, item) {
@@ -1076,20 +829,20 @@ function buildImportDataForRow(row, sheetConfig, item) {
   validateTypeForSheet(sheetConfig, type);
 
   const systemData = (() => {
-    const hasSystemJson = Object.hasOwn(row, GOOGLE_SHEETS_SYNC_SYSTEM_JSON_COLUMN);
+    const hasSystemJson = Object.hasOwn(row, GEAR_CATALOG_SYNC_SYSTEM_JSON_COLUMN);
     if (!hasSystemJson) {
       return deepClone(item?.system ?? {});
     }
 
     const parsed = parseJsonValue(
-      row[GOOGLE_SHEETS_SYNC_SYSTEM_JSON_COLUMN],
+      row[GEAR_CATALOG_SYNC_SYSTEM_JSON_COLUMN],
       item?.system ?? {},
-      GOOGLE_SHEETS_SYNC_SYSTEM_JSON_COLUMN
+      GEAR_CATALOG_SYNC_SYSTEM_JSON_COLUMN
     );
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
       throw new Error(
-        game.i18n.format('MY_RPG.GoogleSheetsSync.Errors.ExpectedObject', {
-          field: GOOGLE_SHEETS_SYNC_SYSTEM_JSON_COLUMN
+        game.i18n.format('MY_RPG.GearCatalogSync.Errors.ExpectedObject', {
+          field: GEAR_CATALOG_SYNC_SYSTEM_JSON_COLUMN
         })
       );
     }
@@ -1136,7 +889,7 @@ function buildCreateDocumentData(importData, resolvedFolderId) {
     system: importData.system,
     flags: {
       [MODULE_ID]: {
-        [GOOGLE_SHEETS_SYNC_ID_FLAG]: importData.syncId
+        [GEAR_CATALOG_SYNC_ID_FLAG]: importData.syncId
       }
     }
   };
@@ -1150,7 +903,7 @@ function buildUpdateDocumentData(item, importData, resolvedFolderId) {
     folder: resolvedFolderId || null,
     sort: importData.sort,
     system: importData.system,
-    [`flags.${MODULE_ID}.${GOOGLE_SHEETS_SYNC_ID_FLAG}`]: importData.syncId
+    [`flags.${MODULE_ID}.${GEAR_CATALOG_SYNC_ID_FLAG}`]: importData.syncId
   };
 }
 
@@ -1186,7 +939,7 @@ function hasActorLinkMetadata(row) {
 
 async function buildImportPlan(remoteSheets = {}) {
   const summary = createPlanSummary();
-  const perSheet = GOOGLE_SHEETS_SYNC_SHEET_CONFIGS.map((config) => ({
+  const perSheet = GEAR_CATALOG_SYNC_SHEET_CONFIGS.map((config) => ({
     key: config.key,
     label: localize(config.labelKey),
     ...createPlanSummary()
@@ -1199,7 +952,7 @@ async function buildImportPlan(remoteSheets = {}) {
   const seenSyncIds = new Set();
   const { bySyncId, byId, byNameAndType } = getItemMaps();
 
-  for (const sheetConfig of GOOGLE_SHEETS_SYNC_SHEET_CONFIGS) {
+  for (const sheetConfig of GEAR_CATALOG_SYNC_SHEET_CONFIGS) {
     const rows = Array.isArray(remoteSheets?.[sheetConfig.key])
       ? remoteSheets[sheetConfig.key]
       : [];
@@ -1218,14 +971,14 @@ async function buildImportPlan(remoteSheets = {}) {
           rowNumber,
           mode: 'skip',
           rowLabel,
-          message: localize('MY_RPG.GoogleSheetsSync.Messages.BlankRowSkipped')
+          message: localize('MY_RPG.GearCatalogSync.Messages.BlankRowSkipped')
         });
         continue;
       }
 
       const status = normalizeOptionalString(row.status).toLowerCase() || 'active';
-      if (!GOOGLE_SHEETS_SYNC_ROW_STATUSES.has(status)) {
-        const errorMessage = game.i18n.format('MY_RPG.GoogleSheetsSync.Errors.InvalidStatus', {
+      if (!GEAR_CATALOG_SYNC_ROW_STATUSES.has(status)) {
+        const errorMessage = game.i18n.format('MY_RPG.GearCatalogSync.Errors.InvalidStatus', {
           status: normalizeOptionalString(row.status)
         });
         errors.push(`${rowLabel}: ${errorMessage}`);
@@ -1235,7 +988,7 @@ async function buildImportPlan(remoteSheets = {}) {
       }
 
       if (status === 'delete') {
-        warnings.push(`${rowLabel}: ${localize('MY_RPG.GoogleSheetsSync.Messages.DeleteSkipped')}`);
+        warnings.push(`${rowLabel}: ${localize('MY_RPG.GearCatalogSync.Messages.DeleteSkipped')}`);
         addPlanCounter(summary, 'skip');
         addPlanCounter(sheetSummary, 'skip');
         operations.push({
@@ -1243,7 +996,7 @@ async function buildImportPlan(remoteSheets = {}) {
           rowNumber,
           mode: 'skip',
           rowLabel,
-          message: localize('MY_RPG.GoogleSheetsSync.Messages.DeleteSkipped')
+          message: localize('MY_RPG.GearCatalogSync.Messages.DeleteSkipped')
         });
         continue;
       }
@@ -1265,7 +1018,7 @@ async function buildImportPlan(remoteSheets = {}) {
         null;
 
       if (!item && hasActorLinkMetadata(row)) {
-        const errorMessage = localize('MY_RPG.GoogleSheetsSync.Errors.ActorLinkedCreateBlocked');
+        const errorMessage = localize('MY_RPG.GearCatalogSync.Errors.ActorLinkedCreateBlocked');
         errors.push(`${rowLabel}: ${errorMessage}`);
         addPlanCounter(summary, 'error');
         addPlanCounter(sheetSummary, 'error');
@@ -1276,7 +1029,7 @@ async function buildImportPlan(remoteSheets = {}) {
         const requestedType = normalizeItemTypeValue(row.type) || item.type;
         if (requestedType !== item.type) {
           const errorMessage = game.i18n.format(
-            'MY_RPG.GoogleSheetsSync.Errors.TypeChangeBlocked',
+            'MY_RPG.GearCatalogSync.Errors.TypeChangeBlocked',
             {
               currentType: getItemLabel(item.type),
               requestedType: getItemLabel(requestedType)
@@ -1335,7 +1088,7 @@ async function buildImportPlan(remoteSheets = {}) {
             rowLabel,
             item,
             importData,
-            message: localize('MY_RPG.GoogleSheetsSync.Messages.NoChanges')
+            message: localize('MY_RPG.GearCatalogSync.Messages.NoChanges')
           });
           continue;
         }
@@ -1365,7 +1118,7 @@ async function buildImportPlan(remoteSheets = {}) {
   if (duplicateSyncIds.size) {
     summary.error += duplicateSyncIds.size;
     errors.push(
-      game.i18n.format('MY_RPG.GoogleSheetsSync.Errors.DuplicateSyncIds', {
+      game.i18n.format('MY_RPG.GearCatalogSync.Errors.DuplicateSyncIds', {
         ids: [...duplicateSyncIds].join(', ')
       })
     );
@@ -1513,7 +1266,7 @@ async function applyImportPlan(plan) {
   };
 }
 
-async function readGoogleSheetsRows(settings = null) {
+async function readGearCatalogRows(settings = null) {
   void settings;
   const catalogs = Object.fromEntries(
     await Promise.all(
@@ -1524,10 +1277,12 @@ async function readGoogleSheetsRows(settings = null) {
     )
   );
   const remoteData = buildGearCatalogRemoteDataFromCatalogs(catalogs);
+  const sourceHash = getGearCatalogSourceHash(remoteData.sheets);
   return {
+    sourceHash,
     meta: remoteData.meta,
     sheets: Object.fromEntries(
-      GOOGLE_SHEETS_SYNC_SHEET_CONFIGS.map((config) => [
+      GEAR_CATALOG_SYNC_SHEET_CONFIGS.map((config) => [
         config.key,
         Array.isArray(remoteData.sheets?.[config.key])
           ? remoteData.sheets[config.key].map((row) => normalizeImportedRow(row, config))
@@ -1537,38 +1292,20 @@ async function readGoogleSheetsRows(settings = null) {
   };
 }
 
-async function exportWorldItemsToGoogleSheets(settings = null) {
+async function previewGearCatalogImport(settings = null) {
   ensurePrimaryActiveGM();
-  const ensuredSyncIds = await ensureWorldItemsHaveSyncIds();
-  const payload = buildExportPayload();
-  const response = await requestGoogleSheets('export', payload, settings);
-
-  debugLog('Exported world items to Google Sheets', {
-    ensuredSyncIds,
-    summary: summarizeSheets(payload.sheets)
-  });
-
-  return {
-    ensuredSyncIds,
-    payload,
-    response,
-    summary: summarizeSheets(payload.sheets)
-  };
-}
-
-async function previewGoogleSheetsImport(settings = null) {
-  ensurePrimaryActiveGM();
-  const remoteData = await readGoogleSheetsRows(settings);
+  const remoteData = await readGearCatalogRows(settings);
   const plan = await buildImportPlan(remoteData.sheets);
   return {
     remoteData,
+    sourceHash: remoteData.sourceHash,
     plan
   };
 }
 
-async function applyGoogleSheetsImport(settings = null) {
+async function applyGearCatalogImport(settings = null) {
   ensurePrimaryActiveGM();
-  const remoteData = await readGoogleSheetsRows(settings);
+  const remoteData = await readGearCatalogRows(settings);
   const plan = await buildImportPlan(remoteData.sheets);
 
   if (
@@ -1576,6 +1313,7 @@ async function applyGoogleSheetsImport(settings = null) {
   ) {
     return {
       remoteData,
+      sourceHash: remoteData.sourceHash,
       plan,
       applied: {
         createdCount: 0,
@@ -1587,29 +1325,28 @@ async function applyGoogleSheetsImport(settings = null) {
 
   const applied = await applyImportPlan(plan);
 
-  debugLog('Imported world items from Google Sheets', {
+  debugLog('Imported world items from gear catalog', {
     applied,
     summary: plan.summary
   });
 
   return {
     remoteData,
+    sourceHash: remoteData.sourceHash,
     plan,
     applied
   };
 }
 
 export {
-  GOOGLE_SHEETS_SYNC_COMMON_COLUMNS,
-  GOOGLE_SHEETS_SYNC_ID_FLAG,
-  GOOGLE_SHEETS_SYNC_SHEET_CONFIGS,
-  GOOGLE_SHEETS_SYNC_SYSTEM_JSON_COLUMN,
-  applyGoogleSheetsImport,
+  GEAR_CATALOG_SYNC_COMMON_COLUMNS,
+  GEAR_CATALOG_SYNC_ID_FLAG,
+  GEAR_CATALOG_SYNC_SHEET_CONFIGS,
+  GEAR_CATALOG_SYNC_SYSTEM_JSON_COLUMN,
+  applyGearCatalogImport,
   buildGearCatalogRemoteDataFromCatalogs,
-  exportWorldItemsToGoogleSheets,
-  getGoogleSheetsSyncId,
-  getGoogleSheetsSyncSettings,
+  getGearCatalogSourceHash,
+  getGearCatalogSyncId,
   getSheetDisplayConfigs,
-  previewGoogleSheetsImport,
-  saveGoogleSheetsSyncSettings
+  previewGearCatalogImport
 };

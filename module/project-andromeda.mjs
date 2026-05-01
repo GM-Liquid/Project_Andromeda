@@ -1,5 +1,4 @@
 // Import document classes.
-import { GoogleSheetsSyncApp } from './apps/google-sheets-sync-app.mjs';
 import { ProjectAndromedaActor } from './documents/actor.mjs';
 import { ProjectAndromedaItem } from './documents/item.mjs';
 // Import sheet classes.
@@ -12,6 +11,7 @@ import { ITEM_SHEET_CLASSES } from './sheets/item-sheet.mjs';
 // Import helper/utility classes and constants.
 import { preloadHandlebarsTemplates } from './helpers/templates.mjs';
 import {
+  GEAR_CATALOG_AUTO_SYNC_STATE_SETTING,
   GM_HERO_POOL_SETTING,
   LEGACY_EQUIPMENT_TYPE_MIGRATION_SETTING,
   LEGACY_EQUIPMENT_TYPE_MIGRATION_VERSION,
@@ -37,6 +37,7 @@ import {
 } from './helpers/actor-types.mjs';
 import { SessionStatsService } from './helpers/session-stats.mjs';
 import { buildRollRerollSpec, rerollRollPreservingContext } from './helpers/roll-reroll.mjs';
+import { applyGearCatalogImport } from './helpers/gear-catalog-sync.mjs';
 import {
   ensureActorItemLibraryLink,
   getLibraryItemUuid,
@@ -1424,6 +1425,50 @@ async function purgeObsoleteCartridgeData() {
   }
 }
 
+function getGearCatalogAutoSyncState() {
+  const state = game.settings.get(MODULE_ID, GEAR_CATALOG_AUTO_SYNC_STATE_SETTING) ?? {};
+  return {
+    sourceHash: String(state?.sourceHash ?? '').trim(),
+    systemVersion: String(state?.systemVersion ?? '').trim()
+  };
+}
+
+async function setGearCatalogAutoSyncState(nextState) {
+  await game.settings.set(MODULE_ID, GEAR_CATALOG_AUTO_SYNC_STATE_SETTING, {
+    sourceHash: String(nextState?.sourceHash ?? '').trim(),
+    systemVersion: String(nextState?.systemVersion ?? '').trim()
+  });
+}
+
+async function runGearCatalogAutoSyncIfNeeded() {
+  if (!isPrimaryActiveGM()) return null;
+
+  const previousState = getGearCatalogAutoSyncState();
+  const currentSystemVersion = String(game.system?.version ?? '').trim();
+  const result = await applyGearCatalogImport();
+  const sourceHash = String(result?.sourceHash ?? '').trim();
+
+  if (
+    sourceHash &&
+    (sourceHash !== previousState.sourceHash || currentSystemVersion !== previousState.systemVersion)
+  ) {
+    await setGearCatalogAutoSyncState({
+      sourceHash,
+      systemVersion: currentSystemVersion
+    });
+  }
+
+  debugLog('Gear catalog auto sync completed', {
+    previousState,
+    sourceHash,
+    systemVersion: currentSystemVersion,
+    summary: result?.plan?.summary ?? null,
+    applied: result?.applied ?? null
+  });
+
+  return result;
+}
+
 /* -------------------------------------------- */
 /*  Init Hook                                   */
 /* -------------------------------------------- */
@@ -1449,14 +1494,6 @@ Hooks.once('init', function () {
   CONFIG.ProjectAndromeda = PROJECT_ANDROMEDA;
 
   registerSystemSettings();
-  game.settings.registerMenu(MODULE_ID, 'googleSheetsSyncMenu', {
-    name: 'MY_RPG.Settings.GoogleSheetsSync.Name',
-    hint: 'MY_RPG.Settings.GoogleSheetsSync.Hint',
-    label: 'MY_RPG.Settings.GoogleSheetsSync.Label',
-    icon: 'fas fa-table',
-    type: GoogleSheetsSyncApp,
-    restricted: true
-  });
 
   // Define custom Document classes
   CONFIG.Actor.documentClass = ProjectAndromedaActor;
@@ -1736,6 +1773,7 @@ Hooks.once('ready', async function () {
     await runLegacyTraitTypeMigrationIfNeeded();
     await purgeObsoleteCartridgeData();
     await runItemLibraryMigrationIfNeeded();
+    await runGearCatalogAutoSyncIfNeeded();
   } else {
     await purgeObsoleteCartridgeData();
   }

@@ -4,7 +4,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
-const syncModule = await import('../helpers/google-sheets-sync.mjs');
+const syncModule = await import('../helpers/gear-catalog-sync.mjs');
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..', '..');
 
@@ -153,19 +153,19 @@ test('gear catalog import groups rows by type and rank folders', () => {
 });
 
 test('import planner resolves existing folder paths before diffing folder changes', () => {
-  const helper = readText('module/helpers/google-sheets-sync.mjs');
+  const helper = readText('module/helpers/gear-catalog-sync.mjs');
 
   assert.match(helper, /function resolveCandidateFolderId/);
   assert.match(helper, /const candidateFolderId = resolveCandidateFolderId\(importData\.folderSpec\)/);
   assert.match(helper, /folderSpec\.folderPath\?\.length && !candidateFolderId/);
 });
 
-test('sync application no longer exposes Google Sheets transport controls', () => {
-  const template = readText('templates/apps/google-sheets-sync.hbs');
-  const app = readText('module/apps/google-sheets-sync-app.mjs');
+test('sync application no longer exposes gear catalog transport controls', () => {
+  const template = readText('templates/apps/gear-catalog-sync.hbs');
+  const app = readText('module/apps/gear-catalog-sync-app.mjs');
 
   assert.doesNotMatch(template, /endpointUrl|token|timeoutMs|data-action='export'/);
-  assert.doesNotMatch(app, /exportWorldItemsToGoogleSheets|getGoogleSheetsSyncSettings/);
-  assert.match(app, /previewGoogleSheetsImport/);
-  assert.match(app, /applyGoogleSheetsImport/);
+  assert.doesNotMatch(app, /exportWorldItemsToGearCatalog|getGearCatalogSyncSettings/);
+  assert.match(app, /previewGearCatalogImport/);
+  assert.match(app, /applyGearCatalogImport/);
 });

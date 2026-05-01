@@ -20,7 +20,7 @@
         "Name": "Debug Mode",
         "Hint": "Enable verbose Project Andromeda diagnostics in the browser console."
       },
-      "GoogleSheetsSync": {
+      "GearCatalogSync": {
         "Name": "Gear Catalog Item Sync",
         "Hint": "Import world items from the packaged gear catalog JSON files.",
         "Label": "Open Catalog Sync"
@@ -362,7 +362,7 @@
       "DeleteTitle": "Delete {type}",
       "DeleteContent": "Are you sure you want to delete {name}? This action cannot be undone."
     },
-    "GoogleSheetsSync": {
+    "GearCatalogSync": {
       "Title": "Gear Catalog Item Sync",
       "Intro": "Use this window to preview and import world items from the packaged armor, equipment, and abilities JSON catalogs.",
       "IntroNote": "The import updates world Items in place when it can match an existing item by catalog sync id or by exact name and type. Linked actor items are refreshed through the existing library sync.",
@@ -375,14 +375,7 @@
       "Warnings": "Warnings",
       "ErrorsTitle": "Errors",
       "Details": "Details",
-      "Fields": {
-        "EndpointUrl": "Apps Script Web App URL",
-        "Token": "Shared token",
-        "TimeoutMs": "Request timeout (ms)"
-      },
       "Actions": {
-        "SaveSettings": "Save Settings",
-        "Export": "Export to Sheets",
         "Preview": "Preview Import",
         "Apply": "Apply Import",
         "Clear": "Clear Report"
@@ -422,8 +415,6 @@
       },
       "Messages": {
         "Working": "Working...",
-        "SettingsSaved": "Catalog sync settings saved.",
-        "ExportComplete": "Export completed.",
         "PreviewReady": "Import preview is ready.",
         "ApplyComplete": "Import completed.",
         "LastRun": "Last Run",
@@ -444,10 +435,6 @@
         "ExportedAt": "Exported at: {value}",
         "ModuleVersion": "Module version: {value}"
       },
-      "Export": {
-        "EnsuredSyncIds": "Items that received a new syncId before export: {count}",
-        "SheetCount": "{sheet}: {count} rows exported"
-      },
       "Apply": {
         "Created": "World items created: {count}",
         "Updated": "World items updated: {count}",
@@ -455,12 +442,6 @@
       },
       "Errors": {
         "RequirePrimaryGM": "Only the primary active GM can run gear catalog import.",
-        "MissingEndpoint": "Set the Apps Script Web App URL before using the sync tool.",
-        "RequestTimeout": "The request timed out after {seconds} seconds.",
-        "HttpError": "The Google Sheets endpoint returned HTTP {status}.",
-        "InvalidResponse": "The endpoint returned an unreadable JSON response: {error}",
-        "RemoteError": "The Google Sheets endpoint returned an error.",
-        "MissingSheetsPayload": "The endpoint response does not contain a sheets payload.",
         "CatalogFetchFailed": "Could not load {file} from the packaged gear catalog. HTTP status: {status}.",
         "InvalidJson": "{field} contains invalid JSON: {error}",
         "UnsupportedItemType": "Unsupported item type: {type}",
@@ -471,7 +452,7 @@
         "ExpectedArray": "{field} must contain a JSON array.",
         "ExpectedObject": "{field} must contain a JSON object.",
         "InvalidStatus": "Unsupported row status: {status}",
-        "ActorLinkedCreateBlocked": "New actor-linked library items cannot be created from Google Sheets in the MVP.",
+        "ActorLinkedCreateBlocked": "New actor-linked library items cannot be created from gear catalog in the MVP.",
         "TypeChangeBlocked": "Changing item type during import is blocked. Current type: {currentType}. Requested type: {requestedType}.",
         "UnknownFolderId": "Unknown Item folder id: {id}",
         "DuplicateSyncIds": "Duplicate syncId values were found in the import data: {ids}"

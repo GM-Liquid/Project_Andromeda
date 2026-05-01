@@ -44,12 +44,12 @@ test('core localizations define the new protection labels and remove the legacy 
   assert.equal(ru.Temp.BonusControlLabel, 'Врем. Контроль');
   assert.equal(ru.Temp.BonusWillLabel, 'Врем. Воля');
 
-  assert.equal(en.GoogleSheetsSync.Headers.ItemFortitude, 'Fortitude');
-  assert.equal(en.GoogleSheetsSync.Headers.ItemControl, 'Control');
-  assert.equal(en.GoogleSheetsSync.Headers.ItemWill, 'Will');
-  assert.equal(ru.GoogleSheetsSync.Headers.ItemFortitude, 'Стойкость');
-  assert.equal(ru.GoogleSheetsSync.Headers.ItemControl, 'Контроль');
-  assert.equal(ru.GoogleSheetsSync.Headers.ItemWill, 'Воля');
+  assert.equal(en.GearCatalogSync.Headers.ItemFortitude, 'Fortitude');
+  assert.equal(en.GearCatalogSync.Headers.ItemControl, 'Control');
+  assert.equal(en.GearCatalogSync.Headers.ItemWill, 'Will');
+  assert.equal(ru.GearCatalogSync.Headers.ItemFortitude, 'Стойкость');
+  assert.equal(ru.GearCatalogSync.Headers.ItemControl, 'Контроль');
+  assert.equal(ru.GearCatalogSync.Headers.ItemWill, 'Воля');
 
   assert.equal('PhysicalLabel' in en.Defenses, false);
   assert.equal('MagicalLabel' in en.Defenses, false);
@@ -60,9 +60,9 @@ test('core localizations define the new protection labels and remove the legacy 
   assert.equal('BonusPhysicalLabel' in en.Temp, false);
   assert.equal('BonusMagicalLabel' in en.Temp, false);
   assert.equal('BonusPsychicLabel' in en.Temp, false);
-  assert.equal('ItemPhys' in en.GoogleSheetsSync.Headers, false);
-  assert.equal('ItemAzure' in en.GoogleSheetsSync.Headers, false);
-  assert.equal('ItemMental' in en.GoogleSheetsSync.Headers, false);
+  assert.equal('ItemPhys' in en.GearCatalogSync.Headers, false);
+  assert.equal('ItemAzure' in en.GearCatalogSync.Headers, false);
+  assert.equal('ItemMental' in en.GearCatalogSync.Headers, false);
 });
 
 test('templates and helpers reference only the new protection label keys', () => {
@@ -70,7 +70,7 @@ test('templates and helpers reference only the new protection label keys', () =>
   const armorSheet = readText('templates/item/armor-sheet.hbs');
   const itemConfig = readText('module/helpers/item-config.mjs');
   const actorSheetClass = readText('module/sheets/actor-sheet.mjs');
-  const googleSheetsSync = readText('module/helpers/google-sheets-sync.mjs');
+  const gearCatalogSync = readText('module/helpers/gear-catalog-sync.mjs');
 
   assert.match(actorSheet, /MY_RPG\.Defenses\.FortitudeLabel/);
   assert.match(actorSheet, /MY_RPG\.Defenses\.ControlLabel/);
@@ -97,10 +97,10 @@ test('templates and helpers reference only the new protection label keys', () =>
   assert.match(actorSheetClass, /MY_RPG\.ArmorItem\.BonusWillLabel/);
   assert.doesNotMatch(actorSheetClass, /MY_RPG\.ArmorItem\.Bonus(Physical|Magical|Psychic)Label/);
 
-  assert.match(googleSheetsSync, /MY_RPG\.GoogleSheetsSync\.Headers\.ItemFortitude/);
-  assert.match(googleSheetsSync, /MY_RPG\.GoogleSheetsSync\.Headers\.ItemControl/);
-  assert.match(googleSheetsSync, /MY_RPG\.GoogleSheetsSync\.Headers\.ItemWill/);
-  assert.doesNotMatch(googleSheetsSync, /MY_RPG\.GoogleSheetsSync\.Headers\.Item(Phys|Azure|Mental)/);
+  assert.match(gearCatalogSync, /MY_RPG\.GearCatalogSync\.Headers\.ItemFortitude/);
+  assert.match(gearCatalogSync, /MY_RPG\.GearCatalogSync\.Headers\.ItemControl/);
+  assert.match(gearCatalogSync, /MY_RPG\.GearCatalogSync\.Headers\.ItemWill/);
+  assert.doesNotMatch(gearCatalogSync, /MY_RPG\.GearCatalogSync\.Headers\.Item(Phys|Azure|Mental)/);
 });
 
 test('the main system no longer imports or ships the temporary protection-label override file', () => {

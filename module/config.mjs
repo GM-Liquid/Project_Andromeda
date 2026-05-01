@@ -2,15 +2,13 @@ import { PROJECT_ANDROMEDA } from './helpers/config.mjs';
 
 export const MODULE_ID = 'project-andromeda';
 export const GM_HERO_POOL_SETTING = 'gmHeroPool';
+export const GEAR_CATALOG_AUTO_SYNC_STATE_SETTING = 'gearCatalogAutoSyncState';
 export const ITEM_LIBRARY_SYNC_MIGRATION_SETTING = 'itemLibrarySyncMigrationVersion';
 export const ITEM_LIBRARY_SYNC_MIGRATION_VERSION = 7;
 export const LEGACY_EQUIPMENT_TYPE_MIGRATION_SETTING = 'legacyEquipmentTypeMigrationVersion';
 export const LEGACY_EQUIPMENT_TYPE_MIGRATION_VERSION = 4;
 export const LEGACY_TRAIT_TYPE_MIGRATION_SETTING = 'legacyTraitTypeMigrationVersion';
 export const LEGACY_TRAIT_TYPE_MIGRATION_VERSION = 2;
-export const GOOGLE_SHEETS_SYNC_ENDPOINT_SETTING = 'googleSheetsSyncEndpointUrl';
-export const GOOGLE_SHEETS_SYNC_TOKEN_SETTING = 'googleSheetsSyncToken';
-export const GOOGLE_SHEETS_SYNC_TIMEOUT_SETTING = 'googleSheetsSyncTimeoutMs';
 
 export function registerSystemSettings() {
   game.settings.register(MODULE_ID, 'debugMode', {
@@ -34,6 +32,16 @@ export function registerSystemSettings() {
     config: false,
     type: Number,
     default: 0
+  });
+
+  game.settings.register(MODULE_ID, GEAR_CATALOG_AUTO_SYNC_STATE_SETTING, {
+    scope: 'world',
+    config: false,
+    type: Object,
+    default: {
+      sourceHash: '',
+      systemVersion: ''
+    }
   });
 
   game.settings.register(MODULE_ID, 'sessionTrackerHistory', {
@@ -76,27 +84,6 @@ export function registerSystemSettings() {
     config: false,
     type: Number,
     default: 0
-  });
-
-  game.settings.register(MODULE_ID, GOOGLE_SHEETS_SYNC_ENDPOINT_SETTING, {
-    scope: 'world',
-    config: false,
-    type: String,
-    default: ''
-  });
-
-  game.settings.register(MODULE_ID, GOOGLE_SHEETS_SYNC_TOKEN_SETTING, {
-    scope: 'world',
-    config: false,
-    type: String,
-    default: ''
-  });
-
-  game.settings.register(MODULE_ID, GOOGLE_SHEETS_SYNC_TIMEOUT_SETTING, {
-    scope: 'world',
-    config: false,
-    type: Number,
-    default: 15000
   });
 }
 

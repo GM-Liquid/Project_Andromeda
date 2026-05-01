@@ -20,7 +20,7 @@
         "Name": "Режим отладки",
         "Hint": "Включает расширенные диагностические сообщения Project Andromeda в консоли браузера."
       },
-      "GoogleSheetsSync": {
+      "GearCatalogSync": {
         "Name": "Синхронизация предметов с каталогом снаряжения",
         "Hint": "Импортирует world Items из JSON-каталогов снаряжения, включенных в систему.",
         "Label": "Открыть синхронизацию каталога"
@@ -218,7 +218,7 @@
       "Inzheneriya": "Инженерия",
       "Dominirovanie": "Доминирование",
       "Rezonans": "Резонанс",
-      "Mistika": "\u041c\u0438\u0441\u0442\u0438\u043a\u0430",
+      "Mistika": "Мистика",
       "Obayanie": "Обаяние"
     },
     "Biography": {
@@ -362,7 +362,7 @@
       "DeleteTitle": "Удалить {type}",
       "DeleteContent": "Вы уверены, что хотите удалить {name}? Это действие нельзя отменить."
     },
-    "GoogleSheetsSync": {
+    "GearCatalogSync": {
       "Title": "Синхронизация предметов с каталогом снаряжения",
       "Intro": "Это окно показывает и импортирует world Items из JSON-каталогов брони, снаряжения и способностей.",
       "IntroNote": "Импорт обновляет world Items на месте, если находит существующий предмет по catalog sync id или точному совпадению названия и типа. Связанные предметы на листах персонажей обновляются через существующую library-sync.",
@@ -375,14 +375,7 @@
       "Warnings": "Предупреждения",
       "ErrorsTitle": "Ошибки",
       "Details": "Подробности",
-      "Fields": {
-        "EndpointUrl": "URL веб-приложения Apps Script",
-        "Token": "Общий токен",
-        "TimeoutMs": "Таймаут запроса (мс)"
-      },
       "Actions": {
-        "SaveSettings": "Сохранить настройки",
-        "Export": "Экспорт в Sheets",
         "Preview": "Предпросмотр импорта",
         "Apply": "Применить импорт",
         "Clear": "Очистить отчёт"
@@ -422,8 +415,6 @@
       },
       "Messages": {
         "Working": "Идёт выполнение...",
-        "SettingsSaved": "Настройки синхронизации каталога сохранены.",
-        "ExportComplete": "Экспорт завершён.",
         "PreviewReady": "Предпросмотр импорта готов.",
         "ApplyComplete": "Импорт завершён.",
         "LastRun": "Последний запуск",
@@ -444,10 +435,6 @@
         "ExportedAt": "Экспортировано: {value}",
         "ModuleVersion": "Версия модуля: {value}"
       },
-      "Export": {
-        "EnsuredSyncIds": "Предметов, которым перед экспортом был выдан новый syncId: {count}",
-        "SheetCount": "{sheet}: экспортировано строк {count}"
-      },
       "Apply": {
         "Created": "Создано world Items: {count}",
         "Updated": "Обновлено world Items: {count}",
@@ -455,12 +442,6 @@
       },
       "Errors": {
         "RequirePrimaryGM": "Импорт каталога снаряжения может запускать только основной активный ГМ.",
-        "MissingEndpoint": "Перед использованием синхронизации укажите URL веб-приложения Apps Script.",
-        "RequestTimeout": "Запрос превысил таймаут в {seconds} сек.",
-        "HttpError": "Endpoint Google Sheets вернул HTTP {status}.",
-        "InvalidResponse": "Endpoint вернул некорректный JSON-ответ: {error}",
-        "RemoteError": "Endpoint Google Sheets вернул ошибку.",
-        "MissingSheetsPayload": "В ответе endpoint отсутствует payload с листами.",
         "CatalogFetchFailed": "Не удалось загрузить {file} из каталога снаряжения системы. HTTP-статус: {status}.",
         "InvalidJson": "В поле {field} находится некорректный JSON: {error}",
         "UnsupportedItemType": "Неподдерживаемый тип предмета: {type}",
@@ -471,7 +452,7 @@
         "ExpectedArray": "Поле {field} должно содержать JSON-массив.",
         "ExpectedObject": "Поле {field} должно содержать JSON-объект.",
         "InvalidStatus": "Неподдерживаемый статус строки: {status}",
-        "ActorLinkedCreateBlocked": "В первой версии нельзя создавать actor-linked library items напрямую из Google Sheets.",
+        "ActorLinkedCreateBlocked": "В первой версии нельзя создавать actor-linked library items напрямую из gear catalog.",
         "TypeChangeBlocked": "Менять тип предмета во время импорта нельзя. Текущий тип: {currentType}. Запрошенный тип: {requestedType}.",
         "UnknownFolderId": "Неизвестный id папки Item: {id}",
         "DuplicateSyncIds": "В импортируемых данных найдены повторяющиеся значения syncId: {ids}"

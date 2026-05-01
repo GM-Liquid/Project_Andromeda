@@ -11,7 +11,7 @@
 | ----------------------------- | --------------------------------------------------------------- |
 | **System name**               | **Project Andromeda**                                           |
 | **Foundry VTT compatibility** | v12 (verified 12)                                               |
-| **Current version**           | `0.3.4.10`                                                      |
+| **Current version**           | `0.3.4.11`                                                      |
 | **Current release line**      | `0.3.4.x`                                                       |
 | **Languages**                 | English, Русский (full parity required)                         |
 | **Main tech**                 | ES-module JavaScript (`*.mjs`), Handlebars (`*.hbs`), JSON, CSS |
@@ -77,9 +77,7 @@ project-andromeda/
 |  project-andromeda.css
 |
 +- docs/
-|  gear-catalog-sync.md
-|  google-sheets-sync.md <- legacy Google Sheets notes, not the current source of truth
-|  google-sheets-webapp.gs <- legacy Apps Script helper
+|  gear-catalog-sync.md <- notes about catalog import workflow
 |
 '- .github/
    workflows/
@@ -291,4 +289,4 @@ The gear catalog sync is part of the shipped Foundry system.
 
 ---
 
-_Last updated: 2026-04-29_
+_Last updated: 2026-05-01_
