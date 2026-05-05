@@ -1,20 +1,28 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 /* Global styles */
 .window-app {
-  font-family: 'Roboto', sans-serif;
+  font-family: var(--andromeda-font-window, 'Roboto', sans-serif);
 }
 
-/* Rank colors -------------------------------------------------- */
-:root {
-  --rank1-bg: #c7e6b3;
-  --rank2-bg: #a5a9b4;
-  --rank3-bg: #fcd75f;
-  --rank4-bg: #87d0fb;
-
-  --rank1-border: #6ab23b; /* контраст 1.91 */
-  --rank2-border: #717788; /* 1.90 */
-  --rank3-border: #c69804; /* 1.90 */
-  --rank4-border: #0896e9; /* 1.90 */
+.project-andromeda {
+  --andromeda-fallback-bg: #f7f6f1;
+  --andromeda-fallback-chrome: #f0eee7;
+  --andromeda-fallback-surface: #ffffff;
+  --andromeda-fallback-panel: #f3f1ea;
+  --andromeda-fallback-line: #d8d5ca;
+  --andromeda-fallback-text: #252629;
+  --andromeda-fallback-muted: #696b70;
+  --andromeda-fallback-accent: #5a50b8;
+  --andromeda-fallback-radius-lg: 8px;
+  --andromeda-fallback-radius-md: 7px;
+  --andromeda-fallback-radius-sm: 5px;
+  --andromeda-fallback-font-body: 'IBM Plex Sans', sans-serif;
+  --andromeda-fallback-font-heading: 'IBM Plex Sans', sans-serif;
+  --andromeda-fallback-font-data: 'JetBrains Mono', monospace;
+  --andromeda-fallback-font-size-body: 0.875rem;
+  --andromeda-fallback-font-size-ui: 0.8125rem;
+  --andromeda-fallback-font-size-label: 0.7rem;
+  --andromeda-fallback-font-size-small: 0.75rem;
+  --andromeda-fallback-shadow-accent-32: rgba(90, 80, 184, 0.32);
 }
 
 .small-input {
@@ -29,8 +37,8 @@
 }
 
 .key-info-input[readonly] {
-  background-color: #f8f8f8;
-  color: #1b1210;
+  background-color: var(--andromeda-raw-input-bg);
+  color: var(--andromeda-raw-ink-900);
 }
 
 .key-info-stack {
@@ -95,7 +103,7 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  border: 2px solid #1b1210;
+  border: 2px solid var(--andromeda-raw-ink-900);
   background: transparent;
   cursor: pointer;
   display: inline-flex;
@@ -104,31 +112,31 @@
   padding: 0;
   font-size: 0.75rem;
   line-height: 1;
-  color: #1b1210;
+  color: var(--andromeda-raw-ink-900);
   transition:
     background-color 0.15s ease,
     color 0.15s ease;
 }
 
 .stress-cell.filled {
-  background-color: #673e37;
-  color: #d2d2c9;
+  background-color: var(--andromeda-raw-brown-900);
+  color: var(--andromeda-raw-cream-300);
 }
 
 .force-shield-cell.filled {
-  background-color: #673e37;
-  color: #d2d2c9;
+  background-color: var(--andromeda-raw-brown-900);
+  color: var(--andromeda-raw-cream-300);
 }
 
 .stress-cell.marked {
-  background-color: #87d0fb;
-  color: #1b1210;
+  background-color: var(--rank4-bg);
+  color: var(--andromeda-raw-ink-900);
 }
 
 .health-cell:focus-visible,
 .stress-cell:focus-visible,
 .force-shield-cell:focus-visible {
-  outline: 2px solid #0896e9;
+  outline: 2px solid var(--andromeda-raw-focus-500);
   outline-offset: 2px;
 }
 
@@ -150,7 +158,7 @@
 
 .key-info-divider {
   border: 0;
-  border-top: 2px solid #1b1210;
+  border-top: 2px solid var(--andromeda-raw-ink-900);
   margin: 4px 0;
 }
 
@@ -185,8 +193,8 @@ textarea[disabled] {
   pointer-events: none;
   user-select: none;
   cursor: default;
-  background-color: #f0f0f0;
-  color: #666;
+  background-color: var(--andromeda-raw-input-disabled-bg);
+  color: var(--andromeda-raw-muted-650);
 }
 
 .features-tab {
@@ -201,7 +209,7 @@ textarea[disabled] {
 .attributes-table td {
   width: 90px;
   height: 45px;
-  border: 2px solid #1b1210;
+  border: 2px solid var(--andromeda-raw-ink-900);
   text-align: center;
   padding: 5px !important;
 }
@@ -216,18 +224,18 @@ textarea[disabled] {
 .ability-die-value {
   min-width: 52px;
   padding: 6px 10px;
-  border: 2px solid #1b1210;
+  border: 2px solid var(--andromeda-raw-ink-900);
   border-radius: 8px;
   font-weight: 700;
-  background: #f5f0e8;
+  background: var(--andromeda-raw-input-chip-bg);
   text-transform: uppercase;
 }
 
 .ability-step {
   width: 26px;
   height: 26px;
-  border: 1px solid #1b1210;
-  background: #ffffff;
+  border: 1px solid var(--andromeda-raw-ink-900);
+  background: var(--andromeda-raw-white);
   border-radius: 6px;
   font-weight: 700;
   line-height: 1;
@@ -238,11 +246,11 @@ textarea[disabled] {
 
 .ability-step:hover,
 .ability-step:focus {
-  background-color: #d2d2c9;
+  background-color: var(--andromeda-raw-cream-300);
 }
 .attributes-table thead th {
-  background-color: #673e37;
-  color: #d2d2c9;
+  background-color: var(--andromeda-raw-brown-900);
+  color: var(--andromeda-raw-cream-300);
   text-shadow: none;
 }
 
@@ -254,18 +262,10 @@ textarea[disabled] {
 /* Item type selection ---------------------------------------------------- */
 .document-create-dialog select optgroup {
   font-weight: 700;
-  color: #1b1210;
+  color: var(--andromeda-raw-ink-900);
 }
 
 /* Item sheets ---------------------------------------------------- */
-.project-andromeda.item-sheet {
-  --item-sheet-border: #d4cbc0;
-  --item-sheet-shadow: rgba(27, 18, 16, 0.12);
-  --item-sheet-label: #3d312d;
-  --item-sheet-heading: #1b1210;
-  --item-sheet-background: #fdf8f2;
-}
-
 .project-andromeda.item-sheet .sheet-header {
   display: grid;
   grid-template-columns: minmax(100px, 132px) 1fr;
@@ -283,7 +283,7 @@ textarea[disabled] {
   overflow: hidden;
   border: 1px solid var(--item-sheet-border);
   box-shadow: 0 4px 12px var(--item-sheet-shadow);
-  background-color: #ffffff;
+  background-color: var(--andromeda-raw-white);
 }
 
 .project-andromeda.item-sheet .item-image img {
@@ -320,7 +320,7 @@ textarea[disabled] {
   border-radius: 10px;
   border: 1px solid transparent;
   box-shadow: inset 0 0 0 1px var(--item-sheet-border);
-  background-color: #ffffff;
+  background-color: var(--andromeda-raw-white);
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease,
@@ -375,7 +375,7 @@ textarea[disabled] {
   box-sizing: border-box;
   border-radius: 10px;
   border: 1px solid var(--item-sheet-border);
-  background-color: #ffffff;
+  background-color: var(--andromeda-raw-white);
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease,
@@ -391,12 +391,12 @@ textarea[disabled] {
 .project-andromeda.item-sheet select:focus,
 .project-andromeda.item-sheet textarea:focus {
   outline: none;
-  border-color: #0896e9;
-  box-shadow: 0 0 0 2px rgba(8, 150, 233, 0.2);
+  border-color: var(--andromeda-raw-focus-500);
+  box-shadow: 0 0 0 2px var(--andromeda-raw-shadow-focus-20);
 }
 
 .project-andromeda.item-sheet .sheet-title input:focus {
-  box-shadow: 0 0 0 2px rgba(8, 150, 233, 0.25);
+  box-shadow: 0 0 0 2px var(--andromeda-raw-shadow-focus-25);
 }
 
 .project-andromeda.item-sheet .sheet-body {
@@ -427,7 +427,7 @@ textarea[disabled] {
   border: 1px solid var(--item-sheet-border);
   border-radius: 10px;
   padding: 0.75rem;
-  background-color: #ffffff;
+  background-color: var(--andromeda-raw-white);
   min-height: 120px;
   box-sizing: border-box;
   display: flex;
@@ -515,1032 +515,70 @@ textarea[disabled] {
 
 /* sheet-box -       */
 .sheet-box {
-  border: 2px solid #1b1210;
+  border: 2px solid var(--andromeda-raw-ink-900);
   padding: 10px;
   margin-bottom: 10px;
 }
 
 .project-andromeda.sheet.actor {
-  --inventory-section-gap: 1rem;
-  background-color: #d2d2c9;
-}
-
-form textarea,
-form input[type='text'],
-form input[type='number'] {
-  border: 2px solid #1b1210; /*            */
-  background-color: #f8f8f8; /*                                         */
-  color: #1b1210; /*                          */
-  font-family: inherit;
-  font-size: inherit;
-  padding: 5px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.project-andromeda .biography .form-group,
-.project-andromeda .personality .form-group {
-  margin-bottom: 5px;
-}
-
-.project-andromeda .abilities .ability {
-  margin-bottom: 5px;
-}
-
-.project-andromeda .skills .skill {
-  margin-bottom: 5px;
-}
-
-/* layout skills into three characteristic columns */
-.skills-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-
-.skills-column {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.skills-column-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 700;
-  padding: 0 4px;
-  justify-content: center;
-}
-
-.skills-column-title {
-  font-size: 1rem;
-}
-
-.temp-bonus-grid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 10px;
-  align-items: end;
-}
-
-.temp-bonus-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.temp-bonus-field label {
-  text-align: center;
-}
-
-/*         resizable   textarea */
-form textarea {
-  resize: none;
-  overflow: hidden;
-  min-height: 60px;
-  max-height: 500px;
-}
-
-/*                    */
-.portrait {
-  width: auto;
-  margin-right: 10px;
-}
-
-.profile-img {
-  display: block;
-  max-width: 194px;
-  max-height: 194px;
-  width: auto !important;
-  height: auto !important;
-  border: 2px solid #1b1210; /* та же толщина и цвет */
-  box-sizing: border-box; /* чтобы рамка не «режала» картинку */
-}
-
-.rollable:hover,
-.rollable:focus {
-  color: #000;
-  text-shadow: 0 0 10px red;
-  cursor: pointer;
-}
-
-td.col-name:hover {
-  color: #000;
-  text-shadow: 0 0 10px red;
-  cursor: pointer;
-}
-
-.sub-labels {
-  margin-bottom: 3px;
-}
-
-/* ability tooltip removed */
-
-/*                      */
-.project-andromeda .abilities-table {
-  width: 100%;
-  border-collapse: collapse !important;
-  margin-bottom: 1em;
-  background: none !important;
-}
-
-.project-andromeda .abilities-table th,
-.project-andromeda .abilities-table td {
-  border: 1px solid #1b1210 !important;
-  padding: 5px;
-  text-align: center;
-}
-
-.project-andromeda .abilities-table thead th {
-  background-color: #673e37 !important;
-  color: #d2d2c9 !important;
-  text-shadow: none !important;
-}
-
-.project-andromeda .abilities-table th.primary-header {
-  font-size: 1.2em;
-  font-weight: bold;
-}
-
-.project-andromeda
-  .abilities-table
-  tr:nth-child(even):not(.ability-effect-row):not(.mod-effect-row):not(.inventory-effect-row):not(
-    .armor-effect-row
-  ):not(.weapon-effect-row) {
-  background-color: #c1b1aa !important;
-}
-
-.abilities-table .effect-wrapper {
-  white-space: pre-wrap;
-}
-
-.abilities-table .ability-effect-row,
-.abilities-table .mod-effect-row,
-.abilities-table .inventory-effect-row,
-.abilities-table .armor-effect-row,
-.abilities-table .weapon-effect-row {
-  display: none;
-}
-
-.abilities-table tr.expanded + .ability-effect-row,
-.abilities-table tr.expanded + .mod-effect-row,
-.abilities-table tr.expanded + .inventory-effect-row,
-.abilities-table tr.expanded + .armor-effect-row,
-.abilities-table tr.expanded + .weapon-effect-row {
-  display: table-row;
-}
-
-/* Also support explicit open state to avoid edge-cases for the last row */
-.abilities-table .ability-effect-row.open,
-.abilities-table .mod-effect-row.open,
-.abilities-table .inventory-effect-row.open,
-.abilities-table .armor-effect-row.open,
-.abilities-table .weapon-effect-row.open {
-  display: table-row;
-}
-
-.tab.abilities table.abilities-table {
-  table-layout: fixed;
-  width: 100%;
-}
-
-.tab.abilities table.abilities-table:not(.abilities-table--unity) th.col-name {
-  width: 34% !important;
-}
-
-.tab.abilities table.abilities-table:not(.abilities-table--unity) th.col-rank {
-  width: 14% !important;
-}
-
-.tab.abilities table.abilities-table:not(.abilities-table--unity) th.col-upg1,
-.tab.abilities table.abilities-table:not(.abilities-table--unity) th.col-upg2 {
-  width: 21% !important;
-}
-
-.tab.abilities table.abilities-table:not(.abilities-table--unity) th.col-delete {
-  width: 10% !important;
-}
-
-.tab.abilities table.abilities-table.abilities-table--unity th.col-name {
-  width: 28% !important;
-}
-
-.tab.abilities table.abilities-table.abilities-table--unity th.col-rank {
-  width: 12% !important;
-}
-
-.tab.abilities table.abilities-table.abilities-table--unity th.col-type {
-  width: 16% !important;
-}
-
-.tab.abilities table.abilities-table.abilities-table--unity th.col-upg1,
-.tab.abilities table.abilities-table.abilities-table--unity th.col-upg2 {
-  width: 18% !important;
-}
-
-.tab.abilities table.abilities-table.abilities-table--unity th.col-delete {
-  width: 8% !important;
-}
-
-.mods-section {
-  margin-top: 50px;
-}
-
-.abilities-table td.col-delete a {
-  display: inline-block;
-  margin: 0 6px;
-  white-space: nowrap;
-}
-
-/* Bold text for table cells except effect rows */
-.abilities-table th,
-.abilities-table td:not(.col-effect) {
-  font-weight: 700;
-}
-
-/* Align first column to the left */
-.abilities-table th.col-name,
-.abilities-table td.col-name {
-  text-align: left;
-}
-
-.abilities-table td.col-cost a {
-  display: inline-block;
-  margin: 0 4px;
-  white-space: nowrap;
-}
-
-.abilities-table td.col-cost .quantity-value {
-  display: inline-block;
-  width: 2ch;
-  text-align: center;
-}
-
-.tab.inventory table.armor-table th.col-name {
-  width: 55%;
-}
-
-.tab.inventory table.armor-table th.col-equip {
-  width: 15%;
-}
-
-.tab.inventory table.armor-table th.col-cost {
-  width: 15%;
-}
-
-.tab.inventory table.armor-table th.col-delete {
-  width: 15%;
-}
-
-.tab.inventory table.weapon-table th.col-name {
-  width: 38%;
-}
-
-.tab.inventory table.weapon-table th.col-skill {
-  width: 15%;
-}
-
-.tab.inventory table.weapon-table th.col-bonus {
-  width: 17%;
-}
-
-.tab.inventory table.weapon-table th.col-equip {
-  width: 15%;
-}
-
-.tab.inventory table.weapon-table th.col-delete {
-  width: 15%;
-}
-
-.tab.inventory table.weapon-table td.col-equip {
-  text-align: center;
-}
-
-.tab.inventory table.abilities-table:not(.armor-table):not(.weapon-table) th.col-name,
-.tab.inventory table.abilities-table:not(.armor-table):not(.weapon-table) td.col-name {
-  width: 55%;
-}
-
-.tab.inventory table.abilities-table:not(.armor-table):not(.weapon-table) th.col-cost,
-.tab.inventory table.abilities-table:not(.armor-table):not(.weapon-table) td.col-cost {
-  width: 30%;
-}
-
-.tab.inventory table.abilities-table:not(.armor-table):not(.weapon-table) th.col-delete,
-.tab.inventory table.abilities-table:not(.armor-table):not(.weapon-table) td.col-delete {
-  width: 15%;
-}
-
-.project-andromeda.sheet.actor form {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  box-sizing: border-box;
-}
-
-.sheet-scrollable {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  overflow-y: auto;
-  box-sizing: border-box;
-}
-
-.sheet-tabs-hex {
-  position: absolute;
-  right: -240px;
-  top: 15%;
-  transform: translateY(-50%);
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.hex-button {
-  background: #d2d2c9;
-  color: #1b1210;
-  border: 2px solid #1b1210;
-  font-weight: bold;
-  cursor: pointer;
-  border-radius: 6px;
-  width: 220px;
-  height: 40px;
-  transition: background 0.3s;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-.hex-button.active {
-  background: #673e37;
-  color: #d2d2c9;
-}
-
-.window-app.project-andromeda-hex-tabs,
-.window-app.project-andromeda-hex-tabs .window-content {
-  overflow: visible !important;
-}
-
-.grid,
-.grid-2col {
-  display: grid;
-  grid-column: span 2 / span 2;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin: 10px 0;
-  padding: 0;
-}
-
-.grid-3col {
-  grid-column: span 3 / span 3;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.grid-6col {
-  grid-column: span 6 / span 6;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-}
-
-.flexrow {
-  align-items: flex-start;
-}
-
-.project-andromeda.sheet.actor::-webkit-scrollbar {
-  width: 12px;
-}
-
-.project-andromeda.sheet.actor::-webkit-scrollbar-track {
-  background: #d2d2c9;
-}
-
-.project-andromeda.sheet.actor::-webkit-scrollbar-thumb {
-  background-color: #6d031c;
-  border: 2px solid #d2d2c9;
-  border-radius: 6px;
-}
-
-.tab.biography h1,
-.tab.biography h2,
-.tab.personality h1,
-.tab.personality h2,
-.tab.abilities h1,
-.tab.abilities h2 {
-  text-align: center; /*                      */
-  font-weight: 700; /*                     */
-}
-
-.sheet-box .form-group label,
-.sheet-box .resource-label,
-.sheet-box .armor-description label,
-.sheet-box .armor-values label {
-  text-align: center; /*                  */
-}
-
-.resource,
-.resource .resource-label,
-.resource .sub-label,
-.resource .resource-content {
-  text-align: center;
-}
-
-.resource input {
-  text-align: center;
-}
-
-/*******************************************************
-  2)                                        
-     (        .resource,                      (1)               )
- *******************************************************/
-/*                           ,      Foundry           : */
-/*******************************************************
-  3)                              (label)             
-                 ,                         input/textarea
- *******************************************************/
-.tab.biography .form-group label,
-.tab.personality .form-group label {
-  text-align: center;
-  display: block;
-}
-
-.tab.biography .form-group input,
-.tab.biography .form-group textarea,
-.tab.personality .form-group input,
-.tab.personality .form-group textarea {
-  text-align: center;
-}
-
-.project-andromeda .personality-sheet-box {
-  margin-bottom: 1rem;
-}
-
-.project-andromeda .personality-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.75rem;
-}
-
-.project-andromeda .personality-field--full {
-  grid-column: 1 / -1;
-}
-
-.project-andromeda .personality-grid textarea.auto-resize-textarea {
-  min-height: 52px;
-  height: auto;
-}
-
-.project-andromeda .personality-item-groups {
-  margin-bottom: 1rem;
-}
-
-/*******************************************************
-  4)                                          
- *******************************************************/
-.armor-description,
-.armor-description label,
-.armor-description textarea {
-  text-align: center;
-}
-
-/*******************************************************
-  5) (      )                   (h2/h3)            
-                                      
- *******************************************************/
-
-.limited-height {
-  height: 280px;
-  overflow-y: auto;
-}
-
-.armor-description textarea {
-  height: 130px;
-  resize: vertical;
-}
-
-.project-andromeda.sheet.item textarea.description-input {
-  width: 100%;
-  height: auto;
-  min-height: 160px;
-  resize: none;
-  overflow: hidden;
-  line-height: 1.4;
-}
-
-/* armor bonuses layout */
-.armor-values {
-  gap: 8px;
-  margin-top: 8px;
-}
-.armor-values .flexcol input {
-  width: 80%;
-}
-
-/*                                             */
-.project-andromeda.sheet.actor form input[type='text'],
-.project-andromeda.sheet.actor form input[type='number'],
-.project-andromeda.sheet.actor form textarea {
-  text-align: center;
-}
-
-/*                          (header)                        */
-.window-app.project-andromeda .window-header {
-  background-color: #673e37 !important; /*                        */
-  opacity: 1 !important;
-}
-
-/*                                            */
-.window-app.project-andromeda .window-header .window-title {
-  color: #ffffff !important; /*                        */
-}
-
-/* 1)                   (                                               ) */
-.window-app.project-andromeda.dialog {
-  background: #d2d2c9 !important; /*        ,                         */
-  opacity: 1 !important;
-  filter: none !important;
-}
-
-/* 2)                (     )         */
-.window-app.project-andromeda.dialog .window-header {
-  background-color: #6d031c !important; /*                   */
-  background-image: none !important; /*                   Foundry */
-  opacity: 1 !important; /*                      */
-  filter: none !important;
-}
-
-/* 3)           (     )          "Close" */
-.window-app.project-andromeda.dialog .window-header .window-title,
-.window-app.project-andromeda.dialog .window-header .close {
-  color: #ffffff !important; /*             */
-  text-shadow: none !important; /*             ,               */
-  opacity: 1 !important;
-}
-/* ---                                     TinyMCE (Foundry V10+),                         .tox-... --- */
-
-/*                             */
-.project-andromeda .tox-tinymce,
-.window-app.dialog .tox-tinymce {
-  border: 2px solid #1b1210;
-  background-color: #f8f8f8;
-  color: #1b1210;
-  font-family: inherit;
-  font-size: inherit;
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  width: 100%;
-}
-
-/*                 ,                               */
-.project-andromeda .tox-tinymce .tox-editor-container {
-  background-color: #f8f8f8;
-  border: none;
-  min-height: 60px;
-  box-sizing: border-box;
-  padding: 0;
-}
-
-/*     iframe,                                 */
-.project-andromeda .tox-tinymce .tox-edit-area__iframe {
-  background-color: #f8f8f8;
-  padding: 0;
-}
-
-/*                ,                  .project-andromeda (              <input>   <textarea>) */
-.project-andromeda .tox-tinymce * {
-  font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
-  color: #1b1210;
-}
-
-/* ---             --- */
-
-.window-app.dialog .form-group {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.window-app.dialog .form-group label {
-  flex: 1;
-  margin-right: 10px;
-}
-
-.window-app.dialog .form-group input[type='text'],
-.window-app.dialog .form-group input[type='number'],
-.window-app.dialog .form-group textarea {
-  width: 250px;
-  box-sizing: border-box;
-}
-
-/* --- Top-row columns 1/3 | 2/3 --- */
-/* --- Центрируем портрет внутри своей колонки --- */
-.top-row .portrait-col {
-  flex: 0 0 33% !important;
-  /* делаем колонку flex-контейнером */
-  display: flex;
-  justify-content: center; /* по горизонтали */
-  align-items: center; /* по вертикали (на случай высоких портретов) */
-}
-
-/* --- таблица-подсказка рангов (тот же вид, что и .attributes-table) --- */
-.rank-hint-table {
-  margin: 0 auto; /* как у таблицы характеристик */
-  border-collapse: collapse;
-}
-
-.rank-hint-table th,
-.rank-hint-table td {
-  width: 90px; /* 1 в 1 с  .attributes-table */
-  height: 45px;
-  border: 2px solid #1b1210;
-  text-align: center;
-  padding: 5px;
-}
-
-.rank-hint-table th {
-  /* хотим оставить цветную «шапку» */
-  background: #673e37;
-  color: #d2d2c9;
-  font-weight: 700;
-}
-
-table {
-  margin: 0em 0 !important;
-}
-
-section.abilities-section {
-  margin-top: 20px;
-}
-
-/* Rank coloring -------------------------------------------------- */
-.rank1 {
-  --rank-bg: var(--rank1-bg);
-  --rank-border: var(--rank1-border);
-  color: var(--rank1-border);
-}
-.rank2 {
-  --rank-bg: var(--rank2-bg);
-  --rank-border: var(--rank2-border);
-  color: var(--rank2-border);
-}
-.rank3 {
-  --rank-bg: var(--rank3-bg);
-  --rank-border: var(--rank3-border);
-  color: var(--rank3-border);
-}
-.rank4 {
-  --rank-bg: var(--rank4-bg);
-  --rank-border: var(--rank4-border);
-  color: var(--rank4-border);
-}
-
-input.rank1,
-input.rank2,
-input.rank3,
-input.rank4 {
-  background-color: var(--rank-bg) !important;
-  border-color: var(--rank-border) !important;
-  color: #000;
-}
-
-.skill-name.rank1,
-.skill-name.rank2,
-.skill-name.rank3,
-.skill-name.rank4 {
-  background-color: var(--rank-bg);
-  border-color: var(--rank-border);
-  color: #000;
-}
-
-.rank-hint-table td.rank1,
-.rank-hint-table td.rank2,
-.rank-hint-table td.rank3,
-.rank-hint-table td.rank4 {
-  background-color: var(--rank-bg);
-  color: #1b1210;
-}
-
-.rune-size {
-  margin-bottom: 10px;
-  text-align: center;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: 700;
-  font-size: 1.1em;
-}
-
-.rune-size input {
-  width: 2.5em !important;
-  text-align: center;
-  margin-left: 5px;
-  margin-right: 5px;
-}
-
-.rune-size .divider {
-  font-weight: bold;
-  margin: 0 0.2em;
-}
-
-.project-andromeda .item-groups {
-  display: flex;
-  flex-direction: column;
-  gap: var(--inventory-section-gap);
-}
-
-.project-andromeda .tab.inventory > .sheet-box {
-  margin-top: var(--inventory-section-gap);
-}
-
-.project-andromeda .item-group {
-  border: 1px solid #d4cbc0;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.65);
-  padding: 0.75rem;
-}
-
-.project-andromeda .item-group__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
-}
-
-.project-andromeda .item-group__header h3 {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1.1rem;
-  margin: 0;
-  font-weight: bold;
-}
-
-.project-andromeda .item-group__capacity {
-  font-size: 0.9rem;
-  color: #5c5244;
-}
-
-.project-andromeda .item-group__title i,
-.project-andromeda .item-group__header i {
-  color: #7a6754;
-}
-
-.project-andromeda .item-create.item-control {
-  border: none;
-  background: none;
-  color: inherit;
-  padding: 0.25rem;
-  cursor: pointer;
-}
-
-.project-andromeda .item-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.project-andromeda .item-row {
-  border: 1px solid #d4cbc0;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.85);
-  padding: 0.5rem 0.75rem;
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.project-andromeda .item-row--equipped {
-  border-color: #3f8854;
-  box-shadow: 0 0 0 1px rgba(63, 136, 84, 0.25);
-}
-
-.project-andromeda .item-row__header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.project-andromeda .item-row__name {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
-  flex: 1 1 auto;
-}
-
-.project-andromeda .item-row__name img {
-  width: 32px;
-  height: 32px;
-  border-radius: 4px;
-  object-fit: cover;
-}
-
-.project-andromeda .item-row__badges {
-  list-style: none;
-  display: flex;
-  gap: 0.5rem;
-  margin: 0;
-  padding: 0;
-  flex-wrap: wrap;
-}
-
-.project-andromeda .item-badge {
-  background: rgba(112, 95, 80, 0.14);
-  border-radius: 999px;
-  padding: 0.25rem 0.5rem;
-  font-size: 0.85rem;
-  color: #4d4034;
-}
-
-.project-andromeda .item-row__actions {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  margin-left: auto;
-}
-
-.project-andromeda .item-control {
-  border: none;
-  background: none;
-  color: inherit;
-  cursor: pointer;
-  padding: 0.25rem;
-}
-
-.project-andromeda .item-control:hover,
-.project-andromeda .item-control:focus {
-  color: #1d6ea8;
-}
-
-.project-andromeda .item-quantity-control {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  border: 1px solid #d4cbc0;
-  border-radius: 4px;
-  padding: 0.15rem 0.35rem;
-  background: rgba(255, 255, 255, 0.9);
-}
-
-.project-andromeda .item-quantity-control .item-quantity-step {
-  border: none;
-  background: none;
-  cursor: pointer;
-  padding: 0;
-  color: inherit;
-}
-
-.project-andromeda .item-quantity-value {
-  min-width: 1.5rem;
-  text-align: center;
-  font-weight: 600;
-}
-
-.project-andromeda .item-equip-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.project-andromeda .item-row__summary {
-  margin-top: 0.5rem;
-  font-size: 0.95rem;
-  color: #3f3327;
-}
-
-.project-andromeda .item-group__empty {
-  margin: 0.5rem 0 0;
-  font-style: italic;
-  color: #6b5b4d;
-}
-
-.project-andromeda .sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-.myrpg-roll-flavor {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.myrpg-roll-flavor__header {
-  font-weight: 600;
-}
-
-.myrpg-roll-flavor__modifiers {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.myrpg-roll-flavor__title {
-  font-size: 0.9em;
-  color: var(--color-text-dark-5);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.myrpg-roll-part {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  font-size: 0.95em;
-}
-
-.myrpg-roll-part__label {
-  color: var(--color-text-dark-3);
-}
-
-.myrpg-roll-part__value {
-  font-weight: 600;
-}
-
-.myrpg-roll-note {
-  font-size: 0.95em;
-  font-weight: 600;
-}
-
-select[name='type'] optgroup {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-/* Actor sheet sci-fi shell ------------------------------------- */
-.project-andromeda.sheet.actor {
-  --andromeda-bg: #0b0f14;
-  --andromeda-chrome: #151b22;
-  --andromeda-surface: #111820;
-  --andromeda-surface-2: #17212b;
-  --andromeda-surface-3: #1e2a36;
-  --andromeda-border: #2d3a46;
-  --andromeda-border-soft: rgba(255, 255, 255, 0.08);
-  --andromeda-text: #edf4f7;
-  --andromeda-muted: #9caab5;
-  --andromeda-subtle: #65737f;
-  --andromeda-accent: #49d4e8;
-  --andromeda-accent-2: #93f2cf;
-  --andromeda-danger: #ff5c7a;
-  --andromeda-warning: #f2c14e;
-  --andromeda-radius: 8px;
-  --inventory-section-gap: 1rem;
-  background: var(--andromeda-bg);
-  color: var(--andromeda-text);
+  background: var(--andromeda-color-bg, var(--andromeda-fallback-bg));
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text));
+  font-size: var(--andromeda-font-size-body, var(--andromeda-fallback-font-size-body));
 }
 
 .window-app.project-andromeda.sheet.actor .window-content {
-  background:
-    radial-gradient(circle at 20% 0%, rgba(73, 212, 232, 0.16), transparent 24rem),
-    linear-gradient(135deg, var(--andromeda-bg), #05080b 72%);
-  color: var(--andromeda-text);
   padding: 0;
+  background: var(--andromeda-color-bg, var(--andromeda-fallback-bg));
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text));
 }
 
 .window-app.project-andromeda.sheet.actor .window-header {
-  min-height: 42px;
-  border-bottom: 1px solid var(--andromeda-border);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.07), transparent), var(--andromeda-chrome) !important;
-  color: var(--andromeda-text) !important;
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 9px;
+  border-bottom: 0;
+  background: var(--andromeda-color-chrome, var(--andromeda-fallback-chrome)) !important;
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text)) !important;
 }
 
 .window-app.project-andromeda.sheet.actor .window-header .window-title {
-  color: var(--andromeda-text) !important;
-  font-weight: 800;
+  display: none;
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text)) !important;
+  font-family: var(--andromeda-font-heading, var(--andromeda-fallback-font-heading));
+  font-size: var(--andromeda-font-size-ui, var(--andromeda-fallback-font-size-ui));
+  font-weight: 600;
+  letter-spacing: 0;
   text-shadow: none;
 }
 
 .window-app.project-andromeda.sheet.actor .window-header .header-button,
 .window-app.project-andromeda.sheet.actor .window-header a {
-  color: var(--andromeda-muted) !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  min-width: 18px;
+  min-height: 18px;
+  margin: 0;
+  padding: 0;
+  color: var(--andromeda-color-muted, var(--andromeda-fallback-muted)) !important;
+  font-size: 0;
+  line-height: 1;
   text-shadow: none;
+}
+
+.window-app.project-andromeda.sheet.actor .window-header .header-button i,
+.window-app.project-andromeda.sheet.actor .window-header a i {
+  margin: 0;
+  font-size: 14px;
 }
 
 .window-app.project-andromeda.sheet.actor .window-header .header-button:hover,
 .window-app.project-andromeda.sheet.actor .window-header a:hover {
-  color: var(--andromeda-text) !important;
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text)) !important;
 }
 
 .project-andromeda.sheet.actor form {
@@ -1549,21 +587,24 @@ select[name='type'] optgroup {
   width: 100%;
   height: 100%;
   margin: 0;
-  color: var(--andromeda-text);
-  background: transparent;
   box-sizing: border-box;
+  font-family: var(--andromeda-font-body, var(--andromeda-fallback-font-body));
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text));
+  background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
 }
 
 .project-andromeda .andromeda-sheet-shell {
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr);
   width: 100%;
+  max-width: 860px;
   height: 100%;
   min-height: 0;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: var(--andromeda-radius);
+  border: 0;
+  border-radius: var(--andromeda-radius-lg, var(--andromeda-fallback-radius-lg));
   overflow: hidden;
-  background: var(--andromeda-chrome);
+  background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
+  box-shadow: 0 0 0 1px var(--andromeda-color-line, var(--andromeda-fallback-line));
 }
 
 .project-andromeda .andromeda-sheet-shell .sheet-scrollable {
@@ -1576,8 +617,10 @@ select[name='type'] optgroup {
   overflow-x: hidden;
   overflow-y: auto;
   box-sizing: border-box;
+  background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
   scrollbar-width: thin;
-  scrollbar-color: rgba(73, 212, 232, 0.36) transparent;
+  scrollbar-color: var(--andromeda-raw-shadow-accent-32, var(--andromeda-fallback-shadow-accent-32))
+    transparent;
 }
 
 .project-andromeda .andromeda-sheet-shell .sheet-scrollable::-webkit-scrollbar {
@@ -1590,29 +633,385 @@ select[name='type'] optgroup {
 }
 
 .project-andromeda .andromeda-sheet-shell .sheet-scrollable::-webkit-scrollbar-thumb {
-  border: 2px solid var(--andromeda-chrome);
+  border: 2px solid var(--andromeda-color-surface, var(--andromeda-fallback-surface));
   border-radius: 999px;
-  background-color: rgba(73, 212, 232, 0.36);
+  background-color: var(
+    --andromeda-raw-shadow-accent-32,
+    var(--andromeda-fallback-shadow-accent-32)
+  );
 }
 
-.project-andromeda .andromeda-sheet-body {
-  min-height: 100%;
+.project-andromeda .andromeda-hud {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr) 72px 108px 132px;
+  grid-template-areas:
+    'portrait name name name rank'
+    'portrait stress speed glory progress';
+  gap: 10px 12px;
+  align-items: stretch;
+  padding: 8px 14px 10px;
+  border-bottom: 0;
+  background: var(--andromeda-color-chrome, var(--andromeda-fallback-chrome));
+}
+
+.project-andromeda .andromeda-hud--gm {
+  grid-template-areas:
+    'portrait name name name rank'
+    'portrait stress speed glory rank';
+}
+
+.project-andromeda .andromeda-hud__portrait {
+  grid-area: portrait;
+  align-self: center;
+  display: block;
+  width: 150px !important;
+  height: 150px !important;
+  max-width: 150px;
+  max-height: 150px;
+  object-fit: cover;
+  border: 0;
+  border-radius: var(--andromeda-radius-md, var(--andromeda-fallback-radius-md));
+  background: var(--andromeda-color-accent, var(--andromeda-fallback-accent));
+  box-shadow: none;
+}
+
+.project-andromeda .andromeda-hud__main,
+.project-andromeda .andromeda-hud__meta-row,
+.project-andromeda .andromeda-hud__aside,
+.project-andromeda .andromeda-hud__aside-top {
+  display: contents;
+}
+
+.project-andromeda .andromeda-inline-field,
+.project-andromeda .andromeda-inline-stat,
+.project-andromeda .andromeda-status-card,
+.project-andromeda .andromeda-defense-pill,
+.project-andromeda .andromeda-temp-row,
+.project-andromeda .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.project-andromeda .andromeda-name-field {
+  grid-area: name;
+  align-self: center;
+  display: block;
+  width: 100%;
+  height: 52px;
+  min-height: 52px;
+  margin: 0;
+  padding: 3px 2px 5px 0;
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent !important;
+  background-image: none !important;
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text)) !important;
+  font-family: var(--andromeda-font-heading, var(--andromeda-fallback-font-heading)) !important;
+  font-size: 2.7rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-align: left !important;
+  line-height: 1.08;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+  outline: none !important;
+  box-shadow: none !important;
+  transition: none;
+}
+
+.project-andromeda .andromeda-inline-field span,
+.project-andromeda .andromeda-inline-stat span,
+.project-andromeda .andromeda-status-card span,
+.project-andromeda .andromeda-defense-pill span,
+.project-andromeda .andromeda-temp-row span,
+.project-andromeda .form-group span,
+.project-andromeda .andromeda-panel__header span,
+.project-andromeda .andromeda-rail-header span {
+  color: var(--andromeda-color-muted, var(--andromeda-fallback-muted));
+  font-family: var(--andromeda-font-heading, var(--andromeda-fallback-font-heading));
+  font-size: var(--andromeda-font-size-label, var(--andromeda-fallback-font-size-label));
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.project-andromeda .sr-only,
+.project-andromeda .andromeda-inline-field--rank > span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+.project-andromeda .andromeda-status-card input,
+.project-andromeda .andromeda-inline-stat input,
+.project-andromeda .andromeda-defense-pill input,
+.project-andromeda .andromeda-temp-row input {
+  min-height: 26px;
+  padding: 0 6px;
+  font-size: var(--andromeda-font-size-ui, var(--andromeda-fallback-font-size-ui));
+  font-weight: 700;
+}
+
+.project-andromeda .andromeda-status-card--speed {
+  grid-area: speed;
+  min-width: 0;
+}
+
+.project-andromeda .andromeda-status-card--speed input {
+  width: 100%;
+  min-height: 26px;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text)) !important;
+}
+
+.project-andromeda .andromeda-status-card--stress,
+.project-andromeda .andromeda-status-card--speed,
+.project-andromeda .andromeda-status-card--progress,
+.project-andromeda .andromeda-status-card--aside {
+  justify-content: flex-start;
+  padding: 8px 10px;
+  border: 1px solid var(--andromeda-color-line, var(--andromeda-fallback-line));
+  border-radius: var(--andromeda-radius-md, var(--andromeda-fallback-radius-md));
+  background: var(--andromeda-color-panel, var(--andromeda-fallback-panel));
+}
+
+.project-andromeda .andromeda-status-card--stress {
+  grid-area: stress;
+  min-width: 0;
+}
+
+.project-andromeda .andromeda-status-card--progress {
+  grid-area: progress;
+  min-width: 0;
+}
+
+.project-andromeda .andromeda-status-combo {
+  display: grid;
+  grid-template-columns: var(--andromeda-compact-number-width) auto var(
+      --andromeda-compact-number-width
+    );
+  gap: 6px;
+  align-items: center;
+}
+
+.project-andromeda .andromeda-status-separator {
+  color: var(--andromeda-color-muted, var(--andromeda-fallback-muted));
+  font-family: var(--andromeda-font-data, var(--andromeda-fallback-font-data));
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.project-andromeda .andromeda-status-card--progress input,
+.project-andromeda .andromeda-status-card--progress strong,
+.project-andromeda .andromeda-status-card--stress input,
+.project-andromeda .andromeda-status-card--stress strong {
+  width: var(--andromeda-compact-number-width);
+  min-width: 0;
+  max-width: var(--andromeda-compact-number-width);
+  min-height: 26px;
+  padding: 0 2px;
+  text-align: center !important;
+}
+
+.project-andromeda .andromeda-status-card--aside {
+  grid-area: glory;
+  min-width: 0;
+}
+
+.project-andromeda .andromeda-status-card--aside input {
+  width: 100%;
+  min-height: 26px;
   padding: 0;
-  background:
-    linear-gradient(90deg, transparent 0, transparent 31px, rgba(255, 255, 255, 0.025) 32px),
-    var(--andromeda-surface);
-  background-size: 32px 32px;
+  text-align: center !important;
+}
+
+.project-andromeda .andromeda-status-card,
+.project-andromeda .andromeda-command-panel,
+.project-andromeda .andromeda-ability-card,
+.project-andromeda .item-group {
+  border: 1px solid var(--andromeda-color-line, var(--andromeda-fallback-line));
+  border-radius: var(--andromeda-radius-md, var(--andromeda-fallback-radius-md));
+  background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
+}
+
+.project-andromeda .andromeda-status-card {
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.project-andromeda .andromeda-status-card header,
+.project-andromeda .andromeda-panel__header,
+.project-andromeda .item-group__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.project-andromeda .andromeda-status-card header {
+  margin-bottom: 4px;
+}
+
+.project-andromeda .andromeda-status-value,
+.project-andromeda .andromeda-compact-stat strong {
+  color: var(--andromeda-color-text);
+  font-family: var(--andromeda-font-data);
+  font-size: var(--andromeda-font-size-ui);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.project-andromeda .andromeda-status-card--glory {
+  min-width: 58px;
+}
+
+.project-andromeda .andromeda-status-card--glory input {
+  width: 58px;
+  min-height: 26px;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--andromeda-color-shield) !important;
+  font-size: 0.875rem;
+}
+
+.project-andromeda .andromeda-hud--player .andromeda-status-card {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.project-andromeda .andromeda-hud--player .andromeda-status-card header {
+  justify-content: center;
+  width: 100%;
+  text-align: center;
+}
+
+.project-andromeda .andromeda-hud--player .andromeda-status-combo {
+  justify-items: center;
+}
+
+.project-andromeda .andromeda-hud--player .andromeda-status-card--progress input,
+.project-andromeda .andromeda-hud--player .andromeda-status-card--progress strong,
+.project-andromeda .andromeda-hud--player .andromeda-status-card--stress input,
+.project-andromeda .andromeda-hud--player .andromeda-status-card--stress strong,
+.project-andromeda .andromeda-hud--player .andromeda-status-separator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+  min-height: 26px;
+  line-height: 1;
+}
+
+.project-andromeda .andromeda-hud--player .andromeda-status-card--progress input {
+  appearance: textfield;
+}
+
+.project-andromeda
+  .andromeda-hud--player
+  .andromeda-status-card--progress
+  input::-webkit-outer-spin-button,
+.project-andromeda
+  .andromeda-hud--player
+  .andromeda-status-card--progress
+  input::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+.project-andromeda .andromeda-hud--player .andromeda-status-card input,
+.project-andromeda .andromeda-hud--player .andromeda-status-card strong {
+  text-align: center !important;
+}
+
+.project-andromeda .andromeda-hud__rank {
+  grid-area: rank;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
+  align-self: center;
+  width: 92px;
+  height: 92px;
+  padding: 8px;
+  border: 1px solid var(--andromeda-color-line, var(--andromeda-fallback-line));
+  border-radius: 50%;
+  box-sizing: border-box;
+  background: var(--andromeda-color-panel, var(--andromeda-fallback-panel));
+  box-shadow:
+    inset 0 0 0 1px var(--andromeda-raw-overlay-white-42),
+    0 0 0 1px var(--andromeda-raw-shadow-text-06);
+}
+
+.project-andromeda .andromeda-hud__rank span {
+  text-align: center;
+}
+
+.project-andromeda .andromeda-hud__rank input {
+  width: 1.15ch;
+  min-width: 1.15ch;
+  max-width: 1.15ch;
+  flex: 0 0 auto;
+  min-height: 0;
+  padding: 0;
+  border: 0 !important;
+  background: transparent !important;
+  background-image: none !important;
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text)) !important;
+  font-family: var(--andromeda-font-heading, var(--andromeda-fallback-font-heading));
+  font-size: 1.65rem;
+  font-weight: 700;
+  text-align: center !important;
+  border-color: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+  appearance: none;
+  transition: none;
+}
+
+.project-andromeda .andromeda-hud__rank input::-webkit-outer-spin-button,
+.project-andromeda .andromeda-hud__rank input::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+.project-andromeda .andromeda-hud__rank--rank1 {
+  background: var(--andromeda-color-rank1);
+}
+
+.project-andromeda .andromeda-hud__rank--rank2 {
+  background: var(--andromeda-color-rank2);
+}
+
+.project-andromeda .andromeda-hud__rank--rank3 {
+  background: var(--andromeda-color-rank3);
+}
+
+.project-andromeda .andromeda-hud__rank--rank4 {
+  background: var(--andromeda-color-rank4);
 }
 
 .project-andromeda .andromeda-sheet-tabs {
   display: flex;
   align-items: end;
-  justify-content: flex-start;
-  gap: 6px;
-  padding: 12px 18px 0;
-  border-bottom: 1px solid var(--andromeda-border);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent), var(--andromeda-chrome);
+  justify-content: center;
+  gap: 0;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--andromeda-color-line);
+  background: var(--andromeda-color-chrome, var(--andromeda-fallback-chrome));
 }
 
 .project-andromeda .andromeda-tab {
@@ -1620,23 +1019,25 @@ select[name='type'] optgroup {
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  min-height: 40px;
-  min-width: 108px;
+  min-height: 34px;
+  min-width: 0;
   width: auto;
   margin: 0;
-  padding: 0 16px;
-  border: 1px solid transparent;
-  border-bottom: 0;
-  border-radius: var(--andromeda-radius) var(--andromeda-radius) 0 0;
+  padding: 0 13px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
   background: transparent;
-  color: var(--andromeda-muted);
-  font-size: 0.86rem;
-  font-weight: 800;
+  color: var(--andromeda-color-muted, var(--andromeda-fallback-muted));
+  font-family: var(--andromeda-font-heading, var(--andromeda-fallback-font-heading));
+  font-size: var(--andromeda-font-size-ui, var(--andromeda-fallback-font-size-ui));
+  font-weight: 500;
+  letter-spacing: 0;
   text-align: center;
   text-decoration: none;
+  text-transform: none;
   cursor: pointer;
   transition:
-    background-color 0.18s ease,
     border-color 0.18s ease,
     color 0.18s ease;
 }
@@ -1651,363 +1052,114 @@ select[name='type'] optgroup {
 
 .project-andromeda .andromeda-tab:hover,
 .project-andromeda .andromeda-tab:focus-visible {
-  color: var(--andromeda-text);
-  border-color: var(--andromeda-border);
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text));
+  border-color: var(--andromeda-raw-shadow-accent-45);
   outline: none;
 }
 
 .project-andromeda .andromeda-tab.active {
-  color: var(--andromeda-text);
-  border-color: var(--andromeda-border);
-  background: var(--andromeda-surface);
-  box-shadow: inset 0 3px 0 var(--andromeda-accent);
-}
-
-.project-andromeda .andromeda-main-tab,
-.project-andromeda .andromeda-item-tab,
-.project-andromeda .andromeda-personality-tab {
-  padding: 18px;
-}
-
-.project-andromeda .andromeda-identity {
-  display: grid;
-  grid-template-columns: minmax(360px, 1fr) minmax(252px, 0.72fr);
-  gap: 18px;
-  padding: 18px;
-  border-bottom: 1px solid var(--andromeda-border);
-  background:
-    linear-gradient(180deg, rgba(73, 212, 232, 0.08), transparent), var(--andromeda-surface);
-}
-
-.project-andromeda .andromeda-portrait-card,
-.project-andromeda .andromeda-metric,
-.project-andromeda .andromeda-track-card,
-.project-andromeda .andromeda-panel,
-.project-andromeda .andromeda-ability-card {
-  border: 1px solid var(--andromeda-border);
-  border-radius: var(--andromeda-radius);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent), var(--andromeda-surface-2);
-}
-
-.project-andromeda .andromeda-portrait-card {
-  display: grid;
-  grid-template-columns: 82px minmax(0, 1fr);
-  gap: 12px;
-  padding: 10px;
-  min-width: 0;
-  min-height: 116px;
-}
-
-.project-andromeda .andromeda-portrait-card .profile-img {
-  display: block;
-  width: 82px !important;
-  height: 82px !important;
-  max-width: 82px;
-  max-height: 82px;
-  object-fit: cover;
-  border: 1px solid var(--andromeda-border);
-  border-radius: 6px;
-  box-shadow: 0 0 0 1px rgba(73, 212, 232, 0.16);
-}
-
-.project-andromeda .andromeda-identity-fields,
-.project-andromeda .andromeda-resource-stack,
-.project-andromeda .andromeda-side-stack,
-.project-andromeda .andromeda-overview-main {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  min-width: 0;
-}
-
-.project-andromeda .andromeda-meta-row,
-.project-andromeda .andromeda-resources-grid {
-  display: grid;
-  gap: 10px;
-  align-items: end;
-}
-
-.project-andromeda .andromeda-meta-row {
-  grid-template-columns: repeat(auto-fit, minmax(108px, 1fr));
-}
-
-.project-andromeda .andromeda-resources-grid {
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-}
-
-.project-andromeda .andromeda-field,
-.project-andromeda .andromeda-metric,
-.project-andromeda .andromeda-defense,
-.project-andromeda .temp-bonus-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-}
-
-.project-andromeda .andromeda-field span,
-.project-andromeda .andromeda-metric span,
-.project-andromeda .andromeda-defense span,
-.project-andromeda .temp-bonus-field span,
-.project-andromeda .form-group span {
-  color: var(--andromeda-muted);
-  font-size: 0.76rem;
-  font-weight: 800;
-  line-height: 1.2;
-  text-transform: uppercase;
-}
-
-.project-andromeda .andromeda-field--name input {
-  min-height: 42px;
-  font-size: 1.75rem;
-  font-weight: 850;
-  text-align: left !important;
-}
-
-.project-andromeda .andromeda-field--compact input {
-  text-align: center !important;
-}
-
-.project-andromeda .andromeda-field small {
-  color: var(--andromeda-subtle);
-  font-size: 0.7rem;
-  line-height: 1.2;
-  text-align: center;
-}
-
-.project-andromeda .andromeda-field small strong {
-  color: var(--andromeda-text);
-  font-size: inherit;
-}
-
-.project-andromeda .andromeda-sheet-shell input[type='text'],
-.project-andromeda .andromeda-sheet-shell input[type='number'],
-.project-andromeda .andromeda-sheet-shell textarea {
-  border: 1px solid var(--andromeda-border);
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.045);
-  color: var(--andromeda-text);
-  font-family: inherit;
+  color: var(--andromeda-color-text);
+  border-color: var(--andromeda-color-accent);
+  background: transparent;
   box-shadow: none;
 }
 
-.project-andromeda .andromeda-sheet-shell input[type='number'] {
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
-
-.project-andromeda .andromeda-sheet-shell input:focus,
-.project-andromeda .andromeda-sheet-shell textarea:focus {
-  border-color: var(--andromeda-accent);
-  outline: 2px solid rgba(73, 212, 232, 0.24);
-  outline-offset: 0;
-}
-
-.project-andromeda .andromeda-sheet-shell input[readonly] {
-  background: rgba(73, 212, 232, 0.08);
-  color: var(--andromeda-text);
-}
-
-.project-andromeda .andromeda-rank-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.project-andromeda .andromeda-rank-legend span {
-  min-height: 24px;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 8px;
-  border: 1px solid currentColor;
-  border-radius: 999px;
-  font-size: 0.78rem;
-  font-weight: 800;
-  background: rgba(255, 255, 255, 0.035);
-}
-
-.project-andromeda .andromeda-metric {
-  min-height: 116px;
-  padding: 12px;
+.project-andromeda .andromeda-sheet-workspace {
   display: grid;
-  align-content: space-between;
-}
-
-.project-andromeda .andromeda-metric input,
-.project-andromeda .andromeda-metric > strong,
-.project-andromeda .andromeda-defense input {
-  min-height: 40px;
+  grid-template-columns: 286px minmax(0, 1fr);
+  gap: 0;
   padding: 0;
-  border: 0;
-  background: transparent !important;
-  color: var(--andromeda-text) !important;
-  font-size: 1.65rem;
-  font-weight: 900;
-  text-align: center !important;
+  min-height: 100%;
+  background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
 }
 
-.project-andromeda .andromeda-metric small {
-  color: var(--andromeda-subtle);
-  font-size: 0.74rem;
-  line-height: 1.25;
-}
-
-.project-andromeda .andromeda-metric small strong {
-  min-height: 0;
-  color: var(--andromeda-text);
-  font-size: inherit;
-}
-
-.project-andromeda .andromeda-metric--progress input {
-  color: var(--andromeda-accent) !important;
-}
-
-.project-andromeda .andromeda-metric--static strong {
-  display: block;
-  min-height: 40px;
-  line-height: 1.2;
-}
-
-.project-andromeda .andromeda-track-card {
-  padding: 12px;
-  min-height: 68px;
-}
-
-.project-andromeda .andromeda-track-card header {
+.project-andromeda .andromeda-sheet-rail {
   display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 9px;
-  color: var(--andromeda-muted);
-  font-size: 0.82rem;
-  font-weight: 800;
-}
-
-.project-andromeda .andromeda-track-card strong {
-  color: var(--andromeda-text);
-}
-
-.project-andromeda .health-track,
-.project-andromeda .stress-track,
-.project-andromeda .force-shield-track {
-  width: auto;
+  flex-direction: column;
+  gap: 0;
   min-width: 0;
-  justify-content: flex-start;
-  gap: 6px;
+  padding: 10px 12px;
+  border-right: 1px solid var(--andromeda-color-line, var(--andromeda-fallback-line));
+  background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
 }
 
-.project-andromeda .health-cell,
-.project-andromeda .stress-cell,
-.project-andromeda .force-shield-cell {
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--andromeda-border);
-  background: transparent;
-}
-
-.project-andromeda .stress-cell.filled,
-.project-andromeda .force-shield-cell.filled {
-  background: var(--andromeda-danger);
-  border-color: var(--andromeda-danger);
-  box-shadow: 0 0 12px rgba(255, 92, 122, 0.26);
-}
-
-.project-andromeda .force-shield-cell.filled {
-  background: var(--andromeda-accent-2);
-  border-color: var(--andromeda-accent-2);
-  box-shadow: 0 0 12px rgba(147, 242, 207, 0.22);
-}
-
-.project-andromeda .stress-cell.marked {
-  background: var(--andromeda-accent);
-  border-color: var(--andromeda-accent);
-  box-shadow: 0 0 12px rgba(73, 212, 232, 0.28);
-}
-
-.project-andromeda .andromeda-overview-grid {
-  display: grid;
-  grid-template-columns: minmax(430px, 1fr) minmax(260px, 320px);
-  gap: 16px;
-  align-items: start;
-}
-
-.project-andromeda .andromeda-panel {
-  padding: 14px;
-  min-width: 0;
-}
-
-.project-andromeda .andromeda-panel__header {
+.project-andromeda .andromeda-rail-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 10px;
+  padding: 0 2px 8px;
 }
 
-.project-andromeda .andromeda-panel__header h2 {
+.project-andromeda .andromeda-rail-header h2,
+.project-andromeda .andromeda-panel__header h2,
+.project-andromeda .item-group__header h3 {
   margin: 0;
   border: 0;
-  color: var(--andromeda-text);
-  font-size: 0.92rem;
-  font-weight: 900;
-  text-align: left;
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text));
+  font-family: var(--andromeda-font-heading, var(--andromeda-fallback-font-heading));
+  font-size: var(--andromeda-font-size-label, var(--andromeda-fallback-font-size-label));
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   text-decoration: none;
-  text-transform: uppercase;
 }
 
-.project-andromeda .andromeda-panel__header span {
-  color: var(--andromeda-subtle);
-  font-size: 0.72rem;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.project-andromeda .andromeda-ability-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+.project-andromeda .andromeda-rail-ability {
+  padding: 0;
 }
 
 .project-andromeda .andromeda-ability-card {
-  min-height: 88px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 0 9px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  min-width: 0;
+}
+
+.project-andromeda .andromeda-ability-summary {
   display: grid;
-  grid-template-rows: 1fr auto;
-  gap: 7px;
-  padding: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  min-height: 34px;
+  padding: 6px 8px;
+  border-radius: var(--andromeda-radius-sm, var(--andromeda-fallback-radius-sm));
+  background: var(--andromeda-color-panel, var(--andromeda-fallback-panel));
 }
 
 .project-andromeda .andromeda-ability-roll {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 6px;
-  min-height: 50px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 0;
   border: 0;
   padding: 0;
   background: transparent;
-  color: var(--andromeda-text);
-  text-align: center;
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text));
+  text-align: left;
   cursor: pointer;
 }
 
-.project-andromeda .andromeda-ability-top {
-  display: flex;
+.project-andromeda .andromeda-ability-title {
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text));
+  font-family: var(--andromeda-font-heading, var(--andromeda-fallback-font-heading));
+  font-size: var(--andromeda-font-size-ui, var(--andromeda-fallback-font-size-ui));
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.project-andromeda .andromeda-ability-die {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-}
-
-.project-andromeda .andromeda-ability-title {
-  color: var(--andromeda-muted);
-  font-size: 0.8rem;
-  font-weight: 850;
-  text-align: center;
-}
-
-.project-andromeda .andromeda-ability-body {
-  display: grid;
-  justify-items: center;
+  min-width: 0;
 }
 
 .project-andromeda .ability-die-value {
@@ -2019,69 +1171,106 @@ select[name='type'] optgroup {
 }
 
 .project-andromeda .andromeda-ability-roll .ability-die-value {
-  color: var(--andromeda-accent) !important;
-  font-size: 1.85rem;
-  font-weight: 950;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 24px;
+  border-radius: 999px;
+  background: var(--andromeda-color-accent) !important;
+  color: var(--andromeda-raw-white) !important;
+  font-family: var(--andromeda-font-data);
+  font-size: 0.78rem;
+  font-weight: 700;
   line-height: 1;
   text-align: center;
 }
 
+.project-andromeda .andromeda-defense-pill {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 4px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.project-andromeda .andromeda-defense-pill input {
+  width: 28px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent !important;
+  color: var(--andromeda-color-text) !important;
+  font-family: var(--andromeda-font-data);
+  font-size: var(--andromeda-font-size-small);
+  font-weight: 700;
+  text-align: left !important;
+}
+
 .project-andromeda .ability-die-control {
-  justify-content: space-between;
-  gap: 8px;
+  position: absolute;
+  top: 12px;
+  right: 48px;
+  display: flex;
+  justify-content: end;
+  gap: 2px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.16s ease;
+}
+
+.project-andromeda .andromeda-ability-card:hover .ability-die-control,
+.project-andromeda .andromeda-ability-card:focus-within .ability-die-control {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .project-andromeda .ability-step {
-  width: 28px;
-  height: 26px;
-  border: 1px solid var(--andromeda-border);
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--andromeda-text);
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--andromeda-color-line);
+  border-radius: 4px;
+  background: var(--andromeda-color-surface);
+  color: var(--andromeda-color-text);
+  font-size: 0.65rem;
+  line-height: 1;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease;
 }
 
 .project-andromeda .ability-step:hover,
 .project-andromeda .ability-step:focus-visible {
-  border-color: var(--andromeda-accent);
-  background: rgba(73, 212, 232, 0.12);
+  border-color: var(--andromeda-color-accent);
+  background: var(--andromeda-color-panel);
   outline: none;
 }
 
-.project-andromeda .andromeda-skills-panel {
-  margin-top: 16px;
-}
-
-.project-andromeda .andromeda-skills-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.project-andromeda .andromeda-skill-column {
-  gap: 7px;
-}
-
-.project-andromeda .skills-column-header {
-  justify-content: flex-start;
-  padding: 0;
-}
-
-.project-andromeda .skills-column-title {
-  color: var(--andromeda-accent);
-  font-size: 0.78rem;
-  font-weight: 900;
-  text-transform: uppercase;
+.project-andromeda .andromeda-rail-skills {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
 .project-andromeda .andromeda-skill-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 54px;
-  min-height: 34px;
+  grid-template-columns: minmax(0, 1fr) 34px;
+  align-items: center;
+  min-height: 26px;
   gap: 8px;
   margin: 0;
-  padding: 0 8px;
-  border: 1px solid var(--andromeda-border-soft);
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.03);
+  padding: 0 4px;
+  border-radius: 4px;
+  background: transparent;
+  transition: background-color 0.18s ease;
+}
+
+.project-andromeda .andromeda-skill-row:hover {
+  background: var(--andromeda-color-panel);
 }
 
 .project-andromeda .andromeda-skill-row .skill-name {
@@ -2092,7 +1281,8 @@ select[name='type'] optgroup {
   padding: 0;
   overflow: hidden;
   background: transparent;
-  color: var(--andromeda-text);
+  color: var(--andromeda-color-text);
+  font-size: var(--andromeda-font-size-ui);
   text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2104,105 +1294,270 @@ select[name='type'] optgroup {
 }
 
 .project-andromeda .andromeda-skill-row .skill-value input {
-  height: 25px;
-  min-height: 25px;
+  width: 30px;
+  height: 24px;
+  min-height: 24px;
   padding: 0;
-  border-radius: 5px;
-  color: #061018 !important;
-  font-weight: 850;
+  border: 0;
+  border-radius: 4px;
+  color: var(--andromeda-raw-charcoal-800) !important;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
   text-align: center !important;
 }
 
 .project-andromeda .andromeda-skill-row .skill-value input.rank1 {
-  background: #7bd88f !important;
-  border-color: #7bd88f !important;
+  background: var(--andromeda-color-rank1);
+  border-color: transparent;
 }
 
 .project-andromeda .andromeda-skill-row .skill-value input.rank2 {
-  background: #aab4c2 !important;
-  border-color: #aab4c2 !important;
+  background: var(--andromeda-color-rank2);
+  border-color: transparent;
 }
 
 .project-andromeda .andromeda-skill-row .skill-value input.rank3 {
-  background: #ffd866 !important;
-  border-color: #ffd866 !important;
+  background: var(--andromeda-color-rank3);
+  border-color: transparent;
 }
 
 .project-andromeda .andromeda-skill-row .skill-value input.rank4 {
-  background: #65c7ff !important;
-  border-color: #65c7ff !important;
+  background: var(--andromeda-color-rank4);
+  border-color: transparent;
 }
 
-.project-andromeda .andromeda-defense-grid,
-.project-andromeda .andromeda-temp-panel .temp-bonus-grid {
-  display: grid;
-  gap: 9px;
+.project-andromeda .andromeda-skill-legend {
+  display: flex;
+  gap: 8px;
+  padding-top: 8px;
 }
 
-.project-andromeda .andromeda-speed-field {
-  display: grid;
-  grid-template-columns: 86px minmax(0, 1fr);
+.project-andromeda .andromeda-skill-legend span {
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  color: var(--andromeda-color-muted);
+  font-size: var(--andromeda-font-size-label);
+  line-height: 1;
 }
 
-.project-andromeda .andromeda-speed-field input {
-  min-height: 42px;
-  padding: 0;
+.project-andromeda .andromeda-skill-legend .rank1 {
+  background: var(--andromeda-color-rank1);
+}
+
+.project-andromeda .andromeda-skill-legend .rank2 {
+  background: var(--andromeda-color-rank2);
+}
+
+.project-andromeda .andromeda-skill-legend .rank3 {
+  background: var(--andromeda-color-rank3);
+}
+
+.project-andromeda .andromeda-skill-legend .rank4 {
+  background: var(--andromeda-color-rank4);
+}
+
+.project-andromeda .andromeda-sheet-pane {
+  min-width: 0;
+  padding: 12px;
+  background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
+}
+
+.project-andromeda .andromeda-tab-panel {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.project-andromeda .andromeda-tab-panel.active {
+  display: flex;
+}
+
+.project-andromeda .andromeda-command-cluster {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  align-items: stretch;
+}
+
+.project-andromeda .andromeda-command-panel {
+  padding: 10px 0;
   border: 0;
-  background: rgba(73, 212, 232, 0.08) !important;
-  color: var(--andromeda-accent) !important;
-  font-size: 1.7rem;
-  font-weight: 950;
-  text-align: center !important;
+  border-bottom: 1px solid var(--andromeda-color-line);
+  border-radius: 0;
+  background: transparent;
+  min-width: 0;
 }
 
-.project-andromeda .andromeda-speed-field small {
-  color: var(--andromeda-subtle);
-  font-size: 0.74rem;
-  line-height: 1.25;
-  text-align: left;
-}
-
-.project-andromeda .andromeda-defense {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 64px;
-  align-items: center;
-  min-height: 38px;
-  border-bottom: 1px solid var(--andromeda-border-soft);
-}
-
-.project-andromeda .andromeda-defense:last-child {
+.project-andromeda .andromeda-command-panel--temps {
+  grid-column: auto;
   border-bottom: 0;
 }
 
-.project-andromeda .andromeda-defense input {
-  min-height: 32px;
-  font-size: 1.4rem;
+.project-andromeda .andromeda-command-panel--quick-stats {
+  padding: 10px 0 12px;
+}
+
+.project-andromeda .andromeda-command-panel small {
+  color: var(--andromeda-color-subtle, var(--andromeda-fallback-muted));
+  font-size: var(--andromeda-font-size-small, var(--andromeda-fallback-font-size-small));
+  line-height: 1.3;
+}
+
+.project-andromeda .andromeda-inline-stat {
+  gap: 8px;
+}
+
+.project-andromeda .andromeda-inline-stat input,
+.project-andromeda .andromeda-status-card input,
+.project-andromeda .andromeda-name-field,
+.project-andromeda .andromeda-defense-pill input,
+.project-andromeda .andromeda-compact-stat input,
+.project-andromeda .andromeda-temp-row input,
+.project-andromeda .andromeda-sheet-shell textarea {
+  border: 1px solid transparent;
+  border-radius: var(--andromeda-radius-sm, var(--andromeda-fallback-radius-sm));
+  background: transparent;
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text));
+  box-shadow: none;
+}
+
+.project-andromeda .andromeda-sheet-shell input[type='text'],
+.project-andromeda .andromeda-sheet-shell textarea {
+  font-family: var(--andromeda-font-body, var(--andromeda-fallback-font-body));
+}
+
+.project-andromeda .andromeda-sheet-shell input[type='number'] {
+  font-family: var(--andromeda-font-data, var(--andromeda-fallback-font-data));
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.project-andromeda .andromeda-sheet-shell input:focus,
+.project-andromeda .andromeda-sheet-shell textarea:focus {
+  border-color: var(--andromeda-raw-shadow-accent-35);
+  outline: 2px solid var(--andromeda-raw-shadow-accent-16);
+  outline-offset: 0;
+}
+
+.project-andromeda .andromeda-name-field:focus {
+  border-color: var(--andromeda-raw-shadow-accent-42) !important;
+  outline: none !important;
+  box-shadow: inset 0 0 0 1px var(--andromeda-raw-shadow-accent-42) !important;
+}
+
+.project-andromeda .andromeda-hud__rank input:focus,
+.project-andromeda .andromeda-hud__rank input:active,
+.project-andromeda .andromeda-name-field:active,
+.project-andromeda .andromeda-name-field:not(:focus),
+.project-andromeda .andromeda-hud__rank input:not(:focus) {
+  border-color: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.project-andromeda .andromeda-sheet-shell input[readonly] {
+  background: transparent;
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text));
+}
+
+.project-andromeda .andromeda-compact-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: end;
+}
+
+.project-andromeda .andromeda-compact-stat {
+  display: inline-grid;
+  grid-template-columns: max-content var(--andromeda-compact-number-width);
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  min-height: 30px;
+  padding: 4px 8px;
+  border-radius: var(--andromeda-radius-sm, var(--andromeda-fallback-radius-sm));
+  background: var(--andromeda-color-panel, var(--andromeda-fallback-panel));
+}
+
+.project-andromeda .andromeda-compact-stat input,
+.project-andromeda .andromeda-compact-stat strong {
+  width: var(--andromeda-compact-number-width);
+  min-width: 0;
+  max-width: var(--andromeda-compact-number-width);
+  min-height: 22px;
+  padding: 0 4px;
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text)) !important;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
   text-align: center !important;
 }
 
-.project-andromeda .andromeda-temp-panel .temp-bonus-grid {
-  grid-template-columns: 1fr;
+.project-andromeda .andromeda-temp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 8px 10px;
+  border-radius: var(--andromeda-radius-md, var(--andromeda-fallback-radius-md));
+  background: var(--andromeda-color-panel, var(--andromeda-fallback-panel));
 }
 
-.project-andromeda .temp-bonus-field {
+.project-andromeda .andromeda-temp-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 72px;
+  grid-template-columns: minmax(0, 1fr) 64px;
   align-items: center;
   gap: 10px;
+  min-height: 28px;
 }
 
-.project-andromeda .temp-bonus-field label,
-.project-andromeda .temp-bonus-field span {
+.project-andromeda .health-track,
+.project-andromeda .stress-track,
+.project-andromeda .force-shield-track {
+  display: flex;
+  flex-wrap: wrap;
+  width: auto;
   min-width: 0;
-  text-align: left;
-  overflow-wrap: anywhere;
+  gap: 3px;
+  justify-content: flex-start;
 }
 
-.project-andromeda .temp-bonus-field input {
-  min-height: 32px;
-  text-align: center !important;
+.project-andromeda .andromeda-hud--player .health-track,
+.project-andromeda .andromeda-hud--player .stress-track {
+  justify-content: center;
+}
+
+.project-andromeda .health-cell,
+.project-andromeda .stress-cell,
+.project-andromeda .force-shield-cell {
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--andromeda-raw-rail-border);
+  border-radius: 2px;
+  background: transparent;
+}
+
+.project-andromeda .stress-cell.filled {
+  background: var(--andromeda-color-stress);
+  border-color: var(--andromeda-color-stress);
+  box-shadow: none;
+}
+
+.project-andromeda .force-shield-cell.filled {
+  background: var(--andromeda-color-shield);
+  border-color: var(--andromeda-color-shield);
+  box-shadow: none;
+}
+
+.project-andromeda .stress-cell.marked {
+  background: var(--andromeda-color-shield);
+  border-color: var(--andromeda-color-shield);
+  box-shadow: none;
 }
 
 .project-andromeda .andromeda-item-tab .item-groups,
@@ -2211,75 +1566,95 @@ select[name='type'] optgroup {
 }
 
 .project-andromeda .item-group {
-  border-color: var(--andromeda-border);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent), var(--andromeda-surface-2);
-  color: var(--andromeda-text);
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text));
+  border: 1px solid var(--andromeda-color-line, var(--andromeda-fallback-line));
+  border-radius: var(--andromeda-radius-md, var(--andromeda-fallback-radius-md));
+  background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
 }
 
+.project-andromeda .item-group__header {
+  padding: 9px 11px;
+  border-bottom: 1px solid var(--andromeda-color-line-soft);
+}
+
+.project-andromeda .item-group__title,
 .project-andromeda .item-group__capacity,
 .project-andromeda .item-row__summary,
 .project-andromeda .item-group__empty {
-  color: var(--andromeda-muted);
+  color: var(--andromeda-color-muted, var(--andromeda-fallback-muted));
 }
 
 .project-andromeda .item-group__title i,
 .project-andromeda .item-group__header i {
-  color: var(--andromeda-accent);
+  color: var(--andromeda-color-accent, var(--andromeda-fallback-accent));
+}
+
+.project-andromeda .item-control,
+.project-andromeda .item-quantity-step {
+  cursor: pointer;
 }
 
 .project-andromeda .item-row {
-  border-color: var(--andromeda-border-soft);
-  background: rgba(255, 255, 255, 0.035);
+  border-color: var(--andromeda-color-line-soft);
+  background: transparent;
 }
 
 .project-andromeda .item-row--equipped {
-  border-color: var(--andromeda-accent-2);
-  box-shadow: 0 0 0 1px rgba(147, 242, 207, 0.18);
+  border-color: var(--andromeda-raw-shadow-accent-28);
+  box-shadow: 0 0 0 1px var(--andromeda-raw-shadow-accent-10);
 }
 
 .project-andromeda .item-badge,
 .project-andromeda .item-quantity-control {
-  border: 1px solid var(--andromeda-border-soft);
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--andromeda-muted);
+  border: 1px solid var(--andromeda-color-line-soft);
+  background: var(--andromeda-color-panel);
+  color: var(--andromeda-color-muted);
 }
 
 .project-andromeda .item-control:hover,
-.project-andromeda .item-control:focus {
-  color: var(--andromeda-accent);
+.project-andromeda .item-control:focus,
+.project-andromeda .item-quantity-step:hover,
+.project-andromeda .item-quantity-step:focus {
+  color: var(--andromeda-color-accent);
 }
 
-.project-andromeda .andromeda-resources-panel {
-  margin-top: var(--inventory-section-gap);
-}
-
+.project-andromeda .andromeda-resource-pair,
 .project-andromeda .personality-grid {
-  gap: 0.9rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
 }
 
 .project-andromeda .personality-grid .form-group {
-  display: flex;
-  flex-direction: column;
   gap: 6px;
 }
 
+.project-andromeda .personality-grid textarea {
+  min-height: 96px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-andromeda .andromeda-tab,
+  .project-andromeda .ability-step,
+  .project-andromeda .andromeda-skill-row {
+    transition: none;
+  }
+}
+
 @media (max-width: 980px) {
-  .project-andromeda .andromeda-identity,
-  .project-andromeda .andromeda-overview-grid {
+  .project-andromeda .andromeda-sheet-workspace,
+  .project-andromeda .andromeda-command-cluster {
     grid-template-columns: 1fr;
+  }
+
+  .project-andromeda .andromeda-hud {
+    grid-template-columns: 150px minmax(0, 1fr) 68px 100px 124px;
+    gap: 10px;
+    padding-inline: 12px;
   }
 }
 
 @media (max-width: 720px) {
-  .project-andromeda .andromeda-sheet-tabs,
-  .project-andromeda .andromeda-meta-row,
-  .project-andromeda .andromeda-ability-grid,
-  .project-andromeda .andromeda-skills-grid,
-  .project-andromeda .andromeda-resources-grid {
-    grid-template-columns: 1fr;
-  }
-
   .project-andromeda .andromeda-sheet-tabs {
     display: grid;
     align-items: stretch;
@@ -2287,26 +1662,58 @@ select[name='type'] optgroup {
   }
 
   .project-andromeda .andromeda-tab {
-    border: 1px solid var(--andromeda-border);
-    border-radius: var(--andromeda-radius);
+    border: 1px solid var(--andromeda-color-line);
+    border-radius: var(--andromeda-radius-sm);
   }
 
-  .project-andromeda .andromeda-portrait-card {
+  .project-andromeda .andromeda-hud {
+    grid-template-columns: 150px minmax(0, 1fr) 92px;
+    grid-template-areas:
+      'portrait name rank'
+      'portrait name progress'
+      'stress speed glory';
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .project-andromeda .andromeda-hud--gm {
+    grid-template-areas:
+      'portrait name rank'
+      'portrait name rank'
+      'stress stress speed'
+      'glory glory speed';
+  }
+
+  .project-andromeda .andromeda-name-field {
+    height: 42px;
+    min-height: 42px;
+    padding: 3px 2px 4px 0;
+    font-size: 2rem;
+  }
+
+  .project-andromeda .andromeda-resource-pair,
+  .project-andromeda .personality-grid,
+  .project-andromeda .andromeda-command-cluster {
+    grid-column: auto;
+  }
+
+  .project-andromeda .andromeda-resource-pair,
+  .project-andromeda .personality-grid {
     grid-template-columns: 1fr;
   }
 
-  .project-andromeda .andromeda-speed-field {
-    grid-template-columns: 1fr;
+  .project-andromeda .andromeda-sheet-workspace {
+    padding: 12px;
   }
 
-  .project-andromeda .andromeda-speed-field small {
-    text-align: center;
+  .project-andromeda .andromeda-ability-summary {
+    grid-template-columns: 1fr;
   }
 }
 
 /* gear catalog sync ---------------------------------------------------- */
 .gear-catalog-sync-app .window-content {
-  background: linear-gradient(180deg, #f7f1e6 0%, #efe5d4 100%);
+  background: var(--andromeda-gradient-gear-sync);
 }
 
 .gear-catalog-sync {
@@ -2320,9 +1727,9 @@ select[name='type'] optgroup {
 .gear-catalog-sync__layout,
 .gear-catalog-sync__results {
   padding: 12px;
-  border: 1px solid #bcae9c;
+  border: 1px solid var(--andromeda-raw-tan-500);
   border-radius: 10px;
-  background: rgba(255, 250, 242, 0.92);
+  background: var(--andromeda-raw-overlay-paper-92);
 }
 
 .gear-catalog-sync__intro p,
@@ -2333,7 +1740,7 @@ select[name='type'] optgroup {
 
 .gear-catalog-sync__note,
 .gear-catalog-sync__status {
-  color: #5a4436;
+  color: var(--andromeda-raw-brown-650);
 }
 
 .gear-catalog-sync__settings {
@@ -2360,8 +1767,8 @@ select[name='type'] optgroup {
 }
 
 .gear-catalog-sync__button--primary {
-  background: #673e37;
-  color: #f6ede0;
+  background: var(--andromeda-raw-brown-900);
+  color: var(--andromeda-raw-cream-100);
 }
 
 .gear-catalog-sync__cards {
@@ -2373,9 +1780,9 @@ select[name='type'] optgroup {
 .gear-catalog-sync__card,
 .gear-catalog-sync__block {
   padding: 12px;
-  border: 1px solid #d4cbc0;
+  border: 1px solid var(--item-sheet-border);
   border-radius: 10px;
-  background: #fffdf9;
+  background: var(--andromeda-raw-app-card-bg);
 }
 
 .gear-catalog-sync__block + .gear-catalog-sync__block {
@@ -2383,13 +1790,13 @@ select[name='type'] optgroup {
 }
 
 .gear-catalog-sync__block--warning {
-  border-color: #c69804;
-  background: #fff7dc;
+  border-color: var(--rank3-border);
+  background: var(--andromeda-raw-warning-bg);
 }
 
 .gear-catalog-sync__block--error {
-  border-color: #8d3c2f;
-  background: #fff0ea;
+  border-color: var(--andromeda-raw-error-700);
+  background: var(--andromeda-raw-error-bg);
 }
 
 .gear-catalog-sync__columns {
@@ -2407,13 +1814,13 @@ select[name='type'] optgroup {
 .gear-catalog-sync__table th,
 .gear-catalog-sync__table td {
   padding: 6px 8px;
-  border: 1px solid #d4cbc0;
+  border: 1px solid var(--item-sheet-border);
   text-align: left;
 }
 
 .gear-catalog-sync__table thead th {
-  background: #673e37;
-  color: #f6ede0;
+  background: var(--andromeda-raw-brown-900);
+  color: var(--andromeda-raw-cream-100);
 }
 
 @media (max-width: 720px) {

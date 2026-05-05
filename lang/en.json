@@ -46,7 +46,7 @@
       "ActorType": "Character Type",
       "MomentOfGlory": "Highlight Points",
       "SharedMomentOfGlory": "GM Highlight Points Pool",
-      "ProgressPoints": "Available Advancement Points",
+      "ProgressPoints": "Advancement Points",
       "TotalAdvancementPoints": "Total Advancement Points"
     },
     "Inventory": {
@@ -73,10 +73,10 @@
     "SheetLabels": {
       "Actor": "Character Sheet",
       "AbilitiesAndMods": "Abilities",
-      "Features": "Main",
+      "Features": "Resources",
       "Abilities": "Genomes",
       "Parameters": "Parameters",
-      "Attributes": "Attributes",
+      "Attributes": "Characteristics, Skills, and Defenses",
       "Skills": "Skills",
       "Defenses": "Defenses",
       "KeyInfo": "Key Information",

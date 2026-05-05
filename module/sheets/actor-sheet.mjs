@@ -101,10 +101,41 @@ export async function updateActorDocumentType(actor, nextType) {
   return true;
 }
 
+function isActorUuidHeaderButton(button, actorName = '') {
+  const headerClass = String(button?.class ?? '').trim().toLowerCase();
+  const label = String(button?.label ?? '').trim();
+  const normalizedActorName = String(actorName ?? '').trim();
+
+  if (!headerClass && !label) return false;
+
+  if (
+    headerClass.includes('copyuuid') ||
+    headerClass.includes('copy-uuid') ||
+    headerClass.includes('document-id') ||
+    headerClass.includes('documentid') ||
+    headerClass.includes('uuid-link')
+  ) {
+    return true;
+  }
+
+  return (
+    Boolean(normalizedActorName) &&
+    label === normalizedActorName &&
+    (headerClass.includes('uuid') || headerClass.includes('document') || headerClass.includes('copy'))
+  );
+}
+
+function getUiThemeValue(variableName, fallback) {
+  const value = window.getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
+  return value || fallback;
+}
+
 export class ProjectAndromedaActorSheet extends ActorSheet {
   /** @override */
   _getHeaderButtons() {
-    const buttons = super._getHeaderButtons();
+    const buttons = super
+      ._getHeaderButtons()
+      .filter((button) => !isActorUuidHeaderButton(button, this.actor?.name));
     if (!game.user?.isGM) return buttons;
 
     buttons.unshift({
@@ -150,6 +181,8 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
 
   initializeRichEditor(element) {
     if (!element._tinyMCEInitialized) {
+      const editorFontFamily = getUiThemeValue('--andromeda-font-body', 'inherit');
+      const editorTextColor = getUiThemeValue('--andromeda-color-text', 'inherit');
       tinymce.init({
         target: element,
         inline: false,
@@ -161,8 +194,17 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
         toolbar: false,
         // contextmenu plugin removed in TinyMCE 6
         valid_elements: 'p,strong/b,em/i,strike/s,br',
-        content_style:
-          'body { margin: 0; padding: 5px; font-family: inherit; font-size: inherit; color: #1b1210; } p { margin: 0; }',
+        content_style: [
+          'body {',
+          '  margin: 0;',
+          '  padding: 5px;',
+          `  font-family: ${editorFontFamily};`,
+          '  font-size: inherit;',
+          `  color: ${editorTextColor};`,
+          '  background: transparent;',
+          '}',
+          'p { margin: 0; }'
+        ].join(' '),
         autoresize_min_height: 40,
         autoresize_bottom_margin: 0,
         width: '100%',
@@ -216,7 +258,9 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     super.activateListeners(html);
     const $html = html instanceof jQuery ? html : $(html);
     const derivedInputSelector = [
+      "input[name='system.progressPoints']",
       "input[name='system.currentRank']",
+      "input[name='system.stress.value']",
       "input[name='system.temphealth']",
       "input[name='system.tempphys']",
       "input[name='system.tempazure']",
@@ -260,8 +304,8 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ['project-andromeda', 'sheet', 'actor'],
-      width: 1180,
-      height: 860,
+      width: 860,
+      height: 760,
       resizable: true,
       tabs: [
         {
@@ -306,6 +350,9 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     if (isSupportedCharacterActorType(actorData.type)) {
       this._prepareCharacterData(context);
     }
+
+    context.system.currentRankClass =
+      'rank' + getColorRank(Number(context.system?.currentRank) || 0, 'skill');
 
     this._preparePersonalityData(context);
 
@@ -374,6 +421,23 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
 
     const sortedSkills = {};
     const skillColumns = [];
+    const defenseConfigs = {
+      con: {
+        label: game.i18n.localize('MY_RPG.Defenses.FortitudeLabel'),
+        path: 'system.defenses.physical',
+        value: context.system?.defenses?.physical ?? 0
+      },
+      int: {
+        label: game.i18n.localize('MY_RPG.Defenses.ControlLabel'),
+        path: 'system.defenses.azure',
+        value: context.system?.defenses?.azure ?? 0
+      },
+      spi: {
+        label: game.i18n.localize('MY_RPG.Defenses.WillLabel'),
+        path: 'system.defenses.mental',
+        value: context.system?.defenses?.mental ?? 0
+      }
+    };
     for (const abilityKey of abilityOrder) {
       const columnSkills = [];
       const abilityLabel =
@@ -393,6 +457,10 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
         key: abilityKey,
         label: abilityLabel,
         abbreviation: abilityAbbreviation,
+        ability: sortedAbilities[abilityKey],
+        defenseLabel: defenseConfigs[abilityKey]?.label ?? '',
+        defensePath: defenseConfigs[abilityKey]?.path ?? '',
+        defenseValue: defenseConfigs[abilityKey]?.value ?? 0,
         skills: columnSkills
       });
     }
@@ -659,8 +727,17 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
   _refreshDerived(html) {
     const s = this.actor.system || {};
     const $root = html instanceof jQuery ? html : $(html ?? this.element);
+    const rankClasses = ['rank1', 'rank2', 'rank3', 'rank4'];
     const setVal = (name, val) => {
       $root.find(`input[name="${name}"]`).val(val ?? 0);
+    };
+    const setRankBadge = (rank) => {
+      const rankClass = 'rank' + getColorRank(rank, 'skill');
+      const rankBadgeClasses = rankClasses.map((value) => `andromeda-hud__rank--${value}`);
+      $root
+        .find('.andromeda-hud__rank')
+        .removeClass(rankBadgeClasses.join(' '))
+        .addClass(`andromeda-hud__rank--${rankClass}`);
     };
     const setText = (field, val) => {
       $root.find(`[data-field="${field}"]`).text(val ?? 0);
@@ -668,8 +745,13 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
 
     // Speed
     setVal('system.speed.value', s?.speed?.value);
+    setVal('system.progressPoints', s?.progressPoints);
+    setVal('system.stress.value', s?.stress?.value);
     setVal('system.advancement.totalSpent', s?.advancement?.totalSpent);
+    setText('system.advancement.available', s?.advancement?.available);
     setText('system.advancement.totalSpent', s?.advancement?.totalSpent);
+    setText('system.stress.max', s?.stress?.max);
+    setRankBadge(s?.currentRank);
     // Defenses
     setVal('system.defenses.physical', s?.defenses?.physical);
     setVal('system.defenses.azure', s?.defenses?.azure);
@@ -696,11 +778,10 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
         ? this._normalizeStressMarked(options.marked, max)
         : this._normalizeStressMarked(stress.marked, max)
       : [];
+    $root.find("input[name='system.stress.value']").val(boundedValue);
+    $root.find("[data-field='system.stress.max']").text(max);
     const $track = $root.find('.stress-track');
     if (!$track.length) return;
-    $root
-      .find('.andromeda-track-card.health-resource--stress strong')
-      .text(`${boundedValue} / ${max}`);
     const cells = this._syncStressTrackCells($track, max);
     cells.forEach((el, i) => {
       const isMarked = marked.includes(i);
@@ -751,9 +832,6 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const boundedValue = Math.min(Math.max(Number(value) || 0, 0), max);
     const $track = $root.find('.force-shield-track');
     if (!$track.length) return;
-    $root
-      .find('.andromeda-track-card.health-resource--shield strong')
-      .text(`${boundedValue} / ${max}`);
     const cells = this._syncForceShieldTrackCells($track, max);
     cells.forEach((el, i) => {
       const filled = i < boundedValue;

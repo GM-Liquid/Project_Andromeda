@@ -11,8 +11,8 @@
 | ----------------------------- | --------------------------------------------------------------- |
 | **System name**               | **Project Andromeda**                                           |
 | **Foundry VTT compatibility** | v12 (verified 12)                                               |
-| **Current version**           | `0.3.4.11`                                                      |
-| **Current release line**      | `0.3.4.x`                                                       |
+| **Current version**           | `0.3.5.1`                                                       |
+| **Current release line**      | `0.3.5.x`                                                       |
 | **Languages**                 | English, Русский (full parity required)                         |
 | **Main tech**                 | ES-module JavaScript (`*.mjs`), Handlebars (`*.hbs`), JSON, CSS |
 | **Licence**                   | CC BY-NC-SA 4.0                                                 |
@@ -74,6 +74,9 @@ project-andromeda/
 |
 +- assets/
 +- css/
+|  ui-fonts.css <- central Google Fonts imports and font-family tokens for the Foundry UI
+|  ui-colors.css <- central raw palette and alpha color tokens for the Foundry UI
+|  ui-theme.css <- semantic UI theme tokens that map fonts/colors onto shared component variables
 |  project-andromeda.css
 |
 +- docs/
@@ -175,12 +178,14 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 ### 3.4 Stress Formulas
 
 - The system has **four** actor character types: `playerCharacter`, `minion`, `rankAndFile`, and `elite`.
-- Player characters (`playerCharacter`, shown in UI as **Player Character** / **Персонаж игрока**) use stress **4 x rank** and support azure-stress marking on the stress track.
-- Minions (`minion`, shown in UI as **Minion** / **Миньон**) use stress **4 x rank** and do **not** support azure-stress marking on the stress track.
-- Rank-and-file characters (`rankAndFile`, shown in UI as **Rank-and-File** / **Рядовой**) use stress **4 x rank** and **do** support azure-stress marking on the stress track.
 - Elite characters (`elite`, shown in UI as **Elite** / **Элита**) use stress **10 x rank** and do **not** support azure-stress marking on the stress track.
+- Player characters (`playerCharacter`, shown in UI as **Player Character** / **Персонаж игрока**) use stress **6 x rank** and support azure-stress marking on the stress track.
+- Minions (`minion`, shown in UI as **Minion** / **Миньон**) use stress **6 x rank** and do **not** support azure-stress marking on the stress track.
+- Rank-and-file characters (`rankAndFile`, shown in UI as **Rank-and-File** / **Рядовой**) use stress **6 x rank** and **do** support azure-stress marking on the stress track.
 - `system.temphealth` is presented as **temporary stress** for backwards compatibility and extends the **power shield** track rather than the base stress track.
 - Shipped defense labels use **Fortitude / Control / Will** in English and **Стойкость / Контроль / Воля** in Russian: Fortitude maps to Body, Control maps to Mind, and Will maps to Spirit.
+- Fortitude, Control, and Will use the formula **ability defense bonus + matching armor bonus + character rank**.
+- The ability defense bonus is half the normalized ability die maximum: **d4 = 2, d6 = 3, d8 = 4, d10 = 5, d12 = 6, 2d8 = 8, d20 = 10**.
 
 ### 3.5 Movement Speed
 
@@ -289,4 +294,4 @@ The gear catalog sync is part of the shipped Foundry system.
 
 ---
 
-_Last updated: 2026-05-01_
+_Last updated: 2026-05-04_

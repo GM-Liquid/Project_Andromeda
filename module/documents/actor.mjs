@@ -46,6 +46,7 @@ export class ProjectAndromedaActor extends Actor {
     s.speed.value = this._calcSpeed(s, itemTotals);
     s.advancement ??= {};
     s.advancement.totalSpent = getTotalAdvancementSpent(s);
+    s.advancement.available = (Number(s.progressPoints) || 0) - s.advancement.totalSpent;
 
     const stress = s.stress ?? (s.stress = {});
     const forceShield = s.forceShield ?? (s.forceShield = {});
@@ -101,12 +102,12 @@ export class ProjectAndromedaActor extends Actor {
   /* ------------------------ Формулы ------------------------------ */
   _calcStressMax(s) {
     const rank = Math.max(Number(s.currentRank) || 0, 0);
-    return Math.max(0, rank * 4);
+    return Math.max(0, rank * 6);
   }
 
   _calcGmStressMax(s) {
     const rank = Math.max(Number(s.currentRank) || 0, 0);
-    return Math.max(0, rank * 4);
+    return Math.max(0, rank * 6);
   }
 
   _calcEliteStressMax(s) {
@@ -136,24 +137,23 @@ export class ProjectAndromedaActor extends Actor {
 
   _calcDefPhys(s, itemTotals = {}) {
     const phys = Number(itemTotals?.armor?.physical) || 0;
-    return this._getAbilityDefense(s.abilities?.con?.value) + phys + (Number(s.tempphys) || 0);
+    return this._getAbilityDefense(s.abilities?.con?.value) + phys + this._getRankDefense(s);
   }
   _calcDefAzure(s, itemTotals = {}) {
     const azure = Number(itemTotals?.armor?.azure) || 0;
-    return this._getAbilityDefense(s.abilities?.int?.value) + azure + (Number(s.tempazure) || 0);
+    return this._getAbilityDefense(s.abilities?.int?.value) + azure + this._getRankDefense(s);
   }
   _calcDefMent(s, itemTotals = {}) {
     const mental = Number(itemTotals?.armor?.mental) || 0;
-    return this._getAbilityDefense(s.abilities?.spi?.value) + mental + (Number(s.tempmental) || 0);
+    return this._getAbilityDefense(s.abilities?.spi?.value) + mental + this._getRankDefense(s);
   }
 
   _getAbilityDefense(abilityValue) {
-    const numeric = getAbilityDieNumeric(abilityValue);
-    if (numeric <= 4) return 2;
-    if (numeric <= 6) return 3;
-    if (numeric <= 8) return 4;
-    if (numeric <= 10) return 6;
-    return 8;
+    return Math.floor(getAbilityDieNumeric(abilityValue) / 2);
+  }
+
+  _getRankDefense(s) {
+    return Math.max(Number(s.currentRank) || 0, 0);
   }
 
   _computeItemTotals() {

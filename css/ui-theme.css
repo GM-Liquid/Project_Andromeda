@@ -1,0 +1,64 @@
+:root {
+  --andromeda-font-window: var(--andromeda-font-family-window);
+  --andromeda-font-heading: var(--andromeda-font-family-heading-raw);
+  --andromeda-font-body: var(--andromeda-font-family-body-raw);
+  --andromeda-font-data: var(--andromeda-font-family-data-raw);
+
+  --andromeda-font-size-body: 0.875rem;
+  --andromeda-font-size-ui: 0.8125rem;
+  --andromeda-font-size-label: 0.7rem;
+  --andromeda-font-size-small: 0.75rem;
+
+  --andromeda-compact-number-width: 4.5ch;
+  --andromeda-radius-lg: 8px;
+  --andromeda-radius-md: 7px;
+  --andromeda-radius-sm: 5px;
+  --inventory-section-gap: 10px;
+
+  --rank1-bg: var(--andromeda-raw-rank1-bg-classic);
+  --rank2-bg: var(--andromeda-raw-rank2-bg-classic);
+  --rank3-bg: var(--andromeda-raw-rank3-bg-classic);
+  --rank4-bg: var(--andromeda-raw-rank4-bg-classic);
+  --rank1-border: var(--andromeda-raw-rank1-border-classic);
+  --rank2-border: var(--andromeda-raw-rank2-border-classic);
+  --rank3-border: var(--andromeda-raw-rank3-border-classic);
+  --rank4-border: var(--andromeda-raw-focus-500);
+
+  --andromeda-color-bg: var(--andromeda-raw-bg);
+  --andromeda-color-chrome: var(--andromeda-raw-chrome);
+  --andromeda-color-surface: var(--andromeda-raw-white);
+  --andromeda-color-panel: var(--andromeda-raw-panel);
+  --andromeda-color-panel-2: var(--andromeda-raw-panel-2);
+  --andromeda-color-line: var(--andromeda-raw-line);
+  --andromeda-color-line-soft: var(--andromeda-raw-line-soft);
+  --andromeda-color-text: var(--andromeda-raw-charcoal-900);
+  --andromeda-color-muted: var(--andromeda-raw-muted-700);
+  --andromeda-color-subtle: var(--andromeda-raw-muted-500);
+  --andromeda-color-accent: var(--andromeda-raw-accent-600);
+  --andromeda-color-cyan: var(--andromeda-raw-link-600);
+  --andromeda-color-amber: var(--andromeda-raw-amber-500);
+  --andromeda-color-stress: var(--andromeda-raw-stress-600);
+  --andromeda-color-rust: var(--andromeda-raw-stress-600);
+  --andromeda-color-shield: var(--andromeda-raw-shield-600);
+  --andromeda-color-rank1: var(--andromeda-raw-rank1-bg-modern);
+  --andromeda-color-rank2: var(--andromeda-raw-rank2-bg-modern);
+  --andromeda-color-rank3: var(--andromeda-raw-rank3-bg-modern);
+  --andromeda-color-rank4: var(--andromeda-raw-rank4-bg-modern);
+
+  --andromeda-item-sheet-border: var(--andromeda-raw-stone-200);
+  --andromeda-item-sheet-shadow: var(--andromeda-raw-shadow-ink-12);
+  --andromeda-item-sheet-label: var(--andromeda-raw-brown-800);
+  --andromeda-item-sheet-heading: var(--andromeda-raw-ink-900);
+  --andromeda-item-sheet-background: var(--andromeda-raw-item-sheet-bg);
+  --item-sheet-border: var(--andromeda-item-sheet-border);
+  --item-sheet-shadow: var(--andromeda-item-sheet-shadow);
+  --item-sheet-label: var(--andromeda-item-sheet-label);
+  --item-sheet-heading: var(--andromeda-item-sheet-heading);
+  --item-sheet-background: var(--andromeda-item-sheet-background);
+
+  --andromeda-gradient-gear-sync: linear-gradient(
+    180deg,
+    var(--andromeda-raw-paper-300) 0%,
+    var(--andromeda-raw-paper-350) 100%
+  );
+}

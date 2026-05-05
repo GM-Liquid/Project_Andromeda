@@ -16,13 +16,18 @@
       "thumbnail": "systems/project-andromeda/assets/Art_core_1.webp"
     }
   ],
-  "version": "0.3.4.11",
+  "version": "0.3.5.2",
   "compatibility": {
     "minimum": "12",
     "verified": "13"
   },
   "esmodules": ["module/project-andromeda.mjs"],
-  "styles": ["css/project-andromeda.css"],
+  "styles": [
+    "css/ui-fonts.css",
+    "css/ui-colors.css",
+    "css/ui-theme.css",
+    "css/project-andromeda.css"
+  ],
   "languages": [
     {
       "lang": "ru",
