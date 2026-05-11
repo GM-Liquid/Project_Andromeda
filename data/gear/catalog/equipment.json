@@ -1575,18 +1575,11 @@
     "mechanics": {
       "effects": [
         {
-          "activation": {
-            "type": "passive"
-          },
+          "activation": { "type": "passive" },
           "conditions": {
             "targets": "single"
           },
-          "outcomes": [
-            {
-              "key": "stackingArmorPiercing",
-              "value": 1
-            }
-          ]
+          "outcomes": [{ "key": "stackingArmorPiercing", "value": 1 }]
         }
       ]
     },
@@ -1603,18 +1596,12 @@
     "mechanics": {
       "effects": [
         {
-          "activation": {
-            "type": "passive"
-          },
+          "activation": { "type": "passive" },
           "conditions": {
             "frequency": "oncePerScene",
             "trigger": "firstMeleeAttackAgainstYou"
           },
-          "outcomes": [
-            {
-              "key": "forceMinRoll"
-            }
-          ]
+          "outcomes": [{ "key": "forceMinRoll" }]
         }
       ]
     },
@@ -1631,34 +1618,20 @@
     "mechanics": {
       "effects": [
         {
-          "activation": {
-            "type": "passive"
-          },
+          "activation": { "type": "passive" },
           "conditions": {
             "trigger": "onKill",
             "targets": "self",
             "duration": "untilStartOfYourNextTurn"
           },
-          "outcomes": [
-            {
-              "key": "applyStatus",
-              "status": "hidden"
-            }
-          ]
+          "outcomes": [{ "key": "applyStatus", "status": "hidden" }]
         },
         {
-          "activation": {
-            "type": "passive"
-          },
+          "activation": { "type": "passive" },
           "conditions": {
             "trigger": "onAttackAfterHidden"
           },
-          "outcomes": [
-            {
-              "key": "bonusDamage",
-              "value": 1
-            }
-          ]
+          "outcomes": [{ "key": "bonusDamage", "value": 1 }]
         }
       ]
     },
@@ -1675,38 +1648,22 @@
     "mechanics": {
       "effects": [
         {
-          "activation": {
-            "type": "action"
-          },
+          "activation": { "type": "action" },
           "conditions": {
             "frequency": "atWill",
             "targets": "self",
             "duration": "untilCanceled"
           },
-          "outcomes": [
-            {
-              "key": "applyStatus",
-              "status": "shadowForm"
-            }
-          ]
+          "outcomes": [{ "key": "applyStatus", "status": "shadowForm" }]
         },
         {
-          "activation": {
-            "type": "maneuver"
-          },
+          "activation": { "type": "maneuver" },
           "conditions": {
-            "range": {
-              "type": "meters",
-              "value": 30
-            },
+            "range": { "type": "meters", "value": 30 },
             "targets": "self",
             "trigger": "whileInShadowForm"
           },
-          "outcomes": [
-            {
-              "key": "shadowMove"
-            }
-          ]
+          "outcomes": [{ "key": "shadowMove" }]
         }
       ]
     },
@@ -1723,37 +1680,21 @@
     "mechanics": {
       "effects": [
         {
-          "activation": {
-            "type": "action"
-          },
+          "activation": { "type": "action" },
           "conditions": {
             "frequency": "oncePerSession",
             "targets": "allInArea",
-            "area": {
-              "type": "circle",
-              "value": 50
-            },
+            "area": { "type": "circle", "value": 50 },
             "duration": "untilEndOfScene"
           },
-          "outcomes": [
-            {
-              "key": "abilityActivationDifficulty",
-              "value": 12
-            }
-          ]
+          "outcomes": [{ "key": "abilityActivationDifficulty", "value": 12 }]
         },
         {
-          "activation": {
-            "type": "passive"
-          },
+          "activation": { "type": "passive" },
           "conditions": {
             "trigger": "onFirstSuccessfulAbilityActivation"
           },
-          "outcomes": [
-            {
-              "key": "endEffect"
-            }
-          ]
+          "outcomes": [{ "key": "endEffect" }]
         }
       ]
     },

@@ -6,7 +6,8 @@ import {
   DEFAULT_ITEM_USAGE_FREQUENCY,
   ITEM_ACTIVATION_TYPE_LABEL_KEYS,
   ITEM_TYPE_CONFIGS,
-  ITEM_USAGE_FREQUENCY_LABEL_KEYS
+  ITEM_USAGE_FREQUENCY_LABEL_KEYS,
+  normalizeUsageFrequency
 } from './item-config.mjs';
 import { getLibraryItemUuid } from './item-library-sync.mjs';
 
@@ -43,8 +44,13 @@ const GEAR_CATALOG_SYNC_COLUMN_LABEL_KEYS = {
   'system.itemShield': 'MY_RPG.GearCatalogSync.Headers.ItemShield',
   'system.itemSpeed': 'MY_RPG.GearCatalogSync.Headers.ItemSpeed',
   'system.usageFrequency': 'MY_RPG.GearCatalogSync.Headers.UsageFrequency',
+  'system.activationCost': 'MY_RPG.GearCatalogSync.Headers.ActivationCost',
   'system.activationType': 'MY_RPG.GearCatalogSync.Headers.ActivationType',
   'system.range': 'MY_RPG.GearCatalogSync.Headers.Range',
+  'system.duration': 'MY_RPG.GearCatalogSync.Headers.Duration',
+  'system.area': 'MY_RPG.GearCatalogSync.Headers.Area',
+  'system.defense': 'MY_RPG.GearCatalogSync.Headers.Defense',
+  'system.targets': 'MY_RPG.GearCatalogSync.Headers.Targets',
   'system.quantity': 'MY_RPG.GearCatalogSync.Headers.Quantity'
 };
 const GEAR_CATALOG_SYNC_COMMON_COLUMNS = ['syncId', 'type', 'name', 'ownerName'];
@@ -88,6 +94,13 @@ const GEAR_CATALOG_SYNC_SHEET_CONFIGS = [
       createSystemField('system.itemMental', 'itemMental', 'number'),
       createSystemField('system.itemShield', 'itemShield', 'number'),
       createSystemField('system.itemSpeed', 'itemSpeed', 'number'),
+      createSystemField('system.usageFrequency', 'usageFrequency', 'usage-frequency'),
+      createSystemField('system.activationCost', 'activationCost', 'activation-type'),
+      createSystemField('system.range', 'range', 'string'),
+      createSystemField('system.duration', 'duration', 'string'),
+      createSystemField('system.area', 'area', 'string'),
+      createSystemField('system.defense', 'defense', 'string'),
+      createSystemField('system.targets', 'targets', 'string'),
       createSystemField('system.description', 'description', 'string')
     ]
   },
@@ -98,6 +111,13 @@ const GEAR_CATALOG_SYNC_SHEET_CONFIGS = [
     types: ['equipment', 'equipment-consumable', 'implant', 'cartridge'],
     fields: [
       createSystemField('system.rank', 'rank', 'rank'),
+      createSystemField('system.usageFrequency', 'usageFrequency', 'usage-frequency'),
+      createSystemField('system.activationCost', 'activationCost', 'activation-type'),
+      createSystemField('system.range', 'range', 'string'),
+      createSystemField('system.duration', 'duration', 'string'),
+      createSystemField('system.area', 'area', 'string'),
+      createSystemField('system.defense', 'defense', 'string'),
+      createSystemField('system.targets', 'targets', 'string'),
       createSystemField('system.skill', 'skill', 'skill'),
       createSystemField('system.skillBonus', 'skillBonus', 'number'),
       createSystemField('system.description', 'description', 'string')
@@ -110,8 +130,13 @@ const GEAR_CATALOG_SYNC_SHEET_CONFIGS = [
     types: ['trait-source-ability'],
     fields: [
       createSystemField('system.rank', 'rank', 'rank'),
-      createSystemField('system.activationType', 'activationType', 'activation-type'),
+      createSystemField('system.usageFrequency', 'usageFrequency', 'usage-frequency'),
+      createSystemField('system.activationCost', 'activationCost', 'activation-type'),
       createSystemField('system.range', 'range', 'string'),
+      createSystemField('system.duration', 'duration', 'string'),
+      createSystemField('system.area', 'area', 'string'),
+      createSystemField('system.defense', 'defense', 'string'),
+      createSystemField('system.targets', 'targets', 'string'),
       createSystemField('system.skill', 'skill', 'skill'),
       createSystemField('system.description', 'description', 'string')
     ]
@@ -549,6 +574,14 @@ function getGearCatalogActivationType(entry) {
   return 'passive';
 }
 
+function getGearCatalogConditionValue(entry, selector) {
+  for (const effect of getGearCatalogEffects(entry)) {
+    const value = selector(effect?.conditions ?? {}, effect);
+    if (value !== undefined && value !== null && value !== '') return value;
+  }
+  return '';
+}
+
 function formatGearCatalogRange(range) {
   if (!range || typeof range !== 'object') return '';
   const type = normalizeOptionalString(range.type);
@@ -560,11 +593,53 @@ function formatGearCatalogRange(range) {
 }
 
 function getGearCatalogRange(entry) {
+  return getGearCatalogConditionValue(entry, (conditions) => formatGearCatalogRange(conditions.range));
+}
+
+function formatGearCatalogArea(area) {
+  if (!area || typeof area !== 'object') return '';
+  const type = normalizeOptionalString(area.type);
+  const value = Number(area.value);
+  if (type && Number.isFinite(value)) return `${type} ${value} m`;
+  return type;
+}
+
+function getGearCatalogArea(entry) {
+  return getGearCatalogConditionValue(entry, (conditions) => formatGearCatalogArea(conditions.area));
+}
+
+function getGearCatalogUsageFrequency(entry) {
+  return normalizeUsageFrequency(
+    getGearCatalogConditionValue(entry, (conditions) => normalizeOptionalString(conditions.frequency)) ||
+      DEFAULT_ITEM_USAGE_FREQUENCY
+  );
+}
+
+function getGearCatalogTargets(entry) {
+  return getGearCatalogConditionValue(entry, (conditions) =>
+    normalizeOptionalString(conditions.targets)
+  );
+}
+
+function getGearCatalogDefense(entry) {
+  return getGearCatalogConditionValue(entry, (conditions) =>
+    normalizeOptionalString(conditions.defense)
+  );
+}
+
+function getGearCatalogDuration(entry) {
+  return getGearCatalogConditionValue(entry, (conditions) =>
+    normalizeOptionalString(conditions.duration)
+  );
+}
+
+function getGearCatalogRequiresRoll(entry, { fallbackToSkill = true } = {}) {
+  const rollChecks = new Set(['required', 'successBonus', 'failureRisk']);
   for (const effect of getGearCatalogEffects(entry)) {
-    const range = formatGearCatalogRange(effect?.conditions?.range);
-    if (range) return range;
+    const check = normalizeOptionalString(effect?.conditions?.check);
+    if (rollChecks.has(check)) return true;
   }
-  return '';
+  return fallbackToSkill ? Boolean(getGearCatalogSkill(entry)) : false;
 }
 
 function buildGearCatalogDetails(catalogKey, entry) {
@@ -584,6 +659,14 @@ function buildGearCatalogSystemData(entry, config) {
   const systemData = {
     description: getGearCatalogDescription(entry),
     rank: getGearCatalogRank(entry),
+    usageFrequency: getGearCatalogUsageFrequency(entry),
+    activationCost: getGearCatalogActivationType(entry),
+    activationType: getGearCatalogActivationType(entry),
+    range: getGearCatalogRange(entry),
+    duration: getGearCatalogDuration(entry),
+    area: getGearCatalogArea(entry),
+    defense: getGearCatalogDefense(entry),
+    targets: getGearCatalogTargets(entry),
     details: buildGearCatalogDetails(config.catalogKey, entry)
   };
 
@@ -603,9 +686,7 @@ function buildGearCatalogSystemData(entry, config) {
     const skill = getGearCatalogSkill(entry);
     return {
       ...systemData,
-      activationType: getGearCatalogActivationType(entry),
-      range: getGearCatalogRange(entry),
-      requiresRoll: Boolean(skill),
+      requiresRoll: getGearCatalogRequiresRoll(entry, { fallbackToSkill: false }),
       skill
     };
   }
@@ -613,7 +694,7 @@ function buildGearCatalogSystemData(entry, config) {
   const skill = getGearCatalogSkill(entry);
   return {
     ...systemData,
-    requiresRoll: Boolean(skill),
+    requiresRoll: getGearCatalogRequiresRoll(entry),
     skill,
     skillBonus: getFirstOutcomeNumber(entry, ['damage'])
   };
@@ -638,19 +719,23 @@ function buildGearCatalogImportRow(entry, config) {
     row['system.itemMental'] = systemData.itemMental;
     row['system.itemShield'] = systemData.itemShield;
     row['system.itemSpeed'] = systemData.itemSpeed;
-    return row;
   }
 
+  row['system.usageFrequency'] = systemData.usageFrequency ?? DEFAULT_ITEM_USAGE_FREQUENCY;
+  row['system.activationCost'] = systemData.activationCost ?? '';
+  row['system.activationType'] = systemData.activationType ?? '';
+  row['system.range'] = systemData.range ?? '';
+  row['system.duration'] = systemData.duration ?? '';
+  row['system.area'] = systemData.area ?? '';
+  row['system.defense'] = systemData.defense ?? '';
+  row['system.targets'] = systemData.targets ?? '';
   row['system.skill'] = systemData.skill ?? '';
   row['system.requiresRoll'] = Boolean(systemData.requiresRoll);
 
-  if (config.itemType === 'trait-source-ability') {
-    row['system.activationType'] = systemData.activationType;
-    row['system.range'] = systemData.range;
-    return row;
+  if (config.itemType !== 'trait-source-ability' && config.itemType !== 'armor') {
+    row['system.skillBonus'] = systemData.skillBonus;
   }
 
-  row['system.skillBonus'] = systemData.skillBonus;
   return row;
 }
 
@@ -905,6 +990,25 @@ function buildUpdateDocumentData(item, importData, resolvedFolderId) {
     system: importData.system,
     [`flags.${MODULE_ID}.${GEAR_CATALOG_SYNC_ID_FLAG}`]: importData.syncId
   };
+}
+
+const GEAR_CATALOG_WORLD_ITEM_CREATE_OPTIONS = Object.freeze({
+  render: false
+});
+
+const GEAR_CATALOG_WORLD_ITEM_UPDATE_OPTIONS = Object.freeze({
+  render: false,
+  diff: false
+});
+
+async function applyCatalogWorldItemCreates(createDocuments = []) {
+  if (!createDocuments.length) return [];
+  return Item.createDocuments(createDocuments, GEAR_CATALOG_WORLD_ITEM_CREATE_OPTIONS);
+}
+
+async function applyCatalogWorldItemUpdates(updateDocuments = []) {
+  if (!updateDocuments.length) return [];
+  return Item.updateDocuments(updateDocuments, GEAR_CATALOG_WORLD_ITEM_UPDATE_OPTIONS);
 }
 
 function buildOperationRowLabel(sheetConfig, rowNumber, row) {
@@ -1239,18 +1343,8 @@ async function applyImportPlan(plan) {
     );
   }
 
-  const createdItems =
-    createDocuments.length > 0
-      ? await Item.createDocuments(createDocuments, {
-          render: false
-        })
-      : [];
-  const updatedItems =
-    updateDocuments.length > 0
-      ? await Item.updateDocuments(updateDocuments, {
-          render: false
-        })
-      : [];
+  const createdItems = await applyCatalogWorldItemCreates(createDocuments);
+  const updatedItems = await applyCatalogWorldItemUpdates(updateDocuments);
 
   await new Promise((resolve) => setTimeout(resolve, 0));
 

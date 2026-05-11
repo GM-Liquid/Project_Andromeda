@@ -56,9 +56,13 @@ function renderMetaChips(entry: RulebookCatalogEntry) {
 
 function buildDetailFactLines(
   detailTags: Array<{ key: string; label: string; value: string }>,
-  lineSize = 4,
+  lineSize = 2,
 ) {
-  const primaryLineOrder = [
+  const hiddenKeys = new Set(["targets", "frequency", "skill"])
+  const firstLineOrder = ["actions", "defense"]
+  const sharedOrder = [
+    "actions",
+    "defense",
     "damage",
     "physicalDefense",
     "magicalDefense",
@@ -66,23 +70,24 @@ function buildDetailFactLines(
     "shield",
     "speed",
     "range",
-    "targets",
     "area",
-    "defense",
+    "duration",
   ]
-  const secondaryLineOrder = ["duration", "actions", "frequency", "skill"]
+  const visibleTags = detailTags.filter((tag) => !hiddenKeys.has(tag.key))
   const buildOrderedLine = (order: string[]) =>
     order
-      .map((key) => detailTags.find((tag) => tag.key === key))
+      .map((key) => visibleTags.find((tag) => tag.key === key))
       .filter((tag): tag is { key: string; label: string; value: string } => Boolean(tag))
-  const groupedKeys = new Set([...primaryLineOrder, ...secondaryLineOrder])
-  const remainingTags = detailTags.filter((tag) => !groupedKeys.has(tag.key))
-  const lines = [buildOrderedLine(primaryLineOrder), buildOrderedLine(secondaryLineOrder)].filter(
-    (line) => line.length > 0,
-  )
+  const firstLine = buildOrderedLine(firstLineOrder)
+  const firstLineKeys = new Set(firstLineOrder)
+  const orderedTags = buildOrderedLine(sharedOrder).filter((tag) => !firstLineKeys.has(tag.key))
+  const orderedKeys = new Set(sharedOrder)
+  const remainingTags = visibleTags.filter((tag) => !orderedKeys.has(tag.key))
+  const trailingTags = [...orderedTags, ...remainingTags]
+  const lines = firstLine.length > 0 ? [firstLine] : []
 
-  for (let index = 0; index < remainingTags.length; index += lineSize) {
-    lines.push(remainingTags.slice(index, index + lineSize))
+  for (let index = 0; index < trailingTags.length; index += lineSize) {
+    lines.push(trailingTags.slice(index, index + lineSize))
   }
 
   return lines

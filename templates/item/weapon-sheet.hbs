@@ -53,6 +53,47 @@
         </div>
       </div>
     </div>
+    {{#if metadataFields.length}}
+      <div class="item-section">
+        <div class="item-meta-grid">
+          {{#each metadataFields as |field|}}
+            <div class="item-field{{#if field.isCheckbox}} item-field--checkbox{{/if}}">
+              {{#if field.isCheckbox}}
+                <label class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    name="system.{{field.path}}"
+                    data-dtype="Boolean"
+                    {{#if field.checked}}checked{{/if}}
+                    {{#unless ../editable}}disabled{{/unless}}
+                  />
+                  <span>{{localize field.labelKey}}</span>
+                </label>
+              {{else}}
+                <label>{{localize field.labelKey}}</label>
+                {{#if field.hasOptions}}
+                  <select name="system.{{field.path}}" {{#unless ../editable}}disabled{{/unless}}>
+                    {{#each field.options as |option|}}
+                      <option value="{{option.value}}" {{#if option.selected}}selected{{/if}}>
+                        {{option.label}}
+                      </option>
+                    {{/each}}
+                  </select>
+                {{else}}
+                  <input
+                    type="{{field.inputType}}"
+                    name="system.{{field.path}}"
+                    value="{{field.value}}"
+                    {{#if field.hasMin}}min="{{field.min}}"{{/if}}
+                    {{#unless ../editable}}disabled{{/unless}}
+                  />
+                {{/if}}
+              {{/if}}
+            </div>
+          {{/each}}
+        </div>
+      </div>
+    {{/if}}
     <div class="item-section rich-text-field">
       <label>{{localize 'MY_RPG.Inventory.Description'}}</label>
       <textarea

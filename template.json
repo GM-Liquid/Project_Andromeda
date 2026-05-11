@@ -177,6 +177,12 @@
         "equipped": false,
         "rank": "",
         "usageFrequency": "passive",
+        "activationCost": "",
+        "duration": "",
+        "area": "",
+        "defense": "",
+        "range": "",
+        "targets": "",
         "rules": [],
         "traits": [],
         "details": {}
@@ -204,12 +210,15 @@
       "itemAzure": 0,
       "itemMental": 0,
       "itemShield": 0,
-      "itemSpeed": 0
+      "itemSpeed": 0,
+      "requiresRoll": false,
+      "skill": ""
     },
     "weapon": {
       "templates": ["base"],
       "quantity": 1,
       "rank": "",
+      "requiresRoll": true,
       "skill": "",
       "skillBonus": 0
     },
@@ -217,7 +226,8 @@
       "templates": ["base"],
       "rank": "",
       "requiresRoll": false,
-      "skill": ""
+      "skill": "",
+      "skillBonus": 0
     },
     "equipment-consumable": {
       "templates": ["base"],
@@ -248,78 +258,133 @@
     },
     "trait": {
       "templates": ["base"],
+      "activationCost": "passive",
       "activationType": "passive",
       "range": "",
+      "duration": "",
+      "area": "",
+      "defense": "",
+      "targets": "",
       "requiresRoll": false,
       "skill": ""
     },
     "trait-flaw": {
       "templates": ["base"],
+      "activationCost": "passive",
       "activationType": "passive",
       "range": "",
+      "duration": "",
+      "area": "",
+      "defense": "",
+      "targets": "",
       "requiresRoll": false,
       "skill": ""
     },
     "trait-general": {
       "templates": ["base"],
+      "activationCost": "passive",
       "activationType": "passive",
       "range": "",
+      "duration": "",
+      "area": "",
+      "defense": "",
+      "targets": "",
       "requiresRoll": false,
       "skill": ""
     },
     "trait-backstory": {
       "templates": ["base"],
+      "activationCost": "passive",
       "activationType": "passive",
       "range": "",
+      "duration": "",
+      "area": "",
+      "defense": "",
+      "targets": "",
       "requiresRoll": false,
       "skill": ""
     },
     "trait-social": {
       "templates": ["base"],
+      "activationCost": "passive",
       "activationType": "passive",
       "range": "",
+      "duration": "",
+      "area": "",
+      "defense": "",
+      "targets": "",
       "requiresRoll": false,
       "skill": ""
     },
     "trait-combat": {
       "templates": ["base"],
+      "activationCost": "passive",
       "activationType": "passive",
       "range": "",
+      "duration": "",
+      "area": "",
+      "defense": "",
+      "targets": "",
       "requiresRoll": false,
       "skill": ""
     },
     "trait-magical": {
       "templates": ["base"],
+      "activationCost": "passive",
       "activationType": "passive",
       "range": "",
+      "duration": "",
+      "area": "",
+      "defense": "",
+      "targets": "",
       "requiresRoll": false,
       "skill": ""
     },
     "trait-professional": {
       "templates": ["base"],
+      "activationCost": "passive",
       "activationType": "passive",
       "range": "",
+      "duration": "",
+      "area": "",
+      "defense": "",
+      "targets": "",
       "requiresRoll": false,
       "skill": ""
     },
     "trait-technological": {
       "templates": ["base"],
+      "activationCost": "passive",
       "activationType": "passive",
       "range": "",
+      "duration": "",
+      "area": "",
+      "defense": "",
+      "targets": "",
       "requiresRoll": false,
       "skill": ""
     },
     "trait-genome": {
       "templates": ["base"],
+      "activationCost": "passive",
       "activationType": "passive",
       "range": "",
+      "duration": "",
+      "area": "",
+      "defense": "",
+      "targets": "",
       "requiresRoll": false,
       "skill": ""
     },
     "trait-source-ability": {
       "templates": ["base"],
+      "activationCost": "passive",
       "activationType": "passive",
       "range": "",
+      "duration": "",
+      "area": "",
+      "defense": "",
+      "targets": "",
       "requiresRoll": false,
       "skill": ""
     }

@@ -2,6 +2,12 @@ export const ITEM_BASE_DEFAULTS = {
   description: '',
   rank: '',
   usageFrequency: 'passive',
+  activationCost: '',
+  duration: '',
+  area: '',
+  defense: '',
+  range: '',
+  targets: '',
   equipped: false,
   rules: [],
   traits: [],
@@ -31,11 +37,42 @@ export const ITEM_ACTIVATION_TYPE_LABEL_KEYS = {
   reaction: 'MY_RPG.ActivationTypes.Reaction'
 };
 
+export const ITEM_DEFENSE_LABEL_KEYS = {
+  fortitude: 'MY_RPG.Defenses.FortitudeLabel',
+  control: 'MY_RPG.Defenses.ControlLabel',
+  will: 'MY_RPG.Defenses.WillLabel'
+};
+
+export const ITEM_DURATION_LABEL_KEYS = {
+  untilCanceled: 'MY_RPG.ItemDurations.UntilCanceled',
+  untilEndOfScene: 'MY_RPG.ItemDurations.UntilEndOfScene',
+  untilEndOfTurn: 'MY_RPG.ItemDurations.UntilEndOfTurn',
+  untilMove: 'MY_RPG.ItemDurations.UntilMove',
+  untilStartOfYourNextTurn: 'MY_RPG.ItemDurations.UntilStartOfYourNextTurn'
+};
+
+export const ITEM_TARGET_LABEL_KEYS = {
+  allInArea: 'MY_RPG.ItemTargets.AllInArea',
+  allInLine: 'MY_RPG.ItemTargets.AllInLine',
+  area: 'MY_RPG.ItemTargets.Area',
+  self: 'MY_RPG.ItemTargets.Self',
+  single: 'MY_RPG.ItemTargets.Single',
+  upTo2: 'MY_RPG.ItemTargets.UpTo2',
+  upTo3: 'MY_RPG.ItemTargets.UpTo3'
+};
+
 export function normalizeUsageFrequency(value) {
   const normalized = String(value ?? '').trim();
-  if (!normalized || normalized === 'atWill') {
+  const aliases = {
+    atWill: DEFAULT_ITEM_USAGE_FREQUENCY,
+    oncePerScene: 'scene',
+    oncePerSession: 'twoPerScene'
+  };
+  if (!normalized) {
     return DEFAULT_ITEM_USAGE_FREQUENCY;
   }
+
+  if (Object.hasOwn(aliases, normalized)) return aliases[normalized];
 
   if (Object.hasOwn(ITEM_USAGE_FREQUENCY_LABEL_KEYS, normalized)) {
     return normalized;
@@ -84,9 +121,9 @@ function buildRequiresRollField() {
 
 function buildActivationTypeField() {
   return {
-    path: 'activationType',
-    labelKey: 'MY_RPG.ItemFields.ActivationType',
-    type: 'activationType'
+    path: 'activationCost',
+    labelKey: 'MY_RPG.ItemFields.ActivationCost',
+    type: 'activationCost'
   };
 }
 
@@ -95,6 +132,38 @@ function buildRangeField() {
     path: 'range',
     labelKey: 'MY_RPG.ItemFields.Range',
     type: 'text'
+  };
+}
+
+function buildDurationField() {
+  return {
+    path: 'duration',
+    labelKey: 'MY_RPG.ItemFields.Duration',
+    type: 'duration'
+  };
+}
+
+function buildAreaField() {
+  return {
+    path: 'area',
+    labelKey: 'MY_RPG.ItemFields.Area',
+    type: 'text'
+  };
+}
+
+function buildDefenseField() {
+  return {
+    path: 'defense',
+    labelKey: 'MY_RPG.ItemFields.Defense',
+    type: 'defense'
+  };
+}
+
+function buildTargetsField() {
+  return {
+    path: 'targets',
+    labelKey: 'MY_RPG.ItemFields.Targets',
+    type: 'targets'
   };
 }
 
@@ -109,6 +178,13 @@ function buildSkillField(options = {}) {
 
 const EQUIPMENT_ITEM_FIELDS = [
   buildRankField(),
+  buildUsageFrequencyField(),
+  buildActivationTypeField(),
+  buildRangeField(),
+  buildDurationField(),
+  buildAreaField(),
+  buildDefenseField(),
+  buildTargetsField(),
   buildRequiresRollField(),
   buildSkillField({ showWhenPath: 'requiresRoll' })
 ];
@@ -116,6 +192,30 @@ const TRAIT_ITEM_FIELDS = [
   buildUsageFrequencyField(),
   buildActivationTypeField(),
   buildRangeField(),
+  buildDurationField(),
+  buildAreaField(),
+  buildDefenseField(),
+  buildTargetsField(),
+  buildRequiresRollField(),
+  buildSkillField({ showWhenPath: 'requiresRoll' })
+];
+const WEAPON_ITEM_FIELDS = [
+  buildUsageFrequencyField(),
+  buildActivationTypeField(),
+  buildRangeField(),
+  buildDurationField(),
+  buildAreaField(),
+  buildDefenseField(),
+  buildTargetsField()
+];
+const ARMOR_ITEM_FIELDS = [
+  buildUsageFrequencyField(),
+  buildActivationTypeField(),
+  buildRangeField(),
+  buildDurationField(),
+  buildAreaField(),
+  buildDefenseField(),
+  buildTargetsField(),
   buildRequiresRollField(),
   buildSkillField({ showWhenPath: 'requiresRoll' })
 ];
@@ -133,7 +233,8 @@ export const ITEM_TYPE_CONFIGS = [
     canRoll: true,
     defaults: {
       requiresRoll: true,
-      skill: ''
+      skill: '',
+      skillBonus: 0
     },
     fields: EQUIPMENT_ITEM_FIELDS
   },
@@ -149,7 +250,8 @@ export const ITEM_TYPE_CONFIGS = [
     canRoll: true,
     defaults: {
       requiresRoll: true,
-      skill: ''
+      skill: '',
+      skillBonus: 0
     },
     fields: EQUIPMENT_ITEM_FIELDS
   },
@@ -165,9 +267,11 @@ export const ITEM_TYPE_CONFIGS = [
     canRoll: true,
     defaults: {
       quantity: 1,
+      requiresRoll: true,
       skill: '',
       skillBonus: 0
-    }
+    },
+    fields: WEAPON_ITEM_FIELDS
   },
   {
     type: 'armor',
@@ -185,8 +289,11 @@ export const ITEM_TYPE_CONFIGS = [
       itemAzure: 0,
       itemMental: 0,
       itemShield: 0,
-      itemSpeed: 0
-    }
+      itemSpeed: 0,
+      requiresRoll: false,
+      skill: ''
+    },
+    fields: ARMOR_ITEM_FIELDS
   },
   {
     type: 'equipment',
@@ -196,7 +303,8 @@ export const ITEM_TYPE_CONFIGS = [
     defaults: {
       rank: '',
       requiresRoll: false,
-      skill: ''
+      skill: '',
+      skillBonus: 0
     },
     fields: EQUIPMENT_ITEM_FIELDS
   },
@@ -209,7 +317,8 @@ export const ITEM_TYPE_CONFIGS = [
     defaults: {
       rank: '',
       requiresRoll: false,
-      skill: ''
+      skill: '',
+      skillBonus: 0
     },
     fields: EQUIPMENT_ITEM_FIELDS
   },
@@ -277,8 +386,13 @@ export const ITEM_TYPE_CONFIGS = [
     groupKey: 'traits',
     sheet: 'generic',
     defaults: {
+      activationCost: 'passive',
       activationType: 'passive',
       range: '',
+      duration: '',
+      area: '',
+      defense: '',
+      targets: '',
       requiresRoll: false,
       skill: ''
     },
@@ -291,8 +405,13 @@ export const ITEM_TYPE_CONFIGS = [
     sheet: 'generic',
     legacy: true,
     defaults: {
+      activationCost: 'passive',
       activationType: 'passive',
       range: '',
+      duration: '',
+      area: '',
+      defense: '',
+      targets: '',
       requiresRoll: false,
       skill: ''
     },
@@ -305,8 +424,13 @@ export const ITEM_TYPE_CONFIGS = [
     sheet: 'generic',
     legacy: true,
     defaults: {
+      activationCost: 'passive',
       activationType: 'passive',
       range: '',
+      duration: '',
+      area: '',
+      defense: '',
+      targets: '',
       requiresRoll: false,
       skill: ''
     },
@@ -319,8 +443,13 @@ export const ITEM_TYPE_CONFIGS = [
     sheet: 'generic',
     legacy: true,
     defaults: {
+      activationCost: 'passive',
       activationType: 'passive',
       range: '',
+      duration: '',
+      area: '',
+      defense: '',
+      targets: '',
       requiresRoll: false,
       skill: ''
     },
@@ -333,8 +462,13 @@ export const ITEM_TYPE_CONFIGS = [
     sheet: 'generic',
     legacy: true,
     defaults: {
+      activationCost: 'passive',
       activationType: 'passive',
       range: '',
+      duration: '',
+      area: '',
+      defense: '',
+      targets: '',
       requiresRoll: false,
       skill: ''
     },
@@ -347,8 +481,13 @@ export const ITEM_TYPE_CONFIGS = [
     sheet: 'generic',
     legacy: true,
     defaults: {
+      activationCost: 'passive',
       activationType: 'passive',
       range: '',
+      duration: '',
+      area: '',
+      defense: '',
+      targets: '',
       requiresRoll: false,
       skill: ''
     },
@@ -361,8 +500,13 @@ export const ITEM_TYPE_CONFIGS = [
     sheet: 'generic',
     legacy: true,
     defaults: {
+      activationCost: 'passive',
       activationType: 'passive',
       range: '',
+      duration: '',
+      area: '',
+      defense: '',
+      targets: '',
       requiresRoll: false,
       skill: ''
     },
@@ -375,8 +519,13 @@ export const ITEM_TYPE_CONFIGS = [
     sheet: 'generic',
     legacy: true,
     defaults: {
+      activationCost: 'passive',
       activationType: 'passive',
       range: '',
+      duration: '',
+      area: '',
+      defense: '',
+      targets: '',
       requiresRoll: false,
       skill: ''
     },
@@ -389,8 +538,13 @@ export const ITEM_TYPE_CONFIGS = [
     sheet: 'generic',
     legacy: true,
     defaults: {
+      activationCost: 'passive',
       activationType: 'passive',
       range: '',
+      duration: '',
+      area: '',
+      defense: '',
+      targets: '',
       requiresRoll: false,
       skill: ''
     },
@@ -402,8 +556,13 @@ export const ITEM_TYPE_CONFIGS = [
     groupKey: 'genomes',
     sheet: 'generic',
     defaults: {
+      activationCost: 'passive',
       activationType: 'passive',
       range: '',
+      duration: '',
+      area: '',
+      defense: '',
+      targets: '',
       requiresRoll: false,
       skill: ''
     },
@@ -415,8 +574,13 @@ export const ITEM_TYPE_CONFIGS = [
     groupKey: 'sourceAbilities',
     sheet: 'generic',
     defaults: {
+      activationCost: 'passive',
       activationType: 'passive',
       range: '',
+      duration: '',
+      area: '',
+      defense: '',
+      targets: '',
       requiresRoll: false,
       skill: ''
     },
@@ -589,17 +753,40 @@ function buildTraitBadges(item, helpers) {
   const system = item.system ?? {};
   const t = helpers.t;
   const badges = [];
-  const activationType = String(system.activationType ?? '').trim();
-  const activationLabelKey = ITEM_ACTIVATION_TYPE_LABEL_KEYS[activationType];
+  const activationCost = String(system.activationCost ?? system.activationType ?? '').trim();
+  const activationLabelKey = ITEM_ACTIVATION_TYPE_LABEL_KEYS[activationCost];
   if (activationLabelKey) {
     badges.push(
-      `${t.localize('MY_RPG.ItemFields.ActivationType')}: ${t.localize(activationLabelKey)}`
+      `${t.localize('MY_RPG.ItemFields.ActivationCost')}: ${t.localize(activationLabelKey)}`
     );
   }
 
   const range = String(system.range ?? '').trim();
   if (range) {
     badges.push(`${t.localize('MY_RPG.ItemFields.Range')}: ${range}`);
+  }
+
+  const duration = String(system.duration ?? '').trim();
+  const durationLabelKey = ITEM_DURATION_LABEL_KEYS[duration];
+  if (durationLabelKey) {
+    badges.push(`${t.localize('MY_RPG.ItemFields.Duration')}: ${t.localize(durationLabelKey)}`);
+  }
+
+  const area = String(system.area ?? '').trim();
+  if (area) {
+    badges.push(`${t.localize('MY_RPG.ItemFields.Area')}: ${area}`);
+  }
+
+  const defense = String(system.defense ?? '').trim();
+  const defenseLabelKey = ITEM_DEFENSE_LABEL_KEYS[defense];
+  if (defenseLabelKey) {
+    badges.push(`${t.localize('MY_RPG.ItemFields.Defense')}: ${t.localize(defenseLabelKey)}`);
+  }
+
+  const targets = String(system.targets ?? '').trim();
+  const targetLabelKey = ITEM_TARGET_LABEL_KEYS[targets];
+  if (targetLabelKey) {
+    badges.push(`${t.localize('MY_RPG.ItemFields.Targets')}: ${t.localize(targetLabelKey)}`);
   }
 
   badges.push(...buildUsageFrequencyBadge(item, helpers));

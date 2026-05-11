@@ -1,43 +1,51 @@
 <section class='item-group' data-item-group='{{group.key}}'>
-  <header class='item-group__header'>
-    <h3>
+  <div class='item-group__columns'>
+    <span class='item-group__column-title'>
       {{#if group.icon}}<i class='{{group.icon}}'></i>{{/if}}
-      <span class='item-group__title'>{{group.label}}</span>
+      <span>{{group.label}}</span>
       {{#if group.capacity}}
         <span class='item-group__capacity'>{{group.capacity.value}} / {{group.capacity.max}}</span>
       {{/if}}
-    </h3>
-    <button
-      type='button'
-      class='item-create item-control'
-      data-type='{{group.type}}'
-      data-group-key='{{group.key}}'
-      title='{{group.createLabel}}'
-    >
-      <i class='fa-solid fa-plus'></i>
-      <span class='sr-only'>{{group.createLabel}}</span>
-    </button>
-  </header>
+    </span>
+    <span>{{localize 'MY_RPG.ItemTableColumns.Skill'}}</span>
+    <span>{{localize 'MY_RPG.ItemTableColumns.Roll'}}</span>
+    <span class='item-group__column-actions'>
+      <button
+        type='button'
+        class='item-create item-control item-group__create'
+        data-type='{{group.type}}'
+        data-group-key='{{group.key}}'
+        title='{{group.createLabel}}'
+      >
+        <i class='fa-solid fa-plus'></i>
+        <span class='sr-only'>{{group.createLabel}}</span>
+      </button>
+    </span>
+  </div>
   {{#if group.items.length}}
     <ol class='item-list'>
       {{#each group.items as |item|}}
         <li
-          class='item-row {{#if item.equipped}}item-row--equipped{{/if}}'
+          class='item-row {{#if item.equipped}}item-row--equipped{{/if}} {{#if item.isExpanded}}item-row--expanded{{/if}}'
           data-item-id='{{item.id}}'
           data-group-key='{{item.groupKey}}'
         >
-          <div class='item-row__header'>
+          <div
+            class='item-row__summary-grid'
+            data-item-summary-toggle='true'
+            role='button'
+            tabindex='0'
+            aria-expanded='{{#if item.isExpanded}}true{{else}}false{{/if}}'
+          >
             <div class='item-row__name'>
               <img src='{{item.img}}' alt='' />
               <span class='item-row__label'>{{item.name}}</span>
+              <span class='item-row__toggle' aria-hidden='true'>
+                <i class='fa-solid fa-chevron-down item-row__toggle-icon'></i>
+              </span>
             </div>
-            {{#if item.hasBadges}}
-              <ul class='item-row__badges'>
-                {{#each item.badges as |badge|}}
-                  <li class='item-badge'>{{badge}}</li>
-                {{/each}}
-              </ul>
-            {{/if}}
+            <div class='item-row__skill'>{{item.skillLabel}}</div>
+            <div class='item-row__roll'>{{item.rollSummary}}</div>
             <div class='item-row__actions' data-item-id='{{item.id}}' data-group-key='{{item.groupKey}}'>
               {{#if item.showQuantity}}
                 <div class='item-quantity-control' aria-label='{{@root.itemControls.quantity}}'>
@@ -116,9 +124,27 @@
               </button>
             </div>
           </div>
-          {{#if item.hasSummary}}
-            <div class='item-row__summary'>
-              {{{item.summary}}}
+          {{#if item.hasDetails}}
+            <div class='item-row__detail' {{#unless item.isExpanded}}hidden{{/unless}}>
+              {{#if item.detailRows.length}}
+                <div class='item-row__detail-grid'>
+                  {{#each item.detailRows as |row|}}
+                    <div class='item-row__detail-line'>
+                      {{#each row as |entry|}}
+                        <span class='item-row__detail-entry'>
+                          <strong>{{entry.label}}</strong>
+                          {{entry.value}}
+                        </span>
+                      {{/each}}
+                    </div>
+                  {{/each}}
+                </div>
+              {{/if}}
+              {{#if item.detailEffect}}
+                <div class='item-row__detail-effect'>
+                  {{{item.detailEffect}}}
+                </div>
+              {{/if}}
             </div>
           {{/if}}
         </li>

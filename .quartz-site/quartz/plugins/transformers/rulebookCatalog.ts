@@ -213,7 +213,11 @@ const detailTagLabels = {
   psychicDefense: 'Воля'
 } as const;
 
-const primaryDetailLineOrder: CatalogDetailTagKey[] = [
+const hiddenDetailTagKeys = new Set<CatalogDetailTagKey>(['targets', 'frequency', 'skill']);
+const firstDetailLineOrder: CatalogDetailTagKey[] = ['actions', 'defense'];
+const sharedDetailTagOrder: CatalogDetailTagKey[] = [
+  'actions',
+  'defense',
   'damage',
   'physicalDefense',
   'magicalDefense',
@@ -221,16 +225,8 @@ const primaryDetailLineOrder: CatalogDetailTagKey[] = [
   'shield',
   'speed',
   'range',
-  'targets',
   'area',
-  'defense'
-];
-
-const secondaryDetailLineOrder: CatalogDetailTagKey[] = [
-  'duration',
-  'actions',
-  'frequency',
-  'skill'
+  'duration'
 ];
 
 const rankOptions = ['1', '2', '3', '4'];
@@ -817,15 +813,20 @@ function buildOrderedDetailLine(tags: CatalogDetailTag[], order: CatalogDetailTa
     .filter((tag): tag is CatalogDetailTag => Boolean(tag));
 }
 
-function buildDetailFactLines(tags: CatalogDetailTag[], lineSize = 4) {
-  const primaryLine = buildOrderedDetailLine(tags, primaryDetailLineOrder);
-  const secondaryLine = buildOrderedDetailLine(tags, secondaryDetailLineOrder);
-  const groupedKeys = new Set([...primaryDetailLineOrder, ...secondaryDetailLineOrder]);
-  const remainingTags = tags.filter((tag) => !groupedKeys.has(tag.key));
-  const lines = [primaryLine, secondaryLine].filter((line) => line.length > 0);
+function buildDetailFactLines(tags: CatalogDetailTag[], lineSize = 2) {
+  const visibleTags = tags.filter((tag) => !hiddenDetailTagKeys.has(tag.key));
+  const firstLine = buildOrderedDetailLine(visibleTags, firstDetailLineOrder);
+  const firstLineKeys = new Set(firstDetailLineOrder);
+  const orderedTags = buildOrderedDetailLine(visibleTags, sharedDetailTagOrder).filter(
+    (tag) => !firstLineKeys.has(tag.key)
+  );
+  const orderedKeys = new Set(sharedDetailTagOrder);
+  const remainingTags = visibleTags.filter((tag) => !orderedKeys.has(tag.key));
+  const trailingTags = [...orderedTags, ...remainingTags];
+  const lines = firstLine.length > 0 ? [firstLine] : [];
 
-  for (let index = 0; index < remainingTags.length; index += lineSize) {
-    lines.push(remainingTags.slice(index, index + lineSize));
+  for (let index = 0; index < trailingTags.length; index += lineSize) {
+    lines.push(trailingTags.slice(index, index + lineSize));
   }
 
   return lines;

@@ -23,6 +23,9 @@
   --andromeda-fallback-font-size-label: 0.7rem;
   --andromeda-fallback-font-size-small: 0.75rem;
   --andromeda-fallback-shadow-accent-32: rgba(90, 80, 184, 0.32);
+  --andromeda-item-actions-width: calc(4 * 1.45rem + 3 * 0.2rem);
+  --andromeda-item-table-columns: minmax(0, 1.9fr) minmax(6.5rem, 0.78fr) minmax(5.7rem, 0.66fr)
+    minmax(var(--andromeda-item-actions-width), auto);
 }
 
 .small-input {
@@ -521,15 +524,52 @@ textarea[disabled] {
 }
 
 .project-andromeda.sheet.actor {
-  background: var(--andromeda-color-bg, var(--andromeda-fallback-bg));
+  background: transparent;
   color: var(--andromeda-color-text, var(--andromeda-fallback-text));
   font-size: var(--andromeda-font-size-body, var(--andromeda-fallback-font-size-body));
 }
 
+.window-app.project-andromeda.sheet.actor {
+  --andromeda-sheet-top-gradient:
+    radial-gradient(circle at top left, rgb(255 255 255 / 0.06), transparent 24%),
+    linear-gradient(
+      135deg,
+      color-mix(
+          in srgb,
+          var(--andromeda-color-chrome, var(--andromeda-fallback-chrome)) 74%,
+          #000000
+        )
+        0%,
+      var(--andromeda-color-chrome, var(--andromeda-fallback-chrome)) 45%,
+      color-mix(
+          in srgb,
+          var(--andromeda-color-chrome, var(--andromeda-fallback-chrome)) 82%,
+          #ffffff
+        )
+        100%
+    );
+  border: 0;
+  border-radius: 7px;
+  overflow: hidden;
+  background: var(--andromeda-sheet-top-gradient);
+}
+
 .window-app.project-andromeda.sheet.actor .window-content {
+  display: flex;
+  flex-direction: column;
   padding: 0;
-  background: var(--andromeda-color-bg, var(--andromeda-fallback-bg));
+  overflow: hidden;
+  background: transparent;
   color: var(--andromeda-color-text, var(--andromeda-fallback-text));
+}
+
+.project-andromeda.sheet.actor form {
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
 }
 
 .window-app.project-andromeda.sheet.actor .window-header {
@@ -540,7 +580,7 @@ textarea[disabled] {
   gap: 8px;
   padding-top: 9px;
   border-bottom: 0;
-  background: var(--andromeda-color-chrome, var(--andromeda-fallback-chrome)) !important;
+  background: transparent !important;
   color: var(--andromeda-color-text, var(--andromeda-fallback-text)) !important;
 }
 
@@ -581,38 +621,42 @@ textarea[disabled] {
   color: var(--andromeda-color-text, var(--andromeda-fallback-text)) !important;
 }
 
-.project-andromeda.sheet.actor form {
-  position: relative;
-  display: flex;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  box-sizing: border-box;
-  font-family: var(--andromeda-font-body, var(--andromeda-fallback-font-body));
-  color: var(--andromeda-color-text, var(--andromeda-fallback-text));
-  background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
-}
-
 .project-andromeda .andromeda-sheet-shell {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  flex: 1 1 auto;
   width: 100%;
-  max-width: 860px;
   height: 100%;
   min-height: 0;
   border: 0;
-  border-radius: var(--andromeda-radius-lg, var(--andromeda-fallback-radius-lg));
+  border-radius: 0 0 7px 7px;
   overflow: hidden;
-  background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
-  box-shadow: 0 0 0 1px var(--andromeda-color-line, var(--andromeda-fallback-line));
+  background: transparent;
+  box-shadow:
+    1px 0 0 0 var(--andromeda-color-line, var(--andromeda-fallback-line)),
+    -1px 0 0 0 var(--andromeda-color-line, var(--andromeda-fallback-line)),
+    0 1px 0 0 var(--andromeda-color-line, var(--andromeda-fallback-line));
 }
 
-.project-andromeda .andromeda-sheet-shell .sheet-scrollable {
+.project-andromeda .andromeda-sheet-chrome {
+  display: grid;
+  grid-template-rows: auto auto;
+  min-height: 0;
+  background: transparent;
+}
+
+.project-andromeda .andromeda-sheet-viewport {
+  min-height: 0;
+  overflow: hidden;
+  background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
+}
+
+.project-andromeda .andromeda-sheet-pane-scroll.sheet-scrollable {
   position: relative;
   top: auto;
   left: auto;
   width: auto;
-  height: auto;
+  height: 100%;
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
@@ -620,19 +664,23 @@ textarea[disabled] {
   background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
   scrollbar-width: thin;
   scrollbar-color: var(--andromeda-raw-shadow-accent-32, var(--andromeda-fallback-shadow-accent-32))
-    transparent;
+    var(--andromeda-color-surface, var(--andromeda-fallback-surface));
 }
 
-.project-andromeda .andromeda-sheet-shell .sheet-scrollable::-webkit-scrollbar {
+.project-andromeda .andromeda-sheet-pane-scroll.sheet-scrollable::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 
-.project-andromeda .andromeda-sheet-shell .sheet-scrollable::-webkit-scrollbar-track {
-  background: transparent;
+.project-andromeda .andromeda-sheet-pane-scroll.sheet-scrollable::-webkit-scrollbar-track {
+  background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
 }
 
-.project-andromeda .andromeda-sheet-shell .sheet-scrollable::-webkit-scrollbar-thumb {
+.project-andromeda .andromeda-sheet-pane-scroll.sheet-scrollable::-webkit-scrollbar-corner {
+  background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
+}
+
+.project-andromeda .andromeda-sheet-pane-scroll.sheet-scrollable::-webkit-scrollbar-thumb {
   border: 2px solid var(--andromeda-color-surface, var(--andromeda-fallback-surface));
   border-radius: 999px;
   background-color: var(
@@ -642,44 +690,89 @@ textarea[disabled] {
 }
 
 .project-andromeda .andromeda-hud {
+  --andromeda-hud-panel-border: 1px solid rgb(255 255 255 / 0.14);
   display: grid;
-  grid-template-columns: 150px minmax(0, 1fr) 72px 108px 132px;
-  grid-template-areas:
-    'portrait name name name rank'
-    'portrait stress speed glory progress';
-  gap: 10px 12px;
-  align-items: stretch;
-  padding: 8px 14px 10px;
+  grid-template-columns: 150px minmax(0, 1fr) 11rem 92px;
+  grid-template-areas: 'portrait main temps rank';
+  gap: 12px 14px;
+  align-items: start;
+  padding: 8px 14px 0;
   border-bottom: 0;
-  background: var(--andromeda-color-chrome, var(--andromeda-fallback-chrome));
+  background: transparent;
+}
+
+.project-andromeda .andromeda-hud--player {
+  grid-template-columns: 137px 13rem minmax(10rem, 1fr) 9.75rem;
 }
 
 .project-andromeda .andromeda-hud--gm {
-  grid-template-areas:
-    'portrait name name name rank'
-    'portrait stress speed glory rank';
+  grid-template-columns: 137px minmax(0, 1fr) 11rem 92px;
 }
 
 .project-andromeda .andromeda-hud__portrait {
   grid-area: portrait;
-  align-self: center;
   display: block;
-  width: 150px !important;
-  height: 150px !important;
-  max-width: 150px;
-  max-height: 150px;
+  width: 137px !important;
+  height: 137px !important;
   object-fit: cover;
-  border: 0;
   border-radius: var(--andromeda-radius-md, var(--andromeda-fallback-radius-md));
   background: var(--andromeda-color-accent, var(--andromeda-fallback-accent));
-  box-shadow: none;
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.08),
+    0 18px 34px rgb(0 0 0 / 0.22);
 }
 
-.project-andromeda .andromeda-hud__main,
-.project-andromeda .andromeda-hud__meta-row,
-.project-andromeda .andromeda-hud__aside,
-.project-andromeda .andromeda-hud__aside-top {
-  display: contents;
+.project-andromeda .andromeda-hud__main {
+  display: grid;
+  grid-template-columns: 13.5rem;
+  align-content: start;
+  column-gap: 0;
+  gap: 8px;
+  align-self: start;
+}
+
+.project-andromeda .andromeda-hud__identity-row {
+  grid-column: 1;
+  display: flex;
+  align-items: flex-start;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border-radius: var(--andromeda-radius-md, var(--andromeda-fallback-radius-md));
+  background: transparent;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.14);
+}
+
+.project-andromeda .andromeda-hud__stats-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-rows: auto;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 6px 12px;
+  min-width: 0;
+}
+
+.project-andromeda .andromeda-hud__rank-column {
+  grid-area: rank;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: start;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.project-andromeda .andromeda-hud__temps {
+  grid-area: temps;
+  display: flex;
+  flex-direction: column;
+  align-self: start;
+  justify-self: center;
+  width: min(11rem, 100%);
+  min-width: 0;
 }
 
 .project-andromeda .andromeda-inline-field,
@@ -695,25 +788,22 @@ textarea[disabled] {
 }
 
 .project-andromeda .andromeda-name-field {
-  grid-area: name;
-  align-self: center;
   display: block;
   width: 100%;
-  height: 52px;
-  min-height: 52px;
+  height: 40px;
+  min-height: 40px;
   margin: 0;
-  padding: 3px 2px 5px 0;
+  padding: 0 2px 0 8px;
   border: 0 !important;
   border-radius: 0;
   background: transparent !important;
   background-image: none !important;
-  color: var(--andromeda-color-text, var(--andromeda-fallback-text)) !important;
-  font-family: var(--andromeda-font-heading, var(--andromeda-fallback-font-heading)) !important;
-  font-size: 2.7rem;
-  font-weight: 700;
-  letter-spacing: 0;
+  color: var(--andromeda-color-text-on-chrome, var(--andromeda-raw-white)) !important;
+  font-family: var(--andromeda-font-body, var(--andromeda-fallback-font-body)) !important;
+  font-size: 2.45rem;
+  font-weight: 400;
   text-align: left !important;
-  line-height: 1.08;
+  line-height: 1.04;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: clip;
@@ -730,7 +820,7 @@ textarea[disabled] {
 .project-andromeda .form-group span,
 .project-andromeda .andromeda-panel__header span,
 .project-andromeda .andromeda-rail-header span {
-  color: var(--andromeda-color-muted, var(--andromeda-fallback-muted));
+  color: var(--andromeda-color-text-on-chrome-soft, rgb(255 255 255 / 0.82));
   font-family: var(--andromeda-font-heading, var(--andromeda-fallback-font-heading));
   font-size: var(--andromeda-font-size-label, var(--andromeda-fallback-font-size-label));
   font-weight: 500;
@@ -754,21 +844,37 @@ textarea[disabled] {
 .project-andromeda .andromeda-temp-row input {
   min-height: 26px;
   padding: 0 6px;
+  font-family: var(--andromeda-font-data, var(--andromeda-fallback-font-data));
   font-size: var(--andromeda-font-size-ui, var(--andromeda-fallback-font-size-ui));
   font-weight: 700;
+  line-height: 1;
 }
 
 .project-andromeda .andromeda-status-card--speed {
-  grid-area: speed;
   min-width: 0;
 }
 
 .project-andromeda .andromeda-status-card--speed input {
   width: 100%;
+  min-width: 0;
   min-height: 26px;
+  padding: 0 2px;
   border: 0 !important;
   background: transparent !important;
-  color: var(--andromeda-color-text, var(--andromeda-fallback-text)) !important;
+  color: var(--andromeda-color-text-on-chrome, var(--andromeda-raw-white)) !important;
+  text-align: center !important;
+}
+
+.project-andromeda .andromeda-hud__stats-row .andromeda-status-card span {
+  letter-spacing: 0.02em;
+}
+
+.project-andromeda .andromeda-hud__stats-row > .andromeda-status-card > span {
+  white-space: nowrap;
+}
+
+.project-andromeda .andromeda-hud__stats-row .andromeda-status-combo {
+  gap: 4px;
 }
 
 .project-andromeda .andromeda-status-card--stress,
@@ -776,19 +882,22 @@ textarea[disabled] {
 .project-andromeda .andromeda-status-card--progress,
 .project-andromeda .andromeda-status-card--aside {
   justify-content: flex-start;
-  padding: 8px 10px;
-  border: 1px solid var(--andromeda-color-line, var(--andromeda-fallback-line));
+  justify-self: stretch;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  padding: 4px 2px;
+  border: 1px solid transparent;
   border-radius: var(--andromeda-radius-md, var(--andromeda-fallback-radius-md));
-  background: var(--andromeda-color-panel, var(--andromeda-fallback-panel));
+  background: transparent;
+  box-shadow: none;
 }
 
 .project-andromeda .andromeda-status-card--stress {
-  grid-area: stress;
   min-width: 0;
 }
 
 .project-andromeda .andromeda-status-card--progress {
-  grid-area: progress;
   min-width: 0;
 }
 
@@ -802,7 +911,7 @@ textarea[disabled] {
 }
 
 .project-andromeda .andromeda-status-separator {
-  color: var(--andromeda-color-muted, var(--andromeda-fallback-muted));
+  color: var(--andromeda-color-text-on-chrome-soft, rgb(255 255 255 / 0.82));
   font-family: var(--andromeda-font-data, var(--andromeda-fallback-font-data));
   font-size: 0.95rem;
   font-weight: 700;
@@ -822,14 +931,14 @@ textarea[disabled] {
 }
 
 .project-andromeda .andromeda-status-card--aside {
-  grid-area: glory;
   min-width: 0;
 }
 
 .project-andromeda .andromeda-status-card--aside input {
   width: 100%;
+  min-width: 0;
   min-height: 26px;
-  padding: 0;
+  padding: 0 2px;
   text-align: center !important;
 }
 
@@ -847,6 +956,12 @@ textarea[disabled] {
   padding: 0;
   border: 0;
   background: transparent;
+}
+
+.project-andromeda .andromeda-hud .andromeda-status-card {
+  border: 0;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.14);
 }
 
 .project-andromeda .andromeda-status-card header,
@@ -870,17 +985,73 @@ textarea[disabled] {
   line-height: 1;
 }
 
+.project-andromeda .andromeda-hud .andromeda-status-card input,
+.project-andromeda .andromeda-hud .andromeda-status-card strong {
+  color: var(--andromeda-color-text-on-chrome, var(--andromeda-raw-white)) !important;
+  font-family: var(--andromeda-font-data, var(--andromeda-fallback-font-data));
+  font-size: var(--andromeda-font-size-ui, var(--andromeda-fallback-font-size-ui));
+  font-weight: 700;
+  line-height: 1;
+}
+
 .project-andromeda .andromeda-status-card--glory {
-  min-width: 58px;
+  min-width: 0;
 }
 
 .project-andromeda .andromeda-status-card--glory input {
-  width: 58px;
+  width: 100%;
+  min-width: 0;
   min-height: 26px;
   border: 0 !important;
   background: transparent !important;
-  color: var(--andromeda-color-shield) !important;
+  color: var(--andromeda-color-text-on-chrome, var(--andromeda-raw-white)) !important;
   font-size: 0.875rem;
+}
+
+.project-andromeda .andromeda-hud--player .andromeda-hud__stats-row {
+  grid-template-areas:
+    'stress glory'
+    'speed archetype';
+  grid-template-columns: 4.75rem 8rem;
+  justify-content: flex-start;
+  justify-items: start;
+}
+
+.project-andromeda .andromeda-hud--player .andromeda-hud__identity-row {
+  max-width: 100%;
+}
+
+.project-andromeda .andromeda-hud--gm .andromeda-hud__stats-row {
+  grid-template-columns: 3.5rem 4.75rem 14.5rem;
+}
+
+.project-andromeda .andromeda-hud--player .andromeda-status-card--speed {
+  grid-area: speed;
+  justify-self: start;
+  width: 4.75rem;
+}
+
+.project-andromeda .andromeda-hud--player .andromeda-status-card--stress {
+  grid-area: stress;
+  justify-self: start;
+  width: 4.75rem;
+}
+
+.project-andromeda .andromeda-hud--player .andromeda-status-card--speed,
+.project-andromeda .andromeda-hud--player .andromeda-status-card--stress {
+  text-align: center;
+}
+
+.project-andromeda .andromeda-hud--player .andromeda-status-card--aside {
+  grid-area: glory;
+  justify-self: start;
+  width: 8rem;
+}
+
+.project-andromeda .andromeda-hud--player .andromeda-status-card--archetype {
+  grid-area: archetype;
+  justify-self: start;
+  width: 8rem;
 }
 
 .project-andromeda .andromeda-hud--player .andromeda-status-card {
@@ -933,32 +1104,69 @@ textarea[disabled] {
   text-align: center !important;
 }
 
+.project-andromeda .andromeda-hud__rank-column .andromeda-status-card--rank-progress {
+  width: 100%;
+}
+
+.project-andromeda .andromeda-archetype-input {
+  width: 100%;
+  min-width: 0;
+  min-height: 26px;
+  padding: 0 2px;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--andromeda-color-text-on-chrome, var(--andromeda-raw-white)) !important;
+  font-family: var(--andromeda-font-body, var(--andromeda-fallback-font-body));
+  font-size: var(--andromeda-font-size-ui, var(--andromeda-fallback-font-size-ui));
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .project-andromeda .andromeda-hud__rank {
-  grid-area: rank;
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  align-items: stretch;
+  justify-content: stretch;
   justify-self: center;
-  align-self: center;
-  width: 92px;
-  height: 92px;
-  padding: 8px;
+  align-self: start;
+  width: 100%;
+  height: 88px;
+  padding: 0;
   border: 1px solid var(--andromeda-color-line, var(--andromeda-fallback-line));
-  border-radius: 50%;
+  border-radius: var(--andromeda-radius-md, var(--andromeda-fallback-radius-md));
   box-sizing: border-box;
   background: var(--andromeda-color-panel, var(--andromeda-fallback-panel));
   box-shadow:
     inset 0 0 0 1px var(--andromeda-raw-overlay-white-42),
     0 0 0 1px var(--andromeda-raw-shadow-text-06);
+  overflow: hidden;
 }
 
-.project-andromeda .andromeda-hud__rank span {
+.project-andromeda .andromeda-hud__rank-title {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 5px 6px 4px;
+  border-bottom: 1px solid rgb(0 0 0 / 0.08);
+  background: rgb(0 0 0 / 0.06);
+  color: rgb(23 45 60 / 0.72);
+  font-family: var(--andromeda-font-heading, var(--andromeda-fallback-font-heading));
+  font-size: var(--andromeda-font-size-label, var(--andromeda-fallback-font-size-label));
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  line-height: 1;
   text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .project-andromeda .andromeda-hud__rank input {
+  place-self: center;
   width: 1.15ch;
   min-width: 1.15ch;
   max-width: 1.15ch;
@@ -988,6 +1196,10 @@ textarea[disabled] {
   -webkit-appearance: none;
 }
 
+.project-andromeda .andromeda-hud__rank--rank0 {
+  background: #fff;
+}
+
 .project-andromeda .andromeda-hud__rank--rank1 {
   background: var(--andromeda-color-rank1);
 }
@@ -1009,9 +1221,8 @@ textarea[disabled] {
   align-items: end;
   justify-content: center;
   gap: 0;
-  padding: 0 12px;
-  border-bottom: 1px solid var(--andromeda-color-line);
-  background: var(--andromeda-color-chrome, var(--andromeda-fallback-chrome));
+  border-bottom: 1px solid rgb(232 210 168 / 0.12);
+  background: transparent;
 }
 
 .project-andromeda .andromeda-tab {
@@ -1025,10 +1236,10 @@ textarea[disabled] {
   margin: 0;
   padding: 0 13px;
   border: 0;
-  border-bottom: 2px solid transparent;
+  border-bottom: 4px solid transparent;
   border-radius: 0;
   background: transparent;
-  color: var(--andromeda-color-muted, var(--andromeda-fallback-muted));
+  color: var(--andromeda-color-text-on-chrome-soft, rgb(255 255 255 / 0.72));
   font-family: var(--andromeda-font-heading, var(--andromeda-fallback-font-heading));
   font-size: var(--andromeda-font-size-ui, var(--andromeda-fallback-font-size-ui));
   font-weight: 500;
@@ -1052,22 +1263,24 @@ textarea[disabled] {
 
 .project-andromeda .andromeda-tab:hover,
 .project-andromeda .andromeda-tab:focus-visible {
-  color: var(--andromeda-color-text, var(--andromeda-fallback-text));
-  border-color: var(--andromeda-raw-shadow-accent-45);
+  color: var(--andromeda-color-text-on-chrome, var(--andromeda-raw-white));
+  border-color: transparent;
   outline: none;
 }
 
 .project-andromeda .andromeda-tab.active {
-  color: var(--andromeda-color-text);
+  color: var(--andromeda-raw-white) !important;
   border-color: var(--andromeda-color-accent);
   background: transparent;
-  box-shadow: none;
+  box-shadow: none !important;
+  text-shadow: none !important;
 }
 
 .project-andromeda .andromeda-sheet-workspace {
   display: grid;
-  grid-template-columns: 286px minmax(0, 1fr);
+  grid-template-columns: 276px minmax(0, 1fr);
   gap: 0;
+  height: 100%;
   padding: 0;
   min-height: 100%;
   background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
@@ -1077,16 +1290,47 @@ textarea[disabled] {
   display: flex;
   flex-direction: column;
   gap: 0;
+  height: 100%;
   min-width: 0;
   padding: 10px 12px;
-  border-right: 1px solid var(--andromeda-color-line, var(--andromeda-fallback-line));
+  overflow: hidden;
+  border-right: 0;
   background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
+}
+
+.project-andromeda .andromeda-rail-skills-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--andromeda-raw-shadow-accent-32, var(--andromeda-fallback-shadow-accent-32))
+    transparent;
+}
+
+.project-andromeda .andromeda-rail-skills-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.project-andromeda .andromeda-rail-skills-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.project-andromeda .andromeda-rail-skills-scroll::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-color: var(
+    --andromeda-raw-shadow-accent-32,
+    var(--andromeda-fallback-shadow-accent-32)
+  );
+  background-clip: content-box;
 }
 
 .project-andromeda .andromeda-rail-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 10px;
   padding: 0 2px 8px;
 }
@@ -1114,7 +1358,7 @@ textarea[disabled] {
   display: flex;
   flex-direction: column;
   gap: 3px;
-  padding: 8px 0 9px;
+  padding: 0 0 4px;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -1123,7 +1367,7 @@ textarea[disabled] {
 
 .project-andromeda .andromeda-ability-summary {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   gap: 8px;
   align-items: center;
   min-height: 34px;
@@ -1133,20 +1377,12 @@ textarea[disabled] {
 }
 
 .project-andromeda .andromeda-ability-roll {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  min-height: 0;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: var(--andromeda-color-text, var(--andromeda-fallback-text));
-  text-align: left;
-  cursor: pointer;
+  display: contents;
 }
 
 .project-andromeda .andromeda-ability-title {
+  grid-column: 1;
+  justify-self: start;
   color: var(--andromeda-color-text, var(--andromeda-fallback-text));
   font-family: var(--andromeda-font-heading, var(--andromeda-fallback-font-heading));
   font-size: var(--andromeda-font-size-ui, var(--andromeda-fallback-font-size-ui));
@@ -1159,6 +1395,8 @@ textarea[disabled] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  grid-column: 2;
+  justify-self: center;
   min-width: 0;
 }
 
@@ -1177,8 +1415,8 @@ textarea[disabled] {
   min-width: 32px;
   min-height: 24px;
   border-radius: 999px;
-  background: var(--andromeda-color-accent) !important;
-  color: var(--andromeda-raw-white) !important;
+  background: var(--andromeda-color-rank0, var(--andromeda-raw-white)) !important;
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text)) !important;
   font-family: var(--andromeda-font-data);
   font-size: 0.78rem;
   font-weight: 700;
@@ -1186,11 +1424,32 @@ textarea[disabled] {
   text-align: center;
 }
 
+.project-andromeda .andromeda-ability-roll .ability-die-value.rank0 {
+  background: var(--andromeda-raw-white) !important;
+}
+
+.project-andromeda .andromeda-ability-roll .ability-die-value.rank1 {
+  background: var(--andromeda-color-rank1) !important;
+}
+
+.project-andromeda .andromeda-ability-roll .ability-die-value.rank2 {
+  background: var(--andromeda-color-rank2) !important;
+}
+
+.project-andromeda .andromeda-ability-roll .ability-die-value.rank3 {
+  background: var(--andromeda-color-rank3) !important;
+}
+
+.project-andromeda .andromeda-ability-roll .ability-die-value.rank4 {
+  background: var(--andromeda-color-rank4) !important;
+}
+
 .project-andromeda .andromeda-defense-pill {
   display: inline-flex;
   flex-direction: row;
   align-items: baseline;
-  justify-content: flex-start;
+  grid-column: 3;
+  justify-content: flex-end;
   gap: 4px;
   min-height: 0;
   padding: 0;
@@ -1329,6 +1588,7 @@ textarea[disabled] {
 
 .project-andromeda .andromeda-skill-legend {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   padding-top: 8px;
 }
@@ -1337,12 +1597,14 @@ textarea[disabled] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  min-width: 54px;
+  height: 22px;
+  padding: 0 8px;
   border-radius: 4px;
   color: var(--andromeda-color-muted);
   font-size: var(--andromeda-font-size-label);
   line-height: 1;
+  white-space: nowrap;
 }
 
 .project-andromeda .andromeda-skill-legend .rank1 {
@@ -1362,9 +1624,14 @@ textarea[disabled] {
 }
 
 .project-andromeda .andromeda-sheet-pane {
+  min-height: 100%;
   min-width: 0;
-  padding: 12px;
+  padding: 12px 12px 12px 0;
   background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
+}
+
+.project-andromeda .andromeda-sheet-pane-scroll {
+  min-width: 0;
 }
 
 .project-andromeda .andromeda-tab-panel {
@@ -1508,6 +1775,30 @@ textarea[disabled] {
   background: var(--andromeda-color-panel, var(--andromeda-fallback-panel));
 }
 
+.project-andromeda .andromeda-temp-list--hud {
+  padding: 2px 8px;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  background: transparent;
+}
+
+.project-andromeda .andromeda-temp-list--hud .andromeda-temp-row {
+  grid-template-columns: minmax(0, 1fr) 42px;
+  gap: 8px;
+  min-height: 24px;
+}
+
+.project-andromeda .andromeda-temp-list--hud .andromeda-temp-row span {
+  color: var(--andromeda-color-text-on-chrome-soft, rgb(255 255 255 / 0.82));
+  font-size: 0.64rem;
+}
+
+.project-andromeda .andromeda-temp-list--hud .andromeda-temp-row input {
+  min-height: 22px;
+  padding: 0 2px;
+  color: var(--andromeda-color-text-on-chrome, var(--andromeda-raw-white)) !important;
+  text-align: center !important;
+}
+
 .project-andromeda .andromeda-temp-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 64px;
@@ -1562,6 +1853,9 @@ textarea[disabled] {
 
 .project-andromeda .andromeda-item-tab .item-groups,
 .project-andromeda .personality-item-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   margin-bottom: var(--inventory-section-gap);
 }
 
@@ -1572,9 +1866,152 @@ textarea[disabled] {
   background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
 }
 
-.project-andromeda .item-group__header {
-  padding: 9px 11px;
+.project-andromeda .item-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.project-andromeda .item-row {
+  padding: 0;
+  border-top: 1px solid var(--andromeda-color-line-soft);
+}
+
+.project-andromeda .item-row__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.project-andromeda .item-row__name {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.project-andromeda .item-row__name img {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.project-andromeda .item-row__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.project-andromeda .item-row__toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  color: var(--andromeda-color-accent, var(--andromeda-fallback-accent));
+}
+
+.project-andromeda .item-row__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.project-andromeda .item-row__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.2rem;
+  margin-left: auto;
+}
+
+.project-andromeda .item-group__columns {
+  display: grid;
+  grid-template-columns: var(--andromeda-item-table-columns);
+  gap: 0.45rem;
+  padding: 0.55rem 0.6rem;
   border-bottom: 1px solid var(--andromeda-color-line-soft);
+  align-items: center;
+  background: var(--andromeda-color-panel, var(--andromeda-fallback-panel));
+  color: var(--andromeda-color-muted, var(--andromeda-fallback-muted));
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.project-andromeda .item-group__column-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text));
+}
+
+.project-andromeda .item-group__column-title i {
+  color: var(--andromeda-color-accent, var(--andromeda-fallback-accent));
+}
+
+.project-andromeda .item-group__column-actions {
+  display: flex;
+  width: 100%;
+  justify-content: stretch;
+}
+
+.project-andromeda .item-group__create {
+  width: 100%;
+  min-width: var(--andromeda-item-actions-width);
+  height: 1.6rem;
+  border-color: var(--andromeda-color-line-soft);
+  background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
+}
+
+.project-andromeda .item-row__summary-grid {
+  display: grid;
+  grid-template-columns: var(--andromeda-item-table-columns);
+  gap: 0.45rem;
+  align-items: center;
+  padding: 0.55rem 0.6rem;
+  cursor: pointer;
+}
+
+.project-andromeda .item-row__summary-grid:focus-visible {
+  outline: 2px solid var(--andromeda-color-accent);
+  outline-offset: -2px;
+}
+
+.project-andromeda .item-row__skill,
+.project-andromeda .item-row__roll {
+  min-width: 0;
+  color: var(--andromeda-color-muted, var(--andromeda-fallback-muted));
+  font-size: 0.84rem;
+}
+
+.project-andromeda .item-row__roll {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.project-andromeda .item-row__actions {
+  margin-left: 0;
+  justify-self: end;
+}
+
+.project-andromeda .item-row__toggle-icon {
+  font-size: 0.85em;
+}
+
+.project-andromeda .item-row--expanded .item-row__toggle {
+  display: inline-flex;
 }
 
 .project-andromeda .item-group__title,
@@ -1584,14 +2021,22 @@ textarea[disabled] {
   color: var(--andromeda-color-muted, var(--andromeda-fallback-muted));
 }
 
-.project-andromeda .item-group__title i,
-.project-andromeda .item-group__header i {
-  color: var(--andromeda-color-accent, var(--andromeda-fallback-accent));
-}
-
 .project-andromeda .item-control,
 .project-andromeda .item-quantity-step {
   cursor: pointer;
+}
+
+.project-andromeda .item-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.45rem;
+  height: 1.45rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--andromeda-color-muted);
 }
 
 .project-andromeda .item-row {
@@ -1599,9 +2044,91 @@ textarea[disabled] {
   background: transparent;
 }
 
+.project-andromeda .item-quantity-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 4px;
+  padding: 0.15rem 0.35rem;
+}
+
+.project-andromeda .item-quantity-control .item-quantity-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+
+.project-andromeda .item-quantity-value {
+  min-width: 1.5ch;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.project-andromeda .item-equip-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.project-andromeda .item-equip-toggle input {
+  margin: 0;
+}
+
 .project-andromeda .item-row--equipped {
   border-color: var(--andromeda-raw-shadow-accent-28);
   box-shadow: 0 0 0 1px var(--andromeda-raw-shadow-accent-10);
+}
+
+.project-andromeda .item-row__detail {
+  padding: 0 0.75rem 0.85rem;
+}
+
+.project-andromeda .item-row__detail-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.75rem 0 0.25rem;
+  border-top: 1px solid var(--andromeda-color-line-soft);
+}
+
+.project-andromeda .item-row__detail-line {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+}
+
+.project-andromeda .item-row__detail-entry {
+  min-width: 0;
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text));
+  line-height: 1.5;
+}
+
+.project-andromeda .item-row__detail-entry strong {
+  margin-right: 0.35rem;
+}
+
+.project-andromeda .item-row__detail-effect {
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--andromeda-color-line-soft);
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text));
+  line-height: 1.65;
+}
+
+.project-andromeda .item-row__detail-effect > :first-child,
+.project-andromeda .item-row__detail-effect p:first-child {
+  margin-top: 0;
+}
+
+.project-andromeda .item-row__detail-effect > :last-child,
+.project-andromeda .item-row__detail-effect p:last-child {
+  margin-bottom: 0;
 }
 
 .project-andromeda .item-badge,
@@ -1618,6 +2145,59 @@ textarea[disabled] {
   color: var(--andromeda-color-accent);
 }
 
+.project-andromeda .item-row__summary {
+  margin-top: 0.5rem;
+}
+
+.project-andromeda .item-row__summary > :first-child,
+.project-andromeda .item-row__summary p:first-child {
+  margin-top: 0;
+}
+
+.project-andromeda .item-row__summary > :last-child,
+.project-andromeda .item-row__summary p:last-child {
+  margin-bottom: 0;
+}
+
+.project-andromeda .item-group__empty {
+  margin: 0;
+  padding: 10px 11px 12px;
+}
+
+@media (max-width: 720px) {
+  .project-andromeda .item-group__columns {
+    display: none;
+  }
+
+  .project-andromeda .item-row__summary-grid {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'name actions'
+      'skill roll';
+    row-gap: 0.4rem;
+  }
+
+  .project-andromeda .item-row__name {
+    grid-area: name;
+  }
+
+  .project-andromeda .item-row__skill {
+    grid-area: skill;
+  }
+
+  .project-andromeda .item-row__roll {
+    grid-area: roll;
+  }
+
+  .project-andromeda .item-row__actions {
+    grid-area: actions;
+  }
+
+  .project-andromeda .item-row__detail-line {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .project-andromeda .andromeda-resource-pair,
 .project-andromeda .personality-grid {
   display: grid;
@@ -1625,12 +2205,63 @@ textarea[disabled] {
   gap: 12px;
 }
 
-.project-andromeda .personality-grid .form-group {
-  gap: 6px;
+.project-andromeda .personality-sheet-box--appearance {
+  padding: 12px;
+  border: 1px solid var(--andromeda-color-line, var(--andromeda-fallback-line));
+  border-radius: var(--andromeda-radius-md, var(--andromeda-fallback-radius-md));
+  background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
 }
 
-.project-andromeda .personality-grid textarea {
-  min-height: 96px;
+.project-andromeda .personality-field--appearance {
+  gap: 8px;
+}
+
+.project-andromeda .personality-field--appearance > span {
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text));
+  font-family: var(--andromeda-font-heading, var(--andromeda-fallback-font-heading));
+  font-size: var(--andromeda-font-size-label, var(--andromeda-fallback-font-size-label));
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.project-andromeda .personality-field__input {
+  min-height: 4.5rem;
+  padding: 8px 10px;
+  border: 1px solid var(--andromeda-color-line-soft, var(--andromeda-fallback-line)) !important;
+  border-radius: var(--andromeda-radius-sm, var(--andromeda-fallback-radius-sm));
+  background: var(--andromeda-color-panel, var(--andromeda-fallback-panel)) !important;
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text)) !important;
+  line-height: 1.45;
+  resize: none;
+  overflow: hidden;
+}
+
+.project-andromeda .andromeda-combat-cheat-sheet-tab {
+  gap: 12px;
+}
+
+.project-andromeda .combat-cheat-sheet-box {
+  padding: 12px;
+}
+
+.project-andromeda .combat-cheat-sheet__input {
+  display: block;
+  width: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  overflow: visible !important;
+  white-space: pre-wrap;
+}
+
+.project-andromeda .combat-cheat-sheet__input:focus {
+  border-color: var(--andromeda-raw-shadow-accent-35) !important;
+  outline: 2px solid var(--andromeda-raw-shadow-accent-16);
+  outline-offset: 0;
+}
+
+.project-andromeda .combat-cheat-sheet__input[aria-readonly='true'] {
+  cursor: text;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1647,8 +2278,16 @@ textarea[disabled] {
     grid-template-columns: 1fr;
   }
 
-  .project-andromeda .andromeda-hud {
-    grid-template-columns: 150px minmax(0, 1fr) 68px 100px 124px;
+  .project-andromeda .andromeda-hud--gm {
+    grid-template-columns: 150px minmax(0, 1fr) 10rem 84px;
+    grid-template-areas: 'portrait main temps rank';
+    gap: 10px;
+    padding-inline: 12px;
+  }
+
+  .project-andromeda .andromeda-hud--player {
+    grid-template-columns: 150px 13rem minmax(9rem, 1fr) 9.75rem;
+    grid-template-areas: 'portrait main temps rank';
     gap: 10px;
     padding-inline: 12px;
   }
@@ -1666,29 +2305,41 @@ textarea[disabled] {
     border-radius: var(--andromeda-radius-sm);
   }
 
-  .project-andromeda .andromeda-hud {
+  .project-andromeda .andromeda-hud--gm {
     grid-template-columns: 150px minmax(0, 1fr) 92px;
     grid-template-areas:
-      'portrait name rank'
-      'portrait name progress'
-      'stress speed glory';
+      'portrait main rank'
+      'temps temps temps';
     gap: 10px;
     padding: 12px;
   }
 
-  .project-andromeda .andromeda-hud--gm {
+  .project-andromeda .andromeda-hud--player {
+    grid-template-columns: 150px minmax(0, 1fr) 9.75rem;
     grid-template-areas:
-      'portrait name rank'
-      'portrait name rank'
-      'stress stress speed'
-      'glory glory speed';
+      'portrait main rank'
+      'temps temps temps';
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .project-andromeda .andromeda-hud__main {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .project-andromeda .andromeda-hud--player .andromeda-hud__stats-row,
+  .project-andromeda .andromeda-hud--gm .andromeda-hud__stats-row {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(2, minmax(0, max-content));
+    gap: 8px 12px;
   }
 
   .project-andromeda .andromeda-name-field {
     height: 42px;
     min-height: 42px;
     padding: 3px 2px 4px 0;
-    font-size: 2rem;
+    font-size: 1.95rem;
   }
 
   .project-andromeda .andromeda-resource-pair,
@@ -1707,7 +2358,7 @@ textarea[disabled] {
   }
 
   .project-andromeda .andromeda-ability-summary {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   }
 }
 

@@ -238,19 +238,60 @@ test('buildAbilityCatalogHtml renders grouped detail facts before the full descr
   assert.match(html, /rulebook-ability-catalog__detail-facts/u);
   assert.match(
     html,
-    /rulebook-ability-catalog__detail-fact-line[\s\S]*Дальность<\/strong>[\s\S]*30 м[\s\S]*Цели<\/strong>[\s\S]*1 цель[\s\S]*Защита<\/strong>[\s\S]*Стойкость/u
+    /rulebook-ability-catalog__detail-fact-line[\s\S]*Цена в действиях<\/strong>[\s\S]*Основное[\s\S]*Защита<\/strong>[\s\S]*Стойкость/u
   );
   assert.match(
     html,
-    /rulebook-ability-catalog__detail-fact-line[\s\S]*Длительность<\/strong>[\s\S]*1 мин[\s\S]*Цена в действиях<\/strong>[\s\S]*Основное[\s\S]*Частота<\/strong>[\s\S]*1\/сцену[\s\S]*Навык<\/strong>[\s\S]*Кинетика/u
+    /rulebook-ability-catalog__detail-fact-line[\s\S]*Дальность<\/strong>[\s\S]*30 м[\s\S]*Длительность<\/strong>[\s\S]*1 мин/u
   );
   assert.doesNotMatch(html, /rulebook-ability-catalog__detail-fact-label">Зона<\/strong>/u);
+  assert.doesNotMatch(html, /rulebook-ability-catalog__detail-fact-label">Цели<\/strong>/u);
+  assert.doesNotMatch(html, /rulebook-ability-catalog__detail-fact-label">Частота<\/strong>/u);
+  assert.doesNotMatch(html, /rulebook-ability-catalog__detail-fact-label">Навык<\/strong>/u);
   assert.doesNotMatch(html, /rulebook-ability-catalog__detail-tag-label/u);
   assert.doesNotMatch(html, /rulebook-ability-catalog__detail-label">Описание<\/span>/u);
   assert.match(
     html,
     /rulebook-ability-catalog__detail-facts[\s\S]*rulebook-ability-catalog__detail-copy[\s\S]*Ближайшие твёрдые поверхности/u
   );
+});
+
+test('equipment detail facts keep the shared chapter order and hide targets, frequency, and skill', () => {
+  const html = buildRulebookCatalogHtml('equipment', equipmentHeaders, [
+    [
+      'Снаряжение',
+      'Проекционный модуль «Искра-30»',
+      '2',
+      'Стихийность',
+      '6',
+      '1/сцену',
+      'Основное',
+      '30 м',
+      '1 цель',
+      'Луч 15 м',
+      'Воля',
+      'До конца сцены',
+      'Выпускаешь струю пламени в цель.',
+      'Выпускаешь струю пламени в цель. Атака Стихийности +6 против Воли.',
+      '900'
+    ]
+  ]);
+
+  assert.match(
+    html,
+    /rulebook-ability-catalog__detail-fact-line[\s\S]*Цена в действиях<\/strong>[\s\S]*Основное[\s\S]*Защита<\/strong>[\s\S]*Воля/u
+  );
+  assert.match(
+    html,
+    /rulebook-ability-catalog__detail-fact-line[\s\S]*Урон<\/strong>[\s\S]*6[\s\S]*Дальность<\/strong>[\s\S]*30 м/u
+  );
+  assert.match(
+    html,
+    /rulebook-ability-catalog__detail-fact-line[\s\S]*Зона<\/strong>[\s\S]*Луч 15 м[\s\S]*Длительность<\/strong>[\s\S]*До конца сцены/u
+  );
+  assert.doesNotMatch(html, /rulebook-ability-catalog__detail-fact-label">Цели<\/strong>/u);
+  assert.doesNotMatch(html, /rulebook-ability-catalog__detail-fact-label">Частота<\/strong>/u);
+  assert.doesNotMatch(html, /rulebook-ability-catalog__detail-fact-label">Навык<\/strong>/u);
 });
 
 test('buildRulebookCatalogHtml uses the requested defense filter labels per catalog family', () => {

@@ -1,7 +1,10 @@
 import { MODULE_ID, debugLog } from '../config.mjs';
 import {
   DEFAULT_ITEM_USAGE_FREQUENCY,
+  ITEM_DEFENSE_LABEL_KEYS,
+  ITEM_DURATION_LABEL_KEYS,
   ITEM_ACTIVATION_TYPE_LABEL_KEYS,
+  ITEM_TARGET_LABEL_KEYS,
   ITEM_USAGE_FREQUENCY_LABEL_KEYS,
   getItemTypeConfig,
   isPersonalityValueItem,
@@ -60,23 +63,48 @@ function buildUsageFrequencyOptions(selected) {
 }
 
 function buildActivationTypeOptions(selected) {
-  const normalized = selected || 'passive';
-  return Object.entries(ITEM_ACTIVATION_TYPE_LABEL_KEYS).map(([value, labelKey]) => ({
-    value,
-    label: game.i18n.localize(labelKey),
-    selected: normalized === value
-  }));
+  return buildSelectOptions(selected, ITEM_ACTIVATION_TYPE_LABEL_KEYS, 'MY_RPG.ItemFields.None');
+}
+
+function buildSelectOptions(selected, labelKeys, blankLabelKey = '') {
+  const options = [];
+  if (blankLabelKey) {
+    options.push({
+      value: '',
+      label: game.i18n.localize(blankLabelKey),
+      selected: !selected
+    });
+  }
+
+  for (const [value, labelKey] of Object.entries(labelKeys)) {
+    options.push({
+      value,
+      label: game.i18n.localize(labelKey),
+      selected: value === selected
+    });
+  }
+
+  return options;
 }
 
 function getFieldOptions(field, data) {
   if (field.type === 'usageFrequency') {
     return data.usageFrequencyOptions;
   }
-  if (field.type === 'activationType') {
-    return data.activationTypeOptions;
+  if (field.type === 'activationCost') {
+    return data.activationCostOptions;
   }
   if (field.type === 'skill') {
     return data.skillOptions;
+  }
+  if (field.type === 'defense') {
+    return data.defenseOptions;
+  }
+  if (field.type === 'duration') {
+    return data.durationOptions;
+  }
+  if (field.type === 'targets') {
+    return data.targetOptions;
   }
   return [];
 }
@@ -93,6 +121,31 @@ function autoResizeDescriptionArea(area) {
 
   const minHeight = Number.parseFloat(window.getComputedStyle(area).minHeight) || 0;
   area.style.height = `${Math.max(area.scrollHeight, minHeight)}px`;
+}
+
+function buildRenderableItemFields(data, itemFields = []) {
+  return itemFields
+    .filter((field) => shouldDisplayField(field, data.system))
+    .map((field) => {
+      const value = foundry.utils.getProperty(data.system, field.path) ?? '';
+      const hasOptions = ['usageFrequency', 'activationCost', 'skill', 'defense', 'duration', 'targets'].includes(field.type);
+      return {
+        ...field,
+        value,
+        checked: Boolean(value),
+        hasMin: field.min !== undefined && field.min !== null,
+        inputType: field.type === 'number' ? 'number' : 'text',
+        isRank: field.type === 'rank',
+        isCheckbox: field.type === 'checkbox',
+        hasOptions,
+        options: getFieldOptions(field, data)
+      };
+    });
+}
+
+function getFilteredItemFields(data, excludedPaths = []) {
+  const hidden = new Set(excludedPaths);
+  return (data.itemConfig?.fields ?? []).filter((field) => !hidden.has(field.path));
 }
 
 export class ProjectAndromedaItemSheet extends ItemSheet {
@@ -191,6 +244,29 @@ export class ProjectAndromedaCartridgeSheet extends ProjectAndromedaItemSheet {
     const data = await super.getData(options);
     data.rankOptions = buildRankOptions(data.system.rank);
     data.skillOptions = buildSkillOptions(data.system.skill);
+    data.usageFrequencyOptions = buildUsageFrequencyOptions(data.system.usageFrequency);
+    data.activationCostOptions = buildActivationTypeOptions(
+      data.system.activationCost ?? data.system.activationType
+    );
+    data.defenseOptions = buildSelectOptions(
+      data.system.defense,
+      ITEM_DEFENSE_LABEL_KEYS,
+      'MY_RPG.ItemFields.None'
+    );
+    data.durationOptions = buildSelectOptions(
+      data.system.duration,
+      ITEM_DURATION_LABEL_KEYS,
+      'MY_RPG.ItemFields.None'
+    );
+    data.targetOptions = buildSelectOptions(
+      data.system.targets,
+      ITEM_TARGET_LABEL_KEYS,
+      'MY_RPG.ItemFields.None'
+    );
+    data.metadataFields = buildRenderableItemFields(
+      data,
+      getFilteredItemFields(data, ['rank', 'skill'])
+    );
     return data;
   }
 }
@@ -204,6 +280,29 @@ export class ProjectAndromedaImplantSheet extends ProjectAndromedaItemSheet {
     const data = await super.getData(options);
     data.rankOptions = buildRankOptions(data.system.rank);
     data.skillOptions = buildSkillOptions(data.system.skill);
+    data.usageFrequencyOptions = buildUsageFrequencyOptions(data.system.usageFrequency);
+    data.activationCostOptions = buildActivationTypeOptions(
+      data.system.activationCost ?? data.system.activationType
+    );
+    data.defenseOptions = buildSelectOptions(
+      data.system.defense,
+      ITEM_DEFENSE_LABEL_KEYS,
+      'MY_RPG.ItemFields.None'
+    );
+    data.durationOptions = buildSelectOptions(
+      data.system.duration,
+      ITEM_DURATION_LABEL_KEYS,
+      'MY_RPG.ItemFields.None'
+    );
+    data.targetOptions = buildSelectOptions(
+      data.system.targets,
+      ITEM_TARGET_LABEL_KEYS,
+      'MY_RPG.ItemFields.None'
+    );
+    data.metadataFields = buildRenderableItemFields(
+      data,
+      getFilteredItemFields(data, ['rank', 'skill'])
+    );
     return data;
   }
 }
@@ -216,6 +315,27 @@ export class ProjectAndromedaArmorSheet extends ProjectAndromedaItemSheet {
   async getData(options) {
     const data = await super.getData(options);
     data.rankOptions = buildRankOptions(data.system.rank);
+    data.skillOptions = buildSkillOptions(data.system.skill);
+    data.usageFrequencyOptions = buildUsageFrequencyOptions(data.system.usageFrequency);
+    data.activationCostOptions = buildActivationTypeOptions(
+      data.system.activationCost ?? data.system.activationType
+    );
+    data.defenseOptions = buildSelectOptions(
+      data.system.defense,
+      ITEM_DEFENSE_LABEL_KEYS,
+      'MY_RPG.ItemFields.None'
+    );
+    data.durationOptions = buildSelectOptions(
+      data.system.duration,
+      ITEM_DURATION_LABEL_KEYS,
+      'MY_RPG.ItemFields.None'
+    );
+    data.targetOptions = buildSelectOptions(
+      data.system.targets,
+      ITEM_TARGET_LABEL_KEYS,
+      'MY_RPG.ItemFields.None'
+    );
+    data.metadataFields = buildRenderableItemFields(data, getFilteredItemFields(data, ['rank']));
     return data;
   }
 }
@@ -229,6 +349,29 @@ export class ProjectAndromedaWeaponSheet extends ProjectAndromedaItemSheet {
     const data = await super.getData(options);
     data.skillOptions = buildSkillOptions(data.system.skill);
     data.rankOptions = buildRankOptions(data.system.rank);
+    data.usageFrequencyOptions = buildUsageFrequencyOptions(data.system.usageFrequency);
+    data.activationCostOptions = buildActivationTypeOptions(
+      data.system.activationCost ?? data.system.activationType
+    );
+    data.defenseOptions = buildSelectOptions(
+      data.system.defense,
+      ITEM_DEFENSE_LABEL_KEYS,
+      'MY_RPG.ItemFields.None'
+    );
+    data.durationOptions = buildSelectOptions(
+      data.system.duration,
+      ITEM_DURATION_LABEL_KEYS,
+      'MY_RPG.ItemFields.None'
+    );
+    data.targetOptions = buildSelectOptions(
+      data.system.targets,
+      ITEM_TARGET_LABEL_KEYS,
+      'MY_RPG.ItemFields.None'
+    );
+    data.metadataFields = buildRenderableItemFields(
+      data,
+      getFilteredItemFields(data, ['rank', 'skill'])
+    );
     return data;
   }
 }
@@ -243,29 +386,30 @@ export class ProjectAndromedaGenericItemSheet extends ProjectAndromedaItemSheet 
     data.rankOptions = buildRankOptions(data.system.rank);
     data.skillOptions = buildSkillOptions(data.system.skill);
     data.usageFrequencyOptions = buildUsageFrequencyOptions(data.system.usageFrequency);
-    data.activationTypeOptions = buildActivationTypeOptions(data.system.activationType);
+    data.activationCostOptions = buildActivationTypeOptions(
+      data.system.activationCost ?? data.system.activationType
+    );
+    data.defenseOptions = buildSelectOptions(
+      data.system.defense,
+      ITEM_DEFENSE_LABEL_KEYS,
+      'MY_RPG.ItemFields.None'
+    );
+    data.durationOptions = buildSelectOptions(
+      data.system.duration,
+      ITEM_DURATION_LABEL_KEYS,
+      'MY_RPG.ItemFields.None'
+    );
+    data.targetOptions = buildSelectOptions(
+      data.system.targets,
+      ITEM_TARGET_LABEL_KEYS,
+      'MY_RPG.ItemFields.None'
+    );
     const fields = isPersonalityValueItem(this.item)
       ? []
       : Array.isArray(data.itemConfig?.fields)
         ? data.itemConfig.fields
         : [];
-    data.itemFields = fields
-      .filter((field) => shouldDisplayField(field, data.system))
-      .map((field) => {
-        const value = foundry.utils.getProperty(data.system, field.path) ?? '';
-        const hasOptions = ['usageFrequency', 'activationType', 'skill'].includes(field.type);
-        return {
-          ...field,
-          value,
-          checked: Boolean(value),
-          hasMin: field.min !== undefined && field.min !== null,
-          inputType: field.type === 'number' ? 'number' : 'text',
-          isRank: field.type === 'rank',
-          isCheckbox: field.type === 'checkbox',
-          hasOptions,
-          options: getFieldOptions(field, data)
-        };
-      });
+    data.itemFields = buildRenderableItemFields(data, fields);
     return data;
   }
 }

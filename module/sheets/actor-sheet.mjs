@@ -21,8 +21,13 @@ import {
   normalizeAbilityDie
 } from '../helpers/utils.mjs';
 import {
+  ITEM_ACTIVATION_TYPE_LABEL_KEYS,
   ITEM_TABS,
   ITEM_BADGE_BUILDERS,
+  ITEM_DEFENSE_LABEL_KEYS,
+  ITEM_DURATION_LABEL_KEYS,
+  ITEM_TARGET_LABEL_KEYS,
+  ITEM_USAGE_FREQUENCY_LABEL_KEYS,
   getItemGroupConfigByKey,
   getItemGroupConfigs,
   getItemTypeConfig,
@@ -30,6 +35,13 @@ import {
 } from '../helpers/item-config.mjs';
 function getRankLabel(rank) {
   return game.i18n.localize(`MY_RPG.RankNumeric.Rank${rank}`);
+}
+
+function getHudRankClass(rank) {
+  const numeric = Number(rank) || 0;
+  if (numeric <= 0) return 'rank0';
+  if (numeric >= 4) return 'rank4';
+  return `rank${numeric}`;
 }
 
 function getSharedGmHeroPool() {
@@ -102,7 +114,9 @@ export async function updateActorDocumentType(actor, nextType) {
 }
 
 function isActorUuidHeaderButton(button, actorName = '') {
-  const headerClass = String(button?.class ?? '').trim().toLowerCase();
+  const headerClass = String(button?.class ?? '')
+    .trim()
+    .toLowerCase();
   const label = String(button?.label ?? '').trim();
   const normalizedActorName = String(actorName ?? '').trim();
 
@@ -121,16 +135,26 @@ function isActorUuidHeaderButton(button, actorName = '') {
   return (
     Boolean(normalizedActorName) &&
     label === normalizedActorName &&
-    (headerClass.includes('uuid') || headerClass.includes('document') || headerClass.includes('copy'))
+    (headerClass.includes('uuid') ||
+      headerClass.includes('document') ||
+      headerClass.includes('copy'))
   );
 }
 
 function getUiThemeValue(variableName, fallback) {
-  const value = window.getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
+  const value = window
+    .getComputedStyle(document.documentElement)
+    .getPropertyValue(variableName)
+    .trim();
   return value || fallback;
 }
 
 export class ProjectAndromedaActorSheet extends ActorSheet {
+  constructor(...args) {
+    super(...args);
+    this._expandedItemIds = new Set();
+  }
+
   /** @override */
   _getHeaderButtons() {
     const buttons = super
@@ -150,11 +174,12 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
 
   /** @override */
   async _render(force = false, options = {}) {
-    const scrollContainer = this.element.find('.sheet-scrollable');
-    const scrollPos = scrollContainer.scrollTop();
+    const paneScrollPos = this.element.find('.sheet-scrollable').scrollTop() ?? 0;
+    const railSkillsScrollPos = this.element.find('.andromeda-rail-skills-scroll').scrollTop() ?? 0;
     await super._render(force, options);
 
-    this.element.find('.sheet-scrollable').scrollTop(scrollPos);
+    this.element.find('.sheet-scrollable').scrollTop(paneScrollPos);
+    this.element.find('.andromeda-rail-skills-scroll').scrollTop(railSkillsScrollPos);
   }
   validateNumericInput(input) {
     let val = parseInt(input.value, 10);
@@ -240,11 +265,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
   initializeAutoResizeTextarea(element) {
     if (!(element instanceof HTMLTextAreaElement)) return;
 
-    const resize = () => {
-      element.style.height = 'auto';
-      const minHeight = Number.parseFloat(window.getComputedStyle(element).minHeight) || 0;
-      element.style.height = `${Math.max(element.scrollHeight, minHeight)}px`;
-    };
+    const resize = () => this.resizeAutoResizeTextarea(element);
 
     resize();
 
@@ -252,6 +273,29 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       element.dataset.hasAutoResizeHandler = 'true';
       element.addEventListener('input', resize);
     }
+  }
+
+  resizeAutoResizeTextarea(element) {
+    if (!(element instanceof HTMLTextAreaElement)) return;
+
+    element.style.height = 'auto';
+    element.style.overflowY = 'hidden';
+    const minHeight = Number.parseFloat(window.getComputedStyle(element).minHeight) || 0;
+    element.style.height = `${Math.max(element.scrollHeight, minHeight)}px`;
+  }
+
+  refreshAutoResizeTextareas(root = this.element) {
+    const $root = root instanceof jQuery ? root : $(root);
+    const refresh = () => {
+      window.requestAnimationFrame(() => {
+        $root
+          .find('textarea.auto-resize-textarea')
+          .each((i, el) => this.resizeAutoResizeTextarea(el));
+      });
+    };
+
+    refresh();
+    setTimeout(refresh, 0);
   }
 
   activateListeners(html) {
@@ -284,6 +328,8 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     $html.on('click', '.item-roll', this._onItemRoll.bind(this));
     $html.on('click', '.item-quantity-step', this._onItemQuantityStep.bind(this));
     $html.on('change', '.item-equip-checkbox', this._onItemEquipChange.bind(this));
+    $html.on('click', '[data-item-summary-toggle]', this._onItemRowToggle.bind(this));
+    $html.on('keydown', '[data-item-summary-toggle]', this._onItemRowToggleKeydown.bind(this));
 
     $html.find('input[name^="system.skills."]').on('change', async (ev) => {
       const input = ev.currentTarget;
@@ -299,19 +345,20 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     $html.find(derivedInputSelector).on('change', this._onDerivedInputChange.bind(this));
     $html.on('click', '.ability-step', this._onAbilityStep.bind(this));
     $html.on('change', '.shared-hero-pool-input', this._onSharedHeroPoolChange.bind(this));
+    $html.on('click', '.andromeda-tab', () => this.refreshAutoResizeTextareas($html));
   }
 
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ['project-andromeda', 'sheet', 'actor'],
       width: 860,
-      height: 760,
+      height: 790,
       resizable: true,
       tabs: [
         {
           navSelector: '.andromeda-sheet-tabs',
           contentSelector: '.sheet-body',
-          initial: 'features',
+          initial: 'abilities',
           controlSelector: 'a.andromeda-tab'
         }
       ]
@@ -351,8 +398,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       this._prepareCharacterData(context);
     }
 
-    context.system.currentRankClass =
-      'rank' + getColorRank(Number(context.system?.currentRank) || 0, 'skill');
+    context.system.currentRankClass = getHudRankClass(Number(context.system?.currentRank) || 0);
 
     this._preparePersonalityData(context);
 
@@ -652,7 +698,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
   _updateAbilityDisplays(root, abilityKey) {
     const $root = root instanceof jQuery ? root : $(root ?? this.element);
     const abilityKeys = abilityKey ? [abilityKey] : Object.keys(this.actor.system?.abilities ?? {});
-    const rankClasses = ['rank1', 'rank2', 'rank3', 'rank4'];
+    const rankClasses = ['rank0', 'rank1', 'rank2', 'rank3', 'rank4'];
 
     for (const key of abilityKeys) {
       const dieValue = this._getAbilityDieValue(key);
@@ -732,7 +778,7 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       $root.find(`input[name="${name}"]`).val(val ?? 0);
     };
     const setRankBadge = (rank) => {
-      const rankClass = 'rank' + getColorRank(rank, 'skill');
+      const rankClass = getHudRankClass(rank);
       const rankBadgeClasses = rankClasses.map((value) => `andromeda-hud__rank--${value}`);
       $root
         .find('.andromeda-hud__rank')
@@ -930,7 +976,8 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     const displayConfig = this._getItemDisplayConfig(item, config);
     const quantity = displayConfig.showQuantity ? Math.max(Number(system.quantity) || 0, 0) : 1;
     const badges = this._getItemBadges(item, displayConfig);
-    const summary = this._getItemSummary(item, displayConfig);
+    const detailRows = this._buildItemDetailRows(item, displayConfig);
+    const detailEffect = this._getItemSummary(item, displayConfig);
     return {
       id: item.id,
       uuid: item.uuid,
@@ -943,10 +990,14 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
       showEquip: Boolean(displayConfig.allowEquip),
       exclusive: Boolean(displayConfig.exclusive),
       equipped: displayConfig.allowEquip ? Boolean(system.equipped) : false,
+      skillLabel: system.skill ? this._skillLabel(system.skill) : '—',
+      rollSummary: this._getItemRollSummary(item, displayConfig),
+      detailRows,
+      detailEffect,
+      isExpanded: this._expandedItemIds.has(item.id),
       badges,
-      summary,
       hasBadges: badges.length > 0,
-      hasSummary: Boolean(summary),
+      hasDetails: detailRows.length > 0 || Boolean(detailEffect),
       canRoll: Boolean(displayConfig.canRoll)
     };
   }
@@ -1003,6 +1054,206 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
   _getItemSummary(item) {
     const system = item.system ?? {};
     return this._formatItemDescription(system.description);
+  }
+
+  _getItemRollSummary(item, displayConfig = null) {
+    const typeConfig = getItemTypeConfig(item?.type) ?? {};
+    const skillKey = String(item?.system?.skill ?? '').trim();
+    const canRoll = Boolean(displayConfig?.canRoll ?? this._getItemDisplayConfig(item).canRoll);
+    if (!canRoll || !skillKey) return '—';
+
+    const abilityKey = this._getSkillAbilityKey(skillKey);
+    const dieValue = this._getAbilityDieValue(abilityKey);
+    const dieLabel = getAbilityDieLabel(dieValue);
+    if (!dieLabel) return '—';
+
+    const skillValue = Number(this.actor.system?.skills?.[skillKey]?.value) || 0;
+    let modifier = skillValue;
+    if (item?.type === 'weapon') {
+      modifier += this._getSkillBonusDetails(skillKey).total || 0;
+    }
+
+    const sign = modifier >= 0 ? '+' : '-';
+    return `${dieLabel} ${sign} ${Math.abs(modifier)}`;
+  }
+
+  _buildItemDetailRows(item, displayConfig = null) {
+    if (displayConfig?.key === 'personalityValues') return [];
+
+    const system = item?.system ?? {};
+    const rows = [];
+    const primaryRow = [];
+    const activationCostValue = String(system.activationCost ?? system.activationType ?? '').trim();
+    const activationCost =
+      activationCostValue && activationCostValue !== 'passive'
+        ? this._formatMappedValue(activationCostValue, ITEM_ACTIVATION_TYPE_LABEL_KEYS)
+        : '';
+    if (activationCost) {
+      primaryRow.push({
+        label: game.i18n.localize('MY_RPG.ItemFields.ActivationCost'),
+        value: activationCost
+      });
+    }
+
+    const defense = this._formatMappedValue(system.defense, ITEM_DEFENSE_LABEL_KEYS);
+    if (defense) {
+      primaryRow.push({
+        label: game.i18n.localize('MY_RPG.ItemFields.Defense'),
+        value: defense
+      });
+    }
+
+    if (primaryRow.length) rows.push(primaryRow);
+
+    const secondaryEntries = [];
+    this._pushItemDetailEntry(
+      secondaryEntries,
+      'MY_RPG.ItemFields.Range',
+      this._formatRangeValue(system.range)
+    );
+    this._pushItemDetailEntry(
+      secondaryEntries,
+      'MY_RPG.ItemFields.Duration',
+      this._formatMappedValue(system.duration, ITEM_DURATION_LABEL_KEYS)
+    );
+    this._pushItemDetailEntry(
+      secondaryEntries,
+      'MY_RPG.ItemFields.Area',
+      this._formatAreaValue(system.area)
+    );
+    this._pushItemDetailEntry(
+      secondaryEntries,
+      'MY_RPG.ItemFields.Targets',
+      this._formatMappedValue(system.targets, ITEM_TARGET_LABEL_KEYS)
+    );
+    this._pushItemDetailEntry(
+      secondaryEntries,
+      'MY_RPG.AbilityConfig.Skill',
+      system.skill ? this._skillLabel(system.skill) : ''
+    );
+    this._pushItemDetailEntry(
+      secondaryEntries,
+      'MY_RPG.ItemFields.RequiresRoll',
+      this._shouldShowRequiresRoll(item, displayConfig)
+        ? game.i18n.localize(system.requiresRoll ? 'MY_RPG.Inventory.Yes' : 'MY_RPG.Inventory.No')
+        : ''
+    );
+    this._pushItemDetailEntry(
+      secondaryEntries,
+      'MY_RPG.ItemFields.UsageFrequency',
+      String(system.usageFrequency ?? '').trim() &&
+        String(system.usageFrequency).trim() !== 'passive'
+        ? this._formatMappedValue(system.usageFrequency, ITEM_USAGE_FREQUENCY_LABEL_KEYS)
+        : ''
+    );
+
+    const rank = Number(system.rank) || 0;
+    if (rank) {
+      this._pushItemDetailEntry(secondaryEntries, 'MY_RPG.ItemFields.Rank', getRankLabel(rank));
+    }
+
+    if (displayConfig?.showQuantity && Number(system.quantity) > 1) {
+      this._pushItemDetailEntry(
+        secondaryEntries,
+        'MY_RPG.Inventory.Quantity',
+        `${Math.max(Number(system.quantity) || 0, 0)}`
+      );
+    }
+
+    if (item?.type === 'weapon' || item?.type === 'equipment') {
+      const damage = Number(system.skillBonus) || 0;
+      if (damage) {
+        this._pushItemDetailEntry(
+          secondaryEntries,
+          'MY_RPG.WeaponsTable.DamageLabel',
+          this._formatDamage(damage)
+        );
+      }
+    }
+
+    if (item?.type === 'armor') {
+      this._pushItemDetailEntry(
+        secondaryEntries,
+        'MY_RPG.ArmorItem.BonusFortitudeLabel',
+        this._formatNumericDetail(system.itemPhys)
+      );
+      this._pushItemDetailEntry(
+        secondaryEntries,
+        'MY_RPG.ArmorItem.BonusControlLabel',
+        this._formatNumericDetail(system.itemAzure)
+      );
+      this._pushItemDetailEntry(
+        secondaryEntries,
+        'MY_RPG.ArmorItem.BonusWillLabel',
+        this._formatNumericDetail(system.itemMental)
+      );
+      this._pushItemDetailEntry(
+        secondaryEntries,
+        'MY_RPG.ArmorItem.ShieldLabel',
+        this._formatNumericDetail(system.itemShield)
+      );
+      this._pushItemDetailEntry(
+        secondaryEntries,
+        'MY_RPG.ArmorItem.BonusSpeedLabel',
+        this._formatSignedDetail(system.itemSpeed)
+      );
+    }
+
+    for (let index = 0; index < secondaryEntries.length; index += 2) {
+      rows.push(secondaryEntries.slice(index, index + 2));
+    }
+
+    return rows;
+  }
+
+  _pushItemDetailEntry(entries, labelKey, value) {
+    if (!value) return;
+    entries.push({
+      label: game.i18n.localize(labelKey),
+      value
+    });
+  }
+
+  _formatMappedValue(value, labels) {
+    const normalized = String(value ?? '').trim();
+    const labelKey = labels?.[normalized];
+    if (labelKey) return game.i18n.localize(labelKey);
+    return normalized;
+  }
+
+  _formatRangeValue(value) {
+    const normalized = String(value ?? '').trim();
+    if (normalized === 'melee') return game.i18n.localize('MY_RPG.ItemRanges.Melee');
+    if (normalized === 'self') return game.i18n.localize('MY_RPG.ItemRanges.Self');
+    return normalized;
+  }
+
+  _formatAreaValue(value) {
+    const normalized = String(value ?? '').trim();
+    const match = /^([a-z]+)\s+(.+)$/i.exec(normalized);
+    if (!match) return normalized;
+    const [, areaType, rest] = match;
+    const localizedType = game.i18n.localize(`MY_RPG.ItemAreaTypes.${areaType}`);
+    return localizedType === `MY_RPG.ItemAreaTypes.${areaType}`
+      ? normalized
+      : `${localizedType} ${rest}`;
+  }
+
+  _formatNumericDetail(value) {
+    const numeric = Number(value) || 0;
+    return numeric ? `${numeric}` : '';
+  }
+
+  _formatSignedDetail(value) {
+    const numeric = Number(value) || 0;
+    if (!numeric) return '';
+    return numeric > 0 ? `+${numeric}` : `${numeric}`;
+  }
+
+  _shouldShowRequiresRoll(item, displayConfig = null) {
+    if (item?.type === 'weapon') return true;
+    if (displayConfig?.key === 'abilities' || displayConfig?.key === 'equipment') return true;
+    return Boolean(item?.system?.requiresRoll);
   }
 
   _getTraitRollNote(item, typeConfig = null) {
@@ -1425,6 +1676,39 @@ export class ProjectAndromedaActorSheet extends ActorSheet {
     } else {
       $row.toggleClass('item-row--equipped', checked);
     }
+  }
+
+  _onItemRowToggleKeydown(event) {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    this._onItemRowToggle(event);
+  }
+
+  _onItemRowToggle(event) {
+    const target = event.target && typeof event.target.closest === 'function' ? event.target : null;
+    if (
+      target?.closest(
+        '.item-chat, .item-edit, .item-delete, .item-roll, .item-quantity-step, .item-equip-toggle, .item-equip-checkbox'
+      )
+    ) {
+      return;
+    }
+
+    const { item, $row } = this._getItemContextFromEvent(event);
+    if (!item || !$row?.length) return;
+    const nextExpanded = !this._expandedItemIds.has(item.id);
+    if (nextExpanded) {
+      this._expandedItemIds.add(item.id);
+    } else {
+      this._expandedItemIds.delete(item.id);
+    }
+    this._applyItemRowExpandedState($row, nextExpanded);
+  }
+
+  _applyItemRowExpandedState($row, expanded) {
+    $row.toggleClass('item-row--expanded', expanded);
+    $row.find('.item-row__detail').prop('hidden', !expanded);
+    $row.find('[data-item-summary-toggle]').attr('aria-expanded', expanded ? 'true' : 'false');
   }
 
   _normalizeSkillBonus(value) {

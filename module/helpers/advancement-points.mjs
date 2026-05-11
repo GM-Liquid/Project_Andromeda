@@ -1,4 +1,5 @@
 import { getAbilityDieNumeric } from './utils.mjs';
+import { PROJECT_ANDROMEDA } from './config.mjs';
 
 const MAX_CREATION_ABILITY_NUMERIC = 12;
 
@@ -33,12 +34,12 @@ export function getAbilityAdvancementCost(value) {
 }
 
 export function getTotalAdvancementSpent(system = {}) {
-  const abilityCost = Object.values(system?.abilities ?? {}).reduce(
-    (sum, ability) => sum + getAbilityAdvancementCost(ability?.value),
+  const abilityCost = Object.keys(PROJECT_ANDROMEDA.abilities ?? {}).reduce(
+    (sum, abilityKey) => sum + getAbilityAdvancementCost(system?.abilities?.[abilityKey]?.value),
     0
   );
-  const skillCost = Object.values(system?.skills ?? {}).reduce(
-    (sum, skill) => sum + getSkillAdvancementCost(skill?.value),
+  const skillCost = Object.keys(PROJECT_ANDROMEDA.skills ?? {}).reduce(
+    (sum, skillKey) => sum + getSkillAdvancementCost(system?.skills?.[skillKey]?.value),
     0
   );
 

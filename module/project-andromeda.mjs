@@ -911,12 +911,24 @@ function getMigratedEquipmentSystemData(item) {
   systemData.rank = String(systemData.rank ?? '');
   systemData.requiresRoll = Boolean(requiresRoll);
   systemData.skill = String(systemData.skill ?? '');
+  systemData.skillBonus = Number(systemData.skillBonus ?? 0) || 0;
+  systemData.usageFrequency = normalizeUsageFrequency(
+    systemData.usageFrequency ?? DEFAULT_ITEM_USAGE_FREQUENCY
+  );
+  systemData.activationCost = String(
+    systemData.activationCost ?? systemData.activationType ?? ''
+  ).trim();
+  systemData.activationType = systemData.activationCost || String(systemData.activationType ?? '');
+  systemData.range = String(systemData.range ?? '');
+  systemData.duration = String(systemData.duration ?? '');
+  systemData.area = String(systemData.area ?? '');
+  systemData.defense = String(systemData.defense ?? '');
+  systemData.targets = String(systemData.targets ?? '');
   if (!systemData.requiresRoll) {
     systemData.skill = '';
   }
 
   delete systemData.equipmentSubtype;
-  delete systemData.skillBonus;
   return systemData;
 }
 
@@ -956,8 +968,15 @@ function getMigratedTraitSystemData(item) {
   systemData.usageFrequency = normalizeUsageFrequency(
     systemData.usageFrequency ?? DEFAULT_ITEM_USAGE_FREQUENCY
   );
-  systemData.activationType = String(systemData.activationType ?? 'passive') || 'passive';
+  systemData.activationCost = String(
+    systemData.activationCost ?? systemData.activationType ?? 'passive'
+  ).trim();
+  systemData.activationType = systemData.activationCost || 'passive';
   systemData.range = String(systemData.range ?? '');
+  systemData.duration = String(systemData.duration ?? '');
+  systemData.area = String(systemData.area ?? '');
+  systemData.defense = String(systemData.defense ?? '');
+  systemData.targets = String(systemData.targets ?? '');
   systemData.requiresRoll = Boolean(systemData.requiresRoll);
   systemData.skill = String(systemData.skill ?? '');
   if (!systemData.requiresRoll) {

@@ -1,60 +1,136 @@
 <form class='{{cssClass}} {{actor.type}} flexcol' autocomplete='off'>
   <div class='andromeda-sheet-shell'>
-    <header class='andromeda-hud andromeda-hud--{{#if isPlayerCharacter}}player{{else}}gm{{/if}}'>
-      <img
-        class='profile-img andromeda-hud__portrait'
-        src='{{actor.img}}'
-        data-edit='img'
-        title='{{actor.name}}'
-      />
-
-      <div class='andromeda-hud__main'>
-        <input
-          class='andromeda-name-field'
-          type='text'
-          name='name'
-          value='{{actor.name}}'
-          aria-label='{{localize "MY_RPG.KeyInfo.Name"}}'
+    <div class='andromeda-sheet-chrome'>
+      <header class='andromeda-hud andromeda-hud--{{#if isPlayerCharacter}}player{{else}}gm{{/if}}'>
+        <img
+          class='profile-img andromeda-hud__portrait'
+          src='{{actor.img}}'
+          data-edit='img'
+          title='{{actor.name}}'
         />
 
-        <div class='andromeda-hud__meta-row'>
-          <section class='andromeda-status-card andromeda-status-card--stress'>
-            <span>{{localize 'MY_RPG.Stress.Label'}}</span>
-            <div class='andromeda-status-combo andromeda-status-combo--stress'>
+        <div class='andromeda-hud__main'>
+          <div class='andromeda-hud__identity-row'>
+            <input
+              class='andromeda-name-field'
+              type='text'
+              name='name'
+              value='{{actor.name}}'
+              aria-label='{{localize "MY_RPG.KeyInfo.Name"}}'
+            />
+          </div>
+
+          <div class='andromeda-hud__stats-row'>
+            <label class='andromeda-status-card andromeda-status-card--speed'>
+              <span>{{localize 'MY_RPG.Speed.Label'}}</span>
               <input
                 type='number'
-                name='system.stress.value'
-                value='{{system.stress.value}}'
+                name='system.speed.value'
+                value='{{system.speed.value}}'
                 step='1'
                 inputmode='numeric'
-                min='0'
+                readonly
+                tabindex='-1'
               />
-              <span class='andromeda-status-separator'>/</span>
-              <strong class='andromeda-status-value' data-field='system.stress.max'>
-                {{system.stress.max}}
-              </strong>
-            </div>
-          </section>
+            </label>
 
-          <label class='andromeda-status-card andromeda-status-card--speed'>
-            <span>{{localize 'MY_RPG.Speed.Label'}}</span>
+            <section class='andromeda-status-card andromeda-status-card--stress'>
+              <span>{{localize 'MY_RPG.Stress.Label'}}</span>
+              <div class='andromeda-status-combo andromeda-status-combo--stress'>
+                <input
+                  type='number'
+                  name='system.stress.value'
+                  value='{{system.stress.value}}'
+                  step='1'
+                  inputmode='numeric'
+                  min='0'
+                />
+                <span class='andromeda-status-separator'>/</span>
+                <strong class='andromeda-status-value' data-field='system.stress.max'>
+                  {{system.stress.max}}
+                </strong>
+              </div>
+            </section>
+
+            {{#if isPlayerCharacter}}
+              <label class='andromeda-status-card andromeda-status-card--glory andromeda-status-card--aside'>
+                <span>{{localize 'MY_RPG.KeyInfo.MomentOfGlory'}}</span>
+                <input
+                  type='number'
+                  name='system.momentOfGlory'
+                  value='{{system.momentOfGlory}}'
+                  step='1'
+                  inputmode='numeric'
+                />
+              </label>
+
+              <label class='andromeda-status-card andromeda-status-card--archetype'>
+                <span>{{localize 'MY_RPG.Personality.Archetype'}}</span>
+                <input
+                  type='text'
+                  class='andromeda-archetype-input'
+                  name='system.biography.archetype'
+                  value='{{system.biography.archetype}}'
+                />
+              </label>
+            {{/if}}
+
+            {{#if isGmCharacter}}
+              <label class='andromeda-status-card andromeda-status-card--glory andromeda-status-card--aside'>
+                <span>{{localize 'MY_RPG.KeyInfo.SharedMomentOfGlory'}}</span>
+                <input
+                  type='number'
+                  class='shared-hero-pool-input'
+                  value='{{sharedHeroPool}}'
+                  step='1'
+                  min='0'
+                  inputmode='numeric'
+                />
+              </label>
+            {{/if}}
+          </div>
+        </div>
+
+        <section class='andromeda-hud__temps'>
+          <div class='andromeda-temp-list andromeda-temp-list--hud'>
+            <label class='andromeda-temp-row'>
+              <span>{{localize 'MY_RPG.TempStress.Label'}}</span>
+              <input type='number' name='system.temphealth' value='{{system.temphealth}}' />
+            </label>
+            <label class='andromeda-temp-row'>
+              <span>{{localize 'MY_RPG.Temp.BonusFortitudeLabel'}}</span>
+              <input type='number' name='system.tempphys' value='{{system.tempphys}}' />
+            </label>
+            <label class='andromeda-temp-row'>
+              <span>{{localize 'MY_RPG.Temp.BonusControlLabel'}}</span>
+              <input type='number' name='system.tempazure' value='{{system.tempazure}}' />
+            </label>
+            <label class='andromeda-temp-row'>
+              <span>{{localize 'MY_RPG.Temp.BonusWillLabel'}}</span>
+              <input type='number' name='system.tempmental' value='{{system.tempmental}}' />
+            </label>
+            <label class='andromeda-temp-row'>
+              <span>{{localize 'MY_RPG.TempSpeed.Label'}}</span>
+              <input type='number' name='system.tempspeed' value='{{system.tempspeed}}' />
+            </label>
+          </div>
+        </section>
+
+        <div class='andromeda-hud__rank-column'>
+          <label class='andromeda-hud__rank andromeda-hud__rank--{{system.currentRankClass}}'>
+            <span class='andromeda-hud__rank-title'>{{localize 'MY_RPG.RankNumeric.Title'}}</span>
             <input
               type='number'
-              name='system.speed.value'
-              value='{{system.speed.value}}'
+              name='system.currentRank'
+              value='{{system.currentRank}}'
               step='1'
+              min='0'
               inputmode='numeric'
-              readonly
-              tabindex='-1'
             />
           </label>
-        </div>
-      </div>
 
-      <div class='andromeda-hud__aside'>
-        <div class='andromeda-hud__aside-top'>
           {{#if isPlayerCharacter}}
-            <label class='andromeda-status-card andromeda-status-card--progress'>
+            <label class='andromeda-status-card andromeda-status-card--progress andromeda-status-card--rank-progress'>
               <span>{{localize 'MY_RPG.KeyInfo.ProgressPoints'}}</span>
               <div class='andromeda-status-combo'>
                 <strong class='andromeda-status-value' data-field='system.advancement.available'>
@@ -71,297 +147,206 @@
               </div>
             </label>
           {{/if}}
-
-          <label class='andromeda-hud__rank andromeda-hud__rank--{{system.currentRankClass}}'>
-            <span class='sr-only'>{{localize 'MY_RPG.RankNumeric.Title'}}</span>
-            <input
-              type='number'
-              name='system.currentRank'
-              value='{{system.currentRank}}'
-              step='1'
-              min='0'
-              inputmode='numeric'
-            />
-          </label>
         </div>
+      </header>
 
+      <nav class='andromeda-sheet-tabs tabs' data-group='primary'>
+        {{#each itemTabs as |tab|}}
+          <a class='andromeda-tab item' data-tab='{{tab.key}}'>
+            {{tab.label}}
+          </a>
+        {{/each}}
         {{#if isPlayerCharacter}}
-          <label class='andromeda-status-card andromeda-status-card--glory andromeda-status-card--aside'>
-            <span>{{localize 'MY_RPG.KeyInfo.MomentOfGlory'}}</span>
-            <input
-              type='number'
-              name='system.momentOfGlory'
-              value='{{system.momentOfGlory}}'
-              step='1'
-              inputmode='numeric'
-            />
-          </label>
+          <a class='andromeda-tab item' data-tab='personality'>
+            {{localize 'MY_RPG.SheetLabels.Personality'}}
+          </a>
         {{/if}}
-
-        {{#if isGmCharacter}}
-          <label class='andromeda-status-card andromeda-status-card--glory andromeda-status-card--aside'>
-            <span>{{localize 'MY_RPG.KeyInfo.SharedMomentOfGlory'}}</span>
-            <input
-              type='number'
-              class='shared-hero-pool-input'
-              value='{{sharedHeroPool}}'
-              step='1'
-              min='0'
-              inputmode='numeric'
-            />
-          </label>
-        {{/if}}
-      </div>
-    </header>
-
-    <nav class='andromeda-sheet-tabs tabs' data-group='primary'>
-      <a class='andromeda-tab item' data-tab='features'>
-        {{localize 'MY_RPG.SheetLabels.Features'}}
-      </a>
-      {{#each itemTabs as |tab|}}
-        <a class='andromeda-tab item' data-tab='{{tab.key}}'>
-          {{tab.label}}
+        <a class='andromeda-tab item' data-tab='combatCheatSheet'>
+          {{localize 'MY_RPG.SheetLabels.CombatCheatSheet'}}
         </a>
-      {{/each}}
-      {{#if isPlayerCharacter}}
-        <a class='andromeda-tab item' data-tab='personality'>
-          {{localize 'MY_RPG.SheetLabels.Personality'}}
-        </a>
-      {{/if}}
-    </nav>
+      </nav>
+    </div>
 
-    <div class='sheet-scrollable'>
+    <div class='andromeda-sheet-viewport'>
       <section class='andromeda-sheet-workspace'>
         <aside class='andromeda-sheet-rail'>
           <header class='andromeda-rail-header'>
             <h2>{{localize 'MY_RPG.SheetLabels.Attributes'}}</h2>
           </header>
 
-          {{#each skillColumns as |column|}}
-            <article
-              class='andromeda-ability-card andromeda-rail-ability {{column.ability.rankClass}}'
-              data-ability-key='{{column.key}}'
-            >
-              <div class='andromeda-ability-summary'>
-                <button
-                  type='button'
-                  class='andromeda-ability-roll rollable'
-                  data-ability='{{column.key}}'
-                  data-label='{{column.ability.label}}'
-                >
-                  <span class='andromeda-ability-title'>{{column.label}}</span>
-                  <span class='andromeda-ability-die'>
-                    <strong class='ability-die-value {{column.ability.rankClass}}'>
-                      {{column.ability.dieLabel}}
-                    </strong>
-                  </span>
-                </button>
+          <div class='andromeda-rail-skills-scroll'>
+            {{#each skillColumns as |column|}}
+              <article
+                class='andromeda-ability-card andromeda-rail-ability {{column.ability.rankClass}}'
+                data-ability-key='{{column.key}}'
+              >
+                <div class='andromeda-ability-summary'>
+                  <button
+                    type='button'
+                    class='andromeda-ability-roll rollable'
+                    data-ability='{{column.key}}'
+                    data-label='{{column.ability.label}}'
+                  >
+                    <span class='andromeda-ability-title'>{{column.label}}</span>
+                    <span class='andromeda-ability-die'>
+                      <strong class='ability-die-value {{column.ability.rankClass}}'>
+                        {{column.ability.dieLabel}}
+                      </strong>
+                    </span>
+                  </button>
 
-                <label class='andromeda-defense-pill'>
-                  <span>{{column.defenseLabel}}</span>
+                  <label class='andromeda-defense-pill'>
+                    <span>{{column.defenseLabel}}</span>
+                    <input
+                      type='number'
+                      name='{{column.defensePath}}'
+                      value='{{column.defenseValue}}'
+                      step='1'
+                      inputmode='numeric'
+                      readonly
+                      tabindex='-1'
+                    />
+                  </label>
+                </div>
+
+                <div class='ability-die-control'>
+                  <button
+                    type='button'
+                    class='ability-step'
+                    data-step='-1'
+                    aria-label='{{localize "MY_RPG.AbilityDice.Decrease"}}'
+                  >
+                    <i class='fa-solid fa-minus'></i>
+                  </button>
                   <input
-                    type='number'
-                    name='{{column.defensePath}}'
-                    value='{{column.defenseValue}}'
-                    step='1'
-                    inputmode='numeric'
-                    readonly
-                    tabindex='-1'
+                    type='hidden'
+                    name='system.abilities.{{column.key}}.value'
+                    value='{{column.ability.value}}'
                   />
-                </label>
-              </div>
+                  <button
+                    type='button'
+                    class='ability-step'
+                    data-step='1'
+                    aria-label='{{localize "MY_RPG.AbilityDice.Increase"}}'
+                  >
+                    <i class='fa-solid fa-plus'></i>
+                  </button>
+                </div>
 
-              <div class='ability-die-control'>
-                <button
-                  type='button'
-                  class='ability-step'
-                  data-step='-1'
-                  aria-label='{{localize "MY_RPG.AbilityDice.Decrease"}}'
-                >
-                  <i class='fa-solid fa-minus'></i>
-                </button>
-                <input
-                  type='hidden'
-                  name='system.abilities.{{column.key}}.value'
-                  value='{{column.ability.value}}'
-                />
-                <button
-                  type='button'
-                  class='ability-step'
-                  data-step='1'
-                  aria-label='{{localize "MY_RPG.AbilityDice.Increase"}}'
-                >
-                  <i class='fa-solid fa-plus'></i>
-                </button>
-              </div>
-
-              <div class='andromeda-rail-skills'>
-                {{#each column.skills as |skill|}}
-                  <div class='skill skill-row andromeda-skill-row'>
-                    <button
-                      type='button'
-                      class='skill-col skill-name rollable'
-                      data-skill='{{skill.key}}'
-                      data-label='{{skill.label}}'
-                    >
-                      {{skill.label}}
-                    </button>
-                    <div class='skill-col skill-value'>
-                      <input
-                        class='{{skill.rankClass}}'
-                        type='number'
-                        name='system.skills.{{skill.key}}.value'
-                        value='{{skill.value}}'
-                        step='1'
-                        inputmode='numeric'
-                        pattern='\d+'
-                        min='0'
-                      />
+                <div class='andromeda-rail-skills'>
+                  {{#each column.skills as |skill|}}
+                    <div class='skill skill-row andromeda-skill-row'>
+                      <button
+                        type='button'
+                        class='skill-col skill-name rollable'
+                        data-skill='{{skill.key}}'
+                        data-label='{{skill.label}}'
+                      >
+                        {{skill.label}}
+                      </button>
+                      <div class='skill-col skill-value'>
+                        <input
+                          class='{{skill.rankClass}}'
+                          type='number'
+                          name='system.skills.{{skill.key}}.value'
+                          value='{{skill.value}}'
+                          step='1'
+                          inputmode='numeric'
+                          pattern='\d+'
+                          min='0'
+                        />
+                      </div>
                     </div>
-                  </div>
-                {{/each}}
-              </div>
-            </article>
-          {{/each}}
+                  {{/each}}
+                </div>
+              </article>
+            {{/each}}
+          </div>
 
           <footer class='andromeda-skill-legend' aria-label='{{localize "MY_RPG.RankNumeric.Title"}}'>
-            <span class='rank1'>1</span>
-            <span class='rank2'>2</span>
-            <span class='rank3'>3</span>
-            <span class='rank4'>4</span>
+            <span class='rank1'>{{localize 'MY_RPG.RankNumeric.Rank1'}}</span>
+            <span class='rank2'>{{localize 'MY_RPG.RankNumeric.Rank2'}}</span>
+            <span class='rank3'>{{localize 'MY_RPG.RankNumeric.Rank3'}}</span>
+            <span class='rank4'>{{localize 'MY_RPG.RankNumeric.Rank4'}}</span>
           </footer>
         </aside>
 
-        <section class='andromeda-sheet-pane sheet-body'>
-          <div
-            class='tab features andromeda-tab-panel andromeda-tab-panel--resources'
-            data-group='primary'
-            data-tab='features'
-          >
-            <div class='andromeda-command-cluster'>
-              {{#unless isPlayerCharacter}}
-                <section class='andromeda-command-panel andromeda-command-panel--quick-stats'>
-                  <div class='andromeda-compact-stats'>
-                    <div class='andromeda-compact-stat andromeda-compact-stat--progress-total'>
-                      <span>{{localize 'MY_RPG.KeyInfo.CurrentRank'}}</span>
-                      <strong>{{system.currentRank}}</strong>
-                    </div>
-                  </div>
+        <div class='andromeda-sheet-pane-scroll sheet-scrollable'>
+          <section class='andromeda-sheet-pane sheet-body'>
+            {{#each itemTabs as |tab|}}
+              <div
+                class='tab {{tab.key}} andromeda-item-tab andromeda-tab-panel'
+                data-group='primary'
+                data-tab='{{tab.key}}'
+              >
+                <section class='item-groups' data-groups='{{tab.key}}'>
+                  {{#each tab.groups as |group|}}
+                    {{> "systems/project-andromeda/templates/actor/partials/item-group-section.hbs" group=group}}
+                  {{/each}}
                 </section>
-              {{/unless}}
+              </div>
+            {{/each}}
 
-              <section class='andromeda-command-panel andromeda-command-panel--temps'>
-                <header class='andromeda-panel__header'>
-                  <h2>{{localize 'MY_RPG.TempBonus.Label'}}</h2>
-                </header>
-                <div class='andromeda-temp-list'>
-                  <label class='andromeda-temp-row'>
-                    <span>{{localize 'MY_RPG.TempStress.Label'}}</span>
-                    <input type='number' name='system.temphealth' value='{{system.temphealth}}' />
-                  </label>
-                  <label class='andromeda-temp-row'>
-                    <span>{{localize 'MY_RPG.Temp.BonusFortitudeLabel'}}</span>
-                    <input type='number' name='system.tempphys' value='{{system.tempphys}}' />
-                  </label>
-                  <label class='andromeda-temp-row'>
-                    <span>{{localize 'MY_RPG.Temp.BonusControlLabel'}}</span>
-                    <input type='number' name='system.tempazure' value='{{system.tempazure}}' />
-                  </label>
-                  <label class='andromeda-temp-row'>
-                    <span>{{localize 'MY_RPG.Temp.BonusWillLabel'}}</span>
-                    <input type='number' name='system.tempmental' value='{{system.tempmental}}' />
-                  </label>
-                  <label class='andromeda-temp-row'>
-                    <span>{{localize 'MY_RPG.TempSpeed.Label'}}</span>
-                    <input type='number' name='system.tempspeed' value='{{system.tempspeed}}' />
-                  </label>
-                </div>
-              </section>
-            </div>
-          </div>
-
-          {{#each itemTabs as |tab|}}
-            <div
-              class='tab {{tab.key}} andromeda-item-tab andromeda-tab-panel'
-              data-group='primary'
-              data-tab='{{tab.key}}'
-            >
-              <section class='item-groups' data-groups='{{tab.key}}'>
-                {{#each tab.groups as |group|}}
-                  {{> "systems/project-andromeda/templates/actor/partials/item-group-section.hbs" group=group}}
-                {{/each}}
-              </section>
-
-              {{#if tab.isInventory}}
-                  <section class='andromeda-command-panel andromeda-resources-panel'>
-                    <header class='andromeda-panel__header'>
-                      <h2>{{localize 'MY_RPG.Resources.Title'}}</h2>
-                    </header>
-                  <div class='andromeda-resource-pair'>
-                    <label class='andromeda-inline-stat'>
-                      <span>{{localize 'MY_RPG.Resources.SuppliesLabel'}}</span>
-                      <input
-                        type='number'
-                        name='system.supplies'
-                        value='{{tab.supplies}}'
-                        step='1'
-                        inputmode='numeric'
-                      />
-                    </label>
-                    <label class='andromeda-inline-stat'>
-                      <span>{{localize 'MY_RPG.Resources.MoneyLabel'}}</span>
-                      <input
-                        type='number'
-                        name='system.money'
-                        value='{{tab.money}}'
-                        step='1'
-                        inputmode='numeric'
-                      />
-                    </label>
-                  </div>
-                </section>
-              {{/if}}
-            </div>
-          {{/each}}
-
-          {{#if isPlayerCharacter}}
-            <div
-              class='tab personality andromeda-personality-tab andromeda-tab-panel'
-              data-group='primary'
-              data-tab='personality'
-            >
-              <section class='andromeda-command-panel personality-sheet-box'>
-                <header class='andromeda-panel__header'>
-                  <h2>{{localize 'MY_RPG.SheetLabels.Personality'}}</h2>
-                </header>
-                <div class='personality-grid'>
-                  <label class='form-group'>
-                    <span>{{localize 'MY_RPG.Personality.Archetype'}}</span>
-                    <textarea
-                      class='auto-resize-textarea'
-                      name='system.biography.archetype'
-                      rows='2'
-                    >{{system.biography.archetype}}</textarea>
-                  </label>
-                  <label class='form-group personality-field personality-field--full'>
+            {{#if isPlayerCharacter}}
+              <div
+                class='tab personality andromeda-personality-tab andromeda-tab-panel'
+                data-group='primary'
+                data-tab='personality'
+              >
+                <section class='andromeda-command-panel personality-sheet-box personality-sheet-box--appearance'>
+                  <label class='form-group personality-field personality-field--appearance'>
                     <span>{{localize 'MY_RPG.Personality.Appearance'}}</span>
                     <textarea
-                      class='auto-resize-textarea'
+                      class='auto-resize-textarea personality-field__input'
                       name='system.biography.appearance'
-                      rows='2'
+                      rows='3'
                     >{{system.biography.appearance}}</textarea>
                   </label>
-                </div>
+                </section>
+
+                <section class='item-groups personality-item-groups' data-groups='personality'>
+                  {{#if personalityValueGroup}}
+                    {{> "systems/project-andromeda/templates/actor/partials/item-group-section.hbs" group=personalityValueGroup}}
+                  {{/if}}
+                </section>
+              </div>
+            {{/if}}
+
+            <div
+              class='tab combatCheatSheet andromeda-combat-cheat-sheet-tab andromeda-tab-panel'
+              data-group='primary'
+              data-tab='combatCheatSheet'
+            >
+              <section
+                class='andromeda-command-panel personality-sheet-box personality-sheet-box--appearance combat-cheat-sheet-box'
+              >
+                <label class='form-group personality-field personality-field--appearance combat-cheat-sheet-field'>
+                  <span>{{localize 'MY_RPG.CombatCheatSheet.CombatActionsTitle'}}</span>
+                  <div
+                    class='personality-field__input combat-cheat-sheet__input'
+                    role='textbox'
+                    aria-readonly='true'
+                    tabindex='0'
+                  >{{localize 'MY_RPG.CombatCheatSheet.CombatActionsText'}}</div>
+                </label>
               </section>
 
-              <section class='item-groups personality-item-groups' data-groups='personality'>
-                {{#if personalityValueGroup}}
-                  {{> "systems/project-andromeda/templates/actor/partials/item-group-section.hbs" group=personalityValueGroup}}
-                {{/if}}
+              <section
+                class='andromeda-command-panel personality-sheet-box personality-sheet-box--appearance combat-cheat-sheet-box'
+              >
+                <label class='form-group personality-field personality-field--appearance combat-cheat-sheet-field'>
+                  <span>{{localize 'MY_RPG.CombatCheatSheet.HeroismTitle'}}</span>
+                  <div
+                    class='personality-field__input combat-cheat-sheet__input'
+                    role='textbox'
+                    aria-readonly='true'
+                    tabindex='0'
+                  >{{localize 'MY_RPG.CombatCheatSheet.HeroismText'}}</div>
+                </label>
               </section>
             </div>
-          {{/if}}
-        </section>
+          </section>
+        </div>
       </section>
     </div>
   </div>

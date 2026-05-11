@@ -46,7 +46,7 @@
       "ActorType": "Character Type",
       "MomentOfGlory": "Highlight Points",
       "SharedMomentOfGlory": "GM Highlight Points Pool",
-      "ProgressPoints": "Advancement Points",
+      "ProgressPoints": "Progression Points",
       "TotalAdvancementPoints": "Total Advancement Points"
     },
     "Inventory": {
@@ -82,6 +82,7 @@
       "KeyInfo": "Key Information",
       "Biography": "Personality",
       "Personality": "Personality",
+      "CombatCheatSheet": "Combat Cheat Sheet",
       "Inventory": "Inventory",
       "Traits": "Traits",
       "ItemAbility": "Genome Sheet",
@@ -232,6 +233,12 @@
       "Appearance": "Appearance",
       "Backstory": "Backstory"
     },
+    "CombatCheatSheet": {
+      "CombatActionsTitle": "Combat Actions",
+      "HeroismTitle": "Highlight Points",
+      "CombatActionsText": "On their turn, a character has 1 action, 1 maneuver, 1 reaction.\nAnd any number of free actions.\n\nAt the start of your turn, your action, maneuver, and reaction refresh. When all participants have finished their turns, a new round begins.\n\nAvailable action types:\n- Activate an ability\n- Skill check or attack. These differ only because weapon damage is added to a successful attack roll.\n- Extra movement. Gain movement points equal to your speed and immediately spend them to move by the usual rules.\n- Ready. Spend your action now, name a condition, and until the start of your next turn you can spend your reaction to perform this action when the condition is triggered.\n\nAvailable maneuver types:\n- Move a distance equal to or less than your speed\n- Aim. Gain +1 to your next attack this turn.\n- Help an ally. Remove a condition from an ally if the effect allows it to be removed by help.\n- Saving throw. Make a saving throw to remove a condition from yourself on a success.\n\nImportant!\nProvoked attacks are a free action. They are not reactions and do not spend the character's reaction.",
+      "HeroismText": "How Highlight Points are used\n- Add half the die's maximum value to a check result\n- Reroll the check die. Roll the check die again and use either of the two die results; the other check modifiers do not change.\n- Gain an extra use of an ability with a \"1/Scene\" cooldown\n- Gain an extra maneuver\n- Establish a fact. The fact must be local, plausible, and useful right now: add cover, a vulnerability, a lead, a convenient environmental detail, a rumor, a small resource, or another opportunity for action to the scene. It cannot rewrite what already happened, cancel a failure, solve the scene by itself, change someone else's completed choice, or create an advantage above the scene's own rank.\n\nHighlight Point limits\nEach character can use no more than 1 Highlight Point per round. A check that uses a Highlight Point must be colorfully described by the player and must affect the environment by changing the scene."
+    },
     "AbilitiesTable": {
       "TableHeading": "Cartridges",
       "PrimaryHeader": "Cartridges",
@@ -320,11 +327,22 @@
     "ItemFields": {
       "Quantity": "Quantity",
       "Rank": "Rank",
+      "None": "None",
       "RequiresRoll": "Requires Roll",
       "ActivationType": "Activation",
+      "ActivationCost": "Action Cost",
       "Range": "Range",
+      "Duration": "Duration",
+      "Area": "Area",
+      "Defense": "Defense",
+      "Targets": "Targets",
       "EquipmentSubtype": "Equipment Type",
       "UsageFrequency": "Frequency of use"
+    },
+    "ItemTableColumns": {
+      "Name": "Name",
+      "Skill": "Skill",
+      "Roll": "Roll"
     },
     "EquipmentSubtypes": {
       "Gear": "Equipment",
@@ -342,6 +360,31 @@
       "Action": "Action",
       "Maneuver": "Maneuver",
       "Reaction": "Reaction"
+    },
+    "ItemDurations": {
+      "UntilCanceled": "Until canceled",
+      "UntilEndOfScene": "Until end of scene",
+      "UntilEndOfTurn": "Until end of turn",
+      "UntilMove": "Until move",
+      "UntilStartOfYourNextTurn": "Until start of your next turn"
+    },
+    "ItemTargets": {
+      "AllInArea": "All in area",
+      "AllInLine": "All in line",
+      "Area": "Area",
+      "Self": "Self",
+      "Single": "Single target",
+      "UpTo2": "Up to 2 targets",
+      "UpTo3": "Up to 3 targets"
+    },
+    "ItemRanges": {
+      "Melee": "Melee",
+      "Self": "Self"
+    },
+    "ItemAreaTypes": {
+      "blast": "Blast",
+      "circle": "Circle",
+      "ray": "Ray"
     },
     "RollFlavor": {
       "Modifiers": "Modifiers",
@@ -409,8 +452,13 @@
         "ItemShield": "Power Shield",
         "ItemSpeed": "Speed Bonus",
         "UsageFrequency": "Usage Frequency",
+        "ActivationCost": "Action Cost",
         "ActivationType": "Activation",
         "Range": "Range",
+        "Duration": "Duration",
+        "Area": "Area",
+        "Defense": "Defense",
+        "Targets": "Targets",
         "Quantity": "Quantity"
       },
       "Messages": {

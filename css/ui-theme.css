@@ -34,6 +34,8 @@
   --andromeda-color-text: var(--andromeda-raw-charcoal-900);
   --andromeda-color-muted: var(--andromeda-raw-muted-700);
   --andromeda-color-subtle: var(--andromeda-raw-muted-500);
+  --andromeda-color-text-on-chrome: var(--andromeda-raw-header-text);
+  --andromeda-color-text-on-chrome-soft: var(--andromeda-raw-header-text-soft);
   --andromeda-color-accent: var(--andromeda-raw-accent-600);
   --andromeda-color-cyan: var(--andromeda-raw-link-600);
   --andromeda-color-amber: var(--andromeda-raw-amber-500);
