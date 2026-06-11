@@ -62,6 +62,40 @@
     "price": 1
   },
   {
+    "id": "razvedochnaya-vintovka-blik",
+    "name": "Разведочная винтовка «Блик»",
+    "type": "equipment",
+    "rank": 1,
+    "skill": "strelba",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "courage",
+              "value": 1
+            },
+            {
+              "key": "reload",
+              "value": 2
+            },
+            {
+              "key": "damage",
+              "value": 2
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Урон: 2. Перезарядка 2. Кураж 1.",
+    "shortDescription": "Легкая винтовка для стрельбы после смены позиции.",
+    "price": 1
+  },
+  {
     "id": "vintovka-shturmovaya-ares",
     "name": "Винтовка штурмовая \"Арес\"",
     "type": "equipment",
@@ -151,6 +185,78 @@
     },
     "description": "Урон: 4. Эскалация 1. Скрытное. Стабилизация 1.",
     "shortDescription": "Скрытная снайперская винтовка",
+    "price": 3
+  },
+  {
+    "id": "snayperskaya-vintovka-mirazh",
+    "name": "Снайперская винтовка «Мираж»",
+    "type": "equipment",
+    "rank": 2,
+    "skill": "strelba",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "courage",
+              "value": 1
+            },
+            {
+              "key": "concealable",
+              "value": true
+            },
+            {
+              "key": "reload",
+              "value": 2
+            },
+            {
+              "key": "damage",
+              "value": 4
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Урон: 4. Скрытное. Перезарядка 2. Кураж 1.",
+    "shortDescription": "Скрытная снайперская винтовка для смены позиции.",
+    "price": 3
+  },
+  {
+    "id": "skladnoy-karabin-rys",
+    "name": "Складной карабин «Рысь»",
+    "type": "equipment",
+    "rank": 2,
+    "skill": "strelba",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "courage",
+              "value": 1
+            },
+            {
+              "key": "concealable",
+              "value": true
+            },
+            {
+              "key": "damage",
+              "value": 3
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Урон: 3. Скрытное. Кураж 1.",
+    "shortDescription": "Скрытный карабин для мобильной перестрелки.",
     "price": 3
   },
   {

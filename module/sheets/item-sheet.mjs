@@ -1,4 +1,5 @@
 import { MODULE_ID, debugLog } from '../config.mjs';
+import { getFoundryItemSheetClass } from '../helpers/foundry-compat.mjs';
 import {
   DEFAULT_ITEM_USAGE_FREQUENCY,
   ITEM_DEFENSE_LABEL_KEYS,
@@ -10,6 +11,8 @@ import {
   isPersonalityValueItem,
   normalizeUsageFrequency
 } from '../helpers/item-config.mjs';
+
+export const FoundryItemSheet = getFoundryItemSheetClass();
 
 function buildRankOptions(selected) {
   const selectedNumber = Number(selected) || 0;
@@ -63,7 +66,7 @@ function buildUsageFrequencyOptions(selected) {
 }
 
 function buildActivationTypeOptions(selected) {
-  return buildSelectOptions(selected, ITEM_ACTIVATION_TYPE_LABEL_KEYS, 'MY_RPG.ItemFields.None');
+  return buildSelectOptions(selected || 'passive', ITEM_ACTIVATION_TYPE_LABEL_KEYS);
 }
 
 function buildSelectOptions(selected, labelKeys, blankLabelKey = '') {
@@ -148,7 +151,7 @@ function getFilteredItemFields(data, excludedPaths = []) {
   return (data.itemConfig?.fields ?? []).filter((field) => !hidden.has(field.path));
 }
 
-export class ProjectAndromedaItemSheet extends ItemSheet {
+export class ProjectAndromedaItemSheet extends FoundryItemSheet {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ['project-andromeda', 'sheet', 'item'],

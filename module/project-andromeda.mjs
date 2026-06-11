@@ -3,13 +3,18 @@ import { ProjectAndromedaActor } from './documents/actor.mjs';
 import { ProjectAndromedaItem } from './documents/item.mjs';
 // Import sheet classes.
 import {
+  FoundryActorSheet,
   ProjectAndromedaActorSheet,
   promptForActorTypeSelection,
   updateActorDocumentType
 } from './sheets/actor-sheet.mjs';
-import { ITEM_SHEET_CLASSES } from './sheets/item-sheet.mjs';
+import { FoundryItemSheet, ITEM_SHEET_CLASSES } from './sheets/item-sheet.mjs';
 // Import helper/utility classes and constants.
 import { preloadHandlebarsTemplates } from './helpers/templates.mjs';
+import {
+  getFoundryActorSheetsCollection,
+  getFoundryItemSheetsCollection
+} from './helpers/foundry-compat.mjs';
 import {
   GEAR_CATALOG_AUTO_SYNC_STATE_SETTING,
   GM_HERO_POOL_SETTING,
@@ -916,9 +921,9 @@ function getMigratedEquipmentSystemData(item) {
     systemData.usageFrequency ?? DEFAULT_ITEM_USAGE_FREQUENCY
   );
   systemData.activationCost = String(
-    systemData.activationCost ?? systemData.activationType ?? ''
+    systemData.activationCost ?? systemData.activationType ?? 'passive'
   ).trim();
-  systemData.activationType = systemData.activationCost || String(systemData.activationType ?? '');
+  systemData.activationType = systemData.activationCost || 'passive';
   systemData.range = String(systemData.range ?? '');
   systemData.duration = String(systemData.duration ?? '');
   systemData.area = String(systemData.area ?? '');
@@ -1526,12 +1531,14 @@ Hooks.once('init', function () {
   };
 
   // Register sheet application classes
-  Actors.unregisterSheet('core', ActorSheet);
-  Actors.registerSheet(MODULE_ID, ProjectAndromedaActorSheet, {
+  const actorSheets = getFoundryActorSheetsCollection();
+  const itemSheets = getFoundryItemSheetsCollection();
+  actorSheets.unregisterSheet('core', FoundryActorSheet);
+  actorSheets.registerSheet(MODULE_ID, ProjectAndromedaActorSheet, {
     makeDefault: true,
     label: 'MY_RPG.SheetLabels.Actor'
   });
-  Items.unregisterSheet('core', ItemSheet);
+  itemSheets.unregisterSheet('core', FoundryItemSheet);
   const sheetLabels = {
     cartridge: 'MY_RPG.SheetLabels.ItemAbility',
     implant: 'MY_RPG.SheetLabels.ItemMod',
@@ -1550,7 +1557,7 @@ Hooks.once('init', function () {
   for (const [sheetKey, entry] of sheetMap.entries()) {
     const SheetClass = ITEM_SHEET_CLASSES[sheetKey];
     if (!SheetClass) continue;
-    Items.registerSheet(MODULE_ID, SheetClass, {
+    itemSheets.registerSheet(MODULE_ID, SheetClass, {
       types: entry.types,
       makeDefault: true,
       label: entry.label

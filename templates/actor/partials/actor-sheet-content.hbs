@@ -1,4 +1,7 @@
-<form class='{{cssClass}} {{actor.type}} flexcol' autocomplete='off'>
+<form
+  class='{{cssClass}} {{actor.type}} {{#if sheetEditMode}}andromeda-edit-mode{{else}}andromeda-play-mode{{/if}} flexcol'
+  autocomplete='off'
+>
   <div class='andromeda-sheet-shell'>
     <div class='andromeda-sheet-chrome'>
       <header class='andromeda-hud andromeda-hud--{{#if isPlayerCharacter}}player{{else}}gm{{/if}}'>
@@ -225,12 +228,27 @@
                   />
                   <button
                     type='button'
-                    class='ability-step'
+                    class='ability-step {{#if @root.isPlayerCharacter}}andromeda-advancement-control andromeda-advancement--{{column.ability.advancement.state}}{{/if}}'
                     data-step='1'
-                    aria-label='{{localize "MY_RPG.AbilityDice.Increase"}}'
+                    {{#if @root.isPlayerCharacter}}
+                      data-advancement-kind='ability'
+                      data-advancement-key='{{column.key}}'
+                      title='{{column.ability.advancement.title}}'
+                      aria-label='{{column.ability.advancement.title}}'
+                    {{else}}
+                      aria-label='{{localize "MY_RPG.AbilityDice.Increase"}}'
+                    {{/if}}
                   >
                     <i class='fa-solid fa-plus'></i>
                   </button>
+                  {{#if @root.isPlayerCharacter}}
+                    <span
+                      class='andromeda-advancement-cost andromeda-advancement--{{column.ability.advancement.state}}'
+                      data-advancement-kind='ability'
+                      data-advancement-key='{{column.key}}'
+                      title='{{column.ability.advancement.title}}'
+                    >{{column.ability.advancement.costLabel}}</span>
+                  {{/if}}
                 </div>
 
                 <div class='andromeda-rail-skills'>
@@ -242,8 +260,16 @@
                         data-skill='{{skill.key}}'
                         data-label='{{skill.label}}'
                       >
-                        {{skill.label}}
+                        <span class='skill-name__label'>{{skill.label}}</span>
                       </button>
+                      {{#if @root.isPlayerCharacter}}
+                        <span
+                          class='andromeda-advancement-cost andromeda-advancement--{{skill.advancement.state}}'
+                          data-advancement-kind='skill'
+                          data-advancement-key='{{skill.key}}'
+                          title='{{skill.advancement.title}}'
+                        >{{skill.advancement.costLabel}}</span>
+                      {{/if}}
                       <div class='skill-col skill-value'>
                         <input
                           class='{{skill.rankClass}}'

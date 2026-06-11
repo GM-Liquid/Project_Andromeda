@@ -570,7 +570,6 @@ function getGearCatalogActivationType(entry) {
     getGearCatalogEffects(entry).find((effect) => effect?.activation?.type)?.activation?.type
   );
   if (GEAR_CATALOG_SYNC_ALLOWED_ACTIVATION_TYPES.has(activationType)) return activationType;
-  if (activationType === 'freeAction') return 'action';
   return 'passive';
 }
 
@@ -781,12 +780,122 @@ function getItemMaps() {
   for (const item of getAllWorldItems()) {
     byId.set(String(item.id ?? ''), item);
     const syncId = getGearCatalogSyncId(item);
-    if (syncId) bySyncId.set(syncId, item);
+    if (syncId) {
+      const items = bySyncId.get(syncId) ?? [];
+      items.push(item);
+      bySyncId.set(syncId, items);
+    }
     const nameTypeKey = `${String(item.type ?? '')}\u0000${normalizeLookupValue(item.name)}`;
-    if (!byNameAndType.has(nameTypeKey)) byNameAndType.set(nameTypeKey, item);
+    const items = byNameAndType.get(nameTypeKey) ?? [];
+    items.push(item);
+    byNameAndType.set(nameTypeKey, items);
   }
 
   return { bySyncId, byId, byNameAndType };
+}
+
+function getRowGearCatalogKey(row) {
+  const rowSyncId = normalizeOptionalString(row?.syncId);
+  if (rowSyncId.startsWith('gear:')) return rowSyncId;
+
+  const systemJson = normalizeOptionalString(row?.[GEAR_CATALOG_SYNC_SYSTEM_JSON_COLUMN]);
+  if (!systemJson) return '';
+
+  try {
+    const parsed = JSON.parse(systemJson);
+    const catalog = normalizeOptionalString(parsed?.details?.gearCatalog?.catalog);
+    const entryId = normalizeOptionalString(parsed?.details?.gearCatalog?.id);
+    if (catalog && entryId) return `gear:${catalog}:${entryId}`;
+  } catch (_error) {
+    return '';
+  }
+
+  return '';
+}
+
+function getItemGearCatalogKey(item) {
+  const catalog = normalizeOptionalString(item?.system?.details?.gearCatalog?.catalog);
+  const entryId = normalizeOptionalString(item?.system?.details?.gearCatalog?.id);
+  if (!catalog || !entryId) return '';
+  return `gear:${catalog}:${entryId}`;
+}
+
+function getLinkedActorItemCount(item) {
+  const targetUuid = String(item?.uuid ?? '').trim();
+  if (!targetUuid) return 0;
+
+  let count = 0;
+  for (const actor of game.actors?.contents ?? []) {
+    for (const actorItem of actor.items ?? []) {
+      if (getLibraryItemUuid(actorItem) === targetUuid) count += 1;
+    }
+  }
+  return count;
+}
+
+function compareImportCandidatePriority(left, right, context) {
+  const preferredFoundryId = String(context?.foundryId ?? '').trim();
+  const expectedSyncId = normalizeOptionalString(context?.syncId);
+  const expectedGearCatalogKey = normalizeOptionalString(context?.gearCatalogKey);
+
+  const scoreCandidate = (item) => {
+    let score = 0;
+
+    if (preferredFoundryId && String(item?.id ?? '').trim() === preferredFoundryId) score += 100000;
+    if (expectedSyncId && getGearCatalogSyncId(item) === expectedSyncId) score += 50000;
+    if (expectedGearCatalogKey && getItemGearCatalogKey(item) === expectedGearCatalogKey) {
+      score += 10000;
+    }
+    score += getLinkedActorItemCount(item) * 100;
+    return score;
+  };
+
+  const leftScore = scoreCandidate(left);
+  const rightScore = scoreCandidate(right);
+  if (leftScore !== rightScore) return rightScore - leftScore;
+
+  const leftName = normalizeLookupValue(left?.name);
+  const rightName = normalizeLookupValue(right?.name);
+  const nameComparison = leftName.localeCompare(rightName);
+  if (nameComparison !== 0) return nameComparison;
+
+  return String(left?.id ?? '').localeCompare(String(right?.id ?? ''));
+}
+
+function resolveExistingItemForRow(row, sheetConfig, itemMaps) {
+  const rowSyncId = normalizeOptionalString(row?.syncId);
+  const foundryId = normalizeOptionalString(row?.foundryId);
+  const nameTypeKey = `${normalizeItemTypeValue(row?.type) || sheetConfig.types[0]}\u0000${normalizeLookupValue(row?.name)}`;
+  const candidates = [];
+  const seenIds = new Set();
+
+  const addCandidate = (item) => {
+    const itemId = String(item?.id ?? '').trim();
+    if (!itemId || seenIds.has(itemId)) return;
+    seenIds.add(itemId);
+    candidates.push(item);
+  };
+
+  for (const item of itemMaps.bySyncId.get(rowSyncId) ?? []) addCandidate(item);
+  if (foundryId) addCandidate(itemMaps.byId.get(foundryId) ?? null);
+  for (const item of itemMaps.byNameAndType.get(nameTypeKey) ?? []) addCandidate(item);
+
+  if (!candidates.length) return null;
+  if (candidates.length === 1) return candidates[0];
+
+  const gearCatalogKey = getRowGearCatalogKey(row);
+  const preferredId =
+    foundryId ||
+    candidates.find((item) => getLinkedActorItemCount(item) > 0)?.id ||
+    '';
+
+  return [...candidates].sort((left, right) =>
+    compareImportCandidatePriority(left, right, {
+      foundryId: preferredId,
+      syncId: rowSyncId,
+      gearCatalogKey
+    })
+  )[0] ?? null;
 }
 
 function resolveFolderSpec(row, item) {
@@ -1003,12 +1112,23 @@ const GEAR_CATALOG_WORLD_ITEM_UPDATE_OPTIONS = Object.freeze({
 
 async function applyCatalogWorldItemCreates(createDocuments = []) {
   if (!createDocuments.length) return [];
-  return Item.createDocuments(createDocuments, GEAR_CATALOG_WORLD_ITEM_CREATE_OPTIONS);
+  return Item.createDocuments(createDocuments, { ...GEAR_CATALOG_WORLD_ITEM_CREATE_OPTIONS });
 }
 
-async function applyCatalogWorldItemUpdates(updateDocuments = []) {
-  if (!updateDocuments.length) return [];
-  return Item.updateDocuments(updateDocuments, GEAR_CATALOG_WORLD_ITEM_UPDATE_OPTIONS);
+async function applyCatalogWorldItemUpdate(item, updateData) {
+  if (!item || !updateData) return null;
+  return item.update(updateData, { ...GEAR_CATALOG_WORLD_ITEM_UPDATE_OPTIONS });
+}
+
+async function applyCatalogWorldItemUpdates(updateOperations = []) {
+  if (!updateOperations.length) return [];
+
+  const updatedItems = [];
+  for (const operation of updateOperations) {
+    const updatedItem = await applyCatalogWorldItemUpdate(operation.item, operation.updateData);
+    if (updatedItem) updatedItems.push(updatedItem);
+  }
+  return updatedItems;
 }
 
 function buildOperationRowLabel(sheetConfig, rowNumber, row) {
@@ -1054,7 +1174,7 @@ async function buildImportPlan(remoteSheets = {}) {
   const warnings = [];
   const duplicateSyncIds = new Set();
   const seenSyncIds = new Set();
-  const { bySyncId, byId, byNameAndType } = getItemMaps();
+  const itemMaps = getItemMaps();
 
   for (const sheetConfig of GEAR_CATALOG_SYNC_SHEET_CONFIGS) {
     const rows = Array.isArray(remoteSheets?.[sheetConfig.key])
@@ -1111,15 +1231,7 @@ async function buildImportPlan(remoteSheets = {}) {
         seenSyncIds.add(rowSyncId);
       }
 
-      const item =
-        (rowSyncId ? bySyncId.get(rowSyncId) : null) ??
-        (normalizeOptionalString(row.foundryId)
-          ? byId.get(normalizeOptionalString(row.foundryId))
-          : null) ??
-        byNameAndType.get(
-          `${normalizeItemTypeValue(row.type) || sheetConfig.types[0]}\u0000${normalizeLookupValue(row.name)}`
-        ) ??
-        null;
+      const item = resolveExistingItemForRow(row, sheetConfig, itemMaps);
 
       if (!item && hasActorLinkMetadata(row)) {
         const errorMessage = localize('MY_RPG.GearCatalogSync.Errors.ActorLinkedCreateBlocked');
@@ -1316,7 +1428,7 @@ async function applyImportPlan(plan) {
     ])
   );
   const createDocuments = [];
-  const updateDocuments = [];
+  const updateOperations = [];
 
   for (const operation of plan.operations) {
     if (operation.mode !== 'create' && operation.mode !== 'update') continue;
@@ -1338,13 +1450,14 @@ async function applyImportPlan(plan) {
       continue;
     }
 
-    updateDocuments.push(
-      buildUpdateDocumentData(operation.item, operation.importData, resolvedFolderId)
-    );
+    updateOperations.push({
+      item: operation.item,
+      updateData: buildUpdateDocumentData(operation.item, operation.importData, resolvedFolderId)
+    });
   }
 
   const createdItems = await applyCatalogWorldItemCreates(createDocuments);
-  const updatedItems = await applyCatalogWorldItemUpdates(updateDocuments);
+  const updatedItems = await applyCatalogWorldItemUpdates(updateOperations);
 
   await new Promise((resolve) => setTimeout(resolve, 0));
 

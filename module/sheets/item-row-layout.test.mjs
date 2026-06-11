@@ -21,13 +21,19 @@ test('item group rows render a collapsible table summary with detail sections', 
   assert.match(template, /item-group__create/);
   assert.match(template, /item-row__name[\s\S]*item-row__label[\s\S]*item-row__toggle/);
   assert.match(template, /item-row__summary-grid/);
-  assert.match(template, /item-row__roll/);
+  assert.match(template, /item-row__check/);
+  assert.match(template, /item-row__activation/);
+  assert.match(template, /\{\{#unless \.\.\/group\.isSimple\}\}/);
   assert.match(template, /item-row__detail/);
   assert.match(template, /item-row__detail-grid/);
   assert.match(template, /item-row__detail-effect/);
   assert.match(template, /item-row__toggle/);
   assert.match(actorSheet, /_onItemRowToggle/);
   assert.match(actorSheet, /_getItemRollSummary/);
+  assert.match(actorSheet, /_onItemActivate/);
+  assert.match(actorSheet, /closest\('\.item-row\[data-item-id\]'\)/);
+  assert.match(template, /item-activate/);
+  assert.doesNotMatch(template, /item-chat/);
   assert.match(stylesheet, /\.project-andromeda \.item-group__columns \{/);
   assert.match(
     stylesheet,
@@ -37,11 +43,11 @@ test('item group rows render a collapsible table summary with detail sections', 
   assert.match(stylesheet, /\.project-andromeda \.item-row__detail-grid \{/);
   assert.match(
     stylesheet,
-    /\.project-andromeda \.item-group__column-actions \{[\s\S]*justify-content:\s*center;/
+    /\.project-andromeda \.item-group__column-actions \{[\s\S]*justify-content:\s*stretch;/
   );
   assert.match(
     stylesheet,
-    /\.project-andromeda \.item-group__create \{[\s\S]*width:\s*var\(--andromeda-item-create-width\);/
+    /\.project-andromeda \.item-group__create \{[\s\S]*min-width:\s*var\(--andromeda-item-actions-width\);/
   );
   assert.match(
     stylesheet,
@@ -52,8 +58,8 @@ test('item group rows render a collapsible table summary with detail sections', 
     /\.project-andromeda \.item-row--expanded \.item-row__toggle \{[\s\S]*display:\s*inline-flex;/
   );
   assert.equal(english.MY_RPG.ItemTableColumns.Name, 'Name');
-  assert.equal(english.MY_RPG.ItemTableColumns.Skill, 'Skill');
-  assert.equal(english.MY_RPG.ItemTableColumns.Roll, 'Roll');
+  assert.equal(english.MY_RPG.ItemTableColumns.Check, 'Check');
+  assert.equal(english.MY_RPG.ItemTableColumns.Activation, 'Activation');
 });
 
 test('item tables use a tighter layout with no rail divider and no left gutter', () => {
@@ -69,7 +75,7 @@ test('item tables use a tighter layout with no rail divider and no left gutter',
   );
   assert.match(
     stylesheet,
-    /\.project-andromeda \{[\s\S]*--andromeda-item-create-width:\s*calc\(4 \* 1\.45rem \+ 3 \* 0\.2rem\);[\s\S]*--andromeda-item-table-columns:\s*minmax\(0,\s*1\.9fr\)\s+minmax\(6\.5rem,\s*0\.78fr\)\s+minmax\(5\.7rem,\s*0\.66fr\)\s+8\.2rem;/
+    /\.project-andromeda \{[\s\S]*--andromeda-item-actions-width:\s*calc\(2rem \+ 2 \* 1\.45rem \+ 2 \* 0\.2rem\);[\s\S]*--andromeda-item-table-columns:\s*minmax\(0,\s*1\.85fr\)\s+minmax\(7\.6rem,\s*0\.82fr\)\s+minmax\(4\.6rem,\s*0\.42fr\)[\s\S]*minmax\(var\(--andromeda-item-actions-width\),\s*auto\);/
   );
   assert.match(
     stylesheet,
@@ -91,4 +97,6 @@ test('item tables use a tighter layout with no rail divider and no left gutter',
     stylesheet,
     /\.project-andromeda \.item-control \{[\s\S]*width:\s*1\.45rem;[\s\S]*height:\s*1\.45rem;/
   );
+  assert.doesNotMatch(stylesheet, /\.project-andromeda \.item-control:focus,/);
+  assert.match(stylesheet, /\.project-andromeda \.item-control:focus-visible,/);
 });

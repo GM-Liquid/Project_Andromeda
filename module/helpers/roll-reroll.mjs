@@ -58,5 +58,5 @@ export async function rerollRollPreservingContext(sourceRoll) {
 
   const RollClass = resolveRollClass(sourceRoll);
   const rerolledRoll = new RollClass(spec.formula, spec.data, spec.options);
-  return rerolledRoll.roll({ async: true });
+  return rerolledRoll.roll();
 }

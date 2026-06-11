@@ -70,6 +70,48 @@
     "price": 1
   },
   {
+    "id": "tenevoy-plashch",
+    "name": "Теневой плащ",
+    "type": "armor",
+    "rank": 1,
+    "skill": "sokrytie",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "fortitudeBonus",
+              "value": 1
+            },
+            {
+              "key": "controlBonus",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Легкий маскировочный плащ для тихого перемещения. Стойкость +1. Контроль +1. Вы получаете преимущество к проверкам Сокрытия, когда двигаетесь в укрытии, темноте, толпе или шумной обстановке.",
+    "shortDescription": "Легкий плащ для скрытного перемещения.",
+    "price": 1
+  },
+  {
     "id": "ozk",
     "name": "ОЗК",
     "type": "armor",
@@ -152,6 +194,53 @@
     },
     "description": "Штурмовой комплект для входа под огонь и удержания линии. Стойкость +3. Контроль +1. В начале каждого боя броня дает вам 6 временных ячеек стресса.",
     "shortDescription": "Штурмовой комплект для входа под огонь и удержания линии",
+    "price": 3
+  },
+  {
+    "id": "kostyum-sled",
+    "name": "Костюм «След»",
+    "type": "armor",
+    "rank": 2,
+    "skill": "sokrytie",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "fortitudeBonus",
+              "value": 1
+            },
+            {
+              "key": "controlBonus",
+              "value": 3
+            },
+            {
+              "key": "speedBonus",
+              "value": 10
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "trigger": "whileActive"
+          },
+          "outcomes": [
+            {
+              "key": "specialRule"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Подвижный маскировочный костюм для смены огневых позиций. Контроль +3. Стойкость +1. Скорость передвижения увеличивается на 10 м. Если в этом ходу вы переместились хотя бы на половину вашей скорости передвижения и закончили ход в укрытии, вы становитесь скрытым до начала вашего следующего хода.",
+    "shortDescription": "Маскировочный костюм для мобильного снайпера.",
     "price": 3
   },
   {

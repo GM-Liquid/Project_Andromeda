@@ -91,6 +91,12 @@
       "ItemWeapon": "Weapon Sheet",
       "ItemGeneric": "Item Sheet"
     },
+    "SheetMode": {
+      "Edit": "Edit",
+      "Play": "Play",
+      "SwitchToEdit": "Switch to edit mode",
+      "SwitchToPlay": "Switch to play mode"
+    },
     "ItemSheet": {
       "Tabs": {
         "Details": "Details",
@@ -317,6 +323,9 @@
       "Delete": "Delete",
       "Chat": "Send to chat",
       "Roll": "Roll",
+      "Activate": "Activate",
+      "RollAndMark": "Roll and mark as used",
+      "ClearCooldown": "Clear used mark",
       "Equip": "Equipped",
       "EquipAria": "Toggle equipped state",
       "Quantity": "Quantity",
@@ -342,7 +351,16 @@
     "ItemTableColumns": {
       "Name": "Name",
       "Skill": "Skill",
-      "Roll": "Roll"
+      "Roll": "Roll",
+      "Check": "Check",
+      "Activation": "Activation"
+    },
+    "Advancement": {
+      "CanAfford": "Next improvement costs {cost} progression points.",
+      "NeedPoints": "Next improvement costs {cost} progression points; not enough points available.",
+      "RankCap": "Current rank limit reached.",
+      "CostShort": "Cost {cost}",
+      "Max": "Max"
     },
     "EquipmentSubtypes": {
       "Gear": "Equipment",
@@ -359,7 +377,15 @@
       "Passive": "Passive",
       "Action": "Action",
       "Maneuver": "Maneuver",
+      "FreeAction": "Free Action",
       "Reaction": "Reaction"
+    },
+    "ActivationTypesShort": {
+      "Passive": "Passive",
+      "Action": "Action",
+      "Maneuver": "Move",
+      "FreeAction": "Free",
+      "Reaction": "React"
     },
     "ItemDurations": {
       "UntilCanceled": "Until canceled",

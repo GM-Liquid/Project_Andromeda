@@ -102,29 +102,30 @@ export class ProjectAndromedaActor extends Actor {
   /* ------------------------ Формулы ------------------------------ */
   _calcStressMax(s) {
     const rank = Math.max(Number(s.currentRank) || 0, 0);
-    return Math.max(0, rank * 6);
+    const tempStress = Math.max(Number(s?.temphealth) || 0, 0);
+    return Math.max(0, rank * 6 + tempStress);
   }
 
   _calcGmStressMax(s) {
     const rank = Math.max(Number(s.currentRank) || 0, 0);
-    return Math.max(0, rank * 6);
+    const tempStress = Math.max(Number(s?.temphealth) || 0, 0);
+    return Math.max(0, rank * 6 + tempStress);
   }
 
   _calcEliteStressMax(s) {
     const rank = Math.max(Number(s.currentRank) || 0, 0);
-    return Math.max(0, rank * 10);
+    const tempStress = Math.max(Number(s?.temphealth) || 0, 0);
+    return Math.max(0, rank * 10 + tempStress);
   }
 
-  _calcForceShieldMax(s, itemTotals = {}) {
+  _calcForceShieldMax(_s, itemTotals = {}) {
     const shield = Number(itemTotals?.armor?.shield) || 0;
-    const tempStress = Math.max(Number(s?.temphealth) || 0, 0);
-    return Math.max(shield + tempStress, 0);
+    return Math.max(shield, 0);
   }
 
-  _calcGmForceShieldMax(s, itemTotals = {}) {
+  _calcGmForceShieldMax(_s, itemTotals = {}) {
     const shield = Number(itemTotals?.armor?.shield) || 0;
-    const tempStress = Math.max(Number(s?.temphealth) || 0, 0);
-    return Math.max(shield + tempStress, 0);
+    return Math.max(shield, 0);
   }
 
   _calcFlux(s) {
@@ -137,15 +138,33 @@ export class ProjectAndromedaActor extends Actor {
 
   _calcDefPhys(s, itemTotals = {}) {
     const phys = Number(itemTotals?.armor?.physical) || 0;
-    return this._getAbilityDefense(s.abilities?.con?.value) + phys + this._getRankDefense(s);
+    const tempPhys = Number(s.tempphys) || 0;
+    return (
+      this._getAbilityDefense(s.abilities?.con?.value) +
+      phys +
+      this._getRankDefense(s) +
+      tempPhys
+    );
   }
   _calcDefAzure(s, itemTotals = {}) {
     const azure = Number(itemTotals?.armor?.azure) || 0;
-    return this._getAbilityDefense(s.abilities?.int?.value) + azure + this._getRankDefense(s);
+    const tempAzure = Number(s.tempazure) || 0;
+    return (
+      this._getAbilityDefense(s.abilities?.int?.value) +
+      azure +
+      this._getRankDefense(s) +
+      tempAzure
+    );
   }
   _calcDefMent(s, itemTotals = {}) {
     const mental = Number(itemTotals?.armor?.mental) || 0;
-    return this._getAbilityDefense(s.abilities?.spi?.value) + mental + this._getRankDefense(s);
+    const tempMental = Number(s.tempmental) || 0;
+    return (
+      this._getAbilityDefense(s.abilities?.spi?.value) +
+      mental +
+      this._getRankDefense(s) +
+      tempMental
+    );
   }
 
   _getAbilityDefense(abilityValue) {

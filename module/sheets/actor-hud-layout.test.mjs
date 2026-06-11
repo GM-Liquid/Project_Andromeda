@@ -58,7 +58,7 @@ test('HUD stat grid keeps stress and progression columns compact', () => {
 
   assert.match(
     stylesheet,
-    /\.project-andromeda \.andromeda-hud--player \.andromeda-hud__stats-row \{[\s\S]*grid-template-areas:\s*'stress glory'\s*'speed speed';[\s\S]*grid-template-columns:\s*max-content max-content;/
+    /\.project-andromeda \.andromeda-hud--player \.andromeda-hud__stats-row \{[\s\S]*grid-template-areas:\s*'stress glory'\s*'speed archetype';[\s\S]*grid-template-columns:\s*4\.75rem 8rem;/
   );
   assert.match(
     stylesheet,
@@ -120,12 +120,35 @@ test('actor sheet uses fixed chrome with a separate content viewport', () => {
   const stylesheet = readFile('css/project-andromeda.css');
   const actorSheet = readFile('module/sheets/actor-sheet.mjs');
 
+  assert.doesNotMatch(template, /andromeda-edit-mode-toggle/);
+  assert.match(actorSheet, /_syncSheetEditModeHeaderButton/);
+  assert.match(
+    stylesheet,
+    /\.window-app\.project-andromeda\.sheet\.actor \.window-header \{[\s\S]*position:\s*relative;/
+  );
+  assert.match(
+    stylesheet,
+    /\.window-app\.project-andromeda\.sheet\.actor \.window-header \.andromeda-edit-mode-toggle \{[\s\S]*position:\s*absolute;[\s\S]*left:\s*\d+px;/
+  );
+  assert.match(
+    actorSheet,
+    /dblclick\.projectAndromedaEditMode[\s\S]*event\.stopPropagation\(\);/
+  );
   assert.match(template, /<div class='andromeda-sheet-chrome'>/);
   assert.match(template, /<div class='andromeda-sheet-viewport'>/);
   assert.match(template, /<div class='andromeda-sheet-pane-scroll sheet-scrollable'>/);
   assert.match(
     actorSheet,
-    /static get defaultOptions\(\) \{[\s\S]*width:\s*860,[\s\S]*height:\s*790,/
+    /static get defaultOptions\(\) \{[\s\S]*width:\s*860,[\s\S]*height:\s*780,[\s\S]*minWidth:\s*ACTOR_SHEET_MIN_WIDTH,/
+  );
+  assert.match(actorSheet, /const ACTOR_SHEET_MIN_WIDTH = 730;/);
+  assert.match(
+    actorSheet,
+    /setPosition\(position = \{\}\) \{[\s\S]*Math\.max\(Number\(nextPosition\.width\), ACTOR_SHEET_MIN_WIDTH\);/
+  );
+  assert.match(
+    stylesheet,
+    /\.window-app\.project-andromeda\.sheet\.actor \{[\s\S]*min-width:\s*730px;/
   );
   assert.match(
     stylesheet,

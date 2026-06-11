@@ -177,12 +177,15 @@
         "equipped": false,
         "rank": "",
         "usageFrequency": "passive",
-        "activationCost": "",
+        "activationCost": "passive",
         "duration": "",
         "area": "",
         "defense": "",
         "range": "",
         "targets": "",
+        "cooldown": {
+          "used": 0
+        },
         "rules": [],
         "traits": [],
         "details": {}

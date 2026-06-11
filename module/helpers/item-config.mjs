@@ -2,7 +2,7 @@ export const ITEM_BASE_DEFAULTS = {
   description: '',
   rank: '',
   usageFrequency: 'passive',
-  activationCost: '',
+  activationCost: 'passive',
   duration: '',
   area: '',
   defense: '',
@@ -34,6 +34,7 @@ export const ITEM_ACTIVATION_TYPE_LABEL_KEYS = {
   passive: 'MY_RPG.ActivationTypes.Passive',
   action: 'MY_RPG.ActivationTypes.Action',
   maneuver: 'MY_RPG.ActivationTypes.Maneuver',
+  freeAction: 'MY_RPG.ActivationTypes.FreeAction',
   reaction: 'MY_RPG.ActivationTypes.Reaction'
 };
 

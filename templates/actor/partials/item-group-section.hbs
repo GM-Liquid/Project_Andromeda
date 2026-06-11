@@ -1,4 +1,7 @@
-<section class='item-group' data-item-group='{{group.key}}'>
+<section
+  class='item-group {{#if group.isSimple}}item-group--simple{{/if}}'
+  data-item-group='{{group.key}}'
+>
   <div class='item-group__columns'>
     <span class='item-group__column-title'>
       {{#if group.icon}}<i class='{{group.icon}}'></i>{{/if}}
@@ -7,8 +10,10 @@
         <span class='item-group__capacity'>{{group.capacity.value}} / {{group.capacity.max}}</span>
       {{/if}}
     </span>
-    <span>{{localize 'MY_RPG.ItemTableColumns.Skill'}}</span>
-    <span>{{localize 'MY_RPG.ItemTableColumns.Roll'}}</span>
+    {{#unless group.isSimple}}
+      <span>{{localize 'MY_RPG.ItemTableColumns.Check'}}</span>
+      <span>{{localize 'MY_RPG.ItemTableColumns.Activation'}}</span>
+    {{/unless}}
     <span class='item-group__column-actions'>
       <button
         type='button'
@@ -26,7 +31,7 @@
     <ol class='item-list'>
       {{#each group.items as |item|}}
         <li
-          class='item-row {{#if item.equipped}}item-row--equipped{{/if}} {{#if item.isExpanded}}item-row--expanded{{/if}}'
+          class='item-row {{#if item.equipped}}item-row--equipped{{/if}} {{#if item.cooldownUsed}}item-row--cooldown-used{{/if}} {{#if item.isExpanded}}item-row--expanded{{/if}}'
           data-item-id='{{item.id}}'
           data-group-key='{{item.groupKey}}'
         >
@@ -44,8 +49,14 @@
                 <i class='fa-solid fa-chevron-down item-row__toggle-icon'></i>
               </span>
             </div>
-            <div class='item-row__skill'>{{item.skillLabel}}</div>
-            <div class='item-row__roll'>{{item.rollSummary}}</div>
+            {{#unless ../group.isSimple}}
+              <div class='item-row__check'>{{item.checkSummary}}</div>
+              <div class='item-row__activation'>
+                <span class='item-row__activation-cost' title='{{item.activationSummary}}'>
+                  {{item.activationShortSummary}}
+                </span>
+              </div>
+            {{/unless}}
             <div class='item-row__actions' data-item-id='{{item.id}}' data-group-key='{{item.groupKey}}'>
               {{#if item.showQuantity}}
                 <div class='item-quantity-control' aria-label='{{@root.itemControls.quantity}}'>
@@ -80,28 +91,21 @@
                   />
                 </label>
               {{/if}}
-              {{#if item.canRoll}}
+              {{#if item.hasActivationControl}}
                 <button
                   type='button'
-                  class='item-roll item-control'
+                  class='item-activate item-control {{#if item.hasCooldown}}item-activate--trackable{{/if}} {{#if item.cooldownUsed}}item-activate--used{{/if}}'
                   data-item-id='{{item.id}}'
                   data-group-key='{{item.groupKey}}'
-                  title='{{@root.itemControls.roll}}'
+                  data-default-icon='{{item.activationControlDefaultIcon}}'
+                  data-default-title='{{item.activationControlDefaultTitle}}'
+                  title='{{item.activationControlTitle}}'
+                  aria-pressed='{{#if item.cooldownUsed}}true{{else}}false{{/if}}'
                 >
-                  <i class='fa-solid fa-dice-d10'></i>
-                  <span class='sr-only'>{{@root.itemControls.roll}}</span>
+                  <i class='{{item.activationControlIcon}}'></i>
+                  <span class='sr-only'>{{item.activationControlTitle}}</span>
                 </button>
               {{/if}}
-              <button
-                type='button'
-                class='item-chat item-control'
-                data-item-id='{{item.id}}'
-                data-group-key='{{item.groupKey}}'
-                title='{{@root.itemControls.chat}}'
-              >
-                <i class='fa-solid fa-comment-dots'></i>
-                <span class='sr-only'>{{@root.itemControls.chat}}</span>
-              </button>
               <button
                 type='button'
                 class='item-edit item-control'

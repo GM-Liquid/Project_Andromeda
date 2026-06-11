@@ -116,6 +116,12 @@
       "ItemWeapon": "Лист оружия",
       "ItemGeneric": "Лист предмета"
     },
+    "SheetMode": {
+      "Edit": "Правка",
+      "Play": "Игра",
+      "SwitchToEdit": "Перейти в режим редактирования",
+      "SwitchToPlay": "Вернуться в игровой режим"
+    },
     "ItemSheet": {
       "Tabs": {
         "Details": "Сведения",
@@ -317,6 +323,9 @@
       "Delete": "Удалить",
       "Chat": "Отправить в чат",
       "Roll": "Бросок",
+      "Activate": "Активировать",
+      "RollAndMark": "Бросить и отметить использование",
+      "ClearCooldown": "Снять отметку использования",
       "Equip": "Снаряжено",
       "EquipAria": "Переключить статус экипировки",
       "Quantity": "Количество",
@@ -342,7 +351,16 @@
     "ItemTableColumns": {
       "Name": "Название",
       "Skill": "Навык",
-      "Roll": "Бросок"
+      "Roll": "Бросок",
+      "Check": "Проверка",
+      "Activation": "Активация"
+    },
+    "Advancement": {
+      "CanAfford": "Следующее улучшение стоит {cost} очков развития.",
+      "NeedPoints": "Следующее улучшение стоит {cost} очков развития; доступных очков не хватает.",
+      "RankCap": "Достигнут предел текущего ранга.",
+      "CostShort": "Цена {cost}",
+      "Max": "Макс"
     },
     "EquipmentSubtypes": {
       "Gear": "Экипировка",
@@ -359,7 +377,15 @@
       "Passive": "Пассивно",
       "Action": "Действие",
       "Maneuver": "Маневр",
+      "FreeAction": "Свободное действие",
       "Reaction": "Реакция"
+    },
+    "ActivationTypesShort": {
+      "Passive": "Пассив.",
+      "Action": "Действ.",
+      "Maneuver": "Маневр",
+      "FreeAction": "Своб.",
+      "Reaction": "Реакц."
     },
     "ItemDurations": {
       "UntilCanceled": "До отмены",

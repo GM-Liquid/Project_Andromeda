@@ -10,7 +10,7 @@ const LIBRARY_SYNC_OPTION_KEY = 'projectAndromedaLibrarySync';
 const LIBRARY_ITEM_UUID_FLAG = 'libraryItemUuid';
 const LIBRARY_ACTOR_ID_FLAG = 'libraryActorId';
 const LIBRARY_ACTOR_ITEM_ID_FLAG = 'libraryActorItemId';
-const LOCAL_SYSTEM_FIELDS = new Set(['equipped', 'quantity']);
+const LOCAL_SYSTEM_FIELDS = new Set(['cooldown', 'equipped', 'quantity']);
 const SYNCED_ITEM_TYPES = new Set(getItemGroupConfigs().flatMap((config) => config.types));
 
 function renderItemDirectory() {

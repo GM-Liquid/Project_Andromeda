@@ -290,6 +290,99 @@
     "price": 1
   },
   {
+    "id": "iskra",
+    "name": "Искра",
+    "type": "ability",
+    "rank": 1,
+    "skill": "rezonans",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "frequency": "unlimited",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "duration": "untilEndOfScene"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "unlimited",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "single",
+            "defense": "fortitude",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": 2
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Свободным действием создайте или погасите небольшой летающий огонек в пределах 30 м. Он светит до конца сцены, пока вы его не погасите или не создадите новый. Действием бросьте в цель сгусток огня: атака Резонанса против Стойкости, 2 урона.",
+    "shortDescription": "Создайте огонек свободным действием или атакуйте огнем действием.",
+    "price": 1
+  },
+  {
+    "id": "vspyshka",
+    "name": "Вспышка",
+    "type": "ability",
+    "rank": 1,
+    "skill": "rezonans",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "allInArea",
+            "area": {
+              "type": "blast",
+              "value": 15
+            },
+            "defense": "will",
+            "duration": "untilStartOfYourNextTurn",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "specialRule"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Взорвите в выбранной точке резкую вспышку жара и света. Атака Резонанса против Воли каждого противника в малой зоне. При успехе цель не считается скрытой и получает помеху на следующую атаку до начала вашего следующего хода.",
+    "shortDescription": "Раскройте скрытых противников и ослабьте их следующую атаку в малой зоне.",
+    "price": 1
+  },
+  {
     "id": "kristallizatsiya",
     "name": "Кристаллизация",
     "type": "ability",
@@ -550,6 +643,156 @@
     },
     "description": "Поднимите температуру доспеха цели до немыслимых значений. Атака Резонанса против Стойкости. 3 урона. При успехе цель также получает -1 к Стойкости до конца сцены или пока носит этот доспех.",
     "shortDescription": "Поднимите температуру цели до немыслимых значений.",
+    "price": 3
+  },
+  {
+    "id": "ognennyy-udar",
+    "name": "Огненный удар",
+    "type": "ability",
+    "rank": 2,
+    "skill": "rezonans",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "single",
+            "defense": "fortitude",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": 3
+            },
+            {
+              "key": "extraAttack",
+              "attacks": 1
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Обрушьте на цель два удара огня. Совершите две атаки Резонанса против Стойкости по одной или двум целям в пределах 30 м. Каждая атака наносит 3 урона. Вторую атаку вы совершаете даже если первая промахнулась.",
+    "shortDescription": "Две огненные атаки по одной или двум целям.",
+    "price": 3
+  },
+  {
+    "id": "goryashchaya-metka",
+    "name": "Горящая метка",
+    "type": "ability",
+    "rank": 2,
+    "skill": "rezonans",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "single",
+            "defense": "will",
+            "duration": "untilEndOfScene",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": 3
+            },
+            {
+              "key": "specialRule"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Зажгите на цели яркую метку. Атака Резонанса против Воли. 3 урона. При успехе цель не может быть скрытой до конца сцены или пока не потратит действие, чтобы сбить метку.",
+    "shortDescription": "Нанесите урон и не дайте цели скрыться.",
+    "price": 3
+  },
+  {
+    "id": "usilenie-svetom",
+    "name": "Усиление светом",
+    "type": "ability",
+    "rank": 2,
+    "skill": "rezonans",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "single",
+            "trigger": "reactionWindow"
+          },
+          "outcomes": [
+            {
+              "key": "specialRule"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Реакцией, когда союзник в пределах 30 м совершает атаку, подсветите его цель. Союзник добавляет +2 к этой атаке. Вы не можете применить эту способность к своей атаке.",
+    "shortDescription": "Реакцией усильте атаку союзника световой наводкой.",
+    "price": 3
+  },
+  {
+    "id": "ognennyy-shar",
+    "name": "Огненный шар",
+    "type": "ability",
+    "rank": 2,
+    "skill": "rezonans",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "allInArea",
+            "area": {
+              "type": "blast",
+              "value": 15
+            },
+            "defense": "fortitude",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": 3
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Метните огненный шар в точку в пределах 30 м. Атака Резонанса против Стойкости каждого существа в малой зоне. 3 урона.",
+    "shortDescription": "Огненный взрыв с умеренным уроном по малой зоне.",
     "price": 3
   },
   {

@@ -1,3 +1,5 @@
+import { loadFoundryTemplates } from './foundry-compat.mjs';
+
 /**
  * Define a set of template paths to pre-load
  * Pre-loaded templates are compiled and cached for fast access when rendering
@@ -19,5 +21,5 @@ export const preloadHandlebarsTemplates = async function () {
     'systems/project-andromeda/templates/item/weapon-sheet.hbs',
     'systems/project-andromeda/templates/item/generic-sheet.hbs'
   ];
-  return loadTemplates(paths);
+  return loadFoundryTemplates(paths);
 };
