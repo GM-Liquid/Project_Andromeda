@@ -41,6 +41,17 @@ function getSectionBody(document, heading) {
   return document.slice(sectionStart, sectionEnd);
 }
 
+function isWeaponCatalogItem(item) {
+  const tags = new Set(item.tags ?? []);
+  return (
+    item.skill === 'strelba' ||
+    item.skill === 'blizhniy_boy' ||
+    tags.has('blizhnee') ||
+    tags.has('strelkovoe') ||
+    tags.has('metatelnoe')
+  );
+}
+
 test(
   'syncBook preserves line breaks in character sheet examples',
   { concurrency: false },
@@ -98,6 +109,7 @@ test(
       /^\| Название \| Ранг \| Краткое описание \| Полное описание \| Частота использования \| Навык \| Цена в действиях \| Дальность \| Цели \| Зона \| Защита \| Длительность \| Цена в кредитах \|$/m
     );
     assert.match(generated, /^\|.*КД-2.*\|$/m);
+    assert.match(generated, /^## Оружие$/m);
     assert.match(generated, /^## Снаряжение$/m);
     assert.match(generated, /^## Способности$/m);
   }
@@ -443,15 +455,24 @@ test(
     const abilitiesCatalog = JSON.parse(
       await readFile(resolve(repoRoot, 'data', 'gear', 'catalog', 'abilities.json'), 'utf8')
     );
-    const equipmentEntry = equipmentCatalog.find((item) => item.status !== 'deprecated');
+    const weaponEntry = equipmentCatalog.find(
+      (item) => item.status !== 'deprecated' && isWeaponCatalogItem(item)
+    );
+    const equipmentEntry = equipmentCatalog.find(
+      (item) => item.status !== 'deprecated' && !isWeaponCatalogItem(item)
+    );
     const abilityEntry = abilitiesCatalog.find((item) => item.status !== 'deprecated');
 
+    assert.ok(weaponEntry, 'expected at least one visible weapon entry');
     assert.ok(equipmentEntry, 'expected at least one visible equipment entry');
     assert.ok(abilityEntry, 'expected at least one visible ability entry');
 
+    const weaponSection = getSectionBody(generated, 'Оружие');
     const equipmentSection = getSectionBody(generated, 'Снаряжение');
     const abilitiesSection = getSectionBody(generated, 'Способности');
 
+    assert.match(weaponSection, new RegExp(escapeRegExp(weaponEntry.name), 'u'));
+    assert.doesNotMatch(equipmentSection, new RegExp(escapeRegExp(weaponEntry.name), 'u'));
     assert.match(equipmentSection, new RegExp(escapeRegExp(equipmentEntry.name), 'u'));
     assert.match(abilitiesSection, new RegExp(escapeRegExp(abilityEntry.name), 'u'));
   }

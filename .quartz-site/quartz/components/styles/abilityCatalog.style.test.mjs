@@ -37,6 +37,27 @@ test("ability catalog balances left and right outer spacing for table rows", () 
   assert.match(styleSource, /&__description-cell\s*\{[\s\S]*padding-inline-end:\s*0\.35rem;/)
 })
 
+test("ability catalog separates rows, centers ranks, and uses the compact disclosure icon", () => {
+  assert.match(styleSource, /table\s*\{[\s\S]*border-collapse:\s*separate;/)
+  assert.match(styleSource, /table\s*\{[\s\S]*border-spacing:\s*0\s+0\.375rem;/)
+  assert.match(
+    styleSource,
+    /\.rulebook-ability-catalog__table-shell\s*>\s*table\s*\{[\s\S]*border-collapse:\s*separate;/,
+  )
+  assert.match(
+    styleSource,
+    /thead th:nth-child\(1\),\s*tbody td\[data-column="rank"\]\s*\{[\s\S]*text-align:\s*center;/,
+  )
+  assert.match(styleSource, /&__toggle-icon\s*\{[\s\S]*width:\s*0\.72rem;/)
+  assert.match(styleSource, /&__toggle-indicator\s*\{[\s\S]*width:\s*1\.375rem;/)
+})
+
+test("ability catalog highlights reset with the approved amber outline treatment", () => {
+  assert.match(styleSource, /--ability-catalog-reset:\s*#c77a26;/)
+  assert.match(styleSource, /&__reset\s*\{[\s\S]*border-color:\s*var\(--ability-catalog-reset\);/)
+  assert.match(styleSource, /&__reset\s*\{[\s\S]*background:\s*var\(--ability-catalog-reset-surface\);/)
+})
+
 test("ability catalog styles the expanded fact block separately from the description copy", () => {
   assert.match(styleSource, /&__detail-facts\s*\{[\s\S]*display:\s*grid;[\s\S]*border-bottom:/)
   assert.match(styleSource, /&__detail-fact-line\s*\{[\s\S]*font-weight:\s*400;/)

@@ -100,6 +100,8 @@ test('buildAbilityCatalogHtml renders a defense filter instead of sort controls'
 
   const [entry] = extractSerializedEntries(html);
 
+  assert.match(html, />\s*Сброс\s*</u);
+  assert.doesNotMatch(html, />\s*Reset\s*</u);
   assert.match(html, /Против Защиты/u);
   assert.match(html, /value="Стойкость"/u);
   assert.match(html, /value="Контроль"/u);

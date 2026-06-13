@@ -253,7 +253,7 @@
   },
   {
     "id": "blackout",
-    "name": "Blackout",
+    "name": "Блэкаут",
     "type": "ability",
     "rank": 1,
     "skill": null,

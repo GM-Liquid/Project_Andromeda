@@ -53,6 +53,7 @@ const legacyUsageKeyMap = {
 
 const usageValueLabels = {
   frequency: {
+    atWill: 'По желанию',
     passive: 'Постоянно',
     unlimited: 'Неограниченно',
     oncePerScene: '1/сцену',
@@ -354,6 +355,10 @@ function formatTargetsValue(value) {
     switch (normalized) {
       case 'allInArea':
         return 'Все цели в зоне';
+      case 'allInLine':
+        return 'Все цели на линии';
+      case 'area':
+        return 'Зона';
       case 'self':
         return 'Вы';
       case 'single':
@@ -417,6 +422,10 @@ function formatDurationValue(value) {
         return 'До конца сцены';
       case 'untilEndOfTurn':
         return 'До конца хода';
+      case 'untilCanceled':
+        return 'Пока не отмените';
+      case 'untilMove':
+        return 'Пока вы не смените позицию';
       case 'untilStartOfYourNextTurn':
         return 'До начала вашего следующего хода';
       case 'whileMaintained':
@@ -435,6 +444,10 @@ function formatDurationValue(value) {
       return 'До конца сцены';
     case 'untilEndOfTurn':
       return 'До конца хода';
+    case 'untilCanceled':
+      return 'Пока не отмените';
+    case 'untilMove':
+      return 'Пока вы не смените позицию';
     case 'untilStartOfYourNextTurn':
       return 'До начала вашего следующего хода';
     case 'whileMaintained':
@@ -745,6 +758,16 @@ function getEquipmentTypeLabel(item) {
   return 'Снаряжение';
 }
 
+function isWeaponCatalogItem(item) {
+  const skillKey = getGearSkillKey(item?.skill || getGearQuartzValue(item, 'skill'));
+  if (skillKey === 'blizhniy_boy' || skillKey === 'strelba') {
+    return true;
+  }
+
+  const tags = new Set(item.tags ?? []);
+  return tags.has('blizhnee') || tags.has('strelkovoe') || tags.has('metatelnoe');
+}
+
 function getEquipmentDamageValue(item) {
   const propertyDamage = getGearPropertyValue(item, 'damage');
   if (propertyDamage) {
@@ -794,23 +817,68 @@ function buildArmorCatalogTable(catalog) {
 }
 
 function buildEquipmentCatalogTable(catalog) {
-  const rows = getRenderableGearCatalogItems(catalog).map((item) => [
-    getEquipmentTypeLabel(item),
-    item.name,
-    item.rank,
-    getGearSkillValue(item),
-    getGearQuartzValue(item, 'damage') || getEquipmentDamageValue(item),
-    getGearUsageOrQuartzValue(item, 'frequency'),
-    getGearUsageOrQuartzValue(item, 'actions'),
-    getGearUsageOrQuartzValue(item, 'range'),
-    getGearUsageOrQuartzValue(item, 'targets'),
-    getGearUsageOrQuartzValue(item, 'area'),
-    getGearUsageOrQuartzValue(item, 'defense'),
-    getGearUsageOrQuartzValue(item, 'duration'),
-    getGearShortDescription(item),
-    getGearDescription(item),
-    getGearCatalogPrice(item)
-  ]);
+  const rows = getRenderableGearCatalogItems(catalog)
+    .filter((item) => !isWeaponCatalogItem(item))
+    .map((item) => [
+      getEquipmentTypeLabel(item),
+      item.name,
+      item.rank,
+      getGearSkillValue(item),
+      getGearQuartzValue(item, 'damage') || getEquipmentDamageValue(item),
+      getGearUsageOrQuartzValue(item, 'frequency'),
+      getGearUsageOrQuartzValue(item, 'actions'),
+      getGearUsageOrQuartzValue(item, 'range'),
+      getGearUsageOrQuartzValue(item, 'targets'),
+      getGearUsageOrQuartzValue(item, 'area'),
+      getGearUsageOrQuartzValue(item, 'defense'),
+      getGearUsageOrQuartzValue(item, 'duration'),
+      getGearShortDescription(item),
+      getGearDescription(item),
+      getGearCatalogPrice(item)
+    ]);
+
+  return renderMarkdownTable(
+    [
+      'Тип',
+      'Название',
+      'Ранг',
+      'Навык',
+      'Урон',
+      'Частота использования',
+      'Цена в действиях',
+      'Дальность',
+      'Цели',
+      'Зона',
+      'Защита',
+      'Длительность',
+      'Краткое описание',
+      'Полное описание',
+      'Цена'
+    ],
+    rows
+  );
+}
+
+function buildWeaponCatalogTable(catalog) {
+  const rows = getRenderableGearCatalogItems(catalog)
+    .filter(isWeaponCatalogItem)
+    .map((item) => [
+      getEquipmentTypeLabel(item),
+      item.name,
+      item.rank,
+      getGearSkillValue(item),
+      getGearQuartzValue(item, 'damage') || getEquipmentDamageValue(item),
+      getGearUsageOrQuartzValue(item, 'frequency'),
+      getGearUsageOrQuartzValue(item, 'actions'),
+      getGearUsageOrQuartzValue(item, 'range'),
+      getGearUsageOrQuartzValue(item, 'targets'),
+      getGearUsageOrQuartzValue(item, 'area'),
+      getGearUsageOrQuartzValue(item, 'defense'),
+      getGearUsageOrQuartzValue(item, 'duration'),
+      getGearShortDescription(item),
+      getGearDescription(item),
+      getGearCatalogPrice(item)
+    ]);
 
   return renderMarkdownTable(
     [
@@ -915,6 +983,7 @@ function transformAbilitiesEquipmentSource(source, gearCatalogs) {
     ['Снаряжение', buildEquipmentCatalogTable(gearCatalogs.equipment)],
     ['Способности', buildAbilityCatalogTable(gearCatalogs.abilities)]
   ]);
+  const weaponCatalogTable = buildWeaponCatalogTable(gearCatalogs.equipment);
   const lines = source.split('\n');
   const nextLines = [];
   let sectionHeading = null;
@@ -928,13 +997,17 @@ function transformAbilitiesEquipmentSource(source, gearCatalogs) {
     }
 
     const cleanedBody = trimSectionLines(stripMarkdownTableBlocks(sectionBody));
+    const sectionTitle = sectionHeading.replace(/^##\s+/u, '').trim();
+    if (sectionTitle === 'Снаряжение' && weaponCatalogTable) {
+      nextLines.push('## Оружие', '', weaponCatalogTable, '');
+    }
+
     nextLines.push(sectionHeading);
 
     if (cleanedBody.length > 0) {
       nextLines.push('', ...cleanedBody);
     }
 
-    const sectionTitle = sectionHeading.replace(/^##\s+/u, '').trim();
     const injectedTable = sectionTableMap.get(sectionTitle);
     if (injectedTable) {
       nextLines.push('', injectedTable, '');

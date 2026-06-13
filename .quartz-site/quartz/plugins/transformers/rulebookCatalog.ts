@@ -1467,7 +1467,7 @@ function renderCatalogToolbar(entriesCount: number) {
         ${renderCatalogChevronIcon(`${abilityCatalogClass}__filters-toggle-icon`)}
       </button>
       <button type="button" class="${abilityCatalogClass}__reset" data-catalog-reset>
-        Reset
+        Сброс
       </button>
       <p class="${abilityCatalogClass}__count" data-catalog-count>
         Показано: ${entriesCount}

@@ -57,7 +57,7 @@ class DiagramPanZoom {
     // Zoom controls
     const zoomIn = this.createButton("+", () => this.zoom(0.1))
     const zoomOut = this.createButton("-", () => this.zoom(-0.1))
-    const resetBtn = this.createButton("Reset", () => this.resetTransform())
+    const resetBtn = this.createButton("Сброс", () => this.resetTransform())
 
     controls.appendChild(zoomOut)
     controls.appendChild(resetBtn)

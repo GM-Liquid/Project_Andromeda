@@ -148,7 +148,7 @@ test("buildAbilityCatalogHtml renders the compact toolbar, new frequency label, 
   assert.ok(html.includes("data-catalog-filters-toggle"))
   assert.ok(html.includes("data-catalog-filters-panel"))
   assert.ok(html.includes("rulebook-ability-catalog__filters-toggle-icon"))
-  assert.ok(html.includes("Reset"))
+  assert.ok(html.includes("Сброс"))
   assert.ok(html.includes("\u0421\u043e\u0440\u0442\u0438\u0440\u043e\u0432\u043a\u0430"))
   assert.ok(html.includes("\u0420\u0430\u043d\u0433"))
   assert.ok(html.includes("\u0427\u0430\u0441\u0442\u043e\u0442\u0430 \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u043d\u0438\u044f"))
