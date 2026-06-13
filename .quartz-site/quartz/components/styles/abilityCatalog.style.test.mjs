@@ -39,11 +39,21 @@ test("ability catalog balances left and right outer spacing for table rows", () 
 
 test("ability catalog separates rows, centers ranks, and uses the compact disclosure icon", () => {
   assert.match(styleSource, /table\s*\{[\s\S]*border-collapse:\s*separate;/)
-  assert.match(styleSource, /table\s*\{[\s\S]*border-spacing:\s*0\s+0\.375rem;/)
+  assert.match(styleSource, /table\s*\{[\s\S]*border-spacing:\s*0\s+0\.55rem;/)
+  assert.match(styleSource, /&__table-shell\s*\{[\s\S]*padding:\s*0\.25rem\s+0\.45rem\s+0\.45rem;/)
+  assert.match(styleSource, /&__summary-row[\s\S]*td\s*\{[\s\S]*border-top:/)
+  assert.match(styleSource, /&__summary-row[\s\S]*td:first-child\s*\{[\s\S]*border-radius:\s*0\.7rem\s+0\s+0\s+0\.7rem;/)
+  assert.match(styleSource, /&__summary-row[\s\S]*td:last-child\s*\{[\s\S]*border-radius:\s*0\s+0\.7rem\s+0\.7rem\s+0;/)
+  assert.match(styleSource, /&__detail-row\s+td\s*\{[\s\S]*border-radius:\s*0\s+0\s+0\.7rem\s+0\.7rem;/)
   assert.match(
     styleSource,
     /\.rulebook-ability-catalog__table-shell\s*>\s*table\s*\{[\s\S]*border-collapse:\s*separate;/,
   )
+  assert.match(
+    styleSource,
+    /\.rulebook-ability-catalog__table-shell\s*>\s*table\s*\{[\s\S]*border-spacing:\s*0\s+0\.55rem;/,
+  )
+  assert.match(styleSource, /\.rulebook-ability-catalog\s+tr\s*\{[\s\S]*border-bottom:\s*0;/)
   assert.match(
     styleSource,
     /thead th:nth-child\(1\),\s*tbody td\[data-column="rank"\]\s*\{[\s\S]*text-align:\s*center;/,
