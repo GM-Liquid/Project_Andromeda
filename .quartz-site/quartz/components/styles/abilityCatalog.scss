@@ -1,11 +1,8 @@
 .rulebook-ability-catalog {
   --ability-catalog-rect-radius: 0.7rem;
   --ability-catalog-surface: color-mix(in srgb, var(--light) 88%, white 12%);
-  --ability-catalog-card: color-mix(in srgb, var(--light) 55%, white 45%);
-  --ability-catalog-track: color-mix(in srgb, var(--light) 80%, var(--lightgray) 20%);
-  --ability-catalog-card-hover: color-mix(in srgb, var(--secondary) 7%, var(--ability-catalog-card) 93%);
-  --ability-catalog-card-active: color-mix(in srgb, var(--secondary) 13%, white 87%);
-  --ability-catalog-detail: color-mix(in srgb, var(--secondary) 7%, white 93%);
+  --ability-catalog-card: color-mix(in srgb, var(--light) 12%, white 88%);
+  --ability-catalog-card-hover: color-mix(in srgb, var(--secondary) 8%, white 92%);
   --ability-catalog-surface-strong: color-mix(in srgb, var(--highlight) 18%, var(--light) 82%);
   --ability-catalog-reset: #c77a26;
   --ability-catalog-reset-dark: #8a3d10;
@@ -294,10 +291,7 @@
 
   &__table-shell {
     overflow-x: auto;
-    padding: 0 0.55rem;
-    border: 1px solid var(--lightgray);
-    border-radius: 1rem;
-    background: var(--ability-catalog-track);
+    background: transparent;
   }
 
   table {
@@ -310,8 +304,8 @@
 
   thead th {
     padding: 0.85rem 0.75rem;
-    border-bottom: 1px solid var(--lightgray);
-    background: color-mix(in srgb, var(--highlight) 30%, var(--light) 70%);
+    border-bottom: 2px solid color-mix(in srgb, var(--secondary) 28%, var(--lightgray) 72%);
+    background: var(--ability-catalog-card);
     color: var(--secondary);
     font-weight: 700;
     letter-spacing: 0.05em;
@@ -376,7 +370,7 @@
     }
 
     &.is-expanded td {
-      background: var(--ability-catalog-card-active);
+      background: var(--ability-catalog-card-hover);
     }
 
     td:first-child {
@@ -509,7 +503,7 @@
   }
 
   &__detail-row td {
-    background: var(--ability-catalog-detail);
+    background: var(--ability-catalog-card-hover);
     border-radius: var(--ability-catalog-rect-radius);
     box-shadow: inset 3px 0 0 var(--secondary);
   }
@@ -630,8 +624,7 @@ body[data-rulebook="true"] article .rulebook-ability-catalog {
 
 @media all and (max-width: 800px) {
   .rulebook-ability-catalog {
-    &__controls,
-    &__table-shell {
+    &__controls {
       border-radius: 0.85rem;
     }
 
