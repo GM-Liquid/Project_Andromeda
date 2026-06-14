@@ -1,7 +1,11 @@
 .rulebook-ability-catalog {
-  --ability-catalog-rect-radius: 0.6rem;
-  --ability-catalog-surface: color-mix(in srgb, var(--light) 70%, white 30%);
-  --ability-catalog-gap: color-mix(in srgb, var(--light) 96%, var(--lightgray) 4%);
+  --ability-catalog-rect-radius: 0.7rem;
+  --ability-catalog-surface: color-mix(in srgb, var(--light) 88%, white 12%);
+  --ability-catalog-card: color-mix(in srgb, var(--light) 55%, white 45%);
+  --ability-catalog-track: color-mix(in srgb, var(--light) 80%, var(--lightgray) 20%);
+  --ability-catalog-card-hover: color-mix(in srgb, var(--secondary) 7%, var(--ability-catalog-card) 93%);
+  --ability-catalog-card-active: color-mix(in srgb, var(--secondary) 13%, white 87%);
+  --ability-catalog-detail: color-mix(in srgb, var(--secondary) 7%, white 93%);
   --ability-catalog-surface-strong: color-mix(in srgb, var(--highlight) 18%, var(--light) 82%);
   --ability-catalog-reset: #c77a26;
   --ability-catalog-reset-dark: #8a3d10;
@@ -290,16 +294,17 @@
 
   &__table-shell {
     overflow-x: auto;
+    padding: 0 0.55rem;
     border: 1px solid var(--lightgray);
     border-radius: 1rem;
-    background: var(--ability-catalog-gap);
+    background: var(--ability-catalog-track);
   }
 
   table {
     width: 100%;
     min-width: 0;
     border-collapse: separate;
-    border-spacing: 0;
+    border-spacing: 0 0.55rem;
     table-layout: fixed;
   }
 
@@ -318,14 +323,20 @@
 
   tbody td {
     padding: 0.85rem 0.75rem;
-    border-bottom: 0.55rem solid transparent;
-    background: var(--ability-catalog-surface);
-    background-clip: padding-box;
+    background: var(--ability-catalog-card);
     vertical-align: middle;
   }
 
   tr {
     border-bottom: 0;
+  }
+
+  thead th:first-child {
+    border-radius: var(--ability-catalog-rect-radius) 0 0 var(--ability-catalog-rect-radius);
+  }
+
+  thead th:last-child {
+    border-radius: 0 var(--ability-catalog-rect-radius) var(--ability-catalog-rect-radius) 0;
   }
 
   thead th:first-child,
@@ -353,7 +364,7 @@
     }
 
     &:hover td {
-      background: color-mix(in srgb, var(--highlight) 18%, var(--light) 82%);
+      background: var(--ability-catalog-card-hover);
     }
 
     &:focus-visible {
@@ -361,12 +372,11 @@
     }
 
     &:focus-visible td {
-      background: color-mix(in srgb, var(--highlight) 24%, var(--light) 76%);
+      background: var(--ability-catalog-card-hover);
     }
 
     &.is-expanded td {
-      border-bottom-width: 0;
-      background: color-mix(in srgb, var(--highlight) 34%, var(--light) 66%);
+      background: var(--ability-catalog-card-active);
     }
 
     td:first-child {
@@ -375,14 +385,6 @@
 
     td:last-child {
       border-radius: 0 var(--ability-catalog-rect-radius) var(--ability-catalog-rect-radius) 0;
-    }
-
-    &.is-expanded td:first-child {
-      border-radius: var(--ability-catalog-rect-radius) 0 0 0;
-    }
-
-    &.is-expanded td:last-child {
-      border-radius: 0 var(--ability-catalog-rect-radius) 0 0;
     }
 
     td:first-child {
@@ -507,18 +509,9 @@
   }
 
   &__detail-row td {
-    padding-top: 0;
-    border-bottom: 0.55rem solid transparent;
-    background: color-mix(in srgb, var(--highlight) 16%, var(--light) 84%);
-    background-clip: padding-box;
-  }
-
-  &__detail-row.is-expanded td {
-    box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--secondary) 18%, var(--lightgray) 82%);
-  }
-
-  &__detail-row td {
-    border-radius: 0 0 var(--ability-catalog-rect-radius) var(--ability-catalog-rect-radius);
+    background: var(--ability-catalog-detail);
+    border-radius: var(--ability-catalog-rect-radius);
+    box-shadow: inset 3px 0 0 var(--secondary);
   }
 
   &__detail-body {
@@ -587,7 +580,7 @@
 
 .rulebook-ability-catalog__table-shell > table {
   border-collapse: separate;
-  border-spacing: 0;
+  border-spacing: 0 0.55rem;
 }
 
 .rulebook-ability-catalog input.rulebook-ability-catalog__dropdown-checkbox {
