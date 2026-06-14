@@ -38,13 +38,14 @@ test("ability catalog balances left and right outer spacing for table rows", () 
 })
 
 test("ability catalog separates rows, centers ranks, and uses the compact disclosure icon", () => {
-  assert.match(styleSource, /table\s*\{[\s\S]*border-collapse:\s*separate;/)
-  assert.match(styleSource, /table\s*\{[\s\S]*border-spacing:\s*0\s+0\.55rem;/)
-  assert.match(styleSource, /tbody td\s*\{[\s\S]*background:\s*var\(--ability-catalog-card\);/)
+  // Row gaps are driven by a single variable, asserted on the wrapper-level
+  // selector that outranks Quartz's `border-collapse: collapse` default.
+  assert.match(styleSource, /--ability-catalog-row-gap:\s*0\.55rem;/)
   assert.match(
     styleSource,
-    /\.rulebook-ability-catalog__table-shell\s*>\s*table\s*\{[\s\S]*border-spacing:\s*0\s+0\.55rem;/,
+    /\.rulebook-ability-catalog\s+\.table-container\s*>\s*table\s*\{[\s\S]*border-collapse:\s*separate;[\s\S]*border-spacing:\s*0\s+var\(--ability-catalog-row-gap\);/,
   )
+  assert.match(styleSource, /tbody td\s*\{[\s\S]*background:\s*var\(--ability-catalog-card\);/)
   assert.match(
     styleSource,
     /thead th:nth-child\(1\),\s*tbody td\[data-column="rank"\]\s*\{[\s\S]*text-align:\s*center;/,
