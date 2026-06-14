@@ -1,6 +1,7 @@
 .rulebook-ability-catalog {
   --ability-catalog-rect-radius: 0.6rem;
-  --ability-catalog-surface: color-mix(in srgb, var(--light) 88%, white 12%);
+  --ability-catalog-surface: color-mix(in srgb, var(--light) 70%, white 30%);
+  --ability-catalog-gap: color-mix(in srgb, var(--light) 96%, var(--lightgray) 4%);
   --ability-catalog-surface-strong: color-mix(in srgb, var(--highlight) 18%, var(--light) 82%);
   --ability-catalog-reset: #c77a26;
   --ability-catalog-reset-dark: #8a3d10;
@@ -291,7 +292,7 @@
     overflow-x: auto;
     border: 1px solid var(--lightgray);
     border-radius: 1rem;
-    background: color-mix(in srgb, var(--light) 92%, white 8%);
+    background: var(--ability-catalog-gap);
   }
 
   table {
