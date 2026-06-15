@@ -1492,46 +1492,51 @@ function renderCatalogFiltersPanel(filters: RulebookCatalogFilterDefinition[]) {
   `;
 }
 
-function renderCatalogRows(entries: RulebookCatalogEntry[], expandedEntries = new Set<string>()) {
-  return entries
-    .map(
-      (entry) => `
-        <tr
-          class="${abilityCatalogClass}__summary-row${expandedEntries.has(entry.id) ? ' is-expanded' : ''}"
-          data-entry-summary="${entry.id}"
-          data-entry-expanded="${expandedEntries.has(entry.id) ? 'true' : 'false'}"
-          tabindex="0"
-        >
-          <td data-column="rank">${renderCatalogValue(entry.rank)}</td>
-          <td data-column="name">
-            <div class="${abilityCatalogClass}__name-block">
-              <strong>${escapeHtml(entry.name)}</strong>
-              ${renderCatalogMetaChips(entry)}
+function renderCatalogCard(entry: RulebookCatalogEntry, expanded: boolean) {
+  return `
+        <div class="${abilityCatalogClass}__card${expanded ? ' is-expanded' : ''}" role="presentation">
+          <div
+            class="${abilityCatalogClass}__summary-row${expanded ? ' is-expanded' : ''}"
+            role="row"
+            data-entry-summary="${entry.id}"
+            data-entry-expanded="${expanded ? 'true' : 'false'}"
+            aria-expanded="${expanded ? 'true' : 'false'}"
+            tabindex="0"
+          >
+            <div class="${abilityCatalogClass}__cell" data-column="rank" role="cell">${renderCatalogValue(entry.rank)}</div>
+            <div class="${abilityCatalogClass}__cell" data-column="name" role="cell">
+              <div class="${abilityCatalogClass}__name-block">
+                <strong>${escapeHtml(entry.name)}</strong>
+                ${renderCatalogMetaChips(entry)}
+              </div>
             </div>
-          </td>
-          <td data-column="price">${renderCatalogPrice(entry.price)}</td>
-          <td data-column="description">
-            <div class="${abilityCatalogClass}__description-cell">
-              <p class="${abilityCatalogClass}__description-preview">${renderCatalogValue(entry.previewDescription)}</p>
-              ${renderCatalogToggleIndicator()}
+            <div class="${abilityCatalogClass}__cell" data-column="price" role="cell">${renderCatalogPrice(entry.price)}</div>
+            <div class="${abilityCatalogClass}__cell" data-column="description" role="cell">
+              <div class="${abilityCatalogClass}__description-cell">
+                <p class="${abilityCatalogClass}__description-preview">${renderCatalogValue(entry.previewDescription)}</p>
+                ${renderCatalogToggleIndicator()}
+              </div>
             </div>
-          </td>
-        </tr>
-        <tr class="${abilityCatalogClass}__detail-row${expandedEntries.has(entry.id) ? ' is-expanded' : ''}" data-entry-detail="${entry.id}" ${
-          expandedEntries.has(entry.id) ? '' : 'hidden'
-        }>
-          <td colspan="4">
-            <div class="${abilityCatalogClass}__detail-body">
+          </div>
+          <div
+            class="${abilityCatalogClass}__detail-row${expanded ? ' is-expanded' : ''}"
+            role="row"
+            data-entry-detail="${entry.id}"
+            ${expanded ? '' : 'hidden'}
+          >
+            <div class="${abilityCatalogClass}__detail-body" role="cell">
               ${renderCatalogDetailTags(entry)}
               <div class="${abilityCatalogClass}__detail-copy">
                 <p>${renderCatalogValue(entry.fullDescription)}</p>
               </div>
             </div>
-          </td>
-        </tr>
-      `
-    )
-    .join('');
+          </div>
+        </div>
+      `;
+}
+
+function renderCatalogRows(entries: RulebookCatalogEntry[], expandedEntries = new Set<string>()) {
+  return entries.map((entry) => renderCatalogCard(entry, expandedEntries.has(entry.id))).join('');
 }
 
 function buildRulebookCatalogModel(kind: RulebookCatalogKind, headers: string[], rows: string[][]) {
@@ -1562,19 +1567,17 @@ export function buildRulebookCatalogHtml(
       </div>
 
       <div class="${abilityCatalogClass}__table-shell">
-        <table>
-          <thead>
-            <tr>
-              <th>Ранг</th>
-              <th>Название</th>
-              <th>Цена</th>
-              <th>Описание</th>
-            </tr>
-          </thead>
-          <tbody data-catalog-body>
+        <div class="${abilityCatalogClass}__table" role="table">
+          <div class="${abilityCatalogClass}__head" role="row">
+            <div class="${abilityCatalogClass}__col" data-column="rank" role="columnheader">Ранг</div>
+            <div class="${abilityCatalogClass}__col" data-column="name" role="columnheader">Название</div>
+            <div class="${abilityCatalogClass}__col" data-column="price" role="columnheader">Цена</div>
+            <div class="${abilityCatalogClass}__col" data-column="description" role="columnheader">Описание</div>
+          </div>
+          <div class="${abilityCatalogClass}__list" data-catalog-body role="rowgroup">
             ${renderCatalogRows(model.entries)}
-          </tbody>
-        </table>
+          </div>
+        </div>
       </div>
 
       <script type="application/json" class="${abilityCatalogClass}__data">${serializeCatalogData(model.entries)}</script>

@@ -56,11 +56,14 @@ const detailedArmorHeaders = [
 const weaponHeaders = ['Тип', 'Название', 'Цена', 'Ранг', 'Навык', 'Урон', 'Описание'];
 
 function getSummaryRow(html: string) {
-  return (
-    [...html.matchAll(/<tr[\s\S]*?<\/tr>/g)]
-      .map((match) => match[0])
-      .find((row) => row.includes('class="rulebook-ability-catalog__summary-row"')) ?? ''
-  );
+  // The summary is now a <div>; slice from its marker to the sibling detail row.
+  const start = html.indexOf('class="rulebook-ability-catalog__summary-row"');
+  if (start === -1) {
+    return '';
+  }
+
+  const end = html.indexOf('rulebook-ability-catalog__detail-row', start);
+  return end === -1 ? html.slice(start) : html.slice(start, end);
 }
 
 function countMetaChips(summaryRow: string) {

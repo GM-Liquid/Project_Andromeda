@@ -62,11 +62,14 @@ const combinedEquipmentHeaders = [
 const simplePriceHeaders = ["Название", "Ранг", "Описание", "Цена:"]
 
 function getFirstSummaryRow(html: string) {
-  return (
-    [...html.matchAll(/<tr[\s\S]*?<\/tr>/g)]
-      .map((match) => match[0])
-      .find((row) => row.includes('class="rulebook-ability-catalog__summary-row"')) ?? ""
-  )
+  // The summary is now a <div>; slice from its marker to the sibling detail row.
+  const start = html.indexOf('class="rulebook-ability-catalog__summary-row"')
+  if (start === -1) {
+    return ""
+  }
+
+  const end = html.indexOf("rulebook-ability-catalog__detail-row", start)
+  return end === -1 ? html.slice(start) : html.slice(start, end)
 }
 
 test("isAbilityCatalogTable matches the supported abilities table headers", () => {
@@ -141,7 +144,9 @@ test("buildAbilityCatalogHtml renders the compact toolbar, new frequency label, 
     ],
   ])
 
-  const headerBlock = html.match(/<thead>[\s\S]*?<\/thead>/)?.[0] ?? ""
+  const headStart = html.indexOf('class="rulebook-ability-catalog__head"')
+  const headEnd = html.indexOf('class="rulebook-ability-catalog__list"', headStart)
+  const headerBlock = headStart === -1 ? "" : html.slice(headStart, headEnd === -1 ? undefined : headEnd)
   const firstSummaryRow = getFirstSummaryRow(html)
 
   assert.ok(html.includes("\u041f\u043e\u0438\u0441\u043a \u043f\u043e \u043d\u0430\u0437\u0432\u0430\u043d\u0438\u044e \u0438 \u043e\u043f\u0438\u0441\u0430\u043d\u0438\u044e"))
@@ -316,9 +321,11 @@ test("buildRulebookCatalogHtml renders merged equipment with skill tags and a '�
     ["Имплант", "Керезников", "1", "", "", "Ускоритель реакции для пользователя.", "160"],
     ["Стрелковое", "Игла", "2", "Стрельба", "4", "Точная снайперская винтовка.", "780"],
   ])
-  const summaryRows = [...html.matchAll(/<tr[\s\S]*?<\/tr>/g)]
-    .map((match) => match[0])
-    .filter((row) => row.includes('class="rulebook-ability-catalog__summary-row"'))
+  const summaryRows = [
+    ...html.matchAll(
+      /class="rulebook-ability-catalog__summary-row"[\s\S]*?(?=rulebook-ability-catalog__detail-row)/g,
+    ),
+  ].map((match) => match[0])
 
   assert.equal(summaryRows.length, 2)
   assert.ok(html.includes('data-filter-dropdown="rank"'))

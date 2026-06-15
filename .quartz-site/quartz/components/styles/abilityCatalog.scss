@@ -1,6 +1,9 @@
 .rulebook-ability-catalog {
   --ability-catalog-rect-radius: 0.7rem;
   --ability-catalog-row-gap: 0.55rem;
+  // Single source of truth for column widths: the header legend and every
+  // summary line share it so columns stay aligned without a real <table>.
+  --ability-catalog-columns: 2.5rem 12.75rem 5.75rem minmax(0, 1fr);
   --ability-catalog-surface: color-mix(in srgb, var(--light) 88%, white 12%);
   --ability-catalog-card: var(--ability-catalog-surface);
   --ability-catalog-card-hover: color-mix(in srgb, var(--secondary) 12%, var(--ability-catalog-surface) 88%);
@@ -297,139 +300,118 @@
     background: transparent;
   }
 
-  // Box-level table props that don't collide with Quartz live here.
-  // `border-collapse` / `border-spacing` are forced by Quartz's
-  // `.table-container > table` rule, so they're (re)asserted at the end of
-  // this file on a selector specific enough to win.
-  table {
-    width: 100%;
+  // Vertical stack: the flex `gap` is the ONLY source of row spacing, so it only
+  // ever sits between cards (and below the header) — never inside an expanded
+  // entry. That is what removes the wasted gap the old table had. Both the table
+  // (header ↔ list) and the list (card ↔ card) carry the same gap.
+  &__table,
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ability-catalog-row-gap);
     min-width: 0;
-    table-layout: fixed;
   }
 
-  thead th {
-    padding: 0.85rem 0.75rem;
-    border-top: 1px solid var(--ability-catalog-border);
-    border-bottom: 1px solid var(--ability-catalog-border);
+  // Header legend and every summary line share one column template so their
+  // columns line up across cards even though there is no real <table>.
+  &__head,
+  &__summary-row {
+    display: grid;
+    grid-template-columns: var(--ability-catalog-columns);
+    align-items: center;
+  }
+
+  &__head {
+    align-items: end;
+    padding-block: 0.85rem;
+    border: 1px solid var(--ability-catalog-border);
+    border-radius: var(--ability-catalog-rect-radius);
     background: var(--ability-catalog-card);
+  }
+
+  &__col {
+    padding-inline: 0.75rem;
     color: var(--secondary);
     font-weight: 700;
     letter-spacing: 0.05em;
-    text-align: left;
     text-transform: uppercase;
-    vertical-align: bottom;
     white-space: nowrap;
   }
 
-  tbody td {
+  &__cell {
+    min-width: 0;
     padding: 0.85rem 0.75rem;
+  }
+
+  // One entry = one card. Outer corners are rounded; `overflow: hidden` clips
+  // the summary/detail seam corners square for free, with no per-cell radius
+  // juggling and no gap between the two halves.
+  &__card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--ability-catalog-border);
+    border-radius: var(--ability-catalog-rect-radius);
     background: var(--ability-catalog-card);
-    border-block: 1px solid var(--ability-catalog-border);
-    vertical-align: middle;
-  }
-
-  tbody td:first-child {
-    border-left: 1px solid var(--ability-catalog-border);
-  }
-
-  tbody td:last-child {
-    border-right: 1px solid var(--ability-catalog-border);
-  }
-
-  tr {
-    border-bottom: 0;
-  }
-
-  thead th:first-child {
-    border-left: 1px solid var(--ability-catalog-border);
-    border-radius: var(--ability-catalog-rect-radius) 0 0 var(--ability-catalog-rect-radius);
-  }
-
-  thead th:last-child {
-    border-right: 1px solid var(--ability-catalog-border);
-    border-radius: 0 var(--ability-catalog-rect-radius) var(--ability-catalog-rect-radius) 0;
-  }
-
-  thead th:first-child,
-  tbody td:first-child {
-    padding-left: 1.1rem;
-  }
-
-  thead th:nth-child(1),
-  tbody td[data-column="rank"] {
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
-    text-align: center;
+    transition: border-color 120ms ease;
   }
 
   &__summary-row {
     cursor: pointer;
-
-    td {
-      vertical-align: middle;
-      transition:
-        background 120ms ease,
-        border-color 120ms ease,
-        box-shadow 120ms ease;
-    }
-
-    // Rounded card ends; first cell also hosts the (initially hidden) accent bar.
-    td:first-child {
-      border-radius: var(--ability-catalog-rect-radius) 0 0 var(--ability-catalog-rect-radius);
-      box-shadow: inset 3px 0 0 transparent;
-    }
-
-    td:last-child {
-      border-radius: 0 var(--ability-catalog-rect-radius) var(--ability-catalog-rect-radius) 0;
-    }
+    // Accent bar lives on the rows (not the card) so the summary's own surface
+    // never paints over it.
+    box-shadow: inset 3px 0 0 transparent;
+    transition:
+      background 120ms ease,
+      box-shadow 120ms ease;
 
     &:focus-visible {
       outline: none;
     }
-
-    // Hover / keyboard focus / expanded share one emphasis treatment.
-    &:hover td,
-    &:focus-visible td,
-    &.is-expanded td {
-      background: var(--ability-catalog-card-hover);
-      border-color: var(--ability-catalog-border-strong);
-    }
-
-    &:hover td:first-child,
-    &:focus-visible td:first-child,
-    &.is-expanded td:first-child {
-      box-shadow: inset 3px 0 0 var(--secondary);
-    }
   }
 
-  th:nth-child(1),
-  td[data-column="rank"] {
-    width: 2.5rem;
-    white-space: nowrap;
+  // The border marks the whole active card.
+  &__card:hover,
+  &__card:focus-within,
+  &__card.is-expanded {
+    border-color: var(--ability-catalog-border-strong);
+  }
+
+  // The darker surface stays on the summary (top half) only, so an expanded
+  // entry reads like the reference: dark header over a plain detail panel.
+  // Collapsed rows pick it up on hover/focus; expanded rows keep it.
+  &__summary-row:hover,
+  &__summary-row:focus-visible,
+  &__card.is-expanded &__summary-row {
+    background: var(--ability-catalog-card-hover);
+    box-shadow: inset 3px 0 0 var(--secondary);
+  }
+
+  // The accent bar continues down the detail half so the open card reads as one
+  // unit, while the detail keeps the plain (light) surface.
+  &__card.is-expanded &__detail-row {
+    box-shadow: inset 3px 0 0 var(--secondary);
+  }
+
+  [data-column="rank"] {
     text-align: center;
-  }
-
-  th:nth-child(2),
-  td[data-column="name"] {
-    width: 12.75rem;
-  }
-
-  th:nth-child(3),
-  td[data-column="price"] {
-    width: 5.75rem;
     white-space: nowrap;
   }
 
-  td[data-column="rank"] {
+  [data-column="price"] {
+    white-space: nowrap;
+  }
+
+  &__cell[data-column="rank"] {
     font-weight: 700;
     color: var(--secondary);
   }
 
-  td[data-column="name"] {
+  &__cell[data-column="name"] {
     font-weight: 600;
   }
 
-  td[data-column="price"] {
+  &__cell[data-column="price"] {
     color: var(--secondary);
     font-weight: 600;
   }
@@ -512,17 +494,16 @@
     color: var(--light);
   }
 
-  &__detail-row td {
-    background: var(--ability-catalog-card-hover);
-    border-color: var(--ability-catalog-border-strong);
-    border-radius: var(--ability-catalog-rect-radius);
-    box-shadow: inset 3px 0 0 var(--secondary);
+  // The detail block is just the bottom half of the card: the card already owns
+  // the surface, border, and accent bar, so it only needs its own inner padding.
+  &__detail-row[hidden] {
+    display: none;
   }
 
   &__detail-body {
     display: grid;
     gap: 0.85rem;
-    padding: 1rem 0 1.1rem;
+    padding: 0.75rem 0.75rem 1rem;
   }
 
   &__detail-facts {
@@ -574,22 +555,6 @@
   }
 }
 
-// Quartz wraps every Markdown table in `.table-container` and forces
-// `border-collapse: collapse` + margins on `.table-container > table`, which
-// kills `border-spacing` (the row gaps) and the per-cell rounded corners.
-// This selector is specific enough (0,2,1) to outrank that default and is the
-// single source of truth for the catalog's card-list layout.
-.rulebook-ability-catalog .table-container {
-  overflow-x: visible;
-}
-
-.rulebook-ability-catalog .table-container > table {
-  margin: 0;
-  padding: 0;
-  border-collapse: separate;
-  border-spacing: 0 var(--ability-catalog-row-gap);
-}
-
 .rulebook-ability-catalog input.rulebook-ability-catalog__dropdown-checkbox {
   margin-inline: 0 0.2rem;
   transform: none;
@@ -597,12 +562,12 @@
 }
 
 body[data-rulebook="true"] article .rulebook-ability-catalog {
-  thead th {
+  .rulebook-ability-catalog__col {
     font-size: 0.82rem;
     line-height: 1.25;
   }
 
-  tbody td {
+  .rulebook-ability-catalog__cell {
     font-size: 0.98rem;
     line-height: 1.55;
   }
@@ -637,6 +602,10 @@ body[data-rulebook="true"] article .rulebook-ability-catalog {
 
 @media all and (max-width: 800px) {
   .rulebook-ability-catalog {
+    // Narrower name column; the card stack keeps a min width so it scrolls
+    // horizontally inside the shell rather than crushing the columns.
+    --ability-catalog-columns: 2.5rem 11rem 5.75rem minmax(0, 1fr);
+
     &__controls {
       border-radius: 0.85rem;
     }
@@ -656,14 +625,8 @@ body[data-rulebook="true"] article .rulebook-ability-catalog {
       min-width: 0;
     }
 
-    table {
-      min-width: 38rem;
-      table-layout: auto;
-    }
-
-    th:nth-child(2),
-    td[data-column="name"] {
-      width: 11rem;
+    &__table {
+      min-width: 34rem;
     }
   }
 }

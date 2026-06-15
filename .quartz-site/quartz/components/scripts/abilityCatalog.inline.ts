@@ -151,46 +151,51 @@ function renderToggleIndicator() {
   `
 }
 
-function renderRows(entries: RulebookCatalogEntry[], expanded: Set<string>) {
-  return entries
-    .map(
-      (entry) => `
-        <tr
-          class="rulebook-ability-catalog__summary-row${expanded.has(entry.id) ? " is-expanded" : ""}"
-          data-entry-summary="${entry.id}"
-          data-entry-expanded="${expanded.has(entry.id) ? "true" : "false"}"
-          tabindex="0"
-        >
-          <td data-column="rank">${renderValue(entry.rank)}</td>
-          <td data-column="name">
-            <div class="rulebook-ability-catalog__name-block">
-              <strong>${escapeHtml(entry.name)}</strong>
-              ${renderMetaChips(entry)}
+function renderCard(entry: RulebookCatalogEntry, isExpanded: boolean) {
+  return `
+        <div class="rulebook-ability-catalog__card${isExpanded ? " is-expanded" : ""}" role="presentation">
+          <div
+            class="rulebook-ability-catalog__summary-row${isExpanded ? " is-expanded" : ""}"
+            role="row"
+            data-entry-summary="${entry.id}"
+            data-entry-expanded="${isExpanded ? "true" : "false"}"
+            aria-expanded="${isExpanded ? "true" : "false"}"
+            tabindex="0"
+          >
+            <div class="rulebook-ability-catalog__cell" data-column="rank" role="cell">${renderValue(entry.rank)}</div>
+            <div class="rulebook-ability-catalog__cell" data-column="name" role="cell">
+              <div class="rulebook-ability-catalog__name-block">
+                <strong>${escapeHtml(entry.name)}</strong>
+                ${renderMetaChips(entry)}
+              </div>
             </div>
-          </td>
-          <td data-column="price">${renderPrice(entry.price)}</td>
-          <td data-column="description">
-            <div class="rulebook-ability-catalog__description-cell">
-              <p class="rulebook-ability-catalog__description-preview">${renderValue(entry.previewDescription)}</p>
-              ${renderToggleIndicator()}
+            <div class="rulebook-ability-catalog__cell" data-column="price" role="cell">${renderPrice(entry.price)}</div>
+            <div class="rulebook-ability-catalog__cell" data-column="description" role="cell">
+              <div class="rulebook-ability-catalog__description-cell">
+                <p class="rulebook-ability-catalog__description-preview">${renderValue(entry.previewDescription)}</p>
+                ${renderToggleIndicator()}
+              </div>
             </div>
-          </td>
-        </tr>
-        <tr class="rulebook-ability-catalog__detail-row${expanded.has(entry.id) ? " is-expanded" : ""}" data-entry-detail="${entry.id}" ${
-          expanded.has(entry.id) ? "" : "hidden"
-        }>
-          <td colspan="4">
-            <div class="rulebook-ability-catalog__detail-body">
+          </div>
+          <div
+            class="rulebook-ability-catalog__detail-row${isExpanded ? " is-expanded" : ""}"
+            role="row"
+            data-entry-detail="${entry.id}"
+            ${isExpanded ? "" : "hidden"}
+          >
+            <div class="rulebook-ability-catalog__detail-body" role="cell">
               ${renderDetailTags(entry)}
               <div class="rulebook-ability-catalog__detail-copy">
                 <p>${renderValue(entry.fullDescription)}</p>
               </div>
             </div>
-          </td>
-        </tr>
-      `,
-    )
-    .join("")
+          </div>
+        </div>
+      `
+}
+
+function renderRows(entries: RulebookCatalogEntry[], expanded: Set<string>) {
+  return entries.map((entry) => renderCard(entry, expanded.has(entry.id))).join("")
 }
 
 function parseFilterNumber(value: string) {

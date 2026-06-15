@@ -26,30 +26,33 @@ test("ability catalog resets global checkbox offsets and boxes credit inputs cor
   assert.match(styleSource, /&__credits-field[\s\S]*input\s*\{[\s\S]*box-sizing:\s*border-box;/)
 })
 
-test("ability catalog neutralizes generic markdown table wrappers so the shell does not scroll unnecessarily", () => {
-  assert.match(styleSource, /\.rulebook-ability-catalog\s+\.table-container\s*\{[\s\S]*overflow-x:\s*visible;/)
-  assert.match(styleSource, /\.rulebook-ability-catalog\s+\.table-container\s*>\s*table\s*\{[\s\S]*margin:\s*0;/)
-  assert.match(styleSource, /\.rulebook-ability-catalog\s+\.table-container\s*>\s*table\s*\{[\s\S]*padding:\s*0;/)
+test("ability catalog lays the card list out with flex gaps instead of a real table", () => {
+  // The card stack is a flex column; its gap is the only source of row spacing,
+  // so it never appears inside an expanded entry. No <table> wrappers remain.
+  assert.match(
+    styleSource,
+    /&__table,\s*&__list\s*\{[\s\S]*display:\s*flex;[\s\S]*flex-direction:\s*column;[\s\S]*gap:\s*var\(--ability-catalog-row-gap\);/,
+  )
+  assert.match(styleSource, /&__table-shell\s*\{[\s\S]*overflow-x:\s*auto;/)
+  assert.doesNotMatch(styleSource, /\.table-container/)
 })
 
-test("ability catalog balances left and right outer spacing for table rows", () => {
-  assert.match(styleSource, /thead th:first-child,\s*tbody td:first-child\s*\{[\s\S]*padding-left:\s*1\.1rem;/)
+test("ability catalog aligns header and summary columns and insets the description cell", () => {
+  assert.match(
+    styleSource,
+    /&__head,\s*&__summary-row\s*\{[\s\S]*grid-template-columns:\s*var\(--ability-catalog-columns\);/,
+  )
   assert.match(styleSource, /&__description-cell\s*\{[\s\S]*padding-inline-end:\s*0\.35rem;/)
 })
 
-test("ability catalog separates rows, centers ranks, and uses the compact disclosure icon", () => {
-  // Row gaps are driven by a single variable, asserted on the wrapper-level
-  // selector that outranks Quartz's `border-collapse: collapse` default.
+test("ability catalog separates cards, centers ranks, and uses the compact disclosure icon", () => {
   assert.match(styleSource, /--ability-catalog-row-gap:\s*0\.55rem;/)
+  // Each entry is one rounded card whose inner corners are clipped square.
   assert.match(
     styleSource,
-    /\.rulebook-ability-catalog\s+\.table-container\s*>\s*table\s*\{[\s\S]*border-collapse:\s*separate;[\s\S]*border-spacing:\s*0\s+var\(--ability-catalog-row-gap\);/,
+    /&__card\s*\{[\s\S]*overflow:\s*hidden;[\s\S]*border-radius:\s*var\(--ability-catalog-rect-radius\);[\s\S]*background:\s*var\(--ability-catalog-card\);/,
   )
-  assert.match(styleSource, /tbody td\s*\{[\s\S]*background:\s*var\(--ability-catalog-card\);/)
-  assert.match(
-    styleSource,
-    /thead th:nth-child\(1\),\s*tbody td\[data-column="rank"\]\s*\{[\s\S]*text-align:\s*center;/,
-  )
+  assert.match(styleSource, /\[data-column="rank"\]\s*\{[\s\S]*text-align:\s*center;/)
   assert.match(styleSource, /&__toggle-icon\s*\{[\s\S]*width:\s*0\.72rem;/)
   assert.match(styleSource, /&__toggle-indicator\s*\{[\s\S]*width:\s*1\.375rem;/)
 })
