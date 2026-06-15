@@ -9,6 +9,8 @@ export const LEGACY_EQUIPMENT_TYPE_MIGRATION_SETTING = 'legacyEquipmentTypeMigra
 export const LEGACY_EQUIPMENT_TYPE_MIGRATION_VERSION = 4;
 export const LEGACY_TRAIT_TYPE_MIGRATION_SETTING = 'legacyTraitTypeMigrationVersion';
 export const LEGACY_TRAIT_TYPE_MIGRATION_VERSION = 2;
+export const PACK_LINK_MIGRATION_SETTING = 'packLinkMigrationVersion';
+export const PACK_LINK_MIGRATION_VERSION = 1;
 
 export function registerSystemSettings() {
   game.settings.register(MODULE_ID, 'debugMode', {
@@ -80,6 +82,13 @@ export function registerSystemSettings() {
   });
 
   game.settings.register(MODULE_ID, LEGACY_TRAIT_TYPE_MIGRATION_SETTING, {
+    scope: 'world',
+    config: false,
+    type: Number,
+    default: 0
+  });
+
+  game.settings.register(MODULE_ID, PACK_LINK_MIGRATION_SETTING, {
     scope: 'world',
     config: false,
     type: Number,

@@ -32,7 +32,6 @@ export const ABILITY_DIE_STEPS = [
   { value: 20, label: 'd20', roll: '1d20', numeric: 20 }
 ];
 
-const ABILITY_DIE_VALUES = ABILITY_DIE_STEPS.map((step) => step.value);
 const ABILITY_DIE_NUMERICS = ABILITY_DIE_STEPS.map((step) => step.numeric);
 
 export function getAbilityDieStep(value) {

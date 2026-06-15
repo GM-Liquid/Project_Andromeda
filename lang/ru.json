@@ -20,11 +20,6 @@
         "Name": "Режим отладки",
         "Hint": "Включает расширенные диагностические сообщения Project Andromeda в консоли браузера."
       },
-      "GearCatalogSync": {
-        "Name": "Синхронизация предметов с каталогом снаряжения",
-        "Hint": "Импортирует world Items из JSON-каталогов снаряжения, включенных в систему.",
-        "Label": "Открыть синхронизацию каталога"
-      },
       "SessionTrackerMaxHistory": {
         "Name": "Трекер сессии: максимум сохраненных сессий",
         "Hint": "Сколько завершенных сессий хранится в истории."
@@ -430,107 +425,6 @@
     "ItemDialogs": {
       "DeleteTitle": "Удалить {type}",
       "DeleteContent": "Вы уверены, что хотите удалить {name}? Это действие нельзя отменить."
-    },
-    "GearCatalogSync": {
-      "Title": "Синхронизация предметов с каталогом снаряжения",
-      "Intro": "Это окно показывает и импортирует world Items из JSON-каталогов брони, снаряжения и способностей.",
-      "IntroNote": "Импорт обновляет world Items на месте, если находит существующий предмет по catalog sync id или точному совпадению названия и типа. Связанные предметы на листах персонажей обновляются через существующую library-sync.",
-      "SheetLayoutTitle": "Структура каталога",
-      "AllowedTypes": "Разрешённые типы предметов",
-      "Columns": "Колонки",
-      "ResultSummary": "Сводка",
-      "PerSheet": "По листам",
-      "RemoteMeta": "Метаданные удалённой таблицы",
-      "Warnings": "Предупреждения",
-      "ErrorsTitle": "Ошибки",
-      "Details": "Подробности",
-      "Actions": {
-        "Preview": "Предпросмотр импорта",
-        "Apply": "Применить импорт",
-        "Clear": "Очистить отчёт"
-      },
-      "Table": {
-        "Sheet": "Лист",
-        "Create": "Создать",
-        "Update": "Обновить",
-        "Skip": "Пропустить",
-        "Error": "Ошибка"
-      },
-      "Sheets": {
-        "Weapons": "Оружие",
-        "Armor": "Броня",
-        "Equipment": "Экипировка",
-        "Abilities": "Способности",
-        "Traits": "Черты",
-        "Environment": "Окружение"
-      },
-      "Headers": {
-        "Type": "Тип",
-        "Name": "Название",
-        "OwnerName": "Кому принадлежит",
-        "Rank": "Ранг",
-        "Skill": "Навык",
-        "SkillBonus": "Урон",
-        "Description": "Описание",
-        "ItemFortitude": "Стойкость",
-        "ItemControl": "Контроль",
-        "ItemWill": "Воля",
-        "ItemShield": "Сил. щит",
-        "ItemSpeed": "Бонус к скорости",
-        "UsageFrequency": "Частота использования",
-        "ActivationCost": "Цена в действиях",
-        "ActivationType": "Активация",
-        "Range": "Дальность",
-        "Duration": "Длительность",
-        "Area": "Область",
-        "Defense": "Защита",
-        "Targets": "Цели",
-        "Quantity": "Количество"
-      },
-      "Messages": {
-        "Working": "Идёт выполнение...",
-        "PreviewReady": "Предпросмотр импорта готов.",
-        "ApplyComplete": "Импорт завершён.",
-        "LastRun": "Последний запуск",
-        "Failed": "Последняя операция завершилась ошибкой.",
-        "BlankRowSkipped": "Пустая строка пропущена.",
-        "DeleteSkipped": "Строки со статусом delete пропускаются.",
-        "NoChanges": "Изменений не найдено."
-      },
-      "Summary": {
-        "Create": "Строк к созданию: {count}",
-        "Update": "Строк к обновлению: {count}",
-        "Skip": "Строк пропущено: {count}",
-        "Error": "Строк с ошибками: {count}",
-        "FolderCreate": "Папок к созданию: {count}"
-      },
-      "Meta": {
-        "WorldTitle": "Мир: {value}",
-        "ExportedAt": "Экспортировано: {value}",
-        "ModuleVersion": "Версия модуля: {value}"
-      },
-      "Apply": {
-        "Created": "Создано world Items: {count}",
-        "Updated": "Обновлено world Items: {count}",
-        "RefreshedActors": "Обновлено листов персонажей: {count}"
-      },
-      "Errors": {
-        "RequirePrimaryGM": "Импорт каталога снаряжения может запускать только основной активный ГМ.",
-        "CatalogFetchFailed": "Не удалось загрузить {file} из каталога снаряжения системы. HTTP-статус: {status}.",
-        "InvalidJson": "В поле {field} находится некорректный JSON: {error}",
-        "UnsupportedItemType": "Неподдерживаемый тип предмета: {type}",
-        "TypeDoesNotMatchSheet": "Тип предмета {type} не относится к листу {sheet}.",
-        "InvalidRank": "Поле {field} должно быть пустым или содержать ранг от 1 до 4.",
-        "InvalidSkill": "В поле {field} указан неизвестный ключ навыка: {value}",
-        "InvalidEnumValue": "В поле {field} указано неподдерживаемое значение: {value}",
-        "ExpectedArray": "Поле {field} должно содержать JSON-массив.",
-        "ExpectedObject": "Поле {field} должно содержать JSON-объект.",
-        "InvalidStatus": "Неподдерживаемый статус строки: {status}",
-        "ActorLinkedCreateBlocked": "В первой версии нельзя создавать actor-linked library items напрямую из gear catalog.",
-        "TypeChangeBlocked": "Менять тип предмета во время импорта нельзя. Текущий тип: {currentType}. Запрошенный тип: {requestedType}.",
-        "UnknownFolderId": "Неизвестный id папки Item: {id}",
-        "DuplicateSyncIds": "В импортируемых данных найдены повторяющиеся значения syncId: {ids}"
-      }
     },
     "SessionTracker": {
       "Notifications": {

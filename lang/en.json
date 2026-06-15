@@ -20,11 +20,6 @@
         "Name": "Debug Mode",
         "Hint": "Enable verbose Project Andromeda diagnostics in the browser console."
       },
-      "GearCatalogSync": {
-        "Name": "Gear Catalog Item Sync",
-        "Hint": "Import world items from the packaged gear catalog JSON files.",
-        "Label": "Open Catalog Sync"
-      },
       "SessionTrackerMaxHistory": {
         "Name": "Session Tracker: Max stored sessions",
         "Hint": "How many completed sessions are kept in history."
@@ -430,107 +425,6 @@
     "ItemDialogs": {
       "DeleteTitle": "Delete {type}",
       "DeleteContent": "Are you sure you want to delete {name}? This action cannot be undone."
-    },
-    "GearCatalogSync": {
-      "Title": "Gear Catalog Item Sync",
-      "Intro": "Use this window to preview and import world items from the packaged armor, equipment, and abilities JSON catalogs.",
-      "IntroNote": "The import updates world Items in place when it can match an existing item by catalog sync id or by exact name and type. Linked actor items are refreshed through the existing library sync.",
-      "SheetLayoutTitle": "Catalog Layout",
-      "AllowedTypes": "Allowed item types",
-      "Columns": "Columns",
-      "ResultSummary": "Summary",
-      "PerSheet": "Per Sheet",
-      "RemoteMeta": "Remote Metadata",
-      "Warnings": "Warnings",
-      "ErrorsTitle": "Errors",
-      "Details": "Details",
-      "Actions": {
-        "Preview": "Preview Import",
-        "Apply": "Apply Import",
-        "Clear": "Clear Report"
-      },
-      "Table": {
-        "Sheet": "Sheet",
-        "Create": "Create",
-        "Update": "Update",
-        "Skip": "Skip",
-        "Error": "Error"
-      },
-      "Sheets": {
-        "Weapons": "Weapons",
-        "Armor": "Armor",
-        "Equipment": "Equipment",
-        "Abilities": "Abilities",
-        "Traits": "Traits",
-        "Environment": "Environment"
-      },
-      "Headers": {
-        "Type": "Type",
-        "Name": "Name",
-        "OwnerName": "Owned By",
-        "Rank": "Rank",
-        "Skill": "Skill",
-        "SkillBonus": "Damage",
-        "Description": "Description",
-        "ItemFortitude": "Fortitude",
-        "ItemControl": "Control",
-        "ItemWill": "Will",
-        "ItemShield": "Power Shield",
-        "ItemSpeed": "Speed Bonus",
-        "UsageFrequency": "Usage Frequency",
-        "ActivationCost": "Action Cost",
-        "ActivationType": "Activation",
-        "Range": "Range",
-        "Duration": "Duration",
-        "Area": "Area",
-        "Defense": "Defense",
-        "Targets": "Targets",
-        "Quantity": "Quantity"
-      },
-      "Messages": {
-        "Working": "Working...",
-        "PreviewReady": "Import preview is ready.",
-        "ApplyComplete": "Import completed.",
-        "LastRun": "Last Run",
-        "Failed": "The last operation failed.",
-        "BlankRowSkipped": "Blank row skipped.",
-        "DeleteSkipped": "Rows marked as delete are skipped.",
-        "NoChanges": "No changes detected."
-      },
-      "Summary": {
-        "Create": "Rows to create: {count}",
-        "Update": "Rows to update: {count}",
-        "Skip": "Rows skipped: {count}",
-        "Error": "Rows with errors: {count}",
-        "FolderCreate": "Folders to create: {count}"
-      },
-      "Meta": {
-        "WorldTitle": "World: {value}",
-        "ExportedAt": "Exported at: {value}",
-        "ModuleVersion": "Module version: {value}"
-      },
-      "Apply": {
-        "Created": "World items created: {count}",
-        "Updated": "World items updated: {count}",
-        "RefreshedActors": "Actor sheets refreshed: {count}"
-      },
-      "Errors": {
-        "RequirePrimaryGM": "Only the primary active GM can run gear catalog import.",
-        "CatalogFetchFailed": "Could not load {file} from the packaged gear catalog. HTTP status: {status}.",
-        "InvalidJson": "{field} contains invalid JSON: {error}",
-        "UnsupportedItemType": "Unsupported item type: {type}",
-        "TypeDoesNotMatchSheet": "Item type {type} does not belong to sheet {sheet}.",
-        "InvalidRank": "{field} must be empty or a rank between 1 and 4.",
-        "InvalidSkill": "{field} contains an unknown skill key: {value}",
-        "InvalidEnumValue": "{field} contains an unsupported value: {value}",
-        "ExpectedArray": "{field} must contain a JSON array.",
-        "ExpectedObject": "{field} must contain a JSON object.",
-        "InvalidStatus": "Unsupported row status: {status}",
-        "ActorLinkedCreateBlocked": "New actor-linked library items cannot be created from gear catalog in the MVP.",
-        "TypeChangeBlocked": "Changing item type during import is blocked. Current type: {currentType}. Requested type: {requestedType}.",
-        "UnknownFolderId": "Unknown Item folder id: {id}",
-        "DuplicateSyncIds": "Duplicate syncId values were found in the import data: {ids}"
-      }
     },
     "MomentOfGloryBonus": {
       "ContextLabel": "Highlight bonus. Costs 1 Highlight Point.",

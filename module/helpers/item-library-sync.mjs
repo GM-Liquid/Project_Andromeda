@@ -106,6 +106,36 @@ function getWorldItemFromUuid(uuid) {
   return game.items?.get(match[1]) ?? null;
 }
 
+// A compendium-sourced library link (the shipped gear catalog pack). This content
+// is canonical and read-only: actor items link to it, but it is never created,
+// mutated, or deleted by the world-item library-sync machinery.
+function isCompendiumUuid(uuid) {
+  return /^Compendium\./.test(String(uuid ?? '').trim());
+}
+
+async function resolveCompendiumItem(uuid) {
+  if (!isCompendiumUuid(uuid)) return null;
+  try {
+    const document = await fromUuid(String(uuid).trim());
+    return document?.documentName === 'Item' ? document : null;
+  } catch {
+    return null;
+  }
+}
+
+export function isCompendiumLibraryUuid(uuid) {
+  return isCompendiumUuid(uuid);
+}
+
+export function setLibraryItemLinkOnData(data, uuid) {
+  foundry.utils.setProperty(
+    data ?? {},
+    `flags.${MODULE_ID}.${LIBRARY_ITEM_UUID_FLAG}`,
+    String(uuid ?? '').trim()
+  );
+  return data;
+}
+
 function getSourceWorldItem(item) {
   const sourceUuid = String(foundry.utils.getProperty(item, 'flags.core.sourceId') ?? '').trim();
   return getWorldItemFromUuid(sourceUuid);
@@ -377,6 +407,17 @@ export async function ensureActorItemLibraryLink(actorItem, options = {}) {
     return { libraryItem: null, created: false, linked: false, libraryItemUpdated: false };
   }
 
+  // Already linked to a compendium catalog item (the shipped gear pack). That is
+  // canonical, read-only content: keep the link, never spawn a world duplicate.
+  const existingUuid = getLibraryItemUuid(actorItem);
+  if (existingUuid && isCompendiumUuid(existingUuid)) {
+    const packItem = await resolveCompendiumItem(existingUuid);
+    if (packItem) {
+      return { libraryItem: packItem, created: false, linked: false, libraryItemUpdated: false };
+    }
+    // Dangling compendium link (pack renamed/removed): fall through to world handling.
+  }
+
   let libraryItem = getLinkedWorldItem(actorItem);
   let created = false;
   let linked = false;
@@ -440,6 +481,10 @@ export async function ensureActorItemLibraryLink(actorItem, options = {}) {
 }
 
 export async function syncActorItemToLibrary(actorItem) {
+  // Items linked to the compendium catalog are read-only canon. A local edit on a
+  // character sheet stays local; it must never be written back to the shipped pack.
+  if (isCompendiumUuid(getLibraryItemUuid(actorItem))) return null;
+
   const { libraryItem } = await ensureActorItemLibraryLink(actorItem);
   if (!libraryItem) return null;
 
@@ -656,5 +701,178 @@ export async function runItemLibraryMigrationIfNeeded() {
     ITEM_LIBRARY_SYNC_MIGRATION_SETTING,
     ITEM_LIBRARY_SYNC_MIGRATION_VERSION
   );
+  return summary;
+}
+
+/* -------------------------------------------- */
+/*  Compendium gear pack integration            */
+/* -------------------------------------------- */
+
+const GEAR_CATALOG_SYNC_ID_FLAG = 'sheetSyncId';
+const GEAR_LIBRARY_PACK_ID = `${MODULE_ID}.gear-library`;
+
+function getGearCatalogSyncId(item) {
+  const flagValue =
+    item?.getFlag?.(MODULE_ID, GEAR_CATALOG_SYNC_ID_FLAG) ??
+    item?.flags?.[MODULE_ID]?.[GEAR_CATALOG_SYNC_ID_FLAG] ??
+    '';
+  const normalized = String(flagValue ?? '').trim();
+  if (normalized) return normalized;
+
+  // Fall back to the catalog key carried inside the item's own system data, so a
+  // link can still be recovered even if the old world catalog item is already gone.
+  const gearCatalog = item?.system?.details?.gearCatalog ?? {};
+  const catalog = String(gearCatalog.catalog ?? '').trim();
+  const entryId = String(gearCatalog.id ?? '').trim();
+  if (catalog && entryId) return `gear:${catalog}:${entryId}`;
+  return '';
+}
+
+function getGearLibraryPack() {
+  return game.packs?.get(GEAR_LIBRARY_PACK_ID) ?? null;
+}
+
+async function buildPackSyncIdToUuidMap() {
+  const pack = getGearLibraryPack();
+  if (!pack) return new Map();
+
+  const documents = await pack.getDocuments();
+  const map = new Map();
+  for (const document of documents) {
+    const syncId = getGearCatalogSyncId(document);
+    if (syncId) map.set(syncId, document.uuid);
+  }
+  return map;
+}
+
+/**
+ * Phase 3 — refresh every actor item linked to a compendium catalog item from its
+ * pack source. Shared content (name/img/system) is pulled down; local fields
+ * (quantity/equipped/cooldown) are preserved. No-op when content already matches.
+ */
+export async function refreshCompendiumLinkedActorItems() {
+  if (!game.user?.isGM) return { actorsUpdated: 0, itemsUpdated: 0 };
+
+  const sourceCache = new Map();
+  const resolveSource = async (uuid) => {
+    if (sourceCache.has(uuid)) return sourceCache.get(uuid);
+    const source = await resolveCompendiumItem(uuid);
+    sourceCache.set(uuid, source);
+    return source;
+  };
+
+  let actorsUpdated = 0;
+  let itemsUpdated = 0;
+
+  for (const actor of getActors()) {
+    const updates = [];
+    for (const item of actor.items ?? []) {
+      if (!isLibrarySyncManagedType(item.type)) continue;
+      const uuid = getLibraryItemUuid(item);
+      if (!isCompendiumUuid(uuid)) continue;
+
+      const source = await resolveSource(uuid);
+      if (!source) continue;
+      if (sameValue(buildSharedItemPayload(source), buildSharedItemPayload(item))) continue;
+
+      updates.push({ _id: item.id, ...buildActorItemUpdateDataFromLibrary(source, item) });
+    }
+
+    if (updates.length) {
+      await actor.updateEmbeddedDocuments('Item', updates, {
+        render: false,
+        [LIBRARY_SYNC_OPTION_KEY]: { source: 'compendium-pack-refresh' }
+      });
+      actorsUpdated += 1;
+      itemsUpdated += updates.length;
+    }
+  }
+
+  debugLog('Compendium-linked actor items refreshed from pack', { actorsUpdated, itemsUpdated });
+  return { actorsUpdated, itemsUpdated };
+}
+
+/**
+ * Phase 4 (one-time) — repoint actor items that still link to a world catalog item
+ * (or carry a gear-catalog key) at the matching compendium pack item. Non-destructive:
+ * only the libraryItemUuid flag changes. Orphaned world catalog items are cleaned up
+ * separately by removeOrphanCatalogWorldItems so the irreversible delete stays opt-in.
+ */
+export async function migrateActorLinksToCompendium() {
+  if (!game.user?.isGM) return null;
+
+  const packMap = await buildPackSyncIdToUuidMap();
+  if (!packMap.size) {
+    debugLog('Pack link migration skipped: gear-library pack missing or empty');
+    return { actorsUpdated: 0, itemsRelinked: 0 };
+  }
+
+  let actorsUpdated = 0;
+  let itemsRelinked = 0;
+
+  for (const actor of getActors()) {
+    const updates = [];
+    for (const item of actor.items ?? []) {
+      if (!isLibrarySyncManagedType(item.type)) continue;
+      const currentUuid = getLibraryItemUuid(item);
+      if (currentUuid && isCompendiumUuid(currentUuid)) continue;
+
+      const worldItem = currentUuid ? getWorldItemFromUuid(currentUuid) : null;
+      const syncId = getGearCatalogSyncId(worldItem) || getGearCatalogSyncId(item);
+      if (!syncId) continue;
+      const packUuid = packMap.get(syncId);
+      if (!packUuid) continue;
+
+      updates.push({
+        _id: item.id,
+        [`flags.${MODULE_ID}.${LIBRARY_ITEM_UUID_FLAG}`]: packUuid
+      });
+    }
+
+    if (updates.length) {
+      await actor.updateEmbeddedDocuments('Item', updates, {
+        render: false,
+        [LIBRARY_SYNC_OPTION_KEY]: { source: 'pack-link-migration' }
+      });
+      actorsUpdated += 1;
+      itemsRelinked += updates.length;
+    }
+  }
+
+  debugLog('Actor item links migrated to compendium pack', { actorsUpdated, itemsRelinked });
+  return { actorsUpdated, itemsRelinked };
+}
+
+/**
+ * Opt-in cleanup of world catalog items (sheetSyncId `gear:*`) that no longer back
+ * any actor item after the pack-link migration. Destructive, so it is GM-triggered
+ * (game.projectAndromeda.removeOrphanCatalogWorldItems) and supports a dry run.
+ */
+export async function removeOrphanCatalogWorldItems({ dryRun = false } = {}) {
+  if (!game.user?.isGM) return null;
+
+  const orphans = [];
+  for (const worldItem of getWorldItems()) {
+    if (!isLibrarySyncManagedType(worldItem.type)) continue;
+    const syncId = getGearCatalogSyncId(worldItem);
+    if (!syncId.startsWith('gear:')) continue;
+    if (getLinkedActorItems(worldItem.uuid).length) continue;
+    orphans.push(worldItem);
+  }
+
+  const summary = { found: orphans.length, deleted: 0, dryRun };
+  if (!dryRun && orphans.length) {
+    await Item.deleteDocuments(
+      orphans.map((item) => item.id),
+      {
+        render: false,
+        [LIBRARY_SYNC_OPTION_KEY]: { source: 'pack-orphan-cleanup' }
+      }
+    );
+    summary.deleted = orphans.length;
+    renderItemDirectory();
+  }
+
+  debugLog('Orphan catalog world item cleanup', summary);
   return summary;
 }

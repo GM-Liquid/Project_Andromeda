@@ -1,0 +1,149 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+
+import { buildGearCatalogRemoteDataFromCatalogs } from './gear-catalog.mjs';
+
+function getSystemData(row) {
+  return JSON.parse(row.systemJson);
+}
+
+test('gear catalog transform maps activation metadata for abilities, equipment, and armor', () => {
+  const remoteData = buildGearCatalogRemoteDataFromCatalogs({
+    abilities: [
+      {
+        id: 'gravity-snare',
+        name: 'Gravity Snare',
+        type: 'ability',
+        rank: 2,
+        skill: 'mistika',
+        description: 'Locks a target in place.',
+        mechanics: {
+          effects: [
+            {
+              activation: { type: 'action' },
+              conditions: {
+                frequency: 'oncePerScene',
+                range: { type: 'meters', value: 30 },
+                targets: 'single',
+                defense: 'fortitude',
+                duration: 'untilEndOfScene',
+                check: 'required'
+              }
+            }
+          ]
+        }
+      }
+    ],
+    equipment: [
+      {
+        id: 'shock-mine',
+        name: 'Shock Mine',
+        type: 'equipment',
+        rank: 2,
+        skill: 'inzheneriya',
+        description: 'Shocks every target in the blast.',
+        mechanics: {
+          effects: [
+            {
+              activation: { type: 'maneuver' },
+              conditions: {
+                frequency: 'oncePerSession',
+                range: { type: 'meters', value: 20 },
+                targets: 'allInArea',
+                area: { type: 'circle', value: 10 },
+                defense: 'control',
+                duration: 'untilStartOfYourNextTurn'
+              },
+              outcomes: [{ key: 'damage', value: 4 }]
+            }
+          ]
+        }
+      }
+    ],
+    armor: [
+      {
+        id: 'reactive-shell',
+        name: 'Reactive Shell',
+        type: 'armor',
+        rank: 3,
+        skill: null,
+        description: 'A reactive shell that shrugs off incoming fire.',
+        mechanics: {
+          effects: [
+            {
+              activation: { type: 'reaction' },
+              conditions: {
+                frequency: 'oncePerScene',
+                targets: 'self',
+                duration: 'untilEndOfTurn'
+              },
+              outcomes: [{ key: 'fortitudeBonus', value: 2 }]
+            }
+          ]
+        }
+      }
+    ]
+  });
+
+  const abilityData = getSystemData(remoteData.sheets.abilities[0]);
+  assert.equal(abilityData.activationCost, 'action');
+  assert.equal(abilityData.activationType, 'action');
+  assert.equal(abilityData.usageFrequency, 'scene');
+  assert.equal(abilityData.range, '30 m');
+  assert.equal(abilityData.targets, 'single');
+  assert.equal(abilityData.defense, 'fortitude');
+  assert.equal(abilityData.duration, 'untilEndOfScene');
+
+  const equipmentData = getSystemData(remoteData.sheets.equipment[0]);
+  assert.equal(equipmentData.activationCost, 'maneuver');
+  assert.equal(equipmentData.activationType, 'maneuver');
+  assert.equal(equipmentData.usageFrequency, 'twoPerScene');
+  assert.equal(equipmentData.range, '20 m');
+  assert.equal(equipmentData.targets, 'allInArea');
+  assert.equal(equipmentData.area, 'circle 10 m');
+  assert.equal(equipmentData.defense, 'control');
+  assert.equal(equipmentData.duration, 'untilStartOfYourNextTurn');
+
+  const armorData = getSystemData(remoteData.sheets.armor[0]);
+  assert.equal(armorData.activationCost, 'reaction');
+  assert.equal(armorData.activationType, 'reaction');
+  assert.equal(armorData.usageFrequency, 'scene');
+  assert.equal(armorData.targets, 'self');
+  assert.equal(armorData.duration, 'untilEndOfTurn');
+});
+
+test('gear catalog transform preserves freeAction abilities as freeAction activation cost', () => {
+  const remoteData = buildGearCatalogRemoteDataFromCatalogs({
+    armor: [],
+    equipment: [],
+    abilities: [
+      {
+        id: 'desh',
+        name: 'Дэш',
+        type: 'ability',
+        rank: 1,
+        skill: 'lovkost',
+        description: 'Dash forward.',
+        mechanics: {
+          effects: [
+            {
+              activation: { type: 'freeAction' },
+              conditions: {
+                frequency: 'oncePerScene',
+                range: { type: 'meters', value: 15 }
+              },
+              outcomes: [{ key: 'specialRule' }]
+            }
+          ]
+        }
+      }
+    ]
+  });
+
+  const abilityData = getSystemData(remoteData.sheets.abilities[0]);
+  assert.equal(abilityData.activationCost, 'freeAction');
+  assert.equal(abilityData.activationType, 'freeAction');
+  assert.equal(abilityData.usageFrequency, 'scene');
+  assert.equal(abilityData.range, '15 m');
+  assert.equal(abilityData.requiresRoll, false);
+});

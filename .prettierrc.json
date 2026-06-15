@@ -3,14 +3,5 @@
   "printWidth": 100,
   "tabWidth": 2,
   "trailingComma": "none",
-  "endOfLine": "lf",
-
-  "plugins": ["prettier-plugin-handlebars"],
-
-  "overrides": [
-    {
-      "files": ["*.hbs", "*.handlebars"],
-      "options": { "parser": "glimmer" }
-    }
-  ]
+  "endOfLine": "lf"
 }

@@ -39,6 +39,10 @@ import {
   getItemTypeConfig,
   getItemTabLabel
 } from '../helpers/item-config.mjs';
+import {
+  isLibrarySyncManagedType,
+  setLibraryItemLinkOnData
+} from '../helpers/item-library-sync.mjs';
 
 export const FoundryActorSheet = getFoundryActorSheetClass();
 
@@ -207,6 +211,30 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     this._applySheetEditMode(this.element);
     this.element.find('.sheet-scrollable').scrollTop(paneScrollPos);
     this.element.find('.andromeda-rail-skills-scroll').scrollTop(railSkillsScrollPos);
+  }
+
+  /** @override */
+  async _onDropItem(event, data) {
+    if (!this.actor?.isOwner) return false;
+
+    const item = await Item.implementation.fromDropData(data);
+    if (!item) return false;
+    const itemData = item.toObject();
+
+    // Reordering within the same actor — defer to core sorting.
+    if (this.actor.uuid === item.parent?.uuid) {
+      return this._onSortItem(event, itemData);
+    }
+
+    // Dropping a library source (a compendium catalog item or a world Item) of a
+    // managed type: link the new actor item to that source so the library-sync
+    // hook reuses it instead of creating a folderless world duplicate.
+    const sourceUuid = String(data?.uuid ?? '').trim();
+    if (sourceUuid && !item.parent && isLibrarySyncManagedType(item.type)) {
+      setLibraryItemLinkOnData(itemData, sourceUuid);
+    }
+
+    return this._onDropItemCreate(itemData, event);
   }
   validateNumericInput(input) {
     let val = parseInt(input.value, 10);
@@ -1381,7 +1409,6 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
   }
 
   _getItemRollSummary(item, displayConfig = null) {
-    const typeConfig = getItemTypeConfig(item?.type) ?? {};
     const skillKey = String(item?.system?.skill ?? '').trim();
     const canRoll = Boolean(displayConfig?.canRoll ?? this._getItemDisplayConfig(item).canRoll);
     if (!canRoll || !skillKey) return '—';
@@ -1826,7 +1853,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     }
   }
 
-  async _rollItem(item, itemId = null, { includeItemContent = false, displayConfig = null } = {}) {
+  async _rollItem(item, _itemId = null, { includeItemContent = false, displayConfig = null } = {}) {
     if (!item) return false;
     const typeConfig = getItemTypeConfig(item.type);
     const system = item.system ?? {};

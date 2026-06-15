@@ -10,8 +10,8 @@
 | Key fact                      | Value                                                           |
 | ----------------------------- | --------------------------------------------------------------- |
 | **System name**               | **Project Andromeda**                                           |
-| **Foundry VTT compatibility** | v12 (verified 12)                                               |
-| **Current version**           | `0.3.6.1`                                                       |
+| **Foundry VTT compatibility** | v12 (minimum 12, verified 13)                                   |
+| **Current version**           | `0.3.6.3`                                                       |
 | **Current release line**      | `0.3.6.x`                                                       |
 | **Languages**                 | English, Русский (full parity required)                         |
 | **Main tech**                 | ES-module JavaScript (`*.mjs`), Handlebars (`*.hbs`), JSON, CSS |
@@ -29,6 +29,9 @@ project-andromeda/
 | data/
 | '- gear/
 |    '- catalog/ <- public fallback mirror of the canonical armor / equipment / abilities JSON catalogs plus the temporary concept-abilities source catalog kept available when the private repo is unavailable
+| tools/
+| '- build-pack.mjs <- compiles data/gear/catalog/*.json into the gear-library compendium pack
+| packs/ <- built compendium packs (build artifact, gitignored); gear-library ships the gear catalog
 | Книга правил v0.4/ <- public reader-facing rulebook mirror, refreshed from the private source repo
 |
 +- .quartz-site/
@@ -80,7 +83,7 @@ project-andromeda/
 |  project-andromeda.css
 |
 +- docs/
-|  gear-catalog-sync.md <- notes about catalog import workflow
+|  gear-catalog-sync.md <- notes about the gear-library compendium pack workflow
 |
 '- .github/
    workflows/
@@ -243,7 +246,7 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 - **Naming:** camelCase for JS variables, kebab-case for file names, UPPER_SNAKE for Handlebars helpers.
 - **Sheets:** built with plain HTML + Handlebars; keep markup semantic for accessibility.
 - **No full re-render on edits:** Any change made through the character sheet (PC or NPC) should update the UI and derived values without triggering a full sheet re-render, unless a structural reflow is required. Prefer in-place DOM updates tied to `actor.update(..., { render: false })`, and refresh only the affected inputs, labels, and computed fields (speed, defenses, health, and similar values).
-- **Item library sync:** Character-sheet items that represent abilities, genomes, traits, or equipment must stay linked to a corresponding world-level Foundry item in the Items directory. A single library item may be linked to multiple actor items at once. Shared library data must propagate to every linked actor item, while actor-local state such as `quantity` and `equipped` remains local. The system must not auto-create new item folders or automatically move already-foldered library items between folders.
+- **Item library sync:** Character-sheet items that represent abilities, genomes, traits, or equipment stay linked to a corresponding library source via `flags.project-andromeda.libraryItemUuid`. The source is the shipped **`gear-library` compendium pack** for catalog content (read-only canon — see §6.2) or a **world-level Foundry item** for homebrew created on a sheet. A single library item may be linked to multiple actor items at once. Shared library data propagates to every linked actor item, while actor-local state such as `quantity` and `equipped` remains local. The system must not auto-create new item folders or automatically move already-foldered library items between folders, and must not create a duplicate world item when an actor item already links to a valid source.
 - **Unified equipment type:** `equipment`, `equipment-consumable`, `implant`, and `cartridge` are treated as a unified equipment model. New content should use the `equipment` item type with `system.requiresRoll` and optional `system.skill`; legacy types are migration-only compatibility paths and are normalized during migration.
 - **Unified trait type:** all non-genome, non-source-ability traits use the `trait` item type. Legacy `trait-*` subtypes remain migration-only compatibility paths and should not be used for new content.
 
@@ -260,20 +263,18 @@ Balance simulations and data-prep tooling live in the **private companion source
 
 ---
 
-## 6.2 Gear Catalog Foundry Sync
+## 6.2 Gear Catalog Foundry Sync (compendium model)
 
-The gear catalog sync is part of the shipped Foundry system.
+The shipped gear catalog lives in the **`gear-library` compendium pack**, built from JSON. Canon is edited in JSON between releases; the pack is regenerated at release and applied to campaigns only on a system update.
 
-- **Source of truth:** import reads `data/gear/catalog/armor.json`, `data/gear/catalog/equipment.json`, and `data/gear/catalog/abilities.json`, mirrored from `Docs_Project_Andromeda/data/gear/catalog/` when the private repo is available.
-- **Excluded catalog:** `concept-abilities.json` is not imported into Foundry world items.
-- **World item target:** sync works on world `Item` documents, not directly on embedded actor items.
-- **Link safety:** imports must update existing world items in place whenever possible; do not delete and recreate linked library items during normal sync.
-- **Stable identity:** gear catalog imports use `flags.project-andromeda.sheetSyncId` with values like `gear:equipment:<catalog-id>` as the stable external key. The flag name remains for backward compatibility.
-- **Fallback matching:** first catalog import may match existing world items by exact item type and name, then replace the old sync id with the gear catalog sync id.
-- **Folder layout:** imported items are grouped into world Item folders by type and rank: `Броня/Ранг N`, `Снаряжение/Ранг N`, and `Способности/Ранг N`; entries without a valid rank go under `Без ранга`.
-- **Type safety:** changing an existing item's `type` during catalog import is blocked and should be handled as a dedicated migration, not a silent update.
-- **Round-trip coverage:** imports include a `systemJson` fallback so new or uncommon system fields from catalogs survive sync into Foundry item data.
-- **Actor updates:** after importing into world items, linked actor items should refresh through the existing item library sync so links remain intact.
+- **Source of truth:** `data/gear/catalog/armor.json`, `equipment.json`, and `abilities.json` (mirrored from `Docs_Project_Andromeda/data/gear/catalog/` when the private repo is available). `concept-abilities.json` is never shipped.
+- **Build step:** `tools/build-pack.mjs` (`npm run build:pack`, uses `classic-level`) compiles those JSON files into `packs/gear-library`, reusing the runtime `buildGearCatalogRemoteDataFromCatalogs` transform so the pack never drifts from the catalog. The pack is a **build artifact**: gitignored, built locally and in CI (`release.yml`), and copied into the release zip. The pack is registered in `system.json` `packs[]`.
+- **Stable identity:** each pack item carries `flags.project-andromeda.sheetSyncId` (`gear:<catalog>:<id>`) and a `_id` derived deterministically from that sync id, so rebuilds keep the same compendium UUIDs and existing actor links survive.
+- **Folder layout:** pack folders group items by type and rank (`Броня/Ранг N`, `Снаряжение/Ранг N`, `Способности/Ранг N`; no valid rank → `Без ранга`).
+- **Actor links:** a character-sheet item links to its pack source via `flags.project-andromeda.libraryItemUuid` set to the `Compendium.…` UUID. Dropping a pack (or world) item onto an actor stamps this link in the sheet's `_onDropItem`, so it reuses the source instead of creating a folderless world duplicate.
+- **Read-only canon:** compendium-linked items are canonical and read-only. A local edit on a character sheet stays local (it is never written back to the pack). On a system **version change**, `refreshCompendiumLinkedActorItems` pulls shared fields (name/img/system) down to every linked actor item while preserving local `quantity`/`equipped`/`cooldown`. Re-entering the world on an unchanged version touches nothing.
+- **One-time migration:** `migrateActorLinksToCompendium` (gated by `packLinkMigrationVersion`) repoints actor items that still link to a legacy world catalog item — or carry a gear-catalog key — at the matching pack item. It is non-destructive. The opt-in `game.projectAndromeda.removeOrphanCatalogWorldItems({ dryRun })` cleans up leftover `gear:*` world items afterwards.
+- **No world-item importer:** the old JSON→world-items importer and the Gear Catalog Sync app have been removed. `module/helpers/gear-catalog.mjs` now holds only the pure JSON→Item-system transform (consumed by `tools/build-pack.mjs`); there is no in-world import path. The pack is the only distribution path. Catalog content is edited in JSON and shipped via `npm run build:pack`.
 
 ---
 
@@ -294,4 +295,4 @@ The gear catalog sync is part of the shipped Foundry system.
 
 ---
 
-_Last updated: 2026-05-14_
+_Last updated: 2026-06-15_

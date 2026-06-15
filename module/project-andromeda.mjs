@@ -23,6 +23,8 @@ import {
   LEGACY_TRAIT_TYPE_MIGRATION_SETTING,
   LEGACY_TRAIT_TYPE_MIGRATION_VERSION,
   MODULE_ID,
+  PACK_LINK_MIGRATION_SETTING,
+  PACK_LINK_MIGRATION_VERSION,
   PROJECT_ANDROMEDA,
   debugLog,
   registerSystemSettings
@@ -42,7 +44,6 @@ import {
 } from './helpers/actor-types.mjs';
 import { SessionStatsService } from './helpers/session-stats.mjs';
 import { buildRollRerollSpec, rerollRollPreservingContext } from './helpers/roll-reroll.mjs';
-import { applyGearCatalogImport } from './helpers/gear-catalog-sync.mjs';
 import {
   ensureActorItemLibraryLink,
   getLibraryItemUuid,
@@ -51,6 +52,9 @@ import {
   isLibrarySyncManagedType,
   mergeDuplicateLibraryItems,
   migrateActorItemsToLibrary,
+  migrateActorLinksToCompendium,
+  refreshCompendiumLinkedActorItems,
+  removeOrphanCatalogWorldItems,
   runItemLibraryMigrationIfNeeded,
   syncActorItemToLibrary,
   syncActorLibraryStructure,
@@ -1464,32 +1468,45 @@ async function setGearCatalogAutoSyncState(nextState) {
   });
 }
 
-async function runGearCatalogAutoSyncIfNeeded() {
+// One-time migration: repoint actor items that still link to world catalog items
+// (or carry a gear-catalog key) at the shipped compendium pack. Non-destructive.
+async function runPackLinkMigrationIfNeeded() {
+  const currentVersion = Number(game.settings.get(MODULE_ID, PACK_LINK_MIGRATION_SETTING)) || 0;
+  if (currentVersion >= PACK_LINK_MIGRATION_VERSION) return null;
+
+  const summary = await migrateActorLinksToCompendium();
+  await game.settings.set(MODULE_ID, PACK_LINK_MIGRATION_SETTING, PACK_LINK_MIGRATION_VERSION);
+  debugLog('Pack link migration completed', summary);
+  return summary;
+}
+
+// Refresh actor items linked to the compendium catalog from the shipped pack, but
+// only when the system version changed (i.e. on a centralized system update). On an
+// unchanged version, re-entering the world leaves character-sheet items untouched.
+async function runCompendiumPackRefreshIfNeeded() {
   if (!isPrimaryActiveGM()) return null;
 
   const previousState = getGearCatalogAutoSyncState();
   const currentSystemVersion = String(game.system?.version ?? '').trim();
-  const result = await applyGearCatalogImport();
-  const sourceHash = String(result?.sourceHash ?? '').trim();
 
   if (
-    sourceHash &&
-    (sourceHash !== previousState.sourceHash || currentSystemVersion !== previousState.systemVersion)
+    previousState.systemVersion &&
+    currentSystemVersion &&
+    currentSystemVersion === previousState.systemVersion
   ) {
-    await setGearCatalogAutoSyncState({
-      sourceHash,
-      systemVersion: currentSystemVersion
+    debugLog('Compendium pack refresh skipped (system version unchanged)', {
+      currentSystemVersion
     });
+    return null;
   }
 
-  debugLog('Gear catalog auto sync completed', {
-    previousState,
-    sourceHash,
-    systemVersion: currentSystemVersion,
-    summary: result?.plan?.summary ?? null,
-    applied: result?.applied ?? null
+  const result = await refreshCompendiumLinkedActorItems();
+  await setGearCatalogAutoSyncState({
+    sourceHash: previousState.sourceHash,
+    systemVersion: currentSystemVersion
   });
 
+  debugLog('Compendium pack refresh completed', { currentSystemVersion, result });
   return result;
 }
 
@@ -1510,6 +1527,9 @@ Hooks.once('init', function () {
     migrateLegacyTraitTypes,
     mergeDuplicateLibraryItems,
     migrateActorItemsToLibrary,
+    migrateActorLinksToCompendium,
+    refreshCompendiumLinkedActorItems,
+    removeOrphanCatalogWorldItems,
     sessionStats,
     syncSharedHeroPointInputs
   };
@@ -1799,7 +1819,8 @@ Hooks.once('ready', async function () {
     await runLegacyTraitTypeMigrationIfNeeded();
     await purgeObsoleteCartridgeData();
     await runItemLibraryMigrationIfNeeded();
-    await runGearCatalogAutoSyncIfNeeded();
+    await runPackLinkMigrationIfNeeded();
+    await runCompendiumPackRefreshIfNeeded();
   } else {
     await purgeObsoleteCartridgeData();
   }

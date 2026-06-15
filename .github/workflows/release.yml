@@ -9,6 +9,8 @@ on:
       - "css/**"
       - "lang/**"
       - "assets/**"
+      - "data/gear/catalog/**"
+      - "tools/**"
       - "system.json"
       - "template.json"
 
@@ -20,6 +22,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build compendium packs
+        run: npm run build:pack
 
       - name: Read release version
         id: version
@@ -38,7 +51,7 @@ jobs:
       - name: Prepare dist
         run: |
           rm -rf dist && mkdir dist
-          cp -R module templates css lang assets dist/ 2>/dev/null || true
+          cp -R module templates css lang assets packs dist/ 2>/dev/null || true
           cp system.json template.json README.md LICENSE dist/ 2>/dev/null || true
 
       - name: Zip package

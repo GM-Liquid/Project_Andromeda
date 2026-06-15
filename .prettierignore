@@ -1,0 +1,18 @@
+# Dependencies & build output
+node_modules/
+.quartz-site/
+packs/
+dist/
+build/
+coverage/
+.npm-cache/
+pip/
+package-lock.json
+
+# Foundry Handlebars templates: Prettier's built-in glimmer parser does not
+# support Handlebars partials ({{>...}}) or Foundry helpers, so leave them alone.
+*.hbs
+*.handlebars
+
+# Public rulebook mirror (owned by the private docs repo)
+Книга правил v0.4/

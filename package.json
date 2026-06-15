@@ -4,16 +4,19 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:pack": "node tools/build-pack.mjs",
+    "lint": "eslint .",
+    "format": "prettier . --write",
+    "test": "node --test \"module/**/*.test.mjs\" \"data/gear/tests/**/*.test.mjs\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "classic-level": "^3.0.0",
     "eslint": "^9.28.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-import": "^2.31.0",
-    "prettier": "^3.5.3",
-    "prettier-plugin-handlebars": "^3.0.2"
+    "prettier": "^3.5.3"
   }
 }

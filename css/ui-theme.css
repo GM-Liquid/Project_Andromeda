@@ -57,10 +57,4 @@
   --item-sheet-label: var(--andromeda-item-sheet-label);
   --item-sheet-heading: var(--andromeda-item-sheet-heading);
   --item-sheet-background: var(--andromeda-item-sheet-background);
-
-  --andromeda-gradient-gear-sync: linear-gradient(
-    180deg,
-    var(--andromeda-raw-paper-300) 0%,
-    var(--andromeda-raw-paper-350) 100%
-  );
 }

@@ -16,7 +16,7 @@
       "thumbnail": "systems/project-andromeda/assets/Art_core_1.webp"
     }
   ],
-  "version": "0.3.6.2",
+  "version": "0.3.6.3",
   "compatibility": {
     "minimum": "12",
     "verified": "13"
@@ -40,7 +40,19 @@
       "path": "lang/en.json"
     }
   ],
-  "packs": [],
+  "packs": [
+    {
+      "name": "gear-library",
+      "label": "Abilities & Gear",
+      "path": "packs/gear-library",
+      "type": "Item",
+      "system": "project-andromeda",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    }
+  ],
   "packFolders": [],
   "socket": false,
   "manifest": "https://github.com/GM-Liquid/Project_Andromeda/releases/latest/download/system.json",
