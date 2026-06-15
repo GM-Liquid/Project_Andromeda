@@ -26,6 +26,8 @@ import {
   PACK_LINK_MIGRATION_SETTING,
   PACK_LINK_MIGRATION_VERSION,
   PROJECT_ANDROMEDA,
+  WEAPON_TYPE_MIGRATION_SETTING,
+  WEAPON_TYPE_MIGRATION_VERSION,
   debugLog,
   registerSystemSettings
 } from './config.mjs';
@@ -53,6 +55,7 @@ import {
   mergeDuplicateLibraryItems,
   migrateActorItemsToLibrary,
   migrateActorLinksToCompendium,
+  migrateCatalogWeaponsToWeaponType,
   refreshCompendiumLinkedActorItems,
   removeOrphanCatalogWorldItems,
   runItemLibraryMigrationIfNeeded,
@@ -1480,6 +1483,24 @@ async function runPackLinkMigrationIfNeeded() {
   return summary;
 }
 
+// One-time migration: convert actor items linked to a catalog entry that is now a
+// `weapon` (it used to be imported as `equipment`) into real `weapon` items. Skipped
+// without marking complete when the pack is unavailable, so it retries on a later load.
+async function runWeaponTypeMigrationIfNeeded() {
+  const currentVersion = Number(game.settings.get(MODULE_ID, WEAPON_TYPE_MIGRATION_SETTING)) || 0;
+  if (currentVersion >= WEAPON_TYPE_MIGRATION_VERSION) return null;
+
+  const summary = await migrateCatalogWeaponsToWeaponType();
+  if (!summary?.packAvailable) {
+    debugLog('Weapon type migration deferred (gear-library pack unavailable)');
+    return summary;
+  }
+
+  await game.settings.set(MODULE_ID, WEAPON_TYPE_MIGRATION_SETTING, WEAPON_TYPE_MIGRATION_VERSION);
+  debugLog('Weapon type migration completed', summary);
+  return summary;
+}
+
 // Refresh actor items linked to the compendium catalog from the shipped pack, but
 // only when the system version changed (i.e. on a centralized system update). On an
 // unchanged version, re-entering the world leaves character-sheet items untouched.
@@ -1528,6 +1549,7 @@ Hooks.once('init', function () {
     mergeDuplicateLibraryItems,
     migrateActorItemsToLibrary,
     migrateActorLinksToCompendium,
+    migrateCatalogWeaponsToWeaponType,
     refreshCompendiumLinkedActorItems,
     removeOrphanCatalogWorldItems,
     sessionStats,
@@ -1820,6 +1842,7 @@ Hooks.once('ready', async function () {
     await purgeObsoleteCartridgeData();
     await runItemLibraryMigrationIfNeeded();
     await runPackLinkMigrationIfNeeded();
+    await runWeaponTypeMigrationIfNeeded();
     await runCompendiumPackRefreshIfNeeded();
   } else {
     await purgeObsoleteCartridgeData();

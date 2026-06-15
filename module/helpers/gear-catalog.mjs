@@ -15,26 +15,56 @@ const GEAR_CATALOG_SYNC_ALLOWED_ACTIVATION_TYPES = new Set(
   Object.keys(ITEM_ACTIVATION_TYPE_LABEL_KEYS)
 );
 
-const GEAR_CATALOG_IMPORT_CONFIGS = [
-  {
-    catalogKey: 'armor',
-    sheetKey: 'armor',
-    itemType: 'armor',
-    folderName: 'Броня'
-  },
+// The equipment catalog is split into weapons and general items the same way the
+// public rulebook (Quartz) renders two tables: entries whose skill is a weapon skill
+// (melee / ranged) become real `weapon` items, everything else stays a general
+// `equipment` item shown under the "Предметы" / "Items" group.
+const GEAR_WEAPON_SKILL_KEYS = new Set(['blizhniy_boy', 'strelba']);
+
+const GEAR_ARMOR_CONFIG = {
+  catalogKey: 'armor',
+  sheetKey: 'armor',
+  itemType: 'armor',
+  folderName: 'Броня'
+};
+
+const GEAR_WEAPON_CONFIG = {
+  catalogKey: 'equipment',
+  sheetKey: 'weapons',
+  itemType: 'weapon',
+  folderName: 'Оружие'
+};
+
+const GEAR_ITEM_CONFIG = {
+  catalogKey: 'equipment',
+  sheetKey: 'equipment',
+  itemType: 'equipment',
+  folderName: 'Предметы'
+};
+
+const GEAR_ABILITY_CONFIG = {
+  catalogKey: 'abilities',
+  sheetKey: 'abilities',
+  itemType: 'trait-source-ability',
+  folderName: 'Способности'
+};
+
+function isWeaponCatalogEntry(entry) {
+  return GEAR_WEAPON_SKILL_KEYS.has(getGearCatalogSkill(entry));
+}
+
+// Each catalog source maps every entry to its output config. The equipment catalog
+// routes weapon-skilled entries to the weapon group and the rest to general items.
+const GEAR_CATALOG_SOURCES = [
+  { catalogKey: 'armor', resolveConfig: () => GEAR_ARMOR_CONFIG },
   {
     catalogKey: 'equipment',
-    sheetKey: 'equipment',
-    itemType: 'equipment',
-    folderName: 'Снаряжение'
+    resolveConfig: (entry) => (isWeaponCatalogEntry(entry) ? GEAR_WEAPON_CONFIG : GEAR_ITEM_CONFIG)
   },
-  {
-    catalogKey: 'abilities',
-    sheetKey: 'abilities',
-    itemType: 'trait-source-ability',
-    folderName: 'Способности'
-  }
+  { catalogKey: 'abilities', resolveConfig: () => GEAR_ABILITY_CONFIG }
 ];
+
+const GEAR_CATALOG_SHEET_KEYS = ['armor', 'weapons', 'equipment', 'abilities'];
 
 function deepClone(value) {
   if (typeof foundry !== 'undefined' && foundry.utils?.deepClone) {
@@ -262,6 +292,17 @@ function buildGearCatalogSystemData(entry, config) {
     };
   }
 
+  if (config.itemType === 'weapon') {
+    const skill = getGearCatalogSkill(entry);
+    return {
+      ...systemData,
+      quantity: 1,
+      requiresRoll: getGearCatalogRequiresRoll(entry),
+      skill,
+      skillBonus: getFirstOutcomeNumber(entry, ['damage'])
+    };
+  }
+
   const skill = getGearCatalogSkill(entry);
   return {
     ...systemData,
@@ -312,10 +353,15 @@ function buildGearCatalogImportRow(entry, config) {
 
 export function buildGearCatalogRemoteDataFromCatalogs(catalogs = {}) {
   const sheets = {};
-  for (const config of GEAR_CATALOG_IMPORT_CONFIGS) {
-    sheets[config.sheetKey] = normalizeCatalogEntries(catalogs[config.catalogKey]).map((entry) =>
-      buildGearCatalogImportRow(entry, config)
-    );
+  for (const sheetKey of GEAR_CATALOG_SHEET_KEYS) {
+    sheets[sheetKey] = [];
+  }
+
+  for (const source of GEAR_CATALOG_SOURCES) {
+    for (const entry of normalizeCatalogEntries(catalogs[source.catalogKey])) {
+      const config = source.resolveConfig(entry);
+      sheets[config.sheetKey].push(buildGearCatalogImportRow(entry, config));
+    }
   }
 
   return {

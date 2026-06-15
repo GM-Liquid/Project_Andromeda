@@ -844,6 +844,65 @@ export async function migrateActorLinksToCompendium() {
 }
 
 /**
+ * One-time migration — convert actor items that link to a compendium catalog entry
+ * which is now a `weapon` (catalog weapons used to be imported as `equipment`). A
+ * document's type is immutable, so each item is recreated as a `weapon` preserving
+ * its data/flags (including the compendium link and local quantity/equipped/cooldown)
+ * and the old `equipment` item is then deleted. Subsequent compendium refresh aligns
+ * the shared content. Returns `packAvailable: false` when the pack is missing so the
+ * caller can retry on a later load instead of marking the migration complete.
+ */
+export async function migrateCatalogWeaponsToWeaponType() {
+  if (!game.user?.isGM) return { packAvailable: false, actorsUpdated: 0, itemsConverted: 0 };
+
+  const pack = getGearLibraryPack();
+  if (!pack) return { packAvailable: false, actorsUpdated: 0, itemsConverted: 0 };
+
+  const weaponUuids = new Set();
+  for (const document of await pack.getDocuments()) {
+    if (document.type === 'weapon') weaponUuids.add(document.uuid);
+  }
+  if (!weaponUuids.size) return { packAvailable: true, actorsUpdated: 0, itemsConverted: 0 };
+
+  const migrationOptions = {
+    render: false,
+    [LIBRARY_SYNC_OPTION_KEY]: { source: 'weapon-type-migration' }
+  };
+
+  let actorsUpdated = 0;
+  let itemsConverted = 0;
+
+  for (const actor of getActors()) {
+    const legacyWeapons = (actor.items ?? []).filter((item) => {
+      if (item.type !== 'equipment') return false;
+      const uuid = getLibraryItemUuid(item);
+      return isCompendiumUuid(uuid) && weaponUuids.has(uuid);
+    });
+    if (!legacyWeapons.length) continue;
+
+    const createData = legacyWeapons.map((item) => {
+      const data = item.toObject();
+      delete data._id;
+      data.type = 'weapon';
+      return data;
+    });
+
+    await actor.createEmbeddedDocuments('Item', createData, migrationOptions);
+    await actor.deleteEmbeddedDocuments(
+      'Item',
+      legacyWeapons.map((item) => item.id),
+      migrationOptions
+    );
+
+    actorsUpdated += 1;
+    itemsConverted += legacyWeapons.length;
+  }
+
+  debugLog('Catalog weapons migrated to weapon item type', { actorsUpdated, itemsConverted });
+  return { packAvailable: true, actorsUpdated, itemsConverted };
+}
+
+/**
  * Opt-in cleanup of world catalog items (sheetSyncId `gear:*`) that no longer back
  * any actor item after the pack-link migration. Destructive, so it is GM-triggered
  * (game.projectAndromeda.removeOrphanCatalogWorldItems) and supports a dry run.

@@ -11,7 +11,7 @@
 | ----------------------------- | --------------------------------------------------------------- |
 | **System name**               | **Project Andromeda**                                           |
 | **Foundry VTT compatibility** | v12 (minimum 12, verified 13)                                   |
-| **Current version**           | `0.3.6.3`                                                       |
+| **Current version**           | `0.3.6.4`                                                       |
 | **Current release line**      | `0.3.6.x`                                                       |
 | **Languages**                 | English, Русский (full parity required)                         |
 | **Main tech**                 | ES-module JavaScript (`*.mjs`), Handlebars (`*.hbs`), JSON, CSS |
@@ -270,10 +270,11 @@ The shipped gear catalog lives in the **`gear-library` compendium pack**, built 
 - **Source of truth:** `data/gear/catalog/armor.json`, `equipment.json`, and `abilities.json` (mirrored from `Docs_Project_Andromeda/data/gear/catalog/` when the private repo is available). `concept-abilities.json` is never shipped.
 - **Build step:** `tools/build-pack.mjs` (`npm run build:pack`, uses `classic-level`) compiles those JSON files into `packs/gear-library`, reusing the runtime `buildGearCatalogRemoteDataFromCatalogs` transform so the pack never drifts from the catalog. The pack is a **build artifact**: gitignored, built locally and in CI (`release.yml`), and copied into the release zip. The pack is registered in `system.json` `packs[]`.
 - **Stable identity:** each pack item carries `flags.project-andromeda.sheetSyncId` (`gear:<catalog>:<id>`) and a `_id` derived deterministically from that sync id, so rebuilds keep the same compendium UUIDs and existing actor links survive.
-- **Folder layout:** pack folders group items by type and rank (`Броня/Ранг N`, `Снаряжение/Ранг N`, `Способности/Ранг N`; no valid rank → `Без ранга`).
+- **Folder layout:** pack folders group items by type and rank (`Броня/Ранг N`, `Оружие/Ранг N`, `Предметы/Ранг N`, `Способности/Ранг N`; no valid rank → `Без ранга`). The `equipment.json` catalog is split exactly like the public rulebook's two tables: weapon-skilled entries (`blizhniy_boy`/`strelba`) build real `weapon` items under `Оружие`, everything else stays `equipment` items (shown as **Предметы / Items**) under `Предметы`.
 - **Actor links:** a character-sheet item links to its pack source via `flags.project-andromeda.libraryItemUuid` set to the `Compendium.…` UUID. Dropping a pack (or world) item onto an actor stamps this link in the sheet's `_onDropItem`, so it reuses the source instead of creating a folderless world duplicate.
 - **Read-only canon:** compendium-linked items are canonical and read-only. A local edit on a character sheet stays local (it is never written back to the pack). On a system **version change**, `refreshCompendiumLinkedActorItems` pulls shared fields (name/img/system) down to every linked actor item while preserving local `quantity`/`equipped`/`cooldown`. Re-entering the world on an unchanged version touches nothing.
 - **One-time migration:** `migrateActorLinksToCompendium` (gated by `packLinkMigrationVersion`) repoints actor items that still link to a legacy world catalog item — or carry a gear-catalog key — at the matching pack item. It is non-destructive. The opt-in `game.projectAndromeda.removeOrphanCatalogWorldItems({ dryRun })` cleans up leftover `gear:*` world items afterwards.
+- **One-time weapon-type migration:** `migrateCatalogWeaponsToWeaponType` (gated by `weaponTypeMigrationVersion`) converts pre-existing actor items linked to a catalog entry that is now a `weapon` (catalog weapons used to import as `equipment`) into real `weapon` items, preserving the compendium link and local `quantity`/`equipped`/`cooldown`. A document's type is immutable, so it recreates the item and deletes the old one. It defers (without marking complete) when the pack is unavailable.
 - **No world-item importer:** the old JSON→world-items importer and the Gear Catalog Sync app have been removed. `module/helpers/gear-catalog.mjs` now holds only the pure JSON→Item-system transform (consumed by `tools/build-pack.mjs`); there is no in-world import path. The pack is the only distribution path. Catalog content is edited in JSON and shipped via `npm run build:pack`.
 
 ---
@@ -295,4 +296,4 @@ The shipped gear catalog lives in the **`gear-library` compendium pack**, built 
 
 ---
 
-_Last updated: 2026-06-15_
+_Last updated: 2026-06-16_

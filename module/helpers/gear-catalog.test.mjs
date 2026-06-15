@@ -147,3 +147,68 @@ test('gear catalog transform preserves freeAction abilities as freeAction activa
   assert.equal(abilityData.range, '15 m');
   assert.equal(abilityData.requiresRoll, false);
 });
+
+test('gear catalog transform splits weapon-skilled equipment into the weapon group', () => {
+  const remoteData = buildGearCatalogRemoteDataFromCatalogs({
+    armor: [],
+    abilities: [],
+    equipment: [
+      {
+        id: 'hunting-shotgun',
+        name: 'Hunting Shotgun',
+        type: 'equipment',
+        rank: 2,
+        skill: 'strelba',
+        description: 'Damage: 2.',
+        mechanics: {
+          effects: [{ activation: { type: 'action' }, outcomes: [{ key: 'damage', value: 2 }] }]
+        }
+      },
+      {
+        id: 'combat-knife',
+        name: 'Combat Knife',
+        type: 'equipment',
+        rank: 1,
+        skill: 'blizhniy_boy',
+        description: 'Damage: 1.',
+        mechanics: {
+          effects: [{ activation: { type: 'action' }, outcomes: [{ key: 'damage', value: 1 }] }]
+        }
+      },
+      {
+        id: 'medkit',
+        name: 'Medkit',
+        type: 'equipment',
+        rank: 1,
+        skill: 'medicina',
+        description: 'Heal an ally.',
+        mechanics: { effects: [{ activation: { type: 'action' } }] }
+      }
+    ]
+  });
+
+  // Weapon-skilled entries become real weapon items filed under "Оружие".
+  assert.equal(remoteData.sheets.weapons.length, 2);
+  assert.deepEqual(remoteData.sheets.weapons.map((row) => row.name).sort(), [
+    'Combat Knife',
+    'Hunting Shotgun'
+  ]);
+  for (const row of remoteData.sheets.weapons) {
+    assert.equal(row.type, 'weapon');
+    assert.ok(row.folderPath.startsWith('Оружие/'));
+    const systemData = getSystemData(row);
+    assert.equal(systemData.quantity, 1);
+    assert.equal(systemData.requiresRoll, true);
+  }
+  const shotgunData = getSystemData(
+    remoteData.sheets.weapons.find((row) => row.name === 'Hunting Shotgun')
+  );
+  assert.equal(shotgunData.skillBonus, 2);
+
+  // Everything else stays a general equipment item filed under "Предметы".
+  assert.equal(remoteData.sheets.equipment.length, 1);
+  const itemRow = remoteData.sheets.equipment[0];
+  assert.equal(itemRow.name, 'Medkit');
+  assert.equal(itemRow.type, 'equipment');
+  assert.ok(itemRow.folderPath.startsWith('Предметы/'));
+});
