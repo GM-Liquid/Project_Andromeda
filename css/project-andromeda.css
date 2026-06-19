@@ -1015,8 +1015,7 @@ textarea[disabled] {
 
 .project-andromeda .andromeda-status-card,
 .project-andromeda .andromeda-command-panel,
-.project-andromeda .andromeda-ability-card,
-.project-andromeda .item-group {
+.project-andromeda .andromeda-ability-card {
   border: 1px solid var(--andromeda-color-line, var(--andromeda-fallback-line));
   border-radius: var(--andromeda-radius-md, var(--andromeda-fallback-radius-md));
   background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
@@ -1128,6 +1127,7 @@ textarea[disabled] {
 .project-andromeda .andromeda-hud--player .andromeda-status-card {
   align-items: center;
   justify-content: center;
+  padding-block: 3px;
   text-align: center;
 }
 
@@ -1173,6 +1173,16 @@ textarea[disabled] {
 .project-andromeda .andromeda-hud--player .andromeda-status-card input,
 .project-andromeda .andromeda-hud--player .andromeda-status-card strong {
   text-align: center !important;
+}
+
+/* Slim the value fields by 6px and hand it back as 3px top/bottom card padding
+   (see .andromeda-hud--player .andromeda-status-card) so the box keeps its original
+   height while the label + value sit centered instead of pinned to the top edge. */
+.project-andromeda .andromeda-hud--player .andromeda-status-card input,
+.project-andromeda .andromeda-hud--player .andromeda-status-card strong,
+.project-andromeda .andromeda-hud--player .andromeda-status-card .andromeda-status-separator {
+  height: 20px;
+  min-height: 20px;
 }
 
 .project-andromeda .andromeda-hud__rank-column .andromeda-status-card--rank-progress {
@@ -2001,10 +2011,17 @@ textarea[disabled] {
   margin-bottom: var(--inventory-section-gap);
 }
 
+/* The personality tab spaces its sections with the panel's flex gap, so the
+   values group (now first) must not add its own trailing margin on top of that. */
+.project-andromeda .personality-item-groups {
+  margin-bottom: 0;
+}
+
 .project-andromeda .item-group {
+  overflow: hidden;
   color: var(--andromeda-color-text, var(--andromeda-fallback-text));
-  border: 1px solid var(--andromeda-color-line, var(--andromeda-fallback-line));
-  border-radius: var(--andromeda-radius-md, var(--andromeda-fallback-radius-md));
+  border: 2px solid var(--andromeda-color-text, var(--andromeda-fallback-text));
+  border-radius: var(--andromeda-radius-lg, var(--andromeda-fallback-radius-lg));
   background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
 }
 
@@ -2020,6 +2037,11 @@ textarea[disabled] {
 .project-andromeda .item-row {
   padding: 0;
   border-top: 1px solid var(--andromeda-color-line-soft);
+}
+
+/* The card's top border / header divider already separates the first row. */
+.project-andromeda .item-list .item-row:first-child {
+  border-top: 0;
 }
 
 .project-andromeda .item-row__header {
@@ -2081,7 +2103,7 @@ textarea[disabled] {
   grid-template-columns: var(--andromeda-item-table-columns);
   gap: 0.45rem;
   padding: 0.55rem 0.6rem;
-  border-bottom: 1px solid var(--andromeda-color-line-soft);
+  border-bottom: 2px solid var(--andromeda-color-text, var(--andromeda-fallback-text));
   align-items: center;
   background: var(--andromeda-color-panel, var(--andromeda-fallback-panel));
   color: var(--andromeda-color-muted, var(--andromeda-fallback-muted));
@@ -2182,10 +2204,7 @@ textarea[disabled] {
   color: var(--andromeda-color-text, var(--andromeda-fallback-text));
 }
 
-.project-andromeda
-  [data-item-group='abilities']
-  .item-row--cooldown-used
-  .item-row__summary-grid {
+.project-andromeda [data-item-group='abilities'] .item-row--cooldown-used .item-row__summary-grid {
   color: var(--andromeda-color-muted, var(--andromeda-fallback-muted));
 }
 
@@ -2439,44 +2458,62 @@ textarea[disabled] {
   gap: 12px;
 }
 
-.project-andromeda .personality-sheet-box--appearance {
-  padding: 12px;
-  border: 1px solid var(--andromeda-color-line, var(--andromeda-fallback-line));
-  border-radius: var(--andromeda-radius-md, var(--andromeda-fallback-radius-md));
+/* Titled card: centered header strip over a content body. Shared by the
+   personality tab (appearance / feature / weakness) and the combat cheat sheet. */
+.project-andromeda .andromeda-titled-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 2px solid var(--andromeda-color-text, var(--andromeda-fallback-text));
+  border-radius: var(--andromeda-radius-lg, var(--andromeda-fallback-radius-lg));
   background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
 }
 
-.project-andromeda .personality-field--appearance {
-  gap: 8px;
+.project-andromeda .andromeda-titled-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 12px;
+  border-bottom: 2px solid var(--andromeda-color-text, var(--andromeda-fallback-text));
+  background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
 }
 
-.project-andromeda .personality-field--appearance > span {
+.project-andromeda .andromeda-titled-card__title {
   color: var(--andromeda-color-text, var(--andromeda-fallback-text));
   font-family: var(--andromeda-font-heading, var(--andromeda-fallback-font-heading));
   font-size: var(--andromeda-font-size-label, var(--andromeda-fallback-font-size-label));
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: center;
   text-transform: uppercase;
 }
 
-.project-andromeda .personality-field__input {
+.project-andromeda .andromeda-titled-card__body {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 12px;
+  background: var(--andromeda-color-panel, var(--andromeda-fallback-panel));
+}
+
+.project-andromeda .andromeda-titled-card__input {
   min-height: 4.5rem;
-  padding: 8px 10px;
-  border: 1px solid var(--andromeda-color-line-soft, var(--andromeda-fallback-line)) !important;
-  border-radius: var(--andromeda-radius-sm, var(--andromeda-fallback-radius-sm));
-  background: var(--andromeda-color-panel, var(--andromeda-fallback-panel)) !important;
+  padding: 0;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
   color: var(--andromeda-color-text, var(--andromeda-fallback-text)) !important;
   line-height: 1.45;
   resize: none;
   overflow: hidden;
 }
 
-.project-andromeda .andromeda-combat-cheat-sheet-tab {
-  gap: 12px;
+.project-andromeda .andromeda-titled-card__input:focus {
+  outline: none;
+  box-shadow: none !important;
 }
 
-.project-andromeda .combat-cheat-sheet-box {
-  padding: 12px;
+.project-andromeda .andromeda-combat-cheat-sheet-tab {
+  gap: 12px;
 }
 
 .project-andromeda .combat-cheat-sheet__input {
@@ -2486,12 +2523,6 @@ textarea[disabled] {
   box-sizing: border-box;
   overflow: visible !important;
   white-space: pre-wrap;
-}
-
-.project-andromeda .combat-cheat-sheet__input:focus {
-  border-color: var(--andromeda-raw-shadow-accent-35) !important;
-  outline: 2px solid var(--andromeda-raw-shadow-accent-16);
-  outline-offset: 0;
 }
 
 .project-andromeda .combat-cheat-sheet__input[aria-readonly='true'] {
@@ -2600,4 +2631,61 @@ textarea[disabled] {
   .temp-bonus-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+
+/* GM Tools panel */
+.andromeda-gm-tools-app .window-content {
+  padding: 12px;
+}
+
+.andromeda-gm-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-family: var(--andromeda-font-body, inherit);
+  color: var(--andromeda-color-text, inherit);
+}
+
+.andromeda-gm-tools__group {
+  margin: 0;
+  padding: 8px 12px 12px;
+  border: 1px solid var(--andromeda-color-line, #999);
+  border-radius: var(--andromeda-radius-md, 7px);
+}
+
+.andromeda-gm-tools__group legend {
+  padding: 0 6px;
+  font-family: var(--andromeda-font-heading, inherit);
+  font-size: var(--andromeda-font-size-ui, 0.8125rem);
+  font-weight: 600;
+}
+
+.andromeda-gm-tools__options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 14px;
+}
+
+.andromeda-gm-tools__option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: var(--andromeda-font-size-body, 0.875rem);
+}
+
+.andromeda-gm-tools__option input {
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.andromeda-gm-tools__refresh {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: var(--andromeda-radius-md, 7px);
+  cursor: pointer;
 }

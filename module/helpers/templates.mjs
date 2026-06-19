@@ -19,7 +19,8 @@ export const preloadHandlebarsTemplates = async function () {
     'systems/project-andromeda/templates/item/implant-sheet.hbs',
     'systems/project-andromeda/templates/item/armor-sheet.hbs',
     'systems/project-andromeda/templates/item/weapon-sheet.hbs',
-    'systems/project-andromeda/templates/item/generic-sheet.hbs'
+    'systems/project-andromeda/templates/item/generic-sheet.hbs',
+    'systems/project-andromeda/templates/apps/gm-tools.hbs'
   ];
   return loadFoundryTemplates(paths);
 };

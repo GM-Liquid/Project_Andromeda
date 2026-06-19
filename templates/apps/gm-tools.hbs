@@ -1,0 +1,22 @@
+<section class='andromeda-gm-tools'>
+  <fieldset class='andromeda-gm-tools__group'>
+    <legend>{{localize 'MY_RPG.GmTools.RefreshFeatures'}}</legend>
+    <div class='andromeda-gm-tools__options'>
+      {{#each scopes}}
+        <label class='andromeda-gm-tools__option'>
+          <input
+            type='radio'
+            name='refreshScope'
+            value='{{this.value}}'
+            {{#if this.checked}}checked{{/if}}
+          />
+          <span>{{this.label}}</span>
+        </label>
+      {{/each}}
+    </div>
+  </fieldset>
+  <button type='button' class='andromeda-gm-tools__refresh' data-action='refresh'>
+    <i class='fa-solid fa-arrows-rotate'></i>
+    <span>{{localize 'MY_RPG.GmTools.Refresh'}}</span>
+  </button>
+</section>

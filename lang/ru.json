@@ -230,6 +230,8 @@
     },
     "Personality": {
       "Feature": "Особенность",
+      "Weakness": "Слабость",
+      "Temperament": "Характер",
       "Archetype": "Архетип",
       "Appearance": "Внешний вид",
       "Backstory": "Предыстория"
@@ -424,7 +426,11 @@
     },
     "ItemDialogs": {
       "DeleteTitle": "Удалить {type}",
-      "DeleteContent": "Вы уверены, что хотите удалить {name}? Это действие нельзя отменить."
+      "DeleteContent": "Вы уверены, что хотите удалить {name}? Это действие нельзя отменить.",
+      "CreateModePrompt": "Добавить в раздел «{section}»: выбрать готовую запись из компендиума или создать новую.",
+      "CreateNew": "Создать предмет",
+      "BrowseCompendium": "Открыть компендиум",
+      "CompendiumMissing": "Компендиум gear-library недоступен."
     },
     "SessionTracker": {
       "Notifications": {
@@ -493,6 +499,21 @@
       "Label": "Тип персонажа",
       "Save": "Сохранить",
       "Cancel": "Отмена"
+    },
+    "GmTools": {
+      "Title": "Инструменты ГМ",
+      "RefreshFeatures": "Обновление",
+      "Refresh": "Обновить",
+      "Scope": {
+        "Scene": "Сцена"
+      },
+      "Notifications": {
+        "SceneRefreshDone": "Сцена обновлена: сброшено персонажей игроков — {actors}, освобождено использованных способностей — {abilities}."
+      },
+      "Errors": {
+        "RequireGM": "Инструменты ГМ доступны только Мастеру.",
+        "NotImplemented": "Этот вариант обновления ещё не реализован."
+      }
     }
   },
   "TYPES": {

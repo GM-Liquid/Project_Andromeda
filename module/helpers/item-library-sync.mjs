@@ -10,6 +10,7 @@ const LIBRARY_SYNC_OPTION_KEY = 'projectAndromedaLibrarySync';
 const LIBRARY_ITEM_UUID_FLAG = 'libraryItemUuid';
 const LIBRARY_ACTOR_ID_FLAG = 'libraryActorId';
 const LIBRARY_ACTOR_ITEM_ID_FLAG = 'libraryActorItemId';
+const ACTOR_ITEM_FOLDER_FLAG = 'actorItemFolder';
 const LOCAL_SYSTEM_FIELDS = new Set(['cooldown', 'equipped', 'quantity']);
 const SYNCED_ITEM_TYPES = new Set(getItemGroupConfigs().flatMap((config) => config.types));
 
@@ -230,6 +231,69 @@ function chooseCanonicalLibraryItem(items) {
   })[0];
 }
 
+// Homebrew created on a character sheet is backed by a world Item. File that source
+// under an Items folder named after the owning actor, creating the folder on demand.
+// Only applied when the world Item is first created — already-foldered library items
+// are never moved (a shared homebrew item keeps the folder of the actor it came from).
+async function ensureActorItemFolderId(actor) {
+  const folderName = String(actor?.name ?? '').trim();
+  if (!folderName) return null;
+
+  const existing = game.folders?.find(
+    (folder) => folder.type === 'Item' && folder.name === folderName
+  );
+  if (existing) return existing.id;
+
+  // Flag folders we create so the empty-folder cleanup only ever removes our own
+  // per-character folders and never a folder the user authored by hand.
+  const created = await Folder.create({
+    name: folderName,
+    type: 'Item',
+    flags: { [MODULE_ID]: { [ACTOR_ITEM_FOLDER_FLAG]: true } }
+  });
+  return created?.id ?? null;
+}
+
+function getItemFolderId(document) {
+  const folder = document?.folder;
+  if (!folder) return null;
+  return typeof folder === 'string' ? folder : (folder.id ?? null);
+}
+
+function isManagedActorItemFolder(folder) {
+  if (!folder || folder.type !== 'Item') return false;
+  const flagValue =
+    folder.getFlag?.(MODULE_ID, ACTOR_ITEM_FOLDER_FLAG) ??
+    folder.flags?.[MODULE_ID]?.[ACTOR_ITEM_FOLDER_FLAG];
+  return Boolean(flagValue);
+}
+
+function isItemFolderEmpty(folderId) {
+  if (getWorldItems().some((item) => getItemFolderId(item) === folderId)) return false;
+  const childFolders = game.folders?.contents ?? [];
+  return !childFolders.some(
+    (folder) => folder.type === 'Item' && getItemFolderId(folder) === folderId
+  );
+}
+
+// Remove an auto-created per-character Items folder once it holds no item or subfolder,
+// so emptied character folders don't linger. Only folders this system created (flagged)
+// are removed; user-authored folders are left untouched.
+export async function removeManagedItemFolderIfEmpty(folderId) {
+  const normalizedId = String(folderId ?? '').trim();
+  if (!normalizedId) return false;
+
+  const folder = game.folders?.get(normalizedId);
+  if (!isManagedActorItemFolder(folder)) return false;
+  if (!isItemFolderEmpty(normalizedId)) return false;
+
+  await folder.delete({
+    [LIBRARY_SYNC_OPTION_KEY]: { source: 'actor-item-folder-cleanup' }
+  });
+  renderItemDirectory();
+  return true;
+}
+
 function buildLibraryItemCreateData(actorItem) {
   const actor = actorItem.parent;
   const payload = buildSharedItemPayload(actorItem);
@@ -438,7 +502,10 @@ export async function ensureActorItemLibraryLink(actorItem, options = {}) {
   }
 
   if (!libraryItem) {
-    libraryItem = await Item.create(buildLibraryItemCreateData(actorItem), {
+    const createData = buildLibraryItemCreateData(actorItem);
+    const folderId = await ensureActorItemFolderId(actorItem.parent);
+    if (folderId) createData.folder = folderId;
+    libraryItem = await Item.create(createData, {
       render: false,
       [LIBRARY_SYNC_OPTION_KEY]: {
         source: 'actor-create-library'
@@ -531,6 +598,37 @@ export async function syncLinkedLibraryItemStructure(item, options = {}) {
   }
 
   return syncLibraryItemStructure(libraryItem, options);
+}
+
+// Run on deletion of an actor item. While other actor items still link to the world
+// source, just resync its shared structure. When the deleted item was the last link,
+// delete the now-orphaned world source — and clean up its emptied per-character folder
+// — so the Items directory never shows a library item that no character uses.
+// Compendium-linked items resolve to no world source and are left untouched (read-only
+// canon: we never delete from the shipped pack).
+export async function cleanupLibraryLinkOnActorItemDelete(item) {
+  const libraryItem = getLinkedWorldItem(item);
+  if (!libraryItem) return { updated: false, deleted: false };
+
+  if (getLinkedActorItems(libraryItem.uuid).length) {
+    const result = await syncLibraryItemStructure(libraryItem, { renderDirectory: true });
+    return { updated: Boolean(result.updated), deleted: false };
+  }
+
+  // Legacy gear-catalog world items (sheetSyncId `gear:*`) are deprecated canon cleaned
+  // up by the opt-in removeOrphanCatalogWorldItems pass, not by this homebrew cascade.
+  if (getGearCatalogSyncId(libraryItem).startsWith('gear:')) {
+    return { updated: false, deleted: false };
+  }
+
+  const folderId = getItemFolderId(libraryItem);
+  await libraryItem.delete({
+    render: false,
+    [LIBRARY_SYNC_OPTION_KEY]: { source: 'actor-delete-orphan-cleanup' }
+  });
+  await removeManagedItemFolderIfEmpty(folderId);
+  renderItemDirectory();
+  return { updated: false, deleted: true };
 }
 
 export async function mergeDuplicateLibraryItems() {
@@ -728,7 +826,7 @@ function getGearCatalogSyncId(item) {
   return '';
 }
 
-function getGearLibraryPack() {
+export function getGearLibraryPack() {
   return game.packs?.get(GEAR_LIBRARY_PACK_ID) ?? null;
 }
 

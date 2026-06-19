@@ -319,21 +319,70 @@
                 data-group='primary'
                 data-tab='personality'
               >
-                <section class='andromeda-command-panel personality-sheet-box personality-sheet-box--appearance'>
-                  <label class='form-group personality-field personality-field--appearance'>
-                    <span>{{localize 'MY_RPG.Personality.Appearance'}}</span>
-                    <textarea
-                      class='auto-resize-textarea personality-field__input'
-                      name='system.biography.appearance'
-                      rows='3'
-                    >{{system.biography.appearance}}</textarea>
-                  </label>
-                </section>
-
                 <section class='item-groups personality-item-groups' data-groups='personality'>
                   {{#if personalityValueGroup}}
                     {{> "systems/project-andromeda/templates/actor/partials/item-group-section.hbs" group=personalityValueGroup}}
                   {{/if}}
+                </section>
+
+                <section class='andromeda-titled-card personality-sheet-box personality-sheet-box--feature'>
+                  <header class='andromeda-titled-card__header'>
+                    <span class='andromeda-titled-card__title'>
+                      {{localize 'MY_RPG.Personality.Feature'}}
+                    </span>
+                  </header>
+                  <label class='andromeda-titled-card__body personality-field'>
+                    <textarea
+                      class='auto-resize-textarea andromeda-titled-card__input'
+                      name='system.biography.feature'
+                      rows='3'
+                    >{{system.biography.feature}}</textarea>
+                  </label>
+                </section>
+
+                <section class='andromeda-titled-card personality-sheet-box personality-sheet-box--weakness'>
+                  <header class='andromeda-titled-card__header'>
+                    <span class='andromeda-titled-card__title'>
+                      {{localize 'MY_RPG.Personality.Weakness'}}
+                    </span>
+                  </header>
+                  <label class='andromeda-titled-card__body personality-field'>
+                    <textarea
+                      class='auto-resize-textarea andromeda-titled-card__input'
+                      name='system.biography.weakness'
+                      rows='3'
+                    >{{system.biography.weakness}}</textarea>
+                  </label>
+                </section>
+
+                <section class='andromeda-titled-card personality-sheet-box personality-sheet-box--temperament'>
+                  <header class='andromeda-titled-card__header'>
+                    <span class='andromeda-titled-card__title'>
+                      {{localize 'MY_RPG.Personality.Temperament'}}
+                    </span>
+                  </header>
+                  <label class='andromeda-titled-card__body personality-field'>
+                    <textarea
+                      class='auto-resize-textarea andromeda-titled-card__input'
+                      name='system.biography.temperament'
+                      rows='3'
+                    >{{system.biography.temperament}}</textarea>
+                  </label>
+                </section>
+
+                <section class='andromeda-titled-card personality-sheet-box personality-sheet-box--appearance'>
+                  <header class='andromeda-titled-card__header'>
+                    <span class='andromeda-titled-card__title'>
+                      {{localize 'MY_RPG.Personality.Appearance'}}
+                    </span>
+                  </header>
+                  <label class='andromeda-titled-card__body personality-field'>
+                    <textarea
+                      class='auto-resize-textarea andromeda-titled-card__input'
+                      name='system.biography.appearance'
+                      rows='3'
+                    >{{system.biography.appearance}}</textarea>
+                  </label>
                 </section>
               </div>
             {{/if}}
@@ -343,32 +392,36 @@
               data-group='primary'
               data-tab='combatCheatSheet'
             >
-              <section
-                class='andromeda-command-panel personality-sheet-box personality-sheet-box--appearance combat-cheat-sheet-box'
-              >
-                <label class='form-group personality-field personality-field--appearance combat-cheat-sheet-field'>
-                  <span>{{localize 'MY_RPG.CombatCheatSheet.CombatActionsTitle'}}</span>
+              <section class='andromeda-titled-card combat-cheat-sheet-box'>
+                <header class='andromeda-titled-card__header'>
+                  <span class='andromeda-titled-card__title'>
+                    {{localize 'MY_RPG.CombatCheatSheet.CombatActionsTitle'}}
+                  </span>
+                </header>
+                <div class='andromeda-titled-card__body'>
                   <div
-                    class='personality-field__input combat-cheat-sheet__input'
+                    class='andromeda-titled-card__input combat-cheat-sheet__input'
                     role='textbox'
                     aria-readonly='true'
                     tabindex='0'
                   >{{localize 'MY_RPG.CombatCheatSheet.CombatActionsText'}}</div>
-                </label>
+                </div>
               </section>
 
-              <section
-                class='andromeda-command-panel personality-sheet-box personality-sheet-box--appearance combat-cheat-sheet-box'
-              >
-                <label class='form-group personality-field personality-field--appearance combat-cheat-sheet-field'>
-                  <span>{{localize 'MY_RPG.CombatCheatSheet.HeroismTitle'}}</span>
+              <section class='andromeda-titled-card combat-cheat-sheet-box'>
+                <header class='andromeda-titled-card__header'>
+                  <span class='andromeda-titled-card__title'>
+                    {{localize 'MY_RPG.CombatCheatSheet.HeroismTitle'}}
+                  </span>
+                </header>
+                <div class='andromeda-titled-card__body'>
                   <div
-                    class='personality-field__input combat-cheat-sheet__input'
+                    class='andromeda-titled-card__input combat-cheat-sheet__input'
                     role='textbox'
                     aria-readonly='true'
                     tabindex='0'
                   >{{localize 'MY_RPG.CombatCheatSheet.HeroismText'}}</div>
-                </label>
+                </div>
               </section>
             </div>
           </section>

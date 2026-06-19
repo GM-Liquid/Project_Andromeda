@@ -230,6 +230,8 @@
     },
     "Personality": {
       "Feature": "Feature",
+      "Weakness": "Weakness",
+      "Temperament": "Temperament",
       "Archetype": "Archetype",
       "Appearance": "Appearance",
       "Backstory": "Backstory"
@@ -424,7 +426,11 @@
     },
     "ItemDialogs": {
       "DeleteTitle": "Delete {type}",
-      "DeleteContent": "Are you sure you want to delete {name}? This action cannot be undone."
+      "DeleteContent": "Are you sure you want to delete {name}? This action cannot be undone.",
+      "CreateModePrompt": "Add to {section}: pick a ready entry from the compendium or create a new one.",
+      "CreateNew": "Create Item",
+      "BrowseCompendium": "Browse Compendium",
+      "CompendiumMissing": "The gear-library compendium is not available."
     },
     "MomentOfGloryBonus": {
       "ContextLabel": "Highlight bonus. Costs 1 Highlight Point.",
@@ -492,6 +498,21 @@
         "NotAvailable": "N/A",
         "DurationMinutes": "{minutes}m",
         "DurationHoursMinutes": "{hours}h {minutes}m"
+      }
+    },
+    "GmTools": {
+      "Title": "GM Tools",
+      "RefreshFeatures": "Refresh Features",
+      "Refresh": "Refresh",
+      "Scope": {
+        "Scene": "Scene"
+      },
+      "Notifications": {
+        "SceneRefreshDone": "Scene refreshed: reset {actors} player character(s) and freed {abilities} used ability(ies)."
+      },
+      "Errors": {
+        "RequireGM": "Only a GM can use GM Tools.",
+        "NotImplemented": "This refresh option is not implemented yet."
       }
     }
   },

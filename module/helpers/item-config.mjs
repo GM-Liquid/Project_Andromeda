@@ -589,9 +589,15 @@ export const ITEM_TYPE_CONFIGS = [
   }
 ];
 
+// `compendiumFolder` names the top-level folder inside the shipped `gear-library`
+// pack that holds this group's catalog. It must match the folder names produced by
+// the catalog transform (see `module/helpers/gear-catalog.mjs`) so the sheet's
+// "Browse Compendium" action can open straight to the matching section. Groups
+// without a catalog (e.g. personality values) omit it and create directly.
 export const ITEM_GROUP_CONFIGS = [
   {
     key: 'abilities',
+    compendiumFolder: 'Способности',
     types: [
       'trait-source-ability',
       'trait-genome',
@@ -621,6 +627,7 @@ export const ITEM_GROUP_CONFIGS = [
   },
   {
     key: 'weapons',
+    compendiumFolder: 'Оружие',
     types: ['weapon'],
     tab: 'inventory',
     icon: 'fas fa-crosshairs',
@@ -635,6 +642,7 @@ export const ITEM_GROUP_CONFIGS = [
   },
   {
     key: 'armor',
+    compendiumFolder: 'Броня',
     types: ['armor'],
     tab: 'inventory',
     icon: 'fas fa-shield-alt',
@@ -649,6 +657,7 @@ export const ITEM_GROUP_CONFIGS = [
   },
   {
     key: 'equipment',
+    compendiumFolder: 'Предметы',
     types: ['equipment', 'equipment-consumable', 'implant', 'cartridge'],
     createTypes: ['equipment'],
     tab: 'inventory',

@@ -40,11 +40,42 @@ import {
   getItemTabLabel
 } from '../helpers/item-config.mjs';
 import {
+  getGearLibraryPack,
   isLibrarySyncManagedType,
   setLibraryItemLinkOnData
 } from '../helpers/item-library-sync.mjs';
 
 export const FoundryActorSheet = getFoundryActorSheetClass();
+
+// Open the shipped gear-library compendium and, when possible, expand + scroll to the
+// folder that holds the requested group's catalog. Expanding the folder is best-effort
+// (the pack still opens if the layout differs across Foundry versions).
+async function openGearLibraryCatalogSection(folderName) {
+  const pack = getGearLibraryPack();
+  if (!pack) {
+    ui.notifications?.warn(game.i18n.localize('MY_RPG.ItemDialogs.CompendiumMissing'));
+    return;
+  }
+
+  const folder =
+    folderName && pack.folders ? pack.folders.find((entry) => entry.name === folderName) : null;
+
+  if (folder) {
+    // Use a self-removing listener rather than Hooks.once: a different compendium
+    // rendering first must not consume the one-shot before our pack opens.
+    const hookId = Hooks.on('renderCompendium', (app, html) => {
+      if (app?.collection?.metadata?.id !== pack.metadata?.id) return;
+      Hooks.off('renderCompendium', hookId);
+      const root = html?.[0] ?? html;
+      const folderEl = root?.querySelector?.(`[data-folder-id="${folder.id}"]`);
+      if (!folderEl) return;
+      folderEl.classList.remove('collapsed');
+      (folderEl.querySelector('.folder-header') ?? folderEl).scrollIntoView?.({ block: 'start' });
+    });
+  }
+
+  pack.render(true);
+}
 
 function getRankLabel(rank) {
   return game.i18n.localize(`MY_RPG.RankNumeric.Rank${rank}`);
@@ -504,6 +535,8 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     context.system.biography = {
       ...rawBiography,
       feature: String(rawBiography.feature ?? ''),
+      weakness: String(rawBiography.weakness ?? ''),
+      temperament: String(rawBiography.temperament ?? ''),
       archetype: String(rawBiography.archetype ?? ''),
       appearance: String(rawBiography.appearance ?? ''),
       backstory: String(rawBiography.backstory ?? rawBiography.story ?? '')
@@ -1751,6 +1784,57 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       config = getItemGroupConfigs().find((entry) => entry.types.includes(type)) ?? null;
     }
     if (!config) return;
+
+    // Groups backed by the shipped catalog let the user pick a ready compendium entry
+    // or author a new one; groups without a catalog go straight to authoring.
+    if (config.compendiumFolder && getGearLibraryPack()) {
+      const mode = await this._promptItemCreationMode(config);
+      if (!mode) return;
+      if (mode === 'browse') {
+        await openGearLibraryCatalogSection(config.compendiumFolder);
+        return;
+      }
+    }
+
+    await this._createGroupItem(config);
+  }
+
+  async _promptItemCreationMode(config) {
+    const sectionLabel = game.i18n.localize(config.labelKey);
+    const content = `<p class="item-create-mode">${this._escapeHTML(
+      game.i18n.format('MY_RPG.ItemDialogs.CreateModePrompt', { section: sectionLabel })
+    )}</p>`;
+
+    return new Promise((resolve) => {
+      let settled = false;
+      const finish = (value) => {
+        if (settled) return;
+        settled = true;
+        resolve(value);
+      };
+
+      new Dialog({
+        title: game.i18n.localize(config.createKey),
+        content,
+        buttons: {
+          create: {
+            icon: '<i class="fas fa-plus"></i>',
+            label: game.i18n.localize('MY_RPG.ItemDialogs.CreateNew'),
+            callback: () => finish('create')
+          },
+          browse: {
+            icon: '<i class="fas fa-book-open"></i>',
+            label: game.i18n.localize('MY_RPG.ItemDialogs.BrowseCompendium'),
+            callback: () => finish('browse')
+          }
+        },
+        default: 'create',
+        close: () => finish(null)
+      }).render(true);
+    });
+  }
+
+  async _createGroupItem(config) {
     const selectedType = await this._promptForItemType(config);
     if (!selectedType) return;
     const name = this._getDefaultItemNameForType(selectedType, config);

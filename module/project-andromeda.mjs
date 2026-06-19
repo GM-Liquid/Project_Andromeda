@@ -9,6 +9,8 @@ import {
   updateActorDocumentType
 } from './sheets/actor-sheet.mjs';
 import { FoundryItemSheet, ITEM_SHEET_CLASSES } from './sheets/item-sheet.mjs';
+// Import application classes.
+import { GmToolsApp } from './apps/gm-tools.mjs';
 // Import helper/utility classes and constants.
 import { preloadHandlebarsTemplates } from './helpers/templates.mjs';
 import {
@@ -47,6 +49,7 @@ import {
 import { SessionStatsService } from './helpers/session-stats.mjs';
 import { buildRollRerollSpec, rerollRollPreservingContext } from './helpers/roll-reroll.mjs';
 import {
+  cleanupLibraryLinkOnActorItemDelete,
   ensureActorItemLibraryLink,
   getLibraryItemUuid,
   getLibrarySyncOptionKey,
@@ -57,11 +60,11 @@ import {
   migrateActorLinksToCompendium,
   migrateCatalogWeaponsToWeaponType,
   refreshCompendiumLinkedActorItems,
+  removeManagedItemFolderIfEmpty,
   removeOrphanCatalogWorldItems,
   runItemLibraryMigrationIfNeeded,
   syncActorItemToLibrary,
   syncActorLibraryStructure,
-  syncLinkedLibraryItemStructure,
   syncLibraryItemToActors,
   unlinkLibraryItemFromActors
 } from './helpers/item-library-sync.mjs';
@@ -652,6 +655,37 @@ function pushUniqueContextOption(options, entry) {
   options.push(entry);
 }
 
+function registerGmToolsSceneControl(controls) {
+  if (!game.user?.isGM) return;
+
+  const tool = {
+    name: 'andromeda-gm-tools',
+    title: game.i18n.localize('MY_RPG.GmTools.Title'),
+    icon: 'fa-solid fa-toolbox',
+    button: true,
+    visible: true,
+    onClick: () => GmToolsApp.show(),
+    onChange: () => GmToolsApp.show()
+  };
+
+  // Foundry v13+: `controls` is a record keyed by control name and each
+  // control's `tools` is itself a record.
+  if (controls && !Array.isArray(controls)) {
+    const tokenControl = controls.tokens ?? controls.token;
+    if (!tokenControl?.tools) return;
+    tool.order = Object.keys(tokenControl.tools).length;
+    tokenControl.tools[tool.name] = tool;
+    return;
+  }
+
+  // Foundry v12: `controls` is an array of control groups whose `tools` is an array.
+  const tokenControl = Array.isArray(controls)
+    ? controls.find((control) => control.name === 'token' || control.name === 'tokens')
+    : null;
+  if (!Array.isArray(tokenControl?.tools)) return;
+  tokenControl.tools.push(tool);
+}
+
 function registerActorDirectoryContextOptions(options) {
   pushUniqueContextOption(options, {
     name: 'MY_RPG.ActorTypeChange.Context',
@@ -808,11 +842,12 @@ async function handleActorOwnedItemUpdate(item, changed, options = {}) {
 async function handleActorOwnedItemDelete(item, options = {}) {
   if (hasItemLibrarySyncOption(options) || !isLibrarySyncManagedType(item?.type)) return;
 
-  const result = await syncLinkedLibraryItemStructure(item);
-  debugLog('Actor item library structure synced on delete', {
+  const result = await cleanupLibraryLinkOnActorItemDelete(item);
+  debugLog('Actor item library link cleaned up on delete', {
     actor: item?.parent?.uuid ?? null,
     itemId: item?.id ?? null,
-    updated: result?.updated ?? false
+    updated: result?.updated ?? false,
+    deleted: result?.deleted ?? false
   });
 }
 
@@ -831,9 +866,13 @@ async function handleWorldItemDelete(item, options = {}) {
   if (hasItemLibrarySyncOption(options) || !isLibrarySyncManagedType(item?.type)) return;
 
   const unlinkedCopies = await unlinkLibraryItemFromActors(item);
+  // A manual delete from the Items directory should also drop its per-character folder
+  // once that folder is left empty.
+  const folderRemoved = await removeManagedItemFolderIfEmpty(item?.folder?.id);
   debugLog('Library item unlinked from actor items', {
     itemId: item?.id ?? null,
-    unlinkedCopies
+    unlinkedCopies,
+    folderRemoved
   });
 }
 
@@ -1543,6 +1582,8 @@ Hooks.once('init', function () {
   game.projectAndromeda = {
     ProjectAndromedaActor,
     ProjectAndromedaItem,
+    GmToolsApp,
+    openGmTools: () => GmToolsApp.show(),
     debugLog,
     migrateLegacyEquipmentTypes,
     migrateLegacyTraitTypes,
@@ -1627,6 +1668,10 @@ Hooks.on('renderApplicationV2', (application, element) => {
   const selectElement = isDomElement(element) ? element.querySelector('select[name="type"]') : null;
   if (!selectElement) return;
   updateDocumentTypeSelectOptions(application, selectElement);
+});
+
+Hooks.on('getSceneControlButtons', (controls) => {
+  registerGmToolsSceneControl(controls);
 });
 
 Hooks.on('getActorDirectoryEntryContext', (_html, options) => {
