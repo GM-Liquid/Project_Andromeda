@@ -11,8 +11,8 @@
 | ----------------------------- | --------------------------------------------------------------- |
 | **System name**               | **Project Andromeda**                                           |
 | **Foundry VTT compatibility** | v12 (minimum 12, verified 13)                                   |
-| **Current version**           | `0.3.6.4`                                                       |
-| **Current release line**      | `0.3.6.x`                                                       |
+| **Current version**           | `0.3.8.0`                                                       |
+| **Current release line**      | `0.3.8.x`                                                       |
 | **Languages**                 | English, Русский (full parity required)                         |
 | **Main tech**                 | ES-module JavaScript (`*.mjs`), Handlebars (`*.hbs`), JSON, CSS |
 | **Licence**                   | CC BY-NC-SA 4.0                                                 |
@@ -149,23 +149,20 @@ project-andromeda/
 
 ## 3. Data Model & Game Rules
 
-### 3.1 Core Characteristics
+### 3.1 Character and Skill Ranks
 
-Project Andromeda uses **three** primary abilities; no _Dexterity_ characteristic is present.
-
-| Abbreviation | Name (EN / RU) | Range                     |
-| ------------ | -------------- | ------------------------- |
-| **CON**      | Body / Тело    | **d4 -> d20 (incl. 2d8)** |
-| **INT**      | Mind / Разум   | **d4 -> d20 (incl. 2d8)** |
-| **SPI**      | Spirit / Дух   | **d4 -> d20 (incl. 2d8)** |
-
-Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normalized via helper utilities; derived stats and in-game effects are computed in `module/documents/actor.mjs`.
+- Characters have ranks **1-4** and do not have characteristics.
+- Skills remain grouped into the Body / Mind / Spirit categories used by the sheet, but those categories are not characteristics and have no independent values.
+- Every skill stores `rank` (**1-4**) and `value` (**0-3**). A skill's rank cannot exceed `system.currentRank`.
+- Improving a skill value to 1 / 2 / 3 costs 1 / 2 / 3 progression points respectively. Advancing from `rank N, value 3` to `rank N+1, value 0` costs 2 progression points.
+- No migration from the removed characteristic / legacy skill model is shipped; the new model targets new worlds on the experimental branch.
 
 ### 3.2 Skills
 
-- Skills are integer values with no hard upper cap.
-- Each skill is tied to an ability key in `template.json` and uses that ability's die for rolls.
-- Skill modifiers equal the skill's numeric value plus applicable item bonuses (cartridges, implants, weapons), and should not be capped in sheets, rolls, or UI.
+- Skill checks roll **2d6 + skill value**. Item-triggered checks use the same formula.
+- The unshifted outcome table is: **6 or less = failure; 7-9 = success with a cost; 10-12 = success; 13+ = critical success**.
+- **Failure with consequence** is the step below failure and is available only by shifting an outcome.
+- Chat output immediately shows the unshifted outcome and the used skill rank. Players and GMs apply rank-versus-task shifts manually after the roll.
 
 ### 3.3 Points of Heroism
 
@@ -187,8 +184,7 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 - Rank-and-file characters (`rankAndFile`, shown in UI as **Rank-and-File** / **Рядовой**) use stress **6 x rank** and **do** support azure-stress marking on the stress track.
 - `system.temphealth` is presented as **temporary stress** for backwards compatibility and directly extends the base stress track.
 - Shipped defense labels use **Fortitude / Control / Will** in English and **Стойкость / Контроль / Воля** in Russian: Fortitude maps to Body, Control maps to Mind, and Will maps to Spirit.
-- Fortitude, Control, and Will use the formula **ability defense bonus + matching armor bonus + character rank**.
-- The ability defense bonus is half the normalized ability die maximum: **d4 = 2, d6 = 3, d8 = 4, d10 = 5, d12 = 6, 2d8 = 8, d20 = 10**.
+- Fortitude, Control, and Will are currently independent, manually editable values stored under `system.defenses`. They have no automatic formula until the next defense-system revision.
 
 ### 3.5 Movement Speed
 
@@ -289,7 +285,7 @@ The shipped gear catalog lives in the **`gear-library` compendium pack**, built 
 3. **Provide code** in a single contiguous block, ready for one-click copy.
 4. **Ensure RU + EN localisation** for any code that introduces UI text.
 5. **Bump `system.json` version according to the SemVer rules in Section 4** only when the change affects the shipped Foundry system.
-6. If adding or renaming a field that affects characteristics or skills, confirm the ability die step rules and absence of DEX.
+6. If adding or renaming a skill field, preserve the rank **1-4**, value **0-3**, and skill-rank-to-character-rank cap rules.
 7. When implementing sheet interactions, prioritize incremental updates: submit data with `render: false`, then update only the impacted parts of the DOM to reflect changes immediately. This applies equally to PCs and NPCs.
 8. **Adhere to code style:** All generated or modified code must strictly follow the formatting rules defined in `.prettierrc.json` and the linting rules in `eslint.config.mjs`.
 9. **Keep this document in sync:** When important mechanics, release rules, or repository structure change, update `AGENTS.md` in the same change.
@@ -297,4 +293,4 @@ The shipped gear catalog lives in the **`gear-library` compendium pack**, built 
 
 ---
 
-_Last updated: 2026-06-16_
+_Last updated: 2026-06-24_

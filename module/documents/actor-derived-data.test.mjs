@@ -22,7 +22,7 @@ globalThis.foundry = {
 
 const { ProjectAndromedaActor } = await import('./actor.mjs');
 
-test('character derived data includes temporary bonuses in defenses, speed, and stress', () => {
+test('character defenses remain independent from skill ranks', () => {
   const actor = new ProjectAndromedaActor({
     type: 'playerCharacter',
     system: {
@@ -33,12 +33,19 @@ test('character derived data includes temporary bonuses in defenses, speed, and 
       tempmental: 6,
       tempspeed: 9,
       progressPoints: 0,
-      abilities: {
-        con: { value: 8 },
-        int: { value: 10 },
-        spi: { value: '2d8' }
+      defenses: {
+        physical: 4,
+        azure: 3,
+        mental: 2
       },
-      skills: {},
+      skills: {
+        moshch: { rank: 1, value: 2 },
+        lovkost: { rank: 2, value: 0 },
+        nablyudatelnost: { rank: 1, value: 3 },
+        analiz: { rank: 2, value: 1 },
+        dominirovanie: { rank: 1, value: 0 },
+        rezonans: { rank: 1, value: 2 }
+      },
       stress: { value: 0, max: 0 },
       forceShield: { value: 0, max: 0 }
     },
@@ -61,9 +68,9 @@ test('character derived data includes temporary bonuses in defenses, speed, and 
 
   actor.prepareDerivedData();
 
-  assert.equal(actor.system.defenses.physical, 11);
-  assert.equal(actor.system.defenses.azure, 12);
-  assert.equal(actor.system.defenses.mental, 21);
+  assert.equal(actor.system.defenses.physical, 4);
+  assert.equal(actor.system.defenses.azure, 3);
+  assert.equal(actor.system.defenses.mental, 2);
   assert.equal(actor.system.speed.value, 66);
   assert.equal(actor.system.stress.max, 17);
   assert.equal(actor.system.forceShield.max, 4);

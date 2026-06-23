@@ -15,17 +15,14 @@ import {
   supportsAzureStress
 } from '../helpers/actor-types.mjs';
 import {
-  ABILITY_DIE_STEPS,
-  getAbilityDieLabel,
-  getAbilityDieRoll,
-  getAbilityDieNumeric,
-  getColorRank,
-  normalizeAbilityDie
-} from '../helpers/utils.mjs';
-import {
-  getAbilityAdvancementCost,
-  getSkillAdvancementCost
-} from '../helpers/advancement-points.mjs';
+  getNextSkillAdvancement,
+  getSkillCheckOutcomeKey,
+  normalizeCharacterRank,
+  normalizeSkill,
+  normalizeSkillRank,
+  normalizeSkillValue,
+  SKILL_CHECK_FORMULA
+} from '../helpers/skill-check.mjs';
 import {
   ITEM_ACTIVATION_TYPE_LABEL_KEYS,
   ITEM_TABS,
@@ -88,20 +85,8 @@ function getHudRankClass(rank) {
   return `rank${numeric}`;
 }
 
-const ADVANCEMENT_LIMITS_BY_RANK = {
-  1: { ability: 6, skill: 1 },
-  2: { ability: 8, skill: 3 },
-  3: { ability: 10, skill: 6 },
-  4: { ability: 12, skill: 10 }
-};
-
 const ADVANCEMENT_STATES = ['available', 'insufficient', 'capped'];
 const ACTOR_SHEET_MIN_WIDTH = 730;
-
-function getAdvancementLimits(rank) {
-  const normalizedRank = Math.max(1, Math.min(Math.trunc(Number(rank) || 1), 4));
-  return ADVANCEMENT_LIMITS_BY_RANK[normalizedRank] ?? ADVANCEMENT_LIMITS_BY_RANK[1];
-}
 
 function getSharedGmHeroPool() {
   return Math.max(Number(game.settings.get(MODULE_ID, GM_HERO_POOL_SETTING)) || 0, 0);
@@ -267,29 +252,6 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
 
     return this._onDropItemCreate(itemData, event);
   }
-  validateNumericInput(input) {
-    let val = parseInt(input.value, 10);
-    const isAbility = input.name.includes('system.abilities.');
-    const labelKey = isAbility ? 'MY_RPG.NumericWarning.Attribute' : 'MY_RPG.NumericWarning.Skill';
-    const label = game.i18n.localize(labelKey);
-    const minVal = 0;
-
-    if (isNaN(val)) {
-      val = minVal;
-    }
-    if (val < minVal) {
-      ui.notifications.warn(
-        game.i18n.format('MY_RPG.NumericWarning.Min', {
-          label: label,
-          min: minVal
-        })
-      );
-      val = minVal;
-    }
-    input.value = val;
-    return val;
-  }
-
   initializeRichEditor(element) {
     if (!element._tinyMCEInitialized) {
       const editorFontFamily = getUiThemeValue('--andromeda-font-body', 'inherit');
@@ -392,10 +354,8 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       "input[name='system.currentRank']",
       "input[name='system.stress.value']",
       "input[name='system.temphealth']",
-      "input[name='system.tempphys']",
-      "input[name='system.tempazure']",
-      "input[name='system.tempmental']",
-      "input[name='system.tempspeed']"
+      "input[name='system.tempspeed']",
+      "input[name^='system.defenses.']"
     ].join(', ');
     $html.find('textarea.rich-editor').each((i, el) => this.initializeRichEditor(el));
     $html
@@ -419,18 +379,20 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
 
     $html.find('input[name^="system.skills."]').on('change', async (ev) => {
       const input = ev.currentTarget;
-      const validatedValue = this.validateNumericInput(input);
+      const isRank = input.name.endsWith('.rank');
+      const validatedValue = isRank
+        ? normalizeSkillRank(input.value, this.actor.system?.currentRank)
+        : normalizeSkillValue(input.value);
+      input.value = validatedValue;
       await this.actor.update({ [input.name]: validatedValue }, { render: false });
       this.actor.prepareData();
       this._refreshDerived(this.element);
-      const rankClass = 'rank' + getColorRank(validatedValue, 'skill');
-      input.classList.remove('rank1', 'rank2', 'rank3', 'rank4');
-      input.classList.add(rankClass);
+      this._refreshSkillRows(this.element);
       this._refreshAdvancementHints(this.element);
     });
 
     $html.find(derivedInputSelector).on('change', this._onDerivedInputChange.bind(this));
-    $html.on('click', '.ability-step', this._onAbilityStep.bind(this));
+    $html.on('click', '.skill-advance', this._onSkillAdvance.bind(this));
     $html.on('change', '.shared-hero-pool-input', this._onSharedHeroPoolChange.bind(this));
     $html.on('click', '.andromeda-tab', () => this.refreshAutoResizeTextareas($html));
     this._applySheetEditMode($html);
@@ -544,73 +506,33 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
   }
 
   _prepareCharacterData(context) {
-    const abilityOrder = ['con', 'int', 'spi'];
     context.system.skills ??= {};
-
-    const skillOrderByAbility = {
-      con: ['moshch', 'lovkost', 'sokrytie', 'strelba', 'blizhniy_boy'],
-      int: ['nablyudatelnost', 'analiz', 'khakerstvo', 'inzheneriya'],
-      spi: ['dominirovanie', 'rezonans', 'mistika', 'obayanie']
-    };
-    const sortedAbilities = {};
-    for (const abilityKey of abilityOrder) {
-      const ability = context.system.abilities?.[abilityKey];
-      if (!ability) continue;
-      const normalizedValue = normalizeAbilityDie(ability.value);
-      sortedAbilities[abilityKey] = {
-        ...foundry.utils.duplicate(ability),
-        value: normalizedValue,
-        label: game.i18n.localize(CONFIG.ProjectAndromeda.abilities[abilityKey]) ?? abilityKey,
-        rankClass: 'rank' + getColorRank(normalizedValue, 'ability'),
-        dieLabel: getAbilityDieLabel(normalizedValue).toLowerCase(),
-        advancement: this._buildAbilityAdvancementDisplay(context.system, abilityKey)
-      };
-    }
-    context.system.abilities = sortedAbilities;
 
     const sortedSkills = {};
     const skillColumns = [];
-    const defenseConfigs = {
-      con: {
-        label: game.i18n.localize('MY_RPG.Defenses.FortitudeLabel'),
-        path: 'system.defenses.physical',
-        value: context.system?.defenses?.physical ?? 0
-      },
-      int: {
-        label: game.i18n.localize('MY_RPG.Defenses.ControlLabel'),
-        path: 'system.defenses.azure',
-        value: context.system?.defenses?.azure ?? 0
-      },
-      spi: {
-        label: game.i18n.localize('MY_RPG.Defenses.WillLabel'),
-        path: 'system.defenses.mental',
-        value: context.system?.defenses?.mental ?? 0
-      }
-    };
-    for (const abilityKey of abilityOrder) {
+    for (const [categoryKey, category] of Object.entries(
+      CONFIG.ProjectAndromeda.skillCategories ?? {}
+    )) {
       const columnSkills = [];
-      const abilityLabel =
-        game.i18n.localize(CONFIG.ProjectAndromeda.abilities[abilityKey]) ?? abilityKey;
-      const abilityAbbreviation =
-        game.i18n.localize(CONFIG.ProjectAndromeda.abilityAbbreviations[abilityKey]) ?? abilityKey;
-      for (const key of skillOrderByAbility[abilityKey] ?? []) {
+      for (const key of category.skills ?? []) {
         const skill = context.system.skills[key];
         if (!skill) continue;
+        const normalized = normalizeSkill(skill, context.system.currentRank);
+        skill.rank = normalized.rank;
+        skill.value = normalized.value;
         skill.label = game.i18n.localize(CONFIG.ProjectAndromeda.skills[key]) ?? key;
-        skill.rankClass = 'rank' + getColorRank(skill.value, 'skill');
+        skill.rankClass = `rank${skill.rank}`;
         skill.key = key;
         skill.advancement = this._buildSkillAdvancementDisplay(context.system, key);
         sortedSkills[key] = skill;
         columnSkills.push(skill);
       }
       skillColumns.push({
-        key: abilityKey,
-        label: abilityLabel,
-        abbreviation: abilityAbbreviation,
-        ability: sortedAbilities[abilityKey],
-        defenseLabel: defenseConfigs[abilityKey]?.label ?? '',
-        defensePath: defenseConfigs[abilityKey]?.path ?? '',
-        defenseValue: defenseConfigs[abilityKey]?.value ?? 0,
+        key: categoryKey,
+        label: game.i18n.localize(category.label),
+        defenseLabel: game.i18n.localize(category.defenseLabel),
+        defensePath: `system.defenses.${category.defenseKey}`,
+        defenseValue: context.system?.defenses?.[category.defenseKey] ?? 1,
         skills: columnSkills
       });
     }
@@ -654,38 +576,10 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     return Number(system?.advancement?.available) || 0;
   }
 
-  _getNextAbilityValue(value) {
-    const normalized = normalizeAbilityDie(value);
-    const index = ABILITY_DIE_STEPS.findIndex((step) => step.value === normalized);
-    if (index < 0 || index >= ABILITY_DIE_STEPS.length - 1) return null;
-    return ABILITY_DIE_STEPS[index + 1].value;
-  }
-
-  _getAbilityAdvancementInfo(system, abilityKey) {
-    const current = normalizeAbilityDie(system?.abilities?.[abilityKey]?.value);
-    const next = this._getNextAbilityValue(current);
-    const limits = getAdvancementLimits(system?.currentRank);
-    if (!next || getAbilityDieNumeric(next) > limits.ability) {
-      return { state: 'capped', cost: 0 };
-    }
-
-    const cost = Math.max(getAbilityAdvancementCost(next) - getAbilityAdvancementCost(current), 0);
-    const available = this._getAdvancementAvailable(system);
-    return {
-      state: available >= cost ? 'available' : 'insufficient',
-      cost
-    };
-  }
-
   _getSkillAdvancementInfo(system, skillKey) {
-    const current = Math.max(Math.trunc(Number(system?.skills?.[skillKey]?.value) || 0), 0);
-    const limits = getAdvancementLimits(system?.currentRank);
-    if (current >= limits.skill) {
-      return { state: 'capped', cost: 0 };
-    }
-
-    const next = current + 1;
-    const cost = Math.max(getSkillAdvancementCost(next) - getSkillAdvancementCost(current), 0);
+    const next = getNextSkillAdvancement(system?.skills?.[skillKey], system?.currentRank);
+    if (!next) return { state: 'capped', cost: 0 };
+    const cost = next.cost;
     const available = this._getAdvancementAvailable(system);
     return {
       state: available >= cost ? 'available' : 'insufficient',
@@ -714,10 +608,6 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     };
   }
 
-  _buildAbilityAdvancementDisplay(system, abilityKey) {
-    return this._buildAdvancementDisplay(this._getAbilityAdvancementInfo(system, abilityKey));
-  }
-
   _buildSkillAdvancementDisplay(system, skillKey) {
     return this._buildAdvancementDisplay(this._getSkillAdvancementInfo(system, skillKey));
   }
@@ -728,12 +618,8 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     const stateClasses = ADVANCEMENT_STATES.map((state) => `andromeda-advancement--${state}`);
 
     $root.find('[data-advancement-kind][data-advancement-key]').each((_, element) => {
-      const kind = String(element.dataset.advancementKind ?? '');
       const key = String(element.dataset.advancementKey ?? '');
-      const display =
-        kind === 'ability'
-          ? this._buildAbilityAdvancementDisplay(this.actor.system, key)
-          : this._buildSkillAdvancementDisplay(this.actor.system, key);
+      const display = this._buildSkillAdvancementDisplay(this.actor.system, key);
 
       element.classList.remove(...stateClasses);
       element.classList.add(`andromeda-advancement--${display.state}`);
@@ -769,7 +655,9 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       button.setAttribute('aria-pressed', enabled ? 'true' : 'false');
       button.setAttribute(
         'title',
-        game.i18n.localize(enabled ? 'MY_RPG.SheetMode.SwitchToPlay' : 'MY_RPG.SheetMode.SwitchToEdit')
+        game.i18n.localize(
+          enabled ? 'MY_RPG.SheetMode.SwitchToPlay' : 'MY_RPG.SheetMode.SwitchToEdit'
+        )
       );
       const text = button.querySelector('.andromeda-edit-mode-toggle__text');
       if (text) {
@@ -783,15 +671,17 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       }
     });
 
-    $root.find("input[name^='system.skills.']").each((_, input) => {
-      input.readOnly = !enabled;
-      if (enabled) {
-        input.removeAttribute('tabindex');
-      } else {
-        input.setAttribute('tabindex', '-1');
-      }
-    });
-    $root.find('.ability-step').prop('disabled', !enabled);
+    $root
+      .find("input[name^='system.skills.'], input[name^='system.defenses.']")
+      .each((_, input) => {
+        input.readOnly = !enabled;
+        if (enabled) {
+          input.removeAttribute('tabindex');
+        } else {
+          input.setAttribute('tabindex', '-1');
+        }
+      });
+    $root.find('.skill-advance').prop('disabled', !enabled);
   }
 
   _syncSheetEditModeHeaderButton() {
@@ -915,39 +805,30 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     event.preventDefault();
   }
 
-  _stepAbilityDie(current, step) {
-    const normalized = normalizeAbilityDie(current);
-    const dieValues = ABILITY_DIE_STEPS.map((abilityStep) => abilityStep.value);
-    const index = dieValues.indexOf(normalized);
-    const clampedIndex = Math.max(
-      0,
-      Math.min((index === -1 ? 0 : index) + Math.sign(step || 0), dieValues.length - 1)
-    );
-    return dieValues[clampedIndex];
-  }
-
-  _getAbilityDieValue(abilityKey) {
-    if (!abilityKey) return ABILITY_DIE_STEPS[0].value;
-    const ability = this.actor.system?.abilities?.[abilityKey];
-    return normalizeAbilityDie(ability?.value);
-  }
-
-  async _onAbilityStep(event) {
+  async _onSkillAdvance(event) {
     event.preventDefault();
     const button = event.currentTarget;
-    const step = Number(button.dataset.step) || 0;
-    if (!step) return;
-    const container = button.closest('[data-ability-key]');
-    const abilityKey = container?.dataset?.abilityKey;
-    if (!abilityKey) return;
+    const skillKey = String(button.dataset.advancementKey ?? '');
+    if (!skillKey) return;
+    const next = getNextSkillAdvancement(
+      this.actor.system?.skills?.[skillKey],
+      this.actor.system?.currentRank
+    );
+    if (!next) return;
+    if (this._getAdvancementAvailable() < next.cost) {
+      ui.notifications.warn(game.i18n.localize('MY_RPG.Advancement.NotEnoughPoints'));
+      return;
+    }
 
-    const current = this.actor.system?.abilities?.[abilityKey]?.value;
-    const next = this._stepAbilityDie(current, step);
-    if (next === normalizeAbilityDie(current)) return;
-
-    await this.actor.update({ [`system.abilities.${abilityKey}.value`]: next }, { render: false });
+    await this.actor.update(
+      {
+        [`system.skills.${skillKey}.rank`]: next.rank,
+        [`system.skills.${skillKey}.value`]: next.value
+      },
+      { render: false }
+    );
     this.actor.prepareData();
-    this._updateAbilityDisplays(this.element, abilityKey);
+    this._refreshSkillRows(this.element, skillKey);
     this._refreshDerived(this.element);
     this._refreshAdvancementHints(this.element);
   }
@@ -963,9 +844,21 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     const input = event.currentTarget;
     if (!input?.name) return;
 
-    const nextValue = this._coerceNonNegativeIntegerInput(input);
-    await this.actor.update({ [input.name]: nextValue }, { render: false });
+    const nextValue =
+      input.name === 'system.currentRank'
+        ? normalizeCharacterRank(input.value)
+        : this._coerceNonNegativeIntegerInput(input);
+    input.value = nextValue;
+    const updates = { [input.name]: nextValue };
+    if (input.name === 'system.currentRank') {
+      for (const [skillKey, skill] of Object.entries(this.actor.system?.skills ?? {})) {
+        const rank = normalizeSkillRank(skill?.rank, nextValue);
+        if (rank !== Number(skill?.rank)) updates[`system.skills.${skillKey}.rank`] = rank;
+      }
+    }
+    await this.actor.update(updates, { render: false });
     this.actor.prepareData();
+    this._refreshSkillRows(this.element);
     this._refreshDerived(this.element);
     this._refreshAdvancementHints(this.element);
   }
@@ -989,28 +882,22 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     await updateActorDocumentType(this.actor, nextType);
   }
 
-  _updateAbilityDisplays(root, abilityKey) {
+  _refreshSkillRows(root, skillKey = '') {
     const $root = root instanceof jQuery ? root : $(root ?? this.element);
-    const abilityKeys = abilityKey ? [abilityKey] : Object.keys(this.actor.system?.abilities ?? {});
     const rankClasses = ['rank0', 'rank1', 'rank2', 'rank3', 'rank4'];
-
-    for (const key of abilityKeys) {
-      const dieValue = this._getAbilityDieValue(key);
-      const rankClass = 'rank' + getColorRank(dieValue, 'ability');
-      const $container = $root.find(`.andromeda-ability-card[data-ability-key="${key}"]`);
-
-      $container.removeClass(rankClasses.join(' ')).addClass(rankClass);
-
-      $container
-        .find('.ability-die-value')
-        .text(getAbilityDieLabel(dieValue).toLowerCase())
+    const skillKeys = skillKey ? [skillKey] : Object.keys(this.actor.system?.skills ?? {});
+    for (const key of skillKeys) {
+      const skill = normalizeSkill(
+        this.actor.system?.skills?.[key],
+        this.actor.system?.currentRank
+      );
+      const $row = $root.find(`.andromeda-skill-row[data-skill-key="${key}"]`);
+      $row.find(`input[name="system.skills.${key}.rank"]`).val(skill.rank);
+      $row.find(`input[name="system.skills.${key}.value"]`).val(skill.value);
+      $row
+        .find('.skill-rank-input')
         .removeClass(rankClasses.join(' '))
-        .addClass(rankClass);
-
-      $container.find(`input[name="system.abilities.${key}.value"]`).val(dieValue);
-
-      const $header = $root.find(`th[data-ability="${key}"]`);
-      $header.removeClass(rankClasses.join(' ')).addClass(rankClass);
+        .addClass(`rank${skill.rank}`);
     }
   }
 
@@ -1018,44 +905,34 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     event.preventDefault();
     event.currentTarget?.blur?.();
     const el = event.currentTarget;
-    const { skill, ability, label } = el.dataset;
-
-    let modifier = 0;
-    let dieValue = ability ? this._getAbilityDieValue(ability) : null;
-    const parts = [];
-
-    if (!dieValue && !ability) {
-      dieValue = ABILITY_DIE_STEPS[0].value;
-    }
-
-    if (skill) {
-      const skillData = this.actor.system.skills?.[skill] || {};
-      const skillValue = parseInt(skillData.value) || 0;
-      modifier = skillValue;
-      parts.push({
-        label: game.i18n.format('MY_RPG.RollFlavor.SkillValue', { skill: this._skillLabel(skill) }),
-        value: skillValue
-      });
-      const abKey = skillData.ability;
-      if (abKey) {
-        dieValue = this._getAbilityDieValue(abKey);
+    const { skill, label } = el.dataset;
+    if (!skill) return;
+    const skillData = normalizeSkill(
+      this.actor.system.skills?.[skill],
+      this.actor.system.currentRank
+    );
+    const parts = [
+      {
+        label: game.i18n.format('MY_RPG.RollFlavor.SkillValue', {
+          skill: this._skillLabel(skill)
+        }),
+        value: skillData.value
       }
-      const bonusDetails = this._getSkillBonusDetails(skill);
-      modifier += bonusDetails.total;
-      this._appendBonusParts(parts, bonusDetails);
-    } else if (ability) {
-      dieValue = dieValue ?? this._getAbilityDieValue(ability);
-    }
-
-    const rollFormula = dieValue
-      ? getAbilityDieRoll(dieValue)
-      : getAbilityDieRoll(ABILITY_DIE_STEPS[0].value);
-    const roll = await new Roll(`${rollFormula} + @mod`, { mod: modifier }).roll();
-    const flavor = this._buildRollFlavor(label, parts);
-    roll.toMessage({
+    ];
+    const roll = await new Roll(`${SKILL_CHECK_FORMULA} + @mod`, {
+      mod: skillData.value
+    }).roll();
+    const outcomeKey = getSkillCheckOutcomeKey(roll.total);
+    const flavor = this._buildSkillCheckFlavor(label, parts, skillData.rank, outcomeKey);
+    await roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
       flavor,
-      rollMode: game.settings.get('core', 'rollMode')
+      rollMode: game.settings.get('core', 'rollMode'),
+      flags: {
+        [MODULE_ID]: {
+          skillCheck: { skill, rank: skillData.rank, outcome: outcomeKey }
+        }
+      }
     });
   }
 
@@ -1338,9 +1215,9 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
   _hasItemActivationControl(item, displayConfig = null) {
     return Boolean(
       item &&
-        (displayConfig?.canRoll ||
-          this._hasItemCooldown(item, displayConfig) ||
-          this._hasItemActivationCost(item, displayConfig))
+      (displayConfig?.canRoll ||
+        this._hasItemCooldown(item, displayConfig) ||
+        this._hasItemActivationCost(item, displayConfig))
     );
   }
 
@@ -1446,19 +1323,8 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     const canRoll = Boolean(displayConfig?.canRoll ?? this._getItemDisplayConfig(item).canRoll);
     if (!canRoll || !skillKey) return '—';
 
-    const abilityKey = this._getSkillAbilityKey(skillKey);
-    const dieValue = this._getAbilityDieValue(abilityKey);
-    const dieLabel = getAbilityDieLabel(dieValue);
-    if (!dieLabel) return '—';
-
     const skillValue = Number(this.actor.system?.skills?.[skillKey]?.value) || 0;
-    let modifier = skillValue;
-    if (item?.type === 'weapon') {
-      modifier += this._getSkillBonusDetails(skillKey).total || 0;
-    }
-
-    const sign = modifier >= 0 ? '+' : '-';
-    return `${dieLabel} ${sign} ${Math.abs(modifier)}`;
+    return `${SKILL_CHECK_FORMULA} + ${skillValue}`;
   }
 
   _buildItemDetailRows(item, displayConfig = null) {
@@ -1942,105 +1808,65 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     const typeConfig = getItemTypeConfig(item.type);
     const system = item.system ?? {};
     const skillKey = system.skill || '';
-    if (this._isSkillRollItem(item, typeConfig) && !skillKey) {
+    const canRoll = this._isSkillRollItem(item, typeConfig) || item.type === 'weapon';
+    if (!canRoll) return false;
+    if (!skillKey) {
       ui.notifications.warn(game.i18n.localize('MY_RPG.WeaponsTable.SkillNone'));
       return false;
     }
-    const skillData = this.actor.system?.skills?.[skillKey] ?? {};
-    const skillValue = Number(skillData.value) || 0;
-    const parts = [];
+    const skillData = normalizeSkill(
+      this.actor.system?.skills?.[skillKey],
+      this.actor.system?.currentRank
+    );
+    const parts = [
+      {
+        label: game.i18n.format('MY_RPG.RollFlavor.SkillValue', {
+          skill: this._skillLabel(skillKey)
+        }),
+        value: skillData.value
+      }
+    ];
+    const roll = await new Roll(`${SKILL_CHECK_FORMULA} + @mod`, {
+      mod: skillData.value
+    }).roll();
+    const outcomeKey = getSkillCheckOutcomeKey(roll.total);
+    const flavorLabel = game.i18n.format('MY_RPG.ItemRoll.Flavor', {
+      item: item.name || game.i18n.localize(`TYPES.Item.${item.type}`),
+      skill: this._skillLabel(skillKey)
+    });
+    let flavor = this._buildSkillCheckFlavor(flavorLabel, parts, skillData.rank, outcomeKey);
+    const itemContent = includeItemContent
+      ? this._buildItemChatContent(item, displayConfig, { includeName: false })
+      : '';
+    const rollNote =
+      item.type === 'weapon'
+        ? this._weaponEffectHtml(item)
+        : itemContent || this._getTraitRollNote(item, typeConfig);
+    if (rollNote) {
+      flavor += `<div class="myrpg-roll-note">${rollNote}</div>`;
+    }
 
-    parts.push({
-      label: game.i18n.format('MY_RPG.RollFlavor.SkillValue', {
-        skill: this._skillLabel(skillKey)
-      }),
-      value: skillValue
+    await roll.toMessage({
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      flavor,
+      rollMode: game.settings.get('core', 'rollMode'),
+      flags: {
+        [MODULE_ID]: {
+          skillCheck: { skill: skillKey, rank: skillData.rank, outcome: outcomeKey }
+        }
+      }
     });
 
-    if (this._isSkillRollItem(item, typeConfig)) {
-      const modifier = skillValue;
-      const abilityKey = this._getSkillAbilityKey(skillKey);
-      const dieValue = this._getAbilityDieValue(abilityKey);
-      const rollFormula = getAbilityDieRoll(dieValue);
-
-      const roll = await new Roll(`${rollFormula} + @mod`, {
-        mod: modifier
-      }).roll();
-
-      const flavorLabel = game.i18n.format('MY_RPG.ItemRoll.Flavor', {
-        item: item.name || game.i18n.localize(`TYPES.Item.${item.type}`),
-        skill: this._skillLabel(skillKey)
-      });
-      let flavor = this._buildRollFlavor(flavorLabel, parts);
-      const itemContent = includeItemContent
-        ? this._buildItemChatContent(item, displayConfig, { includeName: false })
-        : '';
-      const traitRollNote = itemContent || this._getTraitRollNote(item, typeConfig);
-      if (traitRollNote) {
-        flavor += `<div class="myrpg-roll-note">${traitRollNote}</div>`;
-      }
-
-      roll.toMessage({
-        speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-        flavor,
-        rollMode: game.settings.get('core', 'rollMode')
-      });
-
-      // DEBUG-LOG
-      debugLog('Actor sheet item roll', {
-        actor: this.actor.uuid,
-        itemId: item.id,
-        type: item.type,
-        ability: abilityKey ?? null,
-        rollFormula,
-        skill: skillKey,
-        skillValue,
-        modifier
-      });
-      return true;
-    }
-
-    if (item.type === 'weapon') {
-      const bonusDetails = this._getSkillBonusDetails(skillKey);
-      const modifier = skillValue + (bonusDetails.total || 0);
-      const abilityKey = this._getSkillAbilityKey(skillKey);
-      const dieValue = this._getAbilityDieValue(abilityKey);
-      const rollFormula = getAbilityDieRoll(dieValue);
-      this._appendBonusParts(parts, bonusDetails);
-
-      const roll = await new Roll(`${rollFormula} + @mod`, { mod: modifier }).roll();
-
-      const flavorLabel = game.i18n.format('MY_RPG.ItemRoll.Flavor', {
-        item: item.name || game.i18n.localize(`TYPES.Item.${item.type}`),
-        skill: this._skillLabel(skillKey)
-      });
-
-      let flavor = this._buildRollFlavor(flavorLabel, parts);
-      const weaponDetails = this._weaponEffectHtml(item);
-      if (weaponDetails) {
-        flavor += `<div class="myrpg-roll-note">${weaponDetails}</div>`;
-      }
-
-      roll.toMessage({
-        speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-        flavor,
-        rollMode: game.settings.get('core', 'rollMode')
-      });
-
-      // DEBUG-LOG
-      debugLog('Actor sheet weapon roll', {
-        actor: this.actor.uuid,
-        itemId: item.id,
-        type: item.type,
-        ability: abilityKey ?? null,
-        rollFormula,
-        skill: skillKey,
-        skillValue,
-        modifier
-      });
-      return true;
-    }
-    return false;
+    debugLog('Actor sheet item roll', {
+      actor: this.actor.uuid,
+      itemId: item.id,
+      type: item.type,
+      rollFormula: SKILL_CHECK_FORMULA,
+      skill: skillKey,
+      skillRank: skillData.rank,
+      skillValue: skillData.value
+    });
+    return true;
   }
 
   async _sendItemActivationChat(item, displayConfig = null) {
@@ -2156,9 +1982,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
         button.dataset.defaultTitle || game.i18n.localize('MY_RPG.ItemControls.Activate');
       button.setAttribute(
         'title',
-        normalizedUsed
-          ? game.i18n.localize('MY_RPG.ItemControls.ClearCooldown')
-          : defaultTitle
+        normalizedUsed ? game.i18n.localize('MY_RPG.ItemControls.ClearCooldown') : defaultTitle
       );
       button.setAttribute('aria-pressed', normalizedUsed ? 'true' : 'false');
       const icon = button.querySelector('i');
@@ -2230,65 +2054,6 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     return `${damage}`;
   }
 
-  _appendBonusParts(parts, bonusDetails) {
-    if (!bonusDetails?.total) return;
-    if (bonusDetails.sources?.length) {
-      for (const source of bonusDetails.sources) {
-        parts.push({
-          label: this._formatBonusSourceLabel(source),
-          value: source.bonus
-        });
-      }
-      return;
-    }
-
-    parts.push({
-      label: game.i18n.localize('MY_RPG.RollFlavor.EquipmentBonus'),
-      value: bonusDetails.total
-    });
-  }
-
-  _getSkillBonusDetails(skillKey) {
-    if (!skillKey) return { total: 0, sources: [] };
-    const bonuses = this.actor.system?.cache?.itemTotals?.skillBonuses ?? {};
-    const entry = bonuses?.[skillKey];
-    if (!entry) return { total: 0, sources: [] };
-    if (typeof entry === 'number') {
-      return { total: this._normalizeSkillBonus(entry), sources: [] };
-    }
-
-    const total = this._normalizeSkillBonus(entry?.total);
-    const sources = Array.isArray(entry?.sources)
-      ? entry.sources
-          .map((source) => ({
-            type: source?.type,
-            name: source?.name,
-            quantity: source?.quantity,
-            bonus: this._normalizeSkillBonus(source?.bonus)
-          }))
-          .filter((source) => source.bonus)
-      : [];
-
-    return { total, sources };
-  }
-
-  _formatBonusSourceLabel(source) {
-    const typeKeyMap = {
-      weapon: 'MY_RPG.RollFlavor.SourceWeapon',
-      cartridge: 'MY_RPG.RollFlavor.SourceCartridge',
-      implant: 'MY_RPG.RollFlavor.SourceImplant'
-    };
-
-    const quantity = Number(source?.quantity) || 0;
-    const baseName = source?.name || game.i18n.localize('MY_RPG.RollFlavor.UnknownSource');
-    const nameWithQuantity =
-      quantity > 1
-        ? game.i18n.format('MY_RPG.RollFlavor.SourceWithQuantity', { name: baseName, quantity })
-        : baseName;
-    const key = typeKeyMap[source?.type] ?? 'MY_RPG.RollFlavor.SourceItem';
-    return game.i18n.format(key, { name: nameWithQuantity });
-  }
-
   _buildRollFlavor(label, parts = []) {
     const safeLabel = this._escapeHTML(label ?? '');
     const rollParts = (parts ?? []).filter(
@@ -2308,37 +2073,15 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     return `<div class="myrpg-roll-flavor"><div class="myrpg-roll-flavor__header">${safeLabel}</div><div class="myrpg-roll-flavor__modifiers"><div class="myrpg-roll-flavor__title">${modifiersTitle}</div>${rows}</div></div>`;
   }
 
-  _getTotalSkillBonus(skillKey) {
-    const details = this._getSkillBonusDetails(skillKey);
-    return details.total;
-  }
-
-  _getSkillAbilityKey(skillKey) {
-    if (!skillKey) return '';
-    const actorSkillAbility = String(this.actor.system?.skills?.[skillKey]?.ability ?? '')
-      .trim()
-      .toLowerCase();
-    if (actorSkillAbility === 'con' || actorSkillAbility === 'int' || actorSkillAbility === 'spi') {
-      return actorSkillAbility;
-    }
-
-    const skillAbilityFallback = {
-      moshch: 'con',
-      lovkost: 'con',
-      sokrytie: 'con',
-      strelba: 'con',
-      blizhniy_boy: 'con',
-      nablyudatelnost: 'int',
-      analiz: 'int',
-      khakerstvo: 'int',
-      inzheneriya: 'int',
-      dominirovanie: 'spi',
-      rezonans: 'spi',
-      mistika: 'spi',
-      obayanie: 'spi'
-    };
-
-    return skillAbilityFallback[skillKey] ?? '';
+  _buildSkillCheckFlavor(label, parts, skillRank, outcomeKey) {
+    const flavor = this._buildRollFlavor(label, parts);
+    const rankLabel = this._escapeHTML(
+      game.i18n.format('MY_RPG.SkillCheck.SkillRank', { rank: skillRank })
+    );
+    const outcomeLabel = this._escapeHTML(
+      game.i18n.localize(`MY_RPG.SkillCheck.Outcomes.${outcomeKey}`)
+    );
+    return `${flavor}<div class="myrpg-roll-outcome myrpg-roll-outcome--${outcomeKey.toLowerCase()}"><span>${rankLabel}</span><strong>${outcomeLabel}</strong></div>`;
   }
 
   _skillLabel(skillKey) {

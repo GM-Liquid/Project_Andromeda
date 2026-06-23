@@ -4,10 +4,8 @@
       "Unspecified": "n/a"
     },
     "NumericWarning": {
-      "Attribute": "Attribute",
       "Skill": "Skill",
-      "Min": "{label} cannot be less than {min}",
-      "RankLimit": "At rank {rank} your attributes and skills cannot exceed {limit}"
+      "Min": "{label} cannot be less than {min}"
     },
     "Dialog": {
       "ConfirmDeleteTitle": "Delete Cartridge",
@@ -65,13 +63,29 @@
       "ControlLabel": "Control",
       "WillLabel": "Will"
     },
+    "SkillCategory": {
+      "Body": "Body",
+      "Mind": "Mind",
+      "Spirit": "Spirit"
+    },
+    "SkillCheck": {
+      "RankField": "Skill rank",
+      "ValueField": "Skill value",
+      "SkillRank": "Skill rank: {rank}",
+      "Outcomes": {
+        "FailureWithConsequence": "Failure with consequence",
+        "Failure": "Failure",
+        "SuccessWithCost": "Success with a cost",
+        "Success": "Success",
+        "CriticalSuccess": "Critical success"
+      }
+    },
     "SheetLabels": {
       "Actor": "Character Sheet",
       "AbilitiesAndMods": "Abilities",
       "Features": "Resources",
       "Abilities": "Genomes",
       "Parameters": "Parameters",
-      "Attributes": "Characteristics, Skills, and Defenses",
       "Skills": "Skills",
       "Defenses": "Defenses",
       "KeyInfo": "Key Information",
@@ -185,29 +199,6 @@
     },
     "SendToChat": "Send to Chat",
     "MinimalBonus": "minimal bonus",
-    "AbilityDice": {
-      "Increase": "Increase characteristic die",
-      "Decrease": "Decrease characteristic die"
-    },
-    "abilityAbbreviations": {
-      "spi": "Spi",
-      "con": "Body",
-      "int": "Mind"
-    },
-    "Ability": {
-      "Spi": {
-        "long": "Spirit",
-        "abbr": "Spi"
-      },
-      "Con": {
-        "long": "Body",
-        "abbr": "Body"
-      },
-      "Int": {
-        "long": "Mind",
-        "abbr": "Mind"
-      }
-    },
     "Skill": {
       "Moshch": "Might",
       "Lovkost": "Agility",
@@ -355,6 +346,7 @@
     "Advancement": {
       "CanAfford": "Next improvement costs {cost} progression points.",
       "NeedPoints": "Next improvement costs {cost} progression points; not enough points available.",
+      "NotEnoughPoints": "Not enough progression points for this improvement.",
       "RankCap": "Current rank limit reached.",
       "CostShort": "Cost {cost}",
       "Max": "Max"

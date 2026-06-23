@@ -4,10 +4,8 @@
       "Unspecified": "не указан"
     },
     "NumericWarning": {
-      "Attribute": "Характеристика",
       "Skill": "Навык",
-      "Min": "{label} не может быть меньше {min}",
-      "RankLimit": "На {rank}-м ранге значения ваших характеристик и навыков не могут превышать {limit}"
+      "Min": "{label} не может быть меньше {min}"
     },
     "Dialog": {
       "ConfirmDeleteTitle": "Удаление картриджа",
@@ -29,6 +27,23 @@
       "FortitudeLabel": "Стойкость",
       "ControlLabel": "Контроль",
       "WillLabel": "Воля"
+    },
+    "SkillCategory": {
+      "Body": "Тело",
+      "Mind": "Разум",
+      "Spirit": "Дух"
+    },
+    "SkillCheck": {
+      "RankField": "Ранг навыка",
+      "ValueField": "Значение навыка",
+      "SkillRank": "Ранг навыка: {rank}",
+      "Outcomes": {
+        "FailureWithConsequence": "Провал с последствием",
+        "Failure": "Провал",
+        "SuccessWithCost": "Успех с ценой",
+        "Success": "Успех",
+        "CriticalSuccess": "Критический успех"
+      }
     },
     "RankNumeric": {
       "Title": "Ранг",
@@ -96,7 +111,6 @@
       "Features": "Ресурсы",
       "Abilities": "Геномы",
       "Parameters": "Параметры",
-      "Attributes": "Характеристики, навыки и защиты",
       "Skills": "Навыки",
       "Defenses": "Защиты",
       "KeyInfo": "Ключевая информация",
@@ -185,29 +199,6 @@
     },
     "SendToChat": "Отправить в чат",
     "MinimalBonus": "минимальный бонус",
-    "AbilityDice": {
-      "Increase": "Увеличить куб характеристики",
-      "Decrease": "Уменьшить куб характеристики"
-    },
-    "abilityAbbreviations": {
-      "spi": "Дух",
-      "con": "Тело",
-      "int": "Разум"
-    },
-    "Ability": {
-      "Spi": {
-        "long": "Дух",
-        "abbr": "Дух"
-      },
-      "Con": {
-        "long": "Тело",
-        "abbr": "Тело"
-      },
-      "Int": {
-        "long": "Разум",
-        "abbr": "Раз"
-      }
-    },
     "Skill": {
       "Moshch": "Мощь",
       "Lovkost": "Ловкость",
@@ -355,6 +346,7 @@
     "Advancement": {
       "CanAfford": "Следующее улучшение стоит {cost} очков развития.",
       "NeedPoints": "Следующее улучшение стоит {cost} очков развития; доступных очков не хватает.",
+      "NotEnoughPoints": "Недостаточно очков развития для этого улучшения.",
       "RankCap": "Достигнут предел текущего ранга.",
       "CostShort": "Цена {cost}",
       "Max": "Макс"

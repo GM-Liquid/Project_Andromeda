@@ -1445,9 +1445,9 @@ async function runLegacyTraitTypeMigrationIfNeeded() {
 function hasObsoleteCartridgeData(item) {
   return Boolean(
     (item?.isCartridge || item?.type === 'cartridge') &&
-      OBSOLETE_CARTRIDGE_ITEM_FIELDS.some((field) =>
-        foundry.utils.hasProperty(item.system ?? {}, field)
-      )
+    OBSOLETE_CARTRIDGE_ITEM_FIELDS.some((field) =>
+      foundry.utils.hasProperty(item.system ?? {}, field)
+    )
   );
 }
 
@@ -1608,8 +1608,7 @@ Hooks.once('init', function () {
 
   // systems/project-andromeda/project-andromeda.mjs — в хуке init
   CONFIG.Combat.initiative = {
-    // Initiative rolls use the Body die
-    formula: '@abilities.con.roll',
+    formula: '2d6',
     decimals: 2
   };
 
