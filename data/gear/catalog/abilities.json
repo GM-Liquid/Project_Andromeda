@@ -9,7 +9,7 @@
       "effects": [
         {
           "activation": {
-            "type": "action"
+            "type": "freeAction"
           },
           "conditions": {
             "frequency": "oncePerSession",
@@ -27,7 +27,7 @@
         }
       ]
     },
-    "description": "Превращает небольшой объект 2го ранга в порошок. Для активации способности необходимо иметь навык Мистика 3. Проверка не требуется.",
+    "description": "Свободным действием превратите небольшой объект 2-го ранга в порошок. Для активации способности необходимо иметь навык Мистика 3. Проверка не требуется.",
     "shortDescription": "Превращает небольшой объект в порошок",
     "price": 3
   },
@@ -299,25 +299,6 @@
       "effects": [
         {
           "activation": {
-            "type": "freeAction"
-          },
-          "conditions": {
-            "frequency": "unlimited",
-            "range": {
-              "type": "meters",
-              "value": 30
-            },
-            "duration": "untilEndOfScene"
-          },
-          "outcomes": [
-            {
-              "key": "utility",
-              "value": 1
-            }
-          ]
-        },
-        {
-          "activation": {
             "type": "action"
           },
           "conditions": {
@@ -334,6 +315,25 @@
             {
               "key": "damage",
               "value": 2
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "frequency": "unlimited",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "duration": "untilEndOfScene"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 1
             }
           ]
         }
@@ -796,42 +796,6 @@
     "price": 3
   },
   {
-    "id": "magnitnoe-yadro",
-    "name": "Магнитное ядро",
-    "type": "ability",
-    "rank": 2,
-    "skill": "rezonans",
-    "mechanics": {
-      "effects": [
-        {
-          "activation": {
-            "type": "action"
-          },
-          "conditions": {
-            "frequency": "oncePerScene",
-            "range": {
-              "type": "meters",
-              "value": 30
-            },
-            "area": {
-              "type": "circle",
-              "value": 15
-            },
-            "duration": "untilEndOfScene"
-          },
-          "outcomes": [
-            {
-              "key": "specialRule"
-            }
-          ]
-        }
-      ]
-    },
-    "description": "Вы создаете магнитную сферу, мешающую передвижению и стрельбе. В радиусе её действия проверки Стрельбы получают −2, а цели в броне теряют половину скорости.",
-    "shortDescription": "Вы создаете магнитную сферу, мешающую передвижению и стрельбе.",
-    "price": 3
-  },
-  {
     "id": "radarnaya-travma",
     "name": "Радарная травма",
     "type": "ability",
@@ -1098,7 +1062,7 @@
       "effects": [
         {
           "activation": {
-            "type": "action"
+            "type": "freeAction"
           },
           "conditions": {
             "frequency": "oncePerScene",
@@ -1116,7 +1080,7 @@
         }
       ]
     },
-    "description": "Создайте малый портал между собой и выбранной точкой. Использование портала не тратит движение.",
+    "description": "Свободным действием создайте малый портал между собой и выбранной точкой. Использование портала не тратит движение.",
     "shortDescription": "Создайте малый портал между собой и выбранной точкой.",
     "price": 3
   },
@@ -1452,34 +1416,6 @@
     "price": 3
   },
   {
-    "id": "smertelnyy-vystrel",
-    "name": "Смертельный выстрел",
-    "type": "ability",
-    "rank": 2,
-    "skill": "strelba",
-    "mechanics": {
-      "effects": [
-        {
-          "activation": {
-            "type": "maneuver"
-          },
-          "conditions": {
-            "frequency": "oncePerScene",
-            "duration": "untilEndOfTurn"
-          },
-          "outcomes": [
-            {
-              "key": "specialRule"
-            }
-          ]
-        }
-      ]
-    },
-    "description": "Ваша следующая атака Стрельбой считается как максимально выпавшее значение на кубе.",
-    "shortDescription": "Сделайте следующую атаку Стрельбой максимальным значением куба.",
-    "price": 3
-  },
-  {
     "id": "unichtozhitelnyy-ogon",
     "name": "Уничтожительный огонь",
     "type": "ability",
@@ -1493,7 +1429,7 @@
           },
           "conditions": {
             "frequency": "oncePerScene",
-            "targets": "upTo2"
+            "check": "required"
           },
           "outcomes": [
             {
@@ -1538,7 +1474,7 @@
         }
       ]
     },
-    "description": "Выведите из строя технику коротким ЭМИ-импульсом. Проверка Инженерии против Контроля. При успехе вся техника в радиусе выключается на 1 раунд. Запертые двери открываются, а механические противники пропускают свой ход.",
+    "description": "Выведите из строя технику коротким ЭМИ-импульсом. Проверка Инженерии против Контроля. При успехе вся техника в круге диаметром 15 м выключается на 1 раунд. Запертые двери открываются, а механические противники пропускают свой ход.",
     "shortDescription": "Коротким ЭМИ-импульсом выведите из строя технику 1 ранга.",
     "price": 3
   },
@@ -1606,13 +1542,13 @@
     "id": "prikaz",
     "name": "Приказ",
     "type": "ability",
-    "rank": 2,
+    "rank": 1,
     "skill": "khakerstvo",
     "mechanics": {
       "effects": [
         {
           "activation": {
-            "type": "freeAction"
+            "type": "action"
           },
           "conditions": {
             "frequency": "oncePerScene",
@@ -1632,9 +1568,9 @@
         }
       ]
     },
-    "description": "Отдайте быстрый приказ техническому устройству. Проверка Хакерства против Контроля. При успехе вы отдаете один приказ, который устройство мгновенно выполняет.",
+    "description": "Действием отдайте быстрый приказ техническому устройству. Проверка Хакерства против Контроля. При успехе вы отдаете один приказ, который устройство мгновенно выполняет.",
     "shortDescription": "Отдайте быстрый приказ техническому устройству.",
-    "price": 3
+    "price": 1
   },
   {
     "id": "korotkoe-zamykanie",
@@ -1681,7 +1617,7 @@
       "effects": [
         {
           "activation": {
-            "type": "action"
+            "type": "freeAction"
           },
           "conditions": {
             "frequency": "oncePerScene",
@@ -1696,7 +1632,7 @@
         }
       ]
     },
-    "description": "Станьте невидимы до начала вашего следующего хода, или пока не совершите атаку или иначе не выдадете себя.",
+    "description": "Свободным действием станьте невидимы до начала вашего следующего хода, или пока не совершите атаку или иначе не выдадете себя.",
     "shortDescription": "Станьте невидимы до начала вашего следующего хода, или пока не совершите атаку или иначе не выдадете себя.",
     "price": 1
   },
@@ -1834,7 +1770,7 @@
     "mechanics": {
       "effects": [
         {
-          "activation": { "type": "freeAction" },
+          "activation": { "type": "action" },
           "conditions": {
             "frequency": "oncePerScene",
             "range": { "type": "melee" },
@@ -1846,7 +1782,7 @@
           "outcomes": [{ "key": "applyStatus", "status": "truthBound" }]
         },
         {
-          "activation": { "type": "freeAction" },
+          "activation": { "type": "passive" },
           "conditions": {
             "targets": "single",
             "trigger": "onRefuseAnswer"
@@ -1855,7 +1791,7 @@
         }
       ]
     },
-    "description": "Касанием наложите запрет на ложь. Проверка Доминирования против Воли. При успехе цель не может лгать вам, но не обязана говорить. Если цель отказывается отвечать на ваш вопрос, она получает 5 урона и эффект заканчивается. Обычно цель не знает об эффекте, пока он не заставляет её произнести правду.",
+    "description": "Действием коснитесь цели и наложите запрет на ложь. Проверка Доминирования против Воли. При успехе цель не может лгать вам, но не обязана говорить. Если цель отказывается отвечать на ваш вопрос, она получает 5 урона и эффект заканчивается. Обычно цель не знает об эффекте, пока он не заставляет её произнести правду.",
     "shortDescription": "Цель не может лгать вам.",
     "price": 3
   },
@@ -2088,40 +2024,27 @@
   },
   {
     "id": "tsss",
-    "name": "ТССС",
+    "name": "Тсс-с",
     "type": "ability",
-    "rank": 2,
-    "skill": "sokrytie",
+    "rank": 1,
+    "skill": null,
     "mechanics": {
       "effects": [
         {
-          "activation": { "type": "action" },
+          "activation": { "type": "freeAction" },
           "conditions": {
-            "frequency": "oncePerSession",
-            "range": { "type": "melee" },
+            "frequency": "oncePerScene",
+            "range": { "type": "meters", "value": 15 },
             "targets": "allInArea",
-            "area": { "type": "circle", "value": 10 },
-            "defense": "will",
-            "duration": "untilEndOfScene",
-            "check": "required"
+            "area": { "type": "circle", "value": 15 },
+            "duration": "untilStartOfYourNextTurn"
           },
-          "outcomes": [{ "key": "applyStatus", "status": "silenced" }]
-        },
-        {
-          "activation": { "type": "action" },
-          "conditions": {
-            "frequency": "oncePerSession",
-            "range": { "type": "melee" },
-            "targets": "area",
-            "area": { "type": "circle", "value": 10 },
-            "duration": "untilEndOfScene"
-          },
-          "outcomes": [{ "key": "suppressSound" }]
+          "outcomes": [{ "key": "specialRule" }]
         }
       ]
     },
-    "description": "Создайте стационарную зону тишины радиусом 10 м рядом с собой. Проверка Сокрытия против Воли. При успехе цель и всё, что находится в зоне, заглушаются. Пока существа находятся в тишине, они не могут издавать шум и накладывать заклинания. Зона существует до конца сцены.",
-    "shortDescription": "Создайте зону тишины, запрещающую шум и заклинания.",
-    "price": 3
+    "description": "Раз за сцену свободным действием выберите точку в пределах 15 м. На 1 раунд все существа в круге диаметром 15 м не могут активировать способности 1-го ранга. Проверка не требуется.",
+    "shortDescription": "Запретите всем в выбранной зоне активировать способности 1-го ранга.",
+    "price": 1
   }
 ]

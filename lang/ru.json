@@ -406,7 +406,7 @@
     },
     "ItemAreaTypes": {
       "blast": "Взрыв",
-      "circle": "Круг",
+      "circle": "Круг, диаметр",
       "ray": "Луч"
     },
     "RollFlavor": {

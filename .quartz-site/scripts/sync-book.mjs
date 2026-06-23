@@ -397,7 +397,7 @@ function formatAreaValue(value) {
     case 'blast':
       return value.value ? `Взрыв ${value.value} м` : 'Взрыв';
     case 'circle':
-      return value.value ? `Круг ${value.value} м` : 'Круг';
+      return value.value ? `Круг, диаметр ${value.value} м` : 'Круг';
     case 'custom':
       return String(value.value ?? '').trim();
     case 'line':
