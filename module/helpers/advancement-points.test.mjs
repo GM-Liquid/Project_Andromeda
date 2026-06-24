@@ -23,5 +23,5 @@ test('advancement total uses skill ranks and values and ignores obsolete skill k
     }
   };
 
-  assert.equal(getTotalAdvancementSpent(system), 18);
+  assert.equal(getTotalAdvancementSpent(system), 22);
 });

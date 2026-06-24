@@ -11,8 +11,8 @@
 | ----------------------------- | --------------------------------------------------------------- |
 | **System name**               | **Project Andromeda**                                           |
 | **Foundry VTT compatibility** | v12 (minimum 12, verified 13)                                   |
-| **Current version**           | `0.3.8.0`                                                       |
-| **Current release line**      | `0.3.8.x`                                                       |
+| **Current version**           | `0.3.9.0`                                                       |
+| **Current release line**      | `0.3.9.x`                                                       |
 | **Languages**                 | English, Русский (full parity required)                         |
 | **Main tech**                 | ES-module JavaScript (`*.mjs`), Handlebars (`*.hbs`), JSON, CSS |
 | **Licence**                   | CC BY-NC-SA 4.0                                                 |
@@ -153,14 +153,14 @@ project-andromeda/
 
 - Characters have ranks **1-4** and do not have characteristics.
 - Skills remain grouped into the Body / Mind / Spirit categories used by the sheet, but those categories are not characteristics and have no independent values.
-- Every skill stores `rank` (**1-4**) and `value` (**0-3**). A skill's rank cannot exceed `system.currentRank`.
-- Improving a skill value to 1 / 2 / 3 costs 1 / 2 / 3 progression points respectively. Advancing from `rank N, value 3` to `rank N+1, value 0` costs 2 progression points.
+- Every skill stores `rank` (**1-4**) and `value` (**0-4**). A skill's rank cannot exceed `system.currentRank`.
+- Improving a skill value to 1 / 2 / 3 / 4 costs 1 / 2 / 3 / 4 progression points respectively. Advancing from `rank N, value 4` to `rank N+1, value 0` costs 2 progression points.
 - No migration from the removed characteristic / legacy skill model is shipped; the new model targets new worlds on the experimental branch.
 
 ### 3.2 Skills
 
-- Skill checks roll **2d6 + skill value**. Item-triggered checks use the same formula.
-- The unshifted outcome table is: **6 or less = failure; 7-9 = success with a cost; 10-12 = success; 13+ = critical success**.
+- Skill checks roll **2d8 + skill value**. Item-triggered checks use the same formula.
+- The unshifted outcome table is: **8 or less = failure; 9-12 = success with a cost; 13-16 = success; 17+ = critical success**.
 - **Failure with consequence** is the step below failure and is available only by shifting an outcome.
 - Chat output immediately shows the unshifted outcome and the used skill rank. Players and GMs apply rank-versus-task shifts manually after the roll.
 
@@ -285,7 +285,7 @@ The shipped gear catalog lives in the **`gear-library` compendium pack**, built 
 3. **Provide code** in a single contiguous block, ready for one-click copy.
 4. **Ensure RU + EN localisation** for any code that introduces UI text.
 5. **Bump `system.json` version according to the SemVer rules in Section 4** only when the change affects the shipped Foundry system.
-6. If adding or renaming a skill field, preserve the rank **1-4**, value **0-3**, and skill-rank-to-character-rank cap rules.
+6. If adding or renaming a skill field, preserve the rank **1-4**, value **0-4**, and skill-rank-to-character-rank cap rules.
 7. When implementing sheet interactions, prioritize incremental updates: submit data with `render: false`, then update only the impacted parts of the DOM to reflect changes immediately. This applies equally to PCs and NPCs.
 8. **Adhere to code style:** All generated or modified code must strictly follow the formatting rules defined in `.prettierrc.json` and the linting rules in `eslint.config.mjs`.
 9. **Keep this document in sync:** When important mechanics, release rules, or repository structure change, update `AGENTS.md` in the same change.

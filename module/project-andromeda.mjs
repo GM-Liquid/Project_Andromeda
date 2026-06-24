@@ -1608,7 +1608,7 @@ Hooks.once('init', function () {
 
   // systems/project-andromeda/project-andromeda.mjs — в хуке init
   CONFIG.Combat.initiative = {
-    formula: '2d6',
+    formula: '2d8',
     decimals: 2
   };
 

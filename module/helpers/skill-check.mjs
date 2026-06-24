@@ -1,9 +1,9 @@
-export const SKILL_CHECK_FORMULA = '2d6';
+export const SKILL_CHECK_FORMULA = '2d8';
 export const MIN_SKILL_RANK = 1;
 export const MAX_SKILL_RANK = 4;
-export const MAX_SKILL_VALUE = 3;
+export const MAX_SKILL_VALUE = 4;
 
-const VALUE_ADVANCEMENT_COSTS = [0, 1, 3, 6];
+const VALUE_ADVANCEMENT_COSTS = [0, 1, 3, 6, 10];
 const COMPLETED_RANK_COST = VALUE_ADVANCEMENT_COSTS[MAX_SKILL_VALUE] + 2;
 
 export function normalizeCharacterRank(rank) {
@@ -54,8 +54,8 @@ export function getNextSkillAdvancement(skill = {}, characterRank = MAX_SKILL_RA
 
 export function getSkillCheckOutcomeKey(total) {
   const numeric = Number(total) || 0;
-  if (numeric >= 13) return 'CriticalSuccess';
-  if (numeric >= 10) return 'Success';
-  if (numeric >= 7) return 'SuccessWithCost';
+  if (numeric >= 17) return 'CriticalSuccess';
+  if (numeric >= 13) return 'Success';
+  if (numeric >= 9) return 'SuccessWithCost';
   return 'Failure';
 }

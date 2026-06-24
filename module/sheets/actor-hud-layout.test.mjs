@@ -103,8 +103,10 @@ test('HUD stat grid keeps stress and progression columns compact', () => {
 });
 
 test('skill check formula is centered within each category header', () => {
+  const template = readFile('templates/actor/partials/actor-sheet-content.hbs');
   const stylesheet = readFile('css/project-andromeda.css');
 
+  assert.match(template, /<span class='andromeda-skill-formula'>2d8<\/span>/);
   assert.match(
     stylesheet,
     /\.project-andromeda \.andromeda-ability-summary \{[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s+auto\s+minmax\(0,\s*1fr\);/
