@@ -11,7 +11,7 @@
 | ----------------------------- | --------------------------------------------------------------- |
 | **System name**               | **Project Andromeda**                                           |
 | **Foundry VTT compatibility** | v12 (minimum 12, verified 13)                                   |
-| **Current version**           | `0.3.6.4`                                                       |
+| **Current version**           | `0.3.6.7`                                                       |
 | **Current release line**      | `0.3.6.x`                                                       |
 | **Languages**                 | English, Русский (full parity required)                         |
 | **Main tech**                 | ES-module JavaScript (`*.mjs`), Handlebars (`*.hbs`), JSON, CSS |
@@ -161,13 +161,19 @@ Project Andromeda uses **three** primary abilities; no _Dexterity_ characteristi
 
 Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normalized via helper utilities; derived stats and in-game effects are computed in `module/documents/actor.mjs`.
 
-### 3.2 Skills
+### 3.2 Motivation & Complications
+
+- Player-character identity uses **Motivation**, **Feature**, and one or more **Complications** instead of the former Values + Weakness presentation.
+- For backwards compatibility, Motivation remains stored in `system.biography.weakness`, while Complications remain `trait` items with `system.details.personalityRole: "value"` and use the internal `personalityValues` item-group key.
+- The personality tab presents Motivation and Feature first, followed by Complications, Temperament, and Appearance.
+
+### 3.3 Skills
 
 - Skills are integer values with no hard upper cap.
 - Each skill is tied to an ability key in `template.json` and uses that ability's die for rolls.
 - Skill modifiers equal the skill's numeric value plus applicable item bonuses (cartridges, implants, weapons), and should not be capped in sheets, rolls, or UI.
 
-### 3.3 Points of Heroism
+### 3.4 Points of Heroism
 
 - `system.momentOfGlory` stores **Points of Heroism** and remains the spendable heroism resource for backwards compatibility.
 - Chat roll messages support a context-menu action to spend **1** point of heroism and add a bonus equal to **half the highest die maximum** in that roll.
@@ -178,7 +184,7 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 - A session starts automatically when at least one GM and all player users in the world are connected.
 - An active session ends automatically after any required participant stays offline for more than **15 minutes**.
 
-### 3.4 Stress Formulas
+### 3.5 Stress Formulas
 
 - The system has **four** actor character types: `playerCharacter`, `minion`, `rankAndFile`, and `elite`.
 - Elite characters (`elite`, shown in UI as **Elite** / **Элита**) use stress **10 x rank** and do **not** support azure-stress marking on the stress track.
@@ -190,13 +196,13 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 - Fortitude, Control, and Will use the formula **ability defense bonus + matching armor bonus + character rank**.
 - The ability defense bonus is half the normalized ability die maximum: **d4 = 2, d6 = 3, d8 = 4, d10 = 5, d12 = 6, 2d8 = 8, d20 = 10**.
 
-### 3.5 Movement Speed
+### 3.6 Movement Speed
 
 - Base movement speed depends on `system.currentRank`: **15** at rank 1, **50** at rank 2, **150** at rank 3, and **450** at rank 4.
 - Movement speed does **not** scale from abilities.
 - Armor speed modifiers and `system.tempspeed` remain additive on top of that rank-based base value.
 
-### 3.6 Extreme Roll Reward
+### 3.7 Extreme Roll Reward
 
 - When a player character roll contains at least one die showing its minimum or maximum face, that actor gains **1** point of heroism.
 
@@ -247,7 +253,7 @@ Ability values are stored as die steps (`4, 6, 8, 10, 12, "2d8", 20`) and normal
 - **Sheets:** built with plain HTML + Handlebars; keep markup semantic for accessibility.
 - **No full re-render on edits:** Any change made through the character sheet (PC or NPC) should update the UI and derived values without triggering a full sheet re-render, unless a structural reflow is required. Prefer in-place DOM updates tied to `actor.update(..., { render: false })`, and refresh only the affected inputs, labels, and computed fields (speed, defenses, health, and similar values).
 - **Item library sync:** Character-sheet items that represent abilities, genomes, traits, or equipment stay linked to a corresponding library source via `flags.project-andromeda.libraryItemUuid`. The source is the shipped **`gear-library` compendium pack** for catalog content (read-only canon — see §6.2) or a **world-level Foundry item** for homebrew created on a sheet. A single library item may be linked to multiple actor items at once. Shared library data propagates to every linked actor item, while actor-local state such as `quantity` and `equipped` remains local. When the library-sync first creates the world item that backs a sheet-authored homebrew, it is filed into an **Items folder named after the owning actor** (flagged `flags.project-andromeda.actorItemFolder`), creating that folder on demand. Beyond that on-create filing, the system must not move already-foldered library items between folders, and must not create a duplicate world item when an actor item already links to a valid source. Deleting an actor item resyncs the world source's structure while other actor items still link to it; deleting the **last** linked actor item deletes the now-orphaned world source so no unused library item lingers. When that delete (or a manual delete from the Items directory) leaves one of those flagged per-character folders empty, the folder is removed too. Only system-created (flagged) folders are auto-removed — user-authored folders are never deleted. Compendium-linked actor items resolve to no world source, so none of this delete/cleanup logic touches the shipped pack.
-- **Sheet item creation flow:** for item groups backed by the shipped catalog (weapons, armor, equipment/items, abilities), the sheet's `+` button first offers two choices — **Browse Compendium** (opens the `gear-library` pack expanded to that group's catalog folder, e.g. `Оружие` / `Броня` / `Предметы` / `Способности`) or **Create Item** (authors a new homebrew item). Groups without a catalog section (e.g. personality values) skip the prompt and author directly. The group → catalog-folder mapping lives on `compendiumFolder` in `module/helpers/item-config.mjs` and must match the folder names emitted by `module/helpers/gear-catalog.mjs`.
+- **Sheet item creation flow:** for item groups backed by the shipped catalog (weapons, armor, equipment/items, abilities), the sheet's `+` button first offers two choices — **Browse Compendium** (opens the `gear-library` pack expanded to that group's catalog folder, e.g. `Оружие` / `Броня` / `Предметы` / `Способности`) or **Create Item** (authors a new homebrew item). Groups without a catalog section (e.g. personality complications) skip the prompt and author directly. The group → catalog-folder mapping lives on `compendiumFolder` in `module/helpers/item-config.mjs` and must match the folder names emitted by `module/helpers/gear-catalog.mjs`.
 - **Unified equipment type:** `equipment`, `equipment-consumable`, `implant`, and `cartridge` are treated as a unified equipment model. New content should use the `equipment` item type with `system.requiresRoll` and optional `system.skill`; legacy types are migration-only compatibility paths and are normalized during migration.
 - **Unified trait type:** all non-genome, non-source-ability traits use the `trait` item type. Legacy `trait-*` subtypes remain migration-only compatibility paths and should not be used for new content.
 
@@ -297,4 +303,4 @@ The shipped gear catalog lives in the **`gear-library` compendium pack**, built 
 
 ---
 
-_Last updated: 2026-06-16_
+_Last updated: 2026-06-24_

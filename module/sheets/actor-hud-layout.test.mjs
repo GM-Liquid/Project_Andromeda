@@ -115,6 +115,24 @@ test('ability die badges are centered within the ability header block', () => {
   );
 });
 
+test('personality tab presents motivation and feature before complications', () => {
+  const template = readFile('templates/actor/partials/actor-sheet-content.hbs');
+  const english = JSON.parse(readFile('lang/en.json'));
+  const russian = JSON.parse(readFile('lang/ru.json'));
+  const motivationIndex = template.indexOf("{{localize 'MY_RPG.Personality.Weakness'}}");
+  const featureIndex = template.indexOf("{{localize 'MY_RPG.Personality.Feature'}}");
+  const complicationsIndex = template.indexOf('{{#if personalityValueGroup}}');
+
+  assert.ok(motivationIndex >= 0);
+  assert.ok(featureIndex > motivationIndex);
+  assert.ok(complicationsIndex > featureIndex);
+  assert.match(template, /name='system\.biography\.weakness'/);
+  assert.equal(english.MY_RPG.Personality.Weakness, 'Motivation');
+  assert.equal(russian.MY_RPG.Personality.Weakness, 'Мотивация');
+  assert.equal(english.MY_RPG.ItemGroups.Values, 'Complications');
+  assert.equal(russian.MY_RPG.ItemGroups.Values, 'Осложнения');
+});
+
 test('actor sheet uses fixed chrome with a separate content viewport', () => {
   const template = readFile('templates/actor/partials/actor-sheet-content.hbs');
   const stylesheet = readFile('css/project-andromeda.css');

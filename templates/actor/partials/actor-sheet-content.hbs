@@ -319,10 +319,19 @@
                 data-group='primary'
                 data-tab='personality'
               >
-                <section class='item-groups personality-item-groups' data-groups='personality'>
-                  {{#if personalityValueGroup}}
-                    {{> "systems/project-andromeda/templates/actor/partials/item-group-section.hbs" group=personalityValueGroup}}
-                  {{/if}}
+                <section class='andromeda-titled-card personality-sheet-box personality-sheet-box--weakness'>
+                  <header class='andromeda-titled-card__header'>
+                    <span class='andromeda-titled-card__title'>
+                      {{localize 'MY_RPG.Personality.Weakness'}}
+                    </span>
+                  </header>
+                  <label class='andromeda-titled-card__body personality-field'>
+                    <textarea
+                      class='auto-resize-textarea andromeda-titled-card__input'
+                      name='system.biography.weakness'
+                      rows='3'
+                    >{{system.biography.weakness}}</textarea>
+                  </label>
                 </section>
 
                 <section class='andromeda-titled-card personality-sheet-box personality-sheet-box--feature'>
@@ -340,19 +349,10 @@
                   </label>
                 </section>
 
-                <section class='andromeda-titled-card personality-sheet-box personality-sheet-box--weakness'>
-                  <header class='andromeda-titled-card__header'>
-                    <span class='andromeda-titled-card__title'>
-                      {{localize 'MY_RPG.Personality.Weakness'}}
-                    </span>
-                  </header>
-                  <label class='andromeda-titled-card__body personality-field'>
-                    <textarea
-                      class='auto-resize-textarea andromeda-titled-card__input'
-                      name='system.biography.weakness'
-                      rows='3'
-                    >{{system.biography.weakness}}</textarea>
-                  </label>
+                <section class='item-groups personality-item-groups' data-groups='personality'>
+                  {{#if personalityValueGroup}}
+                    {{> "systems/project-andromeda/templates/actor/partials/item-group-section.hbs" group=personalityValueGroup}}
+                  {{/if}}
                 </section>
 
                 <section class='andromeda-titled-card personality-sheet-box personality-sheet-box--temperament'>
