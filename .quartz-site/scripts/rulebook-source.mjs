@@ -1,5 +1,5 @@
 import { constants as fsConstants } from "node:fs";
-import { access, cp, mkdir, rm } from "node:fs/promises";
+import { access, cp, mkdir, realpath, rm } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
 export const RULEBOOK_DIRNAME = "Книга правил v0.4";
@@ -16,7 +16,33 @@ async function pathExists(pathToCheck) {
   }
 }
 
+function normalizeComparablePath(pathToNormalize) {
+  return process.platform === "win32"
+    ? pathToNormalize.toLowerCase()
+    : pathToNormalize;
+}
+
+async function pathsPointToSameDirectory(sourceDir, targetDir) {
+  try {
+    const [sourceRealPath, targetRealPath] = await Promise.all([
+      realpath(sourceDir),
+      realpath(targetDir),
+    ]);
+
+    return (
+      normalizeComparablePath(sourceRealPath) ===
+      normalizeComparablePath(targetRealPath)
+    );
+  } catch {
+    return false;
+  }
+}
+
 async function replaceDirectory(sourceDir, targetDir) {
+  if (await pathsPointToSameDirectory(sourceDir, targetDir)) {
+    return;
+  }
+
   await rm(targetDir, { recursive: true, force: true });
   await mkdir(dirname(targetDir), { recursive: true });
   await cp(sourceDir, targetDir, { recursive: true, force: true });

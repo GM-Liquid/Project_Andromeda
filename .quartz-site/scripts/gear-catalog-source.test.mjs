@@ -1,5 +1,5 @@
 import assert from "node:assert/strict"
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises"
+import { mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
 import test from "node:test"
@@ -19,6 +19,11 @@ async function createTempRepos() {
   await mkdir(resolve(docsRepoRoot, GEAR_CATALOG_DIRNAME), { recursive: true })
 
   return { workspaceRoot, publicRepoRoot, docsRepoRoot }
+}
+
+async function linkDirectory(sourceDir, targetDir) {
+  await rm(targetDir, { recursive: true, force: true })
+  await symlink(sourceDir, targetDir, process.platform === "win32" ? "junction" : "dir")
 }
 
 test("prepareGearCatalogSource mirrors the sibling docs repo catalog into the public fallback", async () => {
@@ -45,6 +50,39 @@ test("prepareGearCatalogSource mirrors the sibling docs repo catalog into the pu
     assert.equal(
       await readFile(publicFile, "utf8"),
       '{"items":[{"id":"kd-2","name":"КД-2"}],"_meta":{"category":"armor"}}',
+    )
+  } finally {
+    await rm(workspaceRoot, { recursive: true, force: true })
+  }
+})
+
+test("prepareGearCatalogSource preserves a public catalog linked to the docs repo", async () => {
+  const { workspaceRoot, publicRepoRoot, docsRepoRoot } = await createTempRepos()
+
+  try {
+    const publicCatalogDir = resolve(publicRepoRoot, GEAR_CATALOG_DIRNAME)
+    const docsCatalogDir = resolve(docsRepoRoot, GEAR_CATALOG_DIRNAME)
+
+    await writeFile(
+      resolve(docsCatalogDir, "armor.json"),
+      '{"items":[{"id":"linked"}],"_meta":{"category":"armor"}}',
+      "utf8",
+    )
+    await linkDirectory(docsCatalogDir, publicCatalogDir)
+
+    const result = await prepareGearCatalogSource({
+      repoRoot: publicRepoRoot,
+      docsRepoRoot,
+    })
+
+    assert.equal(result.externalAvailable, true)
+    assert.equal(
+      await readFile(resolve(publicCatalogDir, "armor.json"), "utf8"),
+      '{"items":[{"id":"linked"}],"_meta":{"category":"armor"}}',
+    )
+    assert.equal(
+      (await realpath(publicCatalogDir)).toLowerCase(),
+      (await realpath(docsCatalogDir)).toLowerCase(),
     )
   } finally {
     await rm(workspaceRoot, { recursive: true, force: true })
