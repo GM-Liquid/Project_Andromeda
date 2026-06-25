@@ -1997,7 +1997,7 @@ textarea[disabled] {
 }
 
 /* The personality tab spaces its sections with the panel's flex gap, so the
-   values group (now first) must not add its own trailing margin on top of that. */
+   complications group must not add its own trailing margin on top of that. */
 .project-andromeda .personality-item-groups {
   margin-bottom: 0;
 }
@@ -2444,7 +2444,7 @@ textarea[disabled] {
 }
 
 /* Titled card: centered header strip over a content body. Shared by the
-   personality tab (appearance / feature / weakness) and the combat cheat sheet. */
+   personality tab (appearance / feature / motivation) and the combat cheat sheet. */
 .project-andromeda .andromeda-titled-card {
   display: flex;
   flex-direction: column;

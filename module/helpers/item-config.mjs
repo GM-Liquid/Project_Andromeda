@@ -593,7 +593,7 @@ export const ITEM_TYPE_CONFIGS = [
 // pack that holds this group's catalog. It must match the folder names produced by
 // the catalog transform (see `module/helpers/gear-catalog.mjs`) so the sheet's
 // "Browse Compendium" action can open straight to the matching section. Groups
-// without a catalog (e.g. personality values) omit it and create directly.
+// without a catalog (e.g. personality complications) omit it and create directly.
 export const ITEM_GROUP_CONFIGS = [
   {
     key: 'abilities',
@@ -671,6 +671,8 @@ export const ITEM_GROUP_CONFIGS = [
     exclusive: false,
     canRoll: false
   },
+  // Keep the legacy group key, role, and localization keys so existing actor items
+  // continue to render as complications without a migration.
   {
     key: 'personalityValues',
     types: ['trait'],

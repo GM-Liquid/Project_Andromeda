@@ -157,14 +157,20 @@ project-andromeda/
 - Improving a skill value to 1 / 2 / 3 / 4 costs 1 / 2 / 3 / 4 progression points respectively. Advancing from `rank N, value 4` to `rank N+1, value 0` costs 2 progression points.
 - No migration from the removed characteristic / legacy skill model is shipped; the new model targets new worlds on the experimental branch.
 
-### 3.2 Skills
+### 3.2 Motivation & Complications
+
+- Player-character identity uses **Motivation**, **Feature**, and one or more **Complications** instead of the former Values + Weakness presentation.
+- For backwards compatibility, Motivation remains stored in `system.biography.weakness`, while Complications remain `trait` items with `system.details.personalityRole: "value"` and use the internal `personalityValues` item-group key.
+- The personality tab presents Motivation and Feature first, followed by Complications, Temperament, and Appearance.
+
+### 3.3 Skills
 
 - Skill checks roll **2d8 + skill value**. Item-triggered checks use the same formula.
 - The unshifted outcome table is: **8 or less = failure; 9-12 = success with a cost; 13-16 = success; 17+ = critical success**.
 - **Failure with consequence** is the step below failure and is available only by shifting an outcome.
 - Chat output immediately shows the unshifted outcome and the used skill rank. Players and GMs apply rank-versus-task shifts manually after the roll.
 
-### 3.3 Points of Heroism
+### 3.4 Points of Heroism
 
 - `system.momentOfGlory` stores **Points of Heroism** and remains the spendable heroism resource for backwards compatibility.
 - Chat roll messages support a context-menu action to spend **1** point of heroism and add a bonus equal to **half the highest die maximum** in that roll.
@@ -175,7 +181,7 @@ project-andromeda/
 - A session starts automatically when at least one GM and all player users in the world are connected.
 - An active session ends automatically after any required participant stays offline for more than **15 minutes**.
 
-### 3.4 Stress Formulas
+### 3.5 Stress Formulas
 
 - The system has **four** actor character types: `playerCharacter`, `minion`, `rankAndFile`, and `elite`.
 - Elite characters (`elite`, shown in UI as **Elite** / **Элита**) use stress **10 x rank** and do **not** support azure-stress marking on the stress track.
@@ -186,13 +192,13 @@ project-andromeda/
 - Shipped defense labels use **Fortitude / Control / Will** in English and **Стойкость / Контроль / Воля** in Russian: Fortitude maps to Body, Control maps to Mind, and Will maps to Spirit.
 - Fortitude, Control, and Will are currently independent, manually editable values stored under `system.defenses`. They have no automatic formula until the next defense-system revision.
 
-### 3.5 Movement Speed
+### 3.6 Movement Speed
 
 - Base movement speed depends on `system.currentRank`: **15** at rank 1, **50** at rank 2, **150** at rank 3, and **450** at rank 4.
 - Movement speed does **not** scale from abilities.
 - Armor speed modifiers and `system.tempspeed` remain additive on top of that rank-based base value.
 
-### 3.6 Extreme Roll Reward
+### 3.7 Extreme Roll Reward
 
 - When a player character roll contains at least one die showing its minimum or maximum face, that actor gains **1** point of heroism.
 
@@ -243,7 +249,7 @@ project-andromeda/
 - **Sheets:** built with plain HTML + Handlebars; keep markup semantic for accessibility.
 - **No full re-render on edits:** Any change made through the character sheet (PC or NPC) should update the UI and derived values without triggering a full sheet re-render, unless a structural reflow is required. Prefer in-place DOM updates tied to `actor.update(..., { render: false })`, and refresh only the affected inputs, labels, and computed fields (speed, defenses, health, and similar values).
 - **Item library sync:** Character-sheet items that represent abilities, genomes, traits, or equipment stay linked to a corresponding library source via `flags.project-andromeda.libraryItemUuid`. The source is the shipped **`gear-library` compendium pack** for catalog content (read-only canon — see §6.2) or a **world-level Foundry item** for homebrew created on a sheet. A single library item may be linked to multiple actor items at once. Shared library data propagates to every linked actor item, while actor-local state such as `quantity` and `equipped` remains local. When the library-sync first creates the world item that backs a sheet-authored homebrew, it is filed into an **Items folder named after the owning actor** (flagged `flags.project-andromeda.actorItemFolder`), creating that folder on demand. Beyond that on-create filing, the system must not move already-foldered library items between folders, and must not create a duplicate world item when an actor item already links to a valid source. Deleting an actor item resyncs the world source's structure while other actor items still link to it; deleting the **last** linked actor item deletes the now-orphaned world source so no unused library item lingers. When that delete (or a manual delete from the Items directory) leaves one of those flagged per-character folders empty, the folder is removed too. Only system-created (flagged) folders are auto-removed — user-authored folders are never deleted. Compendium-linked actor items resolve to no world source, so none of this delete/cleanup logic touches the shipped pack.
-- **Sheet item creation flow:** for item groups backed by the shipped catalog (weapons, armor, equipment/items, abilities), the sheet's `+` button first offers two choices — **Browse Compendium** (opens the `gear-library` pack expanded to that group's catalog folder, e.g. `Оружие` / `Броня` / `Предметы` / `Способности`) or **Create Item** (authors a new homebrew item). Groups without a catalog section (e.g. personality values) skip the prompt and author directly. The group → catalog-folder mapping lives on `compendiumFolder` in `module/helpers/item-config.mjs` and must match the folder names emitted by `module/helpers/gear-catalog.mjs`.
+- **Sheet item creation flow:** for item groups backed by the shipped catalog (weapons, armor, equipment/items, abilities), the sheet's `+` button first offers two choices — **Browse Compendium** (opens the `gear-library` pack expanded to that group's catalog folder, e.g. `Оружие` / `Броня` / `Предметы` / `Способности`) or **Create Item** (authors a new homebrew item). Groups without a catalog section (e.g. personality complications) skip the prompt and author directly. The group → catalog-folder mapping lives on `compendiumFolder` in `module/helpers/item-config.mjs` and must match the folder names emitted by `module/helpers/gear-catalog.mjs`.
 - **Unified equipment type:** `equipment`, `equipment-consumable`, `implant`, and `cartridge` are treated as a unified equipment model. New content should use the `equipment` item type with `system.requiresRoll` and optional `system.skill`; legacy types are migration-only compatibility paths and are normalized during migration.
 - **Unified trait type:** all non-genome, non-source-ability traits use the `trait` item type. Legacy `trait-*` subtypes remain migration-only compatibility paths and should not be used for new content.
 
