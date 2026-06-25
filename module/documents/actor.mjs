@@ -7,7 +7,7 @@ import {
 } from '../helpers/actor-types.mjs';
 import { getTotalAdvancementSpent } from '../helpers/advancement-points.mjs';
 import { calcMovementSpeed } from '../helpers/movement-speed.mjs';
-import { getAbilityDieRoll, getAbilityDieNumeric, normalizeAbilityDie } from '../helpers/utils.mjs';
+import { normalizeSkill } from '../helpers/skill-check.mjs';
 
 /**
  * Extend the base Actor document by defining a custom roll data structure which is ideal for the Simple system.
@@ -29,19 +29,15 @@ export class ProjectAndromedaActor extends Actor {
     const isGmCharacter = isGmCharacterActorType(this.type);
     const usesAzureStress = supportsAzureStress(this.type);
 
-    /* 1. Способности ---------------------------------------------- */
-    for (const a of Object.values(s.abilities ?? {})) {
-      const normalized = normalizeAbilityDie(a.value);
-      a.mod = normalized; // «бонус» = само значение
-      a.roll = getAbilityDieRoll(normalized);
-    }
-
-    /* 2. Навыки ---------------------------------------------------- */
+    /* 1. Skills ---------------------------------------------------------- */
     for (const sk of Object.values(s.skills ?? {})) {
-      sk.mod = sk.value;
+      const normalized = normalizeSkill(sk, s.currentRank);
+      sk.rank = normalized.rank;
+      sk.value = normalized.value;
+      sk.mod = normalized.value;
     }
 
-    /* 3. Производные параметры ------------------------------------ */
+    /* 2. Derived values -------------------------------------------------- */
     s.speed ??= {};
     s.speed.value = this._calcSpeed(s, itemTotals);
     s.advancement ??= {};
@@ -86,12 +82,6 @@ export class ProjectAndromedaActor extends Actor {
 
     s.flux ??= {};
     s.flux.value = this._calcFlux(s);
-    s.defenses = {
-      physical: this._calcDefPhys(s, itemTotals),
-      azure: this._calcDefAzure(s, itemTotals),
-      mental: this._calcDefMent(s, itemTotals)
-    };
-
     // DEBUG-LOG
     debugLog('prepareDerivedData', {
       uuid: this.uuid,
@@ -136,45 +126,6 @@ export class ProjectAndromedaActor extends Actor {
     return calcMovementSpeed(s, itemTotals);
   }
 
-  _calcDefPhys(s, itemTotals = {}) {
-    const phys = Number(itemTotals?.armor?.physical) || 0;
-    const tempPhys = Number(s.tempphys) || 0;
-    return (
-      this._getAbilityDefense(s.abilities?.con?.value) +
-      phys +
-      this._getRankDefense(s) +
-      tempPhys
-    );
-  }
-  _calcDefAzure(s, itemTotals = {}) {
-    const azure = Number(itemTotals?.armor?.azure) || 0;
-    const tempAzure = Number(s.tempazure) || 0;
-    return (
-      this._getAbilityDefense(s.abilities?.int?.value) +
-      azure +
-      this._getRankDefense(s) +
-      tempAzure
-    );
-  }
-  _calcDefMent(s, itemTotals = {}) {
-    const mental = Number(itemTotals?.armor?.mental) || 0;
-    const tempMental = Number(s.tempmental) || 0;
-    return (
-      this._getAbilityDefense(s.abilities?.spi?.value) +
-      mental +
-      this._getRankDefense(s) +
-      tempMental
-    );
-  }
-
-  _getAbilityDefense(abilityValue) {
-    return Math.floor(getAbilityDieNumeric(abilityValue) / 2);
-  }
-
-  _getRankDefense(s) {
-    return Math.max(Number(s.currentRank) || 0, 0);
-  }
-
   _computeItemTotals() {
     const totals = {
       armor: {
@@ -183,8 +134,7 @@ export class ProjectAndromedaActor extends Actor {
         mental: 0,
         shield: 0,
         speed: 0
-      },
-      skillBonuses: {}
+      }
     };
 
     const armorItems = this.itemTypes?.armor ?? [];

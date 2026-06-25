@@ -15,10 +15,22 @@ test('actor sheet HUD uses the new two-row grid architecture', () => {
 
   assert.match(template, /<div class='andromeda-hud__identity-row'>/);
   assert.match(template, /<div class='andromeda-hud__rank-column'>/);
-  assert.match(stylesheet, /\.project-andromeda \.andromeda-hud__main \{[\s\S]*grid-template-columns:/);
-  assert.match(stylesheet, /\.project-andromeda \.andromeda-hud__main \{[\s\S]*align-self:\s*start;/);
-  assert.match(stylesheet, /\.project-andromeda \.andromeda-hud__stats-row \{[\s\S]*display:\s*grid;/);
-  assert.match(stylesheet, /\.project-andromeda \.andromeda-hud__rank-column \{[\s\S]*grid-area:\s*rank;/);
+  assert.match(
+    stylesheet,
+    /\.project-andromeda \.andromeda-hud__main \{[\s\S]*grid-template-columns:/
+  );
+  assert.match(
+    stylesheet,
+    /\.project-andromeda \.andromeda-hud__main \{[\s\S]*align-self:\s*start;/
+  );
+  assert.match(
+    stylesheet,
+    /\.project-andromeda \.andromeda-hud__stats-row \{[\s\S]*display:\s*grid;/
+  );
+  assert.match(
+    stylesheet,
+    /\.project-andromeda \.andromeda-hud__rank-column \{[\s\S]*grid-area:\s*rank;/
+  );
   assert.match(
     stylesheet,
     /\.project-andromeda \.andromeda-hud--player \.andromeda-hud__stats-row \{[\s\S]*grid-template-columns:/
@@ -90,16 +102,14 @@ test('HUD stat grid keeps stress and progression columns compact', () => {
   );
 });
 
-test('ability die badges are centered within the ability header block', () => {
+test('skill check formula is centered within each category header', () => {
+  const template = readFile('templates/actor/partials/actor-sheet-content.hbs');
   const stylesheet = readFile('css/project-andromeda.css');
 
+  assert.match(template, /<span class='andromeda-skill-formula'>2d8<\/span>/);
   assert.match(
     stylesheet,
     /\.project-andromeda \.andromeda-ability-summary \{[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s+auto\s+minmax\(0,\s*1fr\);/
-  );
-  assert.match(
-    stylesheet,
-    /\.project-andromeda \.andromeda-ability-roll \{[\s\S]*display:\s*contents;/
   );
   assert.match(
     stylesheet,
@@ -107,7 +117,7 @@ test('ability die badges are centered within the ability header block', () => {
   );
   assert.match(
     stylesheet,
-    /\.project-andromeda \.andromeda-ability-die \{[\s\S]*grid-column:\s*2;[\s\S]*justify-self:\s*center;/
+    /\.project-andromeda \.andromeda-skill-formula \{[\s\S]*grid-column:\s*2;[\s\S]*justify-self:\s*center;/
   );
   assert.match(
     stylesheet,
@@ -115,6 +125,13 @@ test('ability die badges are centered within the ability header block', () => {
   );
 });
 
+test('defense fields are editable sheet inputs', () => {
+  const template = readFile('templates/actor/partials/actor-sheet-content.hbs');
+  const defenseInput = template.match(/<input\s+class='andromeda-defense-input'[\s\S]*?\/>/)?.[0];
+
+  assert.ok(defenseInput);
+  assert.doesNotMatch(defenseInput, /readonly/);
+  assert.match(defenseInput, /name='\{\{column\.defensePath\}\}'/);
 test('personality tab presents motivation and feature before complications', () => {
   const template = readFile('templates/actor/partials/actor-sheet-content.hbs');
   const english = JSON.parse(readFile('lang/en.json'));
@@ -148,10 +165,7 @@ test('actor sheet uses fixed chrome with a separate content viewport', () => {
     stylesheet,
     /\.window-app\.project-andromeda\.sheet\.actor \.window-header \.andromeda-edit-mode-toggle \{[\s\S]*position:\s*absolute;[\s\S]*left:\s*\d+px;/
   );
-  assert.match(
-    actorSheet,
-    /dblclick\.projectAndromedaEditMode[\s\S]*event\.stopPropagation\(\);/
-  );
+  assert.match(actorSheet, /dblclick\.projectAndromedaEditMode[\s\S]*event\.stopPropagation\(\);/);
   assert.match(template, /<div class='andromeda-sheet-chrome'>/);
   assert.match(template, /<div class='andromeda-sheet-viewport'>/);
   assert.match(template, /<div class='andromeda-sheet-pane-scroll sheet-scrollable'>/);

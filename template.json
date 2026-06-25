@@ -9,17 +9,6 @@
         "currentRank": 1,
         "momentOfGlory": 0,
         "progressPoints": 0,
-        "abilities": {
-          "con": {
-            "value": 4
-          },
-          "int": {
-            "value": 4
-          },
-          "spi": {
-            "value": 4
-          }
-        },
         "stress": {
           "value": 0,
           "max": 4,
@@ -28,6 +17,11 @@
         "forceShield": {
           "value": 0,
           "max": 0
+        },
+        "defenses": {
+          "physical": 1,
+          "azure": 1,
+          "mental": 1
         },
         "flux": {
           "value": 0
@@ -41,65 +35,62 @@
           "value": 0
         },
         "temphealth": 0,
-        "tempphys": 0,
-        "tempazure": 0,
-        "tempmental": 0,
         "tempspeed": 0,
         "biography": "",
         "skills": {
           "moshch": {
-            "value": 0,
-            "ability": "con"
+            "rank": 1,
+            "value": 0
           },
           "lovkost": {
-            "value": 0,
-            "ability": "con"
+            "rank": 1,
+            "value": 0
           },
           "sokrytie": {
-            "value": 0,
-            "ability": "con"
+            "rank": 1,
+            "value": 0
           },
           "strelba": {
-            "value": 0,
-            "ability": "con"
+            "rank": 1,
+            "value": 0
           },
           "blizhniy_boy": {
-            "value": 0,
-            "ability": "con"
+            "rank": 1,
+            "value": 0
           },
 
           "nablyudatelnost": {
-            "value": 0,
-            "ability": "int"
+            "rank": 1,
+            "value": 0
           },
           "analiz": {
-            "value": 0,
-            "ability": "int"
+            "rank": 1,
+            "value": 0
           },
           "khakerstvo": {
-            "value": 0,
-            "ability": "int"
+            "rank": 1,
+            "value": 0
           },
           "inzheneriya": {
-            "value": 0,
-            "ability": "int"
+            "rank": 1,
+            "value": 0
           },
 
           "dominirovanie": {
-            "value": 0,
-            "ability": "spi"
+            "rank": 1,
+            "value": 0
           },
           "rezonans": {
-            "value": 0,
-            "ability": "spi"
+            "rank": 1,
+            "value": 0
           },
           "mistika": {
-            "value": 0,
-            "ability": "spi"
+            "rank": 1,
+            "value": 0
           },
           "obayanie": {
-            "value": 0,
-            "ability": "spi"
+            "rank": 1,
+            "value": 0
           }
         }
       }

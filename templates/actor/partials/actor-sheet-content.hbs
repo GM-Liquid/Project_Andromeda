@@ -101,18 +101,6 @@
               <input type='number' name='system.temphealth' value='{{system.temphealth}}' />
             </label>
             <label class='andromeda-temp-row'>
-              <span>{{localize 'MY_RPG.Temp.BonusFortitudeLabel'}}</span>
-              <input type='number' name='system.tempphys' value='{{system.tempphys}}' />
-            </label>
-            <label class='andromeda-temp-row'>
-              <span>{{localize 'MY_RPG.Temp.BonusControlLabel'}}</span>
-              <input type='number' name='system.tempazure' value='{{system.tempazure}}' />
-            </label>
-            <label class='andromeda-temp-row'>
-              <span>{{localize 'MY_RPG.Temp.BonusWillLabel'}}</span>
-              <input type='number' name='system.tempmental' value='{{system.tempmental}}' />
-            </label>
-            <label class='andromeda-temp-row'>
               <span>{{localize 'MY_RPG.TempSpeed.Label'}}</span>
               <input type='number' name='system.tempspeed' value='{{system.tempspeed}}' />
             </label>
@@ -174,86 +162,39 @@
       <section class='andromeda-sheet-workspace'>
         <aside class='andromeda-sheet-rail'>
           <header class='andromeda-rail-header'>
-            <h2>{{localize 'MY_RPG.SheetLabels.Attributes'}}</h2>
+            <h2>{{localize 'MY_RPG.SheetLabels.Skills'}}</h2>
           </header>
 
           <div class='andromeda-rail-skills-scroll'>
             {{#each skillColumns as |column|}}
               <article
-                class='andromeda-ability-card andromeda-rail-ability {{column.ability.rankClass}}'
-                data-ability-key='{{column.key}}'
+                class='andromeda-ability-card andromeda-rail-ability'
+                data-category-key='{{column.key}}'
               >
                 <div class='andromeda-ability-summary'>
-                  <button
-                    type='button'
-                    class='andromeda-ability-roll rollable'
-                    data-ability='{{column.key}}'
-                    data-label='{{column.ability.label}}'
-                  >
-                    <span class='andromeda-ability-title'>{{column.label}}</span>
-                    <span class='andromeda-ability-die'>
-                      <strong class='ability-die-value {{column.ability.rankClass}}'>
-                        {{column.ability.dieLabel}}
-                      </strong>
-                    </span>
-                  </button>
+                  <span class='andromeda-ability-title'>{{column.label}}</span>
+                  <span class='andromeda-skill-formula'>2d8</span>
 
                   <label class='andromeda-defense-pill'>
                     <span>{{column.defenseLabel}}</span>
                     <input
+                      class='andromeda-defense-input'
                       type='number'
                       name='{{column.defensePath}}'
                       value='{{column.defenseValue}}'
                       step='1'
+                      min='0'
                       inputmode='numeric'
-                      readonly
-                      tabindex='-1'
                     />
                   </label>
                 </div>
 
-                <div class='ability-die-control'>
-                  <button
-                    type='button'
-                    class='ability-step'
-                    data-step='-1'
-                    aria-label='{{localize "MY_RPG.AbilityDice.Decrease"}}'
-                  >
-                    <i class='fa-solid fa-minus'></i>
-                  </button>
-                  <input
-                    type='hidden'
-                    name='system.abilities.{{column.key}}.value'
-                    value='{{column.ability.value}}'
-                  />
-                  <button
-                    type='button'
-                    class='ability-step {{#if @root.isPlayerCharacter}}andromeda-advancement-control andromeda-advancement--{{column.ability.advancement.state}}{{/if}}'
-                    data-step='1'
-                    {{#if @root.isPlayerCharacter}}
-                      data-advancement-kind='ability'
-                      data-advancement-key='{{column.key}}'
-                      title='{{column.ability.advancement.title}}'
-                      aria-label='{{column.ability.advancement.title}}'
-                    {{else}}
-                      aria-label='{{localize "MY_RPG.AbilityDice.Increase"}}'
-                    {{/if}}
-                  >
-                    <i class='fa-solid fa-plus'></i>
-                  </button>
-                  {{#if @root.isPlayerCharacter}}
-                    <span
-                      class='andromeda-advancement-cost andromeda-advancement--{{column.ability.advancement.state}}'
-                      data-advancement-kind='ability'
-                      data-advancement-key='{{column.key}}'
-                      title='{{column.ability.advancement.title}}'
-                    >{{column.ability.advancement.costLabel}}</span>
-                  {{/if}}
-                </div>
-
                 <div class='andromeda-rail-skills'>
                   {{#each column.skills as |skill|}}
-                    <div class='skill skill-row andromeda-skill-row'>
+                    <div
+                      class='skill skill-row andromeda-skill-row {{#if @root.isPlayerCharacter}}andromeda-skill-row--advancement{{/if}}'
+                      data-skill-key='{{skill.key}}'
+                    >
                       <button
                         type='button'
                         class='skill-col skill-name rollable'
@@ -263,16 +204,31 @@
                         <span class='skill-name__label'>{{skill.label}}</span>
                       </button>
                       {{#if @root.isPlayerCharacter}}
-                        <span
-                          class='andromeda-advancement-cost andromeda-advancement--{{skill.advancement.state}}'
+                        <button
+                          type='button'
+                          class='skill-advance andromeda-advancement-cost andromeda-advancement--{{skill.advancement.state}}'
                           data-advancement-kind='skill'
                           data-advancement-key='{{skill.key}}'
                           title='{{skill.advancement.title}}'
-                        >{{skill.advancement.costLabel}}</span>
+                          aria-label='{{skill.advancement.title}}'
+                        >{{skill.advancement.costLabel}}</button>
                       {{/if}}
                       <div class='skill-col skill-value'>
                         <input
-                          class='{{skill.rankClass}}'
+                          class='skill-rank-input {{skill.rankClass}}'
+                          type='number'
+                          name='system.skills.{{skill.key}}.rank'
+                          value='{{skill.rank}}'
+                          step='1'
+                          inputmode='numeric'
+                          min='1'
+                          max='4'
+                          title='{{localize "MY_RPG.SkillCheck.RankField"}}'
+                          aria-label='{{localize "MY_RPG.SkillCheck.RankField"}}'
+                        />
+                        <span class='skill-value-separator'>·</span>
+                        <input
+                          class='skill-value-input'
                           type='number'
                           name='system.skills.{{skill.key}}.value'
                           value='{{skill.value}}'
@@ -280,6 +236,9 @@
                           inputmode='numeric'
                           pattern='\d+'
                           min='0'
+                          max='4'
+                          title='{{localize "MY_RPG.SkillCheck.ValueField"}}'
+                          aria-label='{{localize "MY_RPG.SkillCheck.ValueField"}}'
                         />
                       </div>
                     </div>
