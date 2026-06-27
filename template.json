@@ -198,14 +198,16 @@
       "requiresRoll": true,
       "rank": "",
       "skill": "",
-      "skillBonus": "0/0/0/0"
+      "skillBonus": "0/0/0/0",
+      "stepEffects": []
     },
     "implant": {
       "templates": ["base"],
       "requiresRoll": true,
       "rank": "",
       "skill": "",
-      "skillBonus": "0/0/0/0"
+      "skillBonus": "0/0/0/0",
+      "stepEffects": []
     },
     "armor": {
       "templates": ["base"],
@@ -225,21 +227,24 @@
       "rank": "",
       "requiresRoll": true,
       "skill": "",
-      "skillBonus": "0/0/0/0"
+      "skillBonus": "0/0/0/0",
+      "stepEffects": []
     },
     "equipment": {
       "templates": ["base"],
       "rank": "",
       "requiresRoll": false,
       "skill": "",
-      "skillBonus": "0/0/0/0"
+      "skillBonus": "0/0/0/0",
+      "stepEffects": []
     },
     "equipment-consumable": {
       "templates": ["base"],
       "rank": "",
       "requiresRoll": false,
       "skill": "",
-      "skillBonus": "0/0/0/0"
+      "skillBonus": "0/0/0/0",
+      "stepEffects": []
     },
     "environment-consumable": {
       "templates": ["base"],

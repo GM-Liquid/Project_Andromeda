@@ -1,0 +1,53 @@
+{{#if showStepEffects}}
+  <div class="item-section step-effects" data-step-effects>
+    <div class="step-effects__header">
+      <label>{{localize 'MY_RPG.StepEffects.SectionTitle'}}</label>
+      <button
+        type="button"
+        class="step-effects__add"
+        data-step-effect-add
+        {{#unless editable}}disabled{{/unless}}
+      >
+        <i class="fas fa-plus"></i> {{localize 'MY_RPG.StepEffects.Add'}}
+      </button>
+    </div>
+    <div class="step-effects__list">
+      {{#each stepEffects as |effect|}}
+        <div class="step-effects__row" data-step-effect-row>
+          <input
+            type="text"
+            class="step-effects__text"
+            name="system.stepEffects.{{effect.index}}.text"
+            value="{{effect.text}}"
+            data-step-effect-text
+            placeholder="{{localize 'MY_RPG.StepEffects.TextPlaceholder'}}"
+            {{#unless ../editable}}disabled{{/unless}}
+          />
+          <select
+            class="step-effects__threshold"
+            name="system.stepEffects.{{effect.index}}.minOutcome"
+            data-step-effect-threshold
+            aria-label="{{localize 'MY_RPG.StepEffects.ThresholdLabel'}}"
+            {{#unless ../editable}}disabled{{/unless}}
+          >
+            {{#each effect.thresholdOptions as |option|}}
+              <option value="{{option.value}}" {{#if option.selected}}selected{{/if}}>
+                {{option.label}}
+              </option>
+            {{/each}}
+          </select>
+          <button
+            type="button"
+            class="step-effects__remove"
+            data-step-effect-remove
+            data-step-effect-index="{{effect.index}}"
+            title="{{localize 'MY_RPG.StepEffects.Remove'}}"
+            {{#unless ../editable}}disabled{{/unless}}
+          >
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      {{/each}}
+    </div>
+  </div>
+{{/if}}

@@ -75,18 +75,29 @@
       "SkillRankLabel": "Skill rank",
       "OutcomeLabel": "Outcome",
       "OutcomeDamageLabel": "Damage",
+      "RolledOutcome": "Rolled",
+      "ShiftWord": "shift",
+      "ShiftUp": "Shift the outcome up",
+      "ShiftDown": "Shift the outcome down",
+      "EffectsLabel": "Effects",
       "RollDetails": "Roll details",
       "ActivatedDescription": "Description",
       "RollFormula": "Formula",
       "RollTotal": "Check total",
       "DamageProfile": "Damage profile",
       "Outcomes": {
-        "FailureWithConsequence": "Failure with consequence",
         "Failure": "Failure",
         "SuccessWithCost": "Success with a cost",
         "Success": "Success",
         "CriticalSuccess": "Critical success"
       }
+    },
+    "StepEffects": {
+      "SectionTitle": "Step effects",
+      "TextPlaceholder": "Effect (e.g. Stun for 1 round)",
+      "ThresholdLabel": "Triggers from",
+      "Add": "Add effect",
+      "Remove": "Remove effect"
     },
     "SheetLabels": {
       "Actor": "Character Sheet",

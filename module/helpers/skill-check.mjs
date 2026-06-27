@@ -59,3 +59,35 @@ export function getSkillCheckOutcomeKey(total) {
   if (numeric >= 9) return 'SuccessWithCost';
   return 'Failure';
 }
+
+// Outcome ladder, lowest to highest. Index order matches the damage profile values.
+export const OUTCOME_KEYS = Object.freeze([
+  'Failure',
+  'SuccessWithCost',
+  'Success',
+  'CriticalSuccess'
+]);
+
+export function getOutcomeIndex(outcomeKey) {
+  const index = OUTCOME_KEYS.indexOf(String(outcomeKey ?? '').trim());
+  return index === -1 ? 0 : index;
+}
+
+export function clampOutcomeIndex(index) {
+  return Math.max(0, Math.min(OUTCOME_KEYS.length - 1, Math.trunc(Number(index) || 0)));
+}
+
+export function getOutcomeKeyByIndex(index) {
+  return OUTCOME_KEYS[clampOutcomeIndex(index)];
+}
+
+// Returns the outcome key after applying a signed step shift, clamped to the ladder.
+export function shiftOutcomeKey(outcomeKey, shift = 0) {
+  return getOutcomeKeyByIndex(getOutcomeIndex(outcomeKey) + (Number(shift) || 0));
+}
+
+// Normalizes a stored shift so the shifted outcome stays inside the ladder.
+export function normalizeOutcomeShift(outcomeKey, shift = 0) {
+  const rolledIndex = getOutcomeIndex(outcomeKey);
+  return clampOutcomeIndex(rolledIndex + (Number(shift) || 0)) - rolledIndex;
+}
