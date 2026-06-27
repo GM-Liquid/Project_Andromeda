@@ -132,6 +132,8 @@ test('defense fields are editable sheet inputs', () => {
   assert.ok(defenseInput);
   assert.doesNotMatch(defenseInput, /readonly/);
   assert.match(defenseInput, /name='\{\{column\.defensePath\}\}'/);
+});
+
 test('personality tab presents motivation and feature before complications', () => {
   const template = readFile('templates/actor/partials/actor-sheet-content.hbs');
   const english = JSON.parse(readFile('lang/en.json'));

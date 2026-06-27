@@ -10,8 +10,8 @@ heroAlt: null
 showHero: true
 showToc: true
 parent: null
-created: "2026-06-25"
-modified: "2026-06-25"
+created: "2026-06-27"
+modified: "2026-06-27"
 ---
 
 ## Свойства
