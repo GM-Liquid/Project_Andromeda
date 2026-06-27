@@ -964,7 +964,6 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       rollMode: game.settings.get('core', 'rollMode'),
       flags: {
         [MODULE_ID]: {
-          skillCheck: { skill, rank: skillData.rank, outcome: outcomeKey }
           skillCheck: { skill, rank: skillData.rank, outcome: outcomeKey, label, parts }
         }
       }
