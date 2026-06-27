@@ -45,17 +45,7 @@ export class ProjectAndromedaActor extends Actor {
 
     const stress = s.stress ?? (s.stress = {});
     const forceShield = s.forceShield ?? (s.forceShield = {});
-    const calculatedStressMax = this._calcStressMax(s, itemTotals);
-    const rawStressMaxOverride = stress.maxOverride;
-    const hasStressMaxOverride =
-      rawStressMaxOverride !== undefined &&
-      rawStressMaxOverride !== null &&
-      String(rawStressMaxOverride).trim() !== '';
-    const overrideStressMax = Number(rawStressMaxOverride);
-    stress.max =
-      hasStressMaxOverride && Number.isFinite(overrideStressMax) && overrideStressMax >= 0
-        ? Math.trunc(overrideStressMax)
-        : calculatedStressMax;
+    stress.max = this._calcStressMax(s, itemTotals);
     forceShield.max = 0;
     const clamp = Math.clamp
       ? (value, min, max) => Math.clamp(value, min, max)
@@ -87,8 +77,8 @@ export class ProjectAndromedaActor extends Actor {
   _calcStressMax(s, itemTotals = {}) {
     const actorType = normalizeActorType(this.type);
     const rank = Math.max(Number(s.currentRank) || 0, 0);
-    const tempStress = Math.max(Number(s?.temphealth) || 0, 0);
-    const shield = Number(itemTotals?.armor?.shield) || 0;
+    const tempStress = Number(s?.temphealth) || 0;
+    const shield = Math.max(Number(itemTotals?.armor?.shield) || 0, 0);
     return Math.max(0, getBaseStressByRank(actorType, rank) + tempStress + shield);
   }
 

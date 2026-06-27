@@ -92,6 +92,7 @@ function getHudRankClass(rank) {
 
 const ADVANCEMENT_STATES = ['available', 'insufficient', 'capped'];
 const ACTOR_SHEET_MIN_WIDTH = 730;
+const TEMPORARY_PARAMETER_PATHS = new Set(['system.temphealth']);
 
 function getSharedGmHeroPool() {
   return Math.max(Number(game.settings.get(MODULE_ID, GM_HERO_POOL_SETTING)) || 0, 0);
@@ -358,7 +359,6 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       "input[name='system.progressPoints']",
       "input[name='system.currentRank']",
       "input[name='system.stress.value']",
-      "input[name='system.stress.maxOverride']",
       "input[name='system.temphealth']",
       "input[name='system.tempspeed']",
       "input[name^='system.defenses.']"
@@ -458,7 +458,6 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     context.isGmCharacter = isGmCharacterActorType(actorData.type);
     context.isElite = isEliteActorType(actorData.type);
     context.canUseAzureStress = supportsAzureStress(actorData.type);
-    context.canEditStressMax = Boolean(game.user?.isGM);
     context.sharedHeroPool = context.isGmCharacter ? getSharedGmHeroPool() : 0;
     context.sheetEditMode = this._editMode;
     context.sheetModeControls = this._getSheetModeControlLabels();
@@ -847,6 +846,13 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     return value;
   }
 
+  _coerceIntegerInput(input) {
+    let value = parseInt(input?.value, 10);
+    if (Number.isNaN(value)) value = 0;
+    if (input) input.value = value;
+    return value;
+  }
+
   async _onDerivedInputChange(event) {
     const input = event.currentTarget;
     if (!input?.name) return;
@@ -854,12 +860,8 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     let nextValue;
     if (input.name === 'system.currentRank') {
       nextValue = normalizeCharacterRank(input.value);
-    } else if (
-      input.name === 'system.stress.maxOverride' &&
-      String(input.value ?? '').trim() === ''
-    ) {
-      nextValue = null;
-      input.value = '';
+    } else if (TEMPORARY_PARAMETER_PATHS.has(input.name)) {
+      nextValue = this._coerceIntegerInput(input);
     } else {
       nextValue = this._coerceNonNegativeIntegerInput(input);
     }
@@ -973,20 +975,10 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     const setText = (field, val) => {
       $root.find(`[data-field="${field}"]`).text(val ?? 0);
     };
-    const stressMaxOverride = s?.stress?.maxOverride;
-    const hasStressMaxOverride =
-      stressMaxOverride !== undefined &&
-      stressMaxOverride !== null &&
-      String(stressMaxOverride).trim() !== '';
-
     // Speed
     setVal('system.speed.value', s?.speed?.value);
     setVal('system.progressPoints', s?.progressPoints);
     setVal('system.stress.value', s?.stress?.value);
-    $root
-      .find("input[name='system.stress.maxOverride']")
-      .val(hasStressMaxOverride ? stressMaxOverride : '')
-      .attr('placeholder', s?.stress?.max ?? 0);
     setVal('system.advancement.totalSpent', s?.advancement?.totalSpent);
     setText('system.advancement.available', s?.advancement?.available);
     setText('system.advancement.totalSpent', s?.advancement?.totalSpent);
@@ -1019,15 +1011,6 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
         : this._normalizeStressMarked(stress.marked, max)
       : [];
     $root.find("input[name='system.stress.value']").val(boundedValue);
-    const stressMaxOverride = stress.maxOverride;
-    const hasStressMaxOverride =
-      stressMaxOverride !== undefined &&
-      stressMaxOverride !== null &&
-      String(stressMaxOverride).trim() !== '';
-    $root
-      .find("input[name='system.stress.maxOverride']")
-      .val(hasStressMaxOverride ? stressMaxOverride : '')
-      .attr('placeholder', max);
     $root.find("[data-field='system.stress.max']").text(max);
     const $track = $root.find('.stress-track');
     if (!$track.length) return;

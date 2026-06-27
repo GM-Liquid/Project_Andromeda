@@ -76,7 +76,7 @@ test('character defenses remain independent from skill ranks', () => {
   assert.equal(actor.system.forceShield.max, 0);
 });
 
-test('character stress max follows actor type defaults and GM overrides', () => {
+test('character stress max follows actor type defaults', () => {
   const cases = [
     ['playerCharacter', 3, 15],
     ['minion', 3, 9],
@@ -105,17 +105,50 @@ test('character stress max follows actor type defaults and GM overrides', () => 
 
     assert.equal(actor.system.stress.max, expectedStress);
   }
+});
 
+test('temporary stress and armor shield add to stress max', () => {
   const actor = new ProjectAndromedaActor({
     type: 'playerCharacter',
     system: {
       currentRank: 2,
-      temphealth: 0,
+      temphealth: 5,
       tempspeed: 0,
       progressPoints: 0,
       defenses: {},
       skills: {},
-      stress: { value: 0, max: 0, maxOverride: 99 },
+      stress: { value: 0, max: 0 },
+      forceShield: { value: 0, max: 0 }
+    },
+    itemTypes: {
+      armor: [
+        {
+          system: {
+            equipped: true,
+            quantity: 1,
+            itemShield: 4
+          }
+        }
+      ]
+    }
+  });
+
+  actor.prepareDerivedData();
+
+  assert.equal(actor.system.stress.max, 19);
+});
+
+test('temporary stress accepts penalties', () => {
+  const actor = new ProjectAndromedaActor({
+    type: 'playerCharacter',
+    system: {
+      currentRank: 2,
+      temphealth: -10,
+      tempspeed: 0,
+      progressPoints: 0,
+      defenses: {},
+      skills: {},
+      stress: { value: 0, max: 0 },
       forceShield: { value: 0, max: 0 }
     },
     itemTypes: {}
@@ -123,5 +156,6 @@ test('character stress max follows actor type defaults and GM overrides', () => 
 
   actor.prepareDerivedData();
 
-  assert.equal(actor.system.stress.max, 99);
+  assert.equal(actor.system.temphealth, -10);
+  assert.equal(actor.system.stress.max, 0);
 });
