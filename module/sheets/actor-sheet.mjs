@@ -41,11 +41,8 @@ import {
   isLibrarySyncManagedType,
   setLibraryItemLinkOnData
 } from '../helpers/item-library-sync.mjs';
-import {
-  formatDamageProfile,
-  getDamageForOutcome,
-  hasDamageProfileValue
-} from '../helpers/damage-profile.mjs';
+import { formatDamageProfile, hasDamageProfileValue } from '../helpers/damage-profile.mjs';
+import { buildSkillCheckRollFlavor } from '../helpers/roll-card.mjs';
 
 export const FoundryActorSheet = getFoundryActorSheetClass();
 
@@ -958,7 +955,9 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       mod: skillData.value
     }).roll();
     const outcomeKey = getSkillCheckOutcomeKey(roll.total);
-    const flavor = this._buildSkillCheckFlavor(label, parts, skillData.rank, outcomeKey);
+    const flavor = this._buildSkillCheckFlavor(label, parts, skillData.rank, outcomeKey, {
+      total: roll.total
+    });
     await roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
       flavor,
@@ -966,6 +965,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       flags: {
         [MODULE_ID]: {
           skillCheck: { skill, rank: skillData.rank, outcome: outcomeKey }
+          skillCheck: { skill, rank: skillData.rank, outcome: outcomeKey, label, parts }
         }
       }
     });
@@ -1815,7 +1815,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       });
       return;
     }
-    await this._rollItem(item, itemId);
+    await this._rollItem(item, itemId, { includeItemContent: true });
   }
 
   async _onItemActivate(event) {
@@ -1883,17 +1883,19 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       item: item.name || game.i18n.localize(`TYPES.Item.${item.type}`),
       skill: this._skillLabel(skillKey)
     });
-    let flavor = this._buildSkillCheckFlavor(flavorLabel, parts, skillData.rank, outcomeKey);
+    const damageProfile = hasDamageProfileValue(system.skillBonus) ? system.skillBonus : null;
     const itemContent = includeItemContent
       ? this._buildItemChatContent(item, displayConfig, { includeName: false })
       : '';
     const rollNote =
       item.type === 'weapon'
-        ? this._weaponEffectHtml(item, outcomeKey)
+        ? this._weaponRollNoteHtml(item)
         : itemContent || this._getTraitRollNote(item, typeConfig);
-    if (rollNote) {
-      flavor += `<div class="myrpg-roll-note">${rollNote}</div>`;
-    }
+    const flavor = this._buildSkillCheckFlavor(flavorLabel, parts, skillData.rank, outcomeKey, {
+      total: roll.total,
+      damageProfile,
+      note: rollNote
+    });
 
     await roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this.actor }),
@@ -1901,7 +1903,15 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       rollMode: game.settings.get('core', 'rollMode'),
       flags: {
         [MODULE_ID]: {
-          skillCheck: { skill: skillKey, rank: skillData.rank, outcome: outcomeKey }
+          skillCheck: {
+            skill: skillKey,
+            rank: skillData.rank,
+            outcome: outcomeKey,
+            label: flavorLabel,
+            parts,
+            damageProfile,
+            note: rollNote
+          }
         }
       }
     });
@@ -2101,34 +2111,16 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     return formatDamageProfile(value);
   }
 
-  _buildRollFlavor(label, parts = []) {
-    const safeLabel = this._escapeHTML(label ?? '');
-    const rollParts = (parts ?? []).filter(
-      (part) => part && part.label && part.value !== undefined && part.value !== null
-    );
-    if (!rollParts.length) return safeLabel;
-
-    const modifiersTitle = this._escapeHTML(game.i18n.localize('MY_RPG.RollFlavor.Modifiers'));
-    const rows = rollParts
-      .map((part) => {
-        const partLabel = this._escapeHTML(part.label);
-        const value = this._formatSkillBonus(part.value);
-        return `<div class="myrpg-roll-part"><span class="myrpg-roll-part__label">${partLabel}</span><span class="myrpg-roll-part__value">${value}</span></div>`;
-      })
-      .join('');
-
-    return `<div class="myrpg-roll-flavor"><div class="myrpg-roll-flavor__header">${safeLabel}</div><div class="myrpg-roll-flavor__modifiers"><div class="myrpg-roll-flavor__title">${modifiersTitle}</div>${rows}</div></div>`;
-  }
-
-  _buildSkillCheckFlavor(label, parts, skillRank, outcomeKey) {
-    const flavor = this._buildRollFlavor(label, parts);
-    const rankLabel = this._escapeHTML(
-      game.i18n.format('MY_RPG.SkillCheck.SkillRank', { rank: skillRank })
-    );
-    const outcomeLabel = this._escapeHTML(
-      game.i18n.localize(`MY_RPG.SkillCheck.Outcomes.${outcomeKey}`)
-    );
-    return `${flavor}<div class="myrpg-roll-outcome myrpg-roll-outcome--${outcomeKey.toLowerCase()}"><span>${rankLabel}</span><strong>${outcomeLabel}</strong></div>`;
+  _buildSkillCheckFlavor(label, parts, skillRank, outcomeKey, options = {}) {
+    return buildSkillCheckRollFlavor({
+      label,
+      parts,
+      skillRank,
+      outcomeKey,
+      total: options.total ?? null,
+      damageProfile: options.damageProfile ?? null,
+      note: options.note ?? ''
+    });
   }
 
   _skillLabel(skillKey) {
@@ -2137,26 +2129,11 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     return configKey ? game.i18n.localize(configKey) : skillKey;
   }
 
-  _weaponEffectHtml(item, outcomeKey = '') {
+  _weaponRollNoteHtml(item) {
     const source = item ?? {};
     const system = source.system ?? source;
-    const damageProfile = this._formatDamage(system.skillBonus);
-    const lines = [
-      `${game.i18n.localize('MY_RPG.WeaponsTable.SkillLabel')}: ${this._skillLabel(system.skill)}`,
-      `${game.i18n.localize('MY_RPG.WeaponsTable.DamageLabel')}: ${damageProfile}`
-    ];
-    if (outcomeKey) {
-      lines.push(
-        `${game.i18n.localize('MY_RPG.WeaponsTable.OutcomeDamageLabel')}: ${getDamageForOutcome(
-          system.skillBonus,
-          outcomeKey
-        )}`
-      );
-    }
-    let html = lines.join('<br>');
     const description = this._formatItemDescription(system.description ?? system.desc ?? '');
-    if (description) html += `<br><br>${description}`;
-    return html;
+    return description;
   }
 
   _armorEffectHtml(item) {

@@ -1699,6 +1699,136 @@ textarea[disabled] {
   color: var(--andromeda-color-text) !important;
 }
 
+.myrpg-roll-card {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0 0 0.5rem;
+  padding: 0.65rem;
+  border: 1px solid var(--andromeda-color-line, #8f887c);
+  border-left: 5px solid var(--andromeda-color-accent, #9b3f2d);
+  border-radius: 6px;
+  background: var(--andromeda-color-surface, #fffaf2);
+  color: var(--andromeda-color-text, #211a15);
+}
+
+.myrpg-roll-card--failure {
+  border-left-color: #8f2f27;
+}
+
+.myrpg-roll-card--successwithcost {
+  border-left-color: #b07124;
+}
+
+.myrpg-roll-card--success {
+  border-left-color: #1f7a4d;
+}
+
+.myrpg-roll-card--criticalsuccess {
+  border-left-color: #0a6c84;
+}
+
+.myrpg-roll-card__heading {
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.myrpg-roll-card__primary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 0.5rem;
+}
+
+.myrpg-roll-card__metric {
+  display: grid;
+  align-content: center;
+  min-height: 54px;
+  padding: 0.45rem 0.5rem;
+  border: 1px solid var(--andromeda-color-line-soft, rgba(143, 136, 124, 0.55));
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.54);
+}
+
+.myrpg-roll-card__metric span {
+  color: var(--andromeda-color-muted, #6f665c);
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.myrpg-roll-card__metric strong {
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+}
+
+.myrpg-roll-card__metric--damage strong {
+  font-size: 1.45rem;
+}
+
+.myrpg-roll-card__details {
+  border-top: 1px solid var(--andromeda-color-line-soft, rgba(143, 136, 124, 0.55));
+  padding-top: 0.35rem;
+}
+
+.myrpg-roll-card__details summary {
+  cursor: pointer;
+  color: var(--andromeda-color-muted, #6f665c);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.myrpg-roll-card__details summary:focus-visible {
+  outline: 2px solid var(--andromeda-color-accent, #9b3f2d);
+  outline-offset: 2px;
+}
+
+.myrpg-roll-card__details-body {
+  display: grid;
+  gap: 0.25rem;
+  margin-top: 0.45rem;
+}
+
+.myrpg-roll-card__detail-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.74rem;
+  line-height: 1.3;
+}
+
+.myrpg-roll-card__detail-row span {
+  color: var(--andromeda-color-muted, #6f665c);
+}
+
+.myrpg-roll-card__detail-row strong {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.myrpg-roll-card__note-section {
+  padding: 0.5rem;
+  border: 1px solid var(--andromeda-color-line-soft, rgba(143, 136, 124, 0.55));
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.34);
+}
+
+.myrpg-roll-card__note-title {
+  margin-bottom: 0.25rem;
+  color: var(--andromeda-color-muted, #6f665c);
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.myrpg-roll-card__note {
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
 .myrpg-roll-outcome {
   display: flex;
   align-items: center;

@@ -48,6 +48,8 @@ import {
 } from './helpers/actor-types.mjs';
 import { SessionStatsService } from './helpers/session-stats.mjs';
 import { buildRollRerollSpec, rerollRollPreservingContext } from './helpers/roll-reroll.mjs';
+import { buildSkillCheckRollFlavorFromData } from './helpers/roll-card.mjs';
+import { getSkillCheckOutcomeKey } from './helpers/skill-check.mjs';
 import {
   cleanupLibraryLinkOnActorItemDelete,
   ensureActorItemLibraryLink,
@@ -340,6 +342,16 @@ function cloneRollWithMomentOfGloryBonus(sourceRoll, bonus) {
   return clonedRoll;
 }
 
+function updateSkillCheckFlavorForRoll(flags, fallbackFlavor, roll) {
+  const skillCheck = flags?.[MODULE_ID]?.skillCheck;
+  if (!skillCheck || !roll) return fallbackFlavor ?? '';
+  const total = Number(roll?.total);
+  if (!Number.isFinite(total)) return fallbackFlavor ?? '';
+  const outcome = getSkillCheckOutcomeKey(total);
+  skillCheck.outcome = outcome;
+  return buildSkillCheckRollFlavorFromData(skillCheck, total) || fallbackFlavor || '';
+}
+
 function canUseMomentOfGloryBonus(message) {
   if (!message) return false;
   const rolls = getMessageRolls(message);
@@ -383,6 +395,7 @@ async function applyMomentOfGloryBonusToMessage(message, actor) {
 
   const flags = foundry.utils.deepClone(message.flags ?? {});
   flags[MODULE_ID] ??= {};
+  const flavor = updateSkillCheckFlavorForRoll(flags, message.flavor, enhancedRolls[0]);
   flags[MODULE_ID].momentOfGlory = {
     spent: 1,
     bonus: totalBonus,
@@ -395,7 +408,7 @@ async function applyMomentOfGloryBonusToMessage(message, actor) {
     await ChatMessage.create({
       user: game.user?.id,
       speaker: foundry.utils.deepClone(message.speaker ?? {}),
-      flavor: message.flavor ?? '',
+      flavor,
       rolls: enhancedRolls,
       style: message.style,
       type: message.type,
@@ -432,6 +445,7 @@ async function applyMomentOfGloryRerollToMessage(message, actor) {
 
   const flags = foundry.utils.deepClone(message.flags ?? {});
   flags[MODULE_ID] ??= {};
+  const flavor = updateSkillCheckFlavorForRoll(flags, message.flavor, rerolledRolls[0]);
   flags[MODULE_ID].momentOfGlory = {
     spent: 1,
     action: 'reroll',
@@ -444,7 +458,7 @@ async function applyMomentOfGloryRerollToMessage(message, actor) {
     await ChatMessage.create({
       user: game.user?.id,
       speaker: foundry.utils.deepClone(message.speaker ?? {}),
-      flavor: message.flavor ?? '',
+      flavor,
       rolls: rerolledRolls,
       style: message.style,
       type: message.type,
