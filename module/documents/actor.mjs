@@ -39,6 +39,7 @@ export class ProjectAndromedaActor extends Actor {
     /* 2. Derived values -------------------------------------------------- */
     s.speed ??= {};
     s.speed.value = this._calcSpeed(s, itemTotals);
+    s.effectiveDefenses = this._calcEffectiveDefenses(s);
     s.advancement ??= {};
     s.advancement.totalSpent = getTotalAdvancementSpent(s);
     s.advancement.available = (Number(s.progressPoints) || 0) - s.advancement.totalSpent;
@@ -80,6 +81,15 @@ export class ProjectAndromedaActor extends Actor {
     const tempStress = Number(s?.temphealth) || 0;
     const shield = Math.max(Number(itemTotals?.armor?.shield) || 0, 0);
     return Math.max(0, getBaseStressByRank(actorType, rank) + tempStress + shield);
+  }
+
+  _calcEffectiveDefenses(s) {
+    const defenses = s?.defenses ?? {};
+    return {
+      physical: Math.max(0, (Number(defenses.physical) || 0) + (Number(s?.tempphys) || 0)),
+      azure: Math.max(0, (Number(defenses.azure) || 0) + (Number(s?.tempazure) || 0)),
+      mental: Math.max(0, (Number(defenses.mental) || 0) + (Number(s?.tempmental) || 0))
+    };
   }
 
   _calcFlux(s) {

@@ -35,6 +35,9 @@
           "value": 0
         },
         "temphealth": 0,
+        "tempphys": 0,
+        "tempazure": 0,
+        "tempmental": 0,
         "tempspeed": 0,
         "biography": "",
         "skills": {

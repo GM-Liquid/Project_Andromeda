@@ -98,11 +98,48 @@
           <div class='andromeda-temp-list andromeda-temp-list--hud'>
             <label class='andromeda-temp-row'>
               <span>{{localize 'MY_RPG.TempStress.Label'}}</span>
-              <input type='number' name='system.temphealth' value='{{system.temphealth}}' />
+              <input
+                type='number'
+                name='system.temphealth'
+                value='{{system.temphealth}}'
+                step='1'
+              />
+            </label>
+            <label class='andromeda-temp-row'>
+              <span>{{localize 'MY_RPG.Temp.BonusFortitudeLabel'}}</span>
+              <input
+                type='number'
+                name='system.tempphys'
+                value='{{system.tempphys}}'
+                step='1'
+              />
+            </label>
+            <label class='andromeda-temp-row'>
+              <span>{{localize 'MY_RPG.Temp.BonusControlLabel'}}</span>
+              <input
+                type='number'
+                name='system.tempazure'
+                value='{{system.tempazure}}'
+                step='1'
+              />
+            </label>
+            <label class='andromeda-temp-row'>
+              <span>{{localize 'MY_RPG.Temp.BonusWillLabel'}}</span>
+              <input
+                type='number'
+                name='system.tempmental'
+                value='{{system.tempmental}}'
+                step='1'
+              />
             </label>
             <label class='andromeda-temp-row'>
               <span>{{localize 'MY_RPG.TempSpeed.Label'}}</span>
-              <input type='number' name='system.tempspeed' value='{{system.tempspeed}}' />
+              <input
+                type='number'
+                name='system.tempspeed'
+                value='{{system.tempspeed}}'
+                step='1'
+              />
             </label>
           </div>
         </section>
@@ -186,6 +223,10 @@
                       min='0'
                       inputmode='numeric'
                     />
+                    <strong
+                      class='andromeda-defense-effective'
+                      data-defense-effective='{{column.defenseKey}}'
+                    >{{column.defenseEffectiveValue}}</strong>
                   </label>
                 </div>
 

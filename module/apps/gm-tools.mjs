@@ -94,7 +94,7 @@ export class GmToolsApp extends HandlebarsApplicationMixin(ApplicationV2) {
   /**
    * Reset every player character to a fresh-scene state: free used abilities
    * (cooldown.used -> 0), clear stress (value plus azure marks), and zero out
-   * the temporary bonuses (temp stress / speed). NPC characters are
+   * the temporary bonuses (temp stress / defenses / speed). NPC characters are
    * left untouched.
    * @returns {Promise<{actorsReset: number, abilitiesFreed: number}|null>}
    */
@@ -116,6 +116,9 @@ export class GmToolsApp extends HandlebarsApplicationMixin(ApplicationV2) {
         'system.stress.value': 0,
         'system.stress.marked': [],
         'system.temphealth': 0,
+        'system.tempphys': 0,
+        'system.tempazure': 0,
+        'system.tempmental': 0,
         'system.tempspeed': 0
       });
 

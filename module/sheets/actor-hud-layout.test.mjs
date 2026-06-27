@@ -134,6 +134,37 @@ test('defense fields are editable sheet inputs', () => {
   assert.match(defenseInput, /name='\{\{column\.defensePath\}\}'/);
 });
 
+test('effective defenses render outside named form inputs', () => {
+  const template = readFile('templates/actor/partials/actor-sheet-content.hbs');
+  const stylesheet = readFile('css/project-andromeda.css');
+  const effectiveDisplay = template.match(
+    /<strong\s+class='andromeda-defense-effective'[\s\S]*?<\/strong>/
+  )?.[0];
+
+  assert.ok(effectiveDisplay);
+  assert.match(effectiveDisplay, /data-defense-effective='\{\{column\.defenseKey\}\}'/);
+  assert.doesNotMatch(effectiveDisplay, /\sname=/);
+  assert.match(
+    stylesheet,
+    /\.project-andromeda\.andromeda-play-mode \.andromeda-defense-input,[\s\S]*display:\s*none;/
+  );
+  assert.match(
+    stylesheet,
+    /\.project-andromeda\.andromeda-edit-mode \.andromeda-defense-effective,[\s\S]*display:\s*none;/
+  );
+});
+
+test('HUD exposes temporary defense fields', () => {
+  const template = readFile('templates/actor/partials/actor-sheet-content.hbs');
+
+  assert.match(template, /name='system\.tempphys'/);
+  assert.match(template, /name='system\.tempazure'/);
+  assert.match(template, /name='system\.tempmental'/);
+  assert.match(template, /MY_RPG\.Temp\.BonusFortitudeLabel/);
+  assert.match(template, /MY_RPG\.Temp\.BonusControlLabel/);
+  assert.match(template, /MY_RPG\.Temp\.BonusWillLabel/);
+});
+
 test('personality tab presents motivation and feature before complications', () => {
   const template = readFile('templates/actor/partials/actor-sheet-content.hbs');
   const english = JSON.parse(readFile('lang/en.json'));

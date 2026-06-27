@@ -11,8 +11,8 @@
 | ----------------------------- | --------------------------------------------------------------- |
 | **System name**               | **Project Andromeda**                                           |
 | **Foundry VTT compatibility** | v12 (minimum 12, verified 13)                                   |
-| **Current version**           | `0.3.10.0`                                                      |
-| **Current release line**      | `0.3.10.x`                                                      |
+| **Current version**           | `0.4.00.1`                                                      |
+| **Current release line**      | `0.4.00.x`                                                      |
 | **Languages**                 | English, Русский (full parity required)                         |
 | **Main tech**                 | ES-module JavaScript (`*.mjs`), Handlebars (`*.hbs`), JSON, CSS |
 | **Licence**                   | CC BY-NC-SA 4.0                                                 |
@@ -190,17 +190,19 @@ project-andromeda/
 - Standard characters (`rankAndFile`, shown in UI as **Standard** / **Стандартный**) use stress **7 x rank** and **do** support azure-stress marking on the stress track.
 - Boss characters (`elite`, shown in UI as **Boss** / **Босс**) use stress **15** at rank 1 and **25 x (rank - 1)** at ranks 2-4, and do **not** support azure-stress marking on the stress track.
 - Shipped Foundry actor defaults for stress, speed, and similar per-type parameters live in `module/config/character-defaults.mjs`.
-- `system.temphealth` is presented as **temporary stress** for backwards compatibility and directly extends the base stress track.
+- `system.temphealth` is presented as **temporary stress** for backwards compatibility and directly extends the base stress track. It may be positive or negative, but the resolved stress maximum never drops below 0.
 - Armor force shield (`itemShield`) directly extends the total stress track like temporary stress.
-- GMs may edit an actor's maximum stress manually through `system.stress.maxOverride`; non-GM users see the resolved maximum as read-only.
+- Maximum stress is formula-derived. For manual scene adjustments, GMs should use temporary stress (`system.temphealth`) rather than editing the derived maximum.
 - Shipped defense labels use **Fortitude / Control / Will** in English and **Стойкость / Контроль / Воля** in Russian: Fortitude maps to Body, Control maps to Mind, and Will maps to Spirit.
 - Fortitude, Control, and Will are currently independent, manually editable values stored under `system.defenses`. They have no automatic formula until the next defense-system revision.
+- Temporary defense modifiers live in `system.tempphys`, `system.tempazure`, and `system.tempmental`. They may be positive or negative and produce derived effective defenses without overwriting the base `system.defenses` values.
 
 ### 3.6 Movement Speed
 
-- Base movement speed depends on `system.currentRank`: **15** at rank 1, **50** at rank 2, **150** at rank 3, and **450** at rank 4.
+- Base movement speed depends on `system.currentRank`: **10** at rank 1, **30** at rank 2, **100** at rank 3, **300** at rank 4, and **1000** at rank 5.
 - Movement speed does **not** scale from abilities.
-- Armor speed modifiers and `system.tempspeed` remain additive on top of that rank-based base value.
+- Armor speed modifiers and `system.tempspeed` remain additive on top of that rank-based base value. `system.tempspeed` may be positive or negative.
+- Movement speed is formula-derived. For manual scene adjustments, GMs should use temporary speed (`system.tempspeed`) rather than editing the derived speed.
 
 ### 3.7 Extreme Roll Reward
 

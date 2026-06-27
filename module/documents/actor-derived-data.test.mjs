@@ -22,7 +22,7 @@ globalThis.foundry = {
 
 const { ProjectAndromedaActor } = await import('./actor.mjs');
 
-test('character defenses remain independent from skill ranks', () => {
+test('character base defenses remain independent from skill ranks and temporary defenses are derived', () => {
   const actor = new ProjectAndromedaActor({
     type: 'playerCharacter',
     system: {
@@ -71,7 +71,10 @@ test('character defenses remain independent from skill ranks', () => {
   assert.equal(actor.system.defenses.physical, 4);
   assert.equal(actor.system.defenses.azure, 3);
   assert.equal(actor.system.defenses.mental, 2);
-  assert.equal(actor.system.speed.value, 66);
+  assert.equal(actor.system.effectiveDefenses.physical, 7);
+  assert.equal(actor.system.effectiveDefenses.azure, 7);
+  assert.equal(actor.system.effectiveDefenses.mental, 8);
+  assert.equal(actor.system.speed.value, 46);
   assert.equal(actor.system.stress.max, 19);
   assert.equal(actor.system.forceShield.max, 0);
 });
@@ -138,16 +141,24 @@ test('temporary stress and armor shield add to stress max', () => {
   assert.equal(actor.system.stress.max, 19);
 });
 
-test('temporary stress accepts penalties', () => {
+test('temporary parameters accept penalties', () => {
   const actor = new ProjectAndromedaActor({
     type: 'playerCharacter',
     system: {
       currentRank: 2,
       temphealth: -10,
-      tempspeed: 0,
+      tempphys: -2,
+      tempazure: -10,
+      tempmental: 3,
+      tempspeed: -35,
       progressPoints: 0,
-      defenses: {},
+      defenses: {
+        physical: 4,
+        azure: 3,
+        mental: 2
+      },
       skills: {},
+      speed: { value: 0 },
       stress: { value: 0, max: 0 },
       forceShield: { value: 0, max: 0 }
     },
@@ -157,5 +168,75 @@ test('temporary stress accepts penalties', () => {
   actor.prepareDerivedData();
 
   assert.equal(actor.system.temphealth, -10);
+  assert.equal(actor.system.tempphys, -2);
+  assert.equal(actor.system.tempazure, -10);
+  assert.equal(actor.system.tempmental, 3);
+  assert.equal(actor.system.tempspeed, -35);
   assert.equal(actor.system.stress.max, 0);
+  assert.equal(actor.system.speed.value, -5);
+  assert.equal(actor.system.effectiveDefenses.physical, 2);
+  assert.equal(actor.system.effectiveDefenses.azure, 0);
+  assert.equal(actor.system.effectiveDefenses.mental, 5);
+});
+
+test('movement speed uses rank defaults with additive bonuses', () => {
+  const cases = [
+    [1, 10],
+    [2, 30],
+    [3, 100],
+    [4, 300],
+    [5, 1000]
+  ];
+
+  for (const [currentRank, expectedSpeed] of cases) {
+    const actor = new ProjectAndromedaActor({
+      type: 'playerCharacter',
+      system: {
+        currentRank,
+        temphealth: 0,
+        tempspeed: 0,
+        progressPoints: 0,
+        defenses: {},
+        skills: {},
+        speed: { value: 0 },
+        stress: { value: 0, max: 0 },
+        forceShield: { value: 0, max: 0 }
+      },
+      itemTypes: {}
+    });
+
+    actor.prepareDerivedData();
+
+    assert.equal(actor.system.speed.value, expectedSpeed);
+  }
+
+  const actor = new ProjectAndromedaActor({
+    type: 'playerCharacter',
+    system: {
+      currentRank: 2,
+      temphealth: 0,
+      tempspeed: 5,
+      progressPoints: 0,
+      defenses: {},
+      skills: {},
+      speed: { value: 0 },
+      stress: { value: 0, max: 0 },
+      forceShield: { value: 0, max: 0 }
+    },
+    itemTypes: {
+      armor: [
+        {
+          system: {
+            equipped: true,
+            quantity: 1,
+            itemSpeed: 7
+          }
+        }
+      ]
+    }
+  });
+
+  actor.prepareDerivedData();
+
+  assert.equal(actor.system.speed.value, 42);
 });

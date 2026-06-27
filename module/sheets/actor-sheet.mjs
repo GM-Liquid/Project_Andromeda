@@ -92,7 +92,13 @@ function getHudRankClass(rank) {
 
 const ADVANCEMENT_STATES = ['available', 'insufficient', 'capped'];
 const ACTOR_SHEET_MIN_WIDTH = 730;
-const TEMPORARY_PARAMETER_PATHS = new Set(['system.temphealth']);
+const TEMPORARY_PARAMETER_PATHS = new Set([
+  'system.temphealth',
+  'system.tempphys',
+  'system.tempazure',
+  'system.tempmental',
+  'system.tempspeed'
+]);
 
 function getSharedGmHeroPool() {
   return Math.max(Number(game.settings.get(MODULE_ID, GM_HERO_POOL_SETTING)) || 0, 0);
@@ -360,6 +366,9 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       "input[name='system.currentRank']",
       "input[name='system.stress.value']",
       "input[name='system.temphealth']",
+      "input[name='system.tempphys']",
+      "input[name='system.tempazure']",
+      "input[name='system.tempmental']",
       "input[name='system.tempspeed']",
       "input[name^='system.defenses.']"
     ].join(', ');
@@ -513,6 +522,12 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
 
   _prepareCharacterData(context) {
     context.system.skills ??= {};
+    context.system.temphealth ??= 0;
+    context.system.tempphys ??= 0;
+    context.system.tempazure ??= 0;
+    context.system.tempmental ??= 0;
+    context.system.tempspeed ??= 0;
+    const effectiveDefenses = context.system?.effectiveDefenses ?? context.system?.defenses ?? {};
 
     const sortedSkills = {};
     const skillColumns = [];
@@ -538,7 +553,9 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
         label: game.i18n.localize(category.label),
         defenseLabel: game.i18n.localize(category.defenseLabel),
         defensePath: `system.defenses.${category.defenseKey}`,
+        defenseKey: category.defenseKey,
         defenseValue: context.system?.defenses?.[category.defenseKey] ?? 1,
+        defenseEffectiveValue: effectiveDefenses[category.defenseKey] ?? 1,
         skills: columnSkills
       });
     }
@@ -688,6 +705,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
         }
       });
     $root.find('.skill-advance').prop('disabled', !enabled);
+    this._refreshDefenseInputs($root);
   }
 
   _syncSheetEditModeHeaderButton() {
@@ -984,13 +1002,30 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     setText('system.advancement.totalSpent', s?.advancement?.totalSpent);
     setText('system.stress.max', s?.stress?.max);
     setRankBadge(s?.currentRank);
-    // Defenses
-    setVal('system.defenses.physical', s?.defenses?.physical);
-    setVal('system.defenses.azure', s?.defenses?.azure);
-    setVal('system.defenses.mental', s?.defenses?.mental);
+    setVal('system.temphealth', s?.temphealth);
+    setVal('system.tempphys', s?.tempphys);
+    setVal('system.tempazure', s?.tempazure);
+    setVal('system.tempmental', s?.tempmental);
+    setVal('system.tempspeed', s?.tempspeed);
+    this._refreshDefenseInputs($root);
 
     this._updateStressTrack($root);
     this._updateForceShieldTrack($root);
+  }
+
+  _refreshDefenseInputs(root = this.element) {
+    const $root = root instanceof jQuery ? root : $(root ?? this.element);
+    const defenses = this.actor.system?.defenses ?? {};
+    const effectiveDefenses = this.actor.system?.effectiveDefenses ?? defenses;
+    const setVal = (name, val) => {
+      $root.find(`input[name="${name}"]`).val(val ?? 0);
+    };
+    setVal('system.defenses.physical', defenses?.physical);
+    setVal('system.defenses.azure', defenses?.azure);
+    setVal('system.defenses.mental', defenses?.mental);
+    $root.find('[data-defense-effective="physical"]').text(effectiveDefenses?.physical ?? 0);
+    $root.find('[data-defense-effective="azure"]').text(effectiveDefenses?.azure ?? 0);
+    $root.find('[data-defense-effective="mental"]').text(effectiveDefenses?.mental ?? 0);
   }
 
   _updateStressTrack(root, options = {}) {

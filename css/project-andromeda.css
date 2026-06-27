@@ -1501,6 +1501,27 @@ textarea[disabled] {
   text-align: left !important;
 }
 
+.project-andromeda .andromeda-defense-effective {
+  display: inline-block;
+  min-width: 28px;
+  color: var(--andromeda-color-text) !important;
+  font-family: var(--andromeda-font-data);
+  font-size: var(--andromeda-font-size-small);
+  font-weight: 700;
+  line-height: 1;
+  text-align: left;
+}
+
+.project-andromeda.andromeda-play-mode .andromeda-defense-input,
+.project-andromeda .andromeda-play-mode .andromeda-defense-input {
+  display: none;
+}
+
+.project-andromeda.andromeda-edit-mode .andromeda-defense-effective,
+.project-andromeda .andromeda-edit-mode .andromeda-defense-effective {
+  display: none;
+}
+
 .project-andromeda.andromeda-edit-mode .andromeda-defense-input,
 .project-andromeda .andromeda-edit-mode .andromeda-defense-input {
   border-radius: 4px;

@@ -28,10 +28,11 @@ export const CHARACTER_DEFAULTS = Object.freeze({
 });
 
 export const MOVEMENT_SPEED_BY_RANK = Object.freeze({
-  1: 15,
-  2: 50,
-  3: 150,
-  4: 450
+  1: 10,
+  2: 30,
+  3: 100,
+  4: 300,
+  5: 1000
 });
 
 export const DEFAULT_CHARACTER_DEFENSES = Object.freeze({
@@ -40,9 +41,9 @@ export const DEFAULT_CHARACTER_DEFENSES = Object.freeze({
   mental: 1
 });
 
-function normalizeRank(rank) {
+function normalizeRank(rank, maxRank = 4) {
   const normalizedRank = Math.max(Math.trunc(Number(rank) || 0), 0);
-  return Math.min(normalizedRank, 4);
+  return Math.min(normalizedRank, maxRank);
 }
 
 export function getCharacterDefaults(actorType) {
@@ -50,7 +51,8 @@ export function getCharacterDefaults(actorType) {
 }
 
 export function getBaseMovementSpeedByRank(rank) {
-  const boundedRank = normalizeRank(rank);
+  const maxMovementRank = Math.max(...Object.keys(MOVEMENT_SPEED_BY_RANK).map(Number));
+  const boundedRank = normalizeRank(rank, maxMovementRank);
   return boundedRank ? (MOVEMENT_SPEED_BY_RANK[boundedRank] ?? 0) : 0;
 }
 
