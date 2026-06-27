@@ -164,7 +164,8 @@
       "SkillNoneOption": "No skill selected",
       "DamageLabel": "Damage",
       "DescriptionLabel": "Description",
-      "EquippedLabel": "Equipped"
+      "EquippedLabel": "Equipped",
+      "OutcomeDamageLabel": "Outcome damage"
     },
     "Resources": {
       "Title": "Resources",
@@ -512,8 +513,8 @@
     "Actor": {
       "playerCharacter": "Player Character",
       "minion": "Minion",
-      "rankAndFile": "Rank-and-File",
-      "elite": "Elite"
+      "rankAndFile": "Standard",
+      "elite": "Boss"
     },
     "Item": {
       "item": "Item",

@@ -1,3 +1,5 @@
+import { actorTypeSupportsAzureStress } from '../config/character-defaults.mjs';
+
 export const PLAYER_CHARACTER_ACTOR_TYPE = 'playerCharacter';
 export const MINION_ACTOR_TYPE = 'minion';
 export const RANK_AND_FILE_ACTOR_TYPE = 'rankAndFile';
@@ -39,8 +41,5 @@ export function isEliteActorType(actorType) {
 }
 
 export function supportsAzureStress(actorType) {
-  const normalized = normalizeActorType(actorType);
-  return (
-    normalized === PLAYER_CHARACTER_ACTOR_TYPE || normalized === RANK_AND_FILE_ACTOR_TYPE
-  );
+  return actorTypeSupportsAzureStress(normalizeActorType(actorType));
 }

@@ -2,17 +2,17 @@ name: Build & Publish Release (Foundry changes)
 
 on:
   push:
-    branches: ["main"]
+    branches: ['main']
     paths:
-      - "module/**"
-      - "templates/**"
-      - "css/**"
-      - "lang/**"
-      - "assets/**"
-      - "data/gear/catalog/**"
-      - "tools/**"
-      - "system.json"
-      - "template.json"
+      - 'module/**'
+      - 'templates/**'
+      - 'css/**'
+      - 'lang/**'
+      - 'assets/**'
+      - 'data/gear/catalog/**'
+      - 'tools/**'
+      - 'system.json'
+      - 'template.json'
 
 permissions:
   contents: write
@@ -30,6 +30,12 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
 
       - name: Build compendium packs
         run: npm run build:pack

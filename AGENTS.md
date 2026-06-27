@@ -11,8 +11,8 @@
 | ----------------------------- | --------------------------------------------------------------- |
 | **System name**               | **Project Andromeda**                                           |
 | **Foundry VTT compatibility** | v12 (minimum 12, verified 13)                                   |
-| **Current version**           | `0.3.9.0`                                                       |
-| **Current release line**      | `0.3.9.x`                                                       |
+| **Current version**           | `0.3.10.0`                                                      |
+| **Current release line**      | `0.3.10.x`                                                      |
 | **Languages**                 | English, Русский (full parity required)                         |
 | **Main tech**                 | ES-module JavaScript (`*.mjs`), Handlebars (`*.hbs`), JSON, CSS |
 | **Licence**                   | CC BY-NC-SA 4.0                                                 |
@@ -169,13 +169,14 @@ project-andromeda/
 - The unshifted outcome table is: **8 or less = failure; 9-12 = success with a cost; 13-16 = success; 17+ = critical success**.
 - **Failure with consequence** is the step below failure and is available only by shifting an outcome.
 - Chat output immediately shows the unshifted outcome and the used skill rank. Players and GMs apply rank-versus-task shifts manually after the roll.
+- Damage from weapons, abilities, and other damaging effects is stored and shown as four slash-separated values: **failure / success with a cost / success / critical success**. For example, `0/1/2/4` means 0 damage on failure, 1 on success with a cost, 2 on success, and 4 on critical success.
 
 ### 3.4 Points of Heroism
 
 - `system.momentOfGlory` stores **Points of Heroism** and remains the spendable heroism resource for backwards compatibility.
 - Chat roll messages support a context-menu action to spend **1** point of heroism and add a bonus equal to **half the highest die maximum** in that roll.
 - **Player characters** use their own personal Points of Heroism pool.
-- **GM characters** (minion, rank-and-file, elite) do **not** gain hero points from player-only reward logic and instead spend from a **shared GM heroism pool** that is visible on all GM character sheets.
+- **GM characters** (minion, Standard, Boss) do **not** gain hero points from player-only reward logic and instead spend from a **shared GM heroism pool** that is visible on all GM character sheets. Internal actor type keys remain `minion`, `rankAndFile`, and `elite` unless an explicit migration is added later.
 - Spending a point of heroism must keep the original roll context (dice results, flavor/modifiers, speaker, and roll visibility mode) without rerolling the dice.
 - Session tracking must count points of heroism spent per actor inside the active session window.
 - A session starts automatically when at least one GM and all player users in the world are connected.
@@ -183,12 +184,15 @@ project-andromeda/
 
 ### 3.5 Stress Formulas
 
-- The system has **four** actor character types: `playerCharacter`, `minion`, `rankAndFile`, and `elite`.
-- Elite characters (`elite`, shown in UI as **Elite** / **Элита**) use stress **10 x rank** and do **not** support azure-stress marking on the stress track.
-- Player characters (`playerCharacter`, shown in UI as **Player Character** / **Персонаж игрока**) use stress **6 x rank** and support azure-stress marking on the stress track.
-- Minions (`minion`, shown in UI as **Minion** / **Миньон**) use stress **6 x rank** and do **not** support azure-stress marking on the stress track.
-- Rank-and-file characters (`rankAndFile`, shown in UI as **Rank-and-File** / **Рядовой**) use stress **6 x rank** and **do** support azure-stress marking on the stress track.
+- The system has **four** actor character types: `playerCharacter`, `minion`, `rankAndFile`, and `elite`. The internal keys remain stable until the maintainer explicitly approves a migration.
+- Player characters (`playerCharacter`, shown in UI as **Player Character** / **Персонаж игрока**) use stress **5 x rank** and support azure-stress marking on the stress track.
+- Minions (`minion`, shown in UI as **Minion** / **Миньон**) use stress **3 x rank** and do **not** support azure-stress marking on the stress track.
+- Standard characters (`rankAndFile`, shown in UI as **Standard** / **Стандартный**) use stress **7 x rank** and **do** support azure-stress marking on the stress track.
+- Boss characters (`elite`, shown in UI as **Boss** / **Босс**) use stress **15** at rank 1 and **25 x (rank - 1)** at ranks 2-4, and do **not** support azure-stress marking on the stress track.
+- Shipped Foundry actor defaults for stress, speed, and similar per-type parameters live in `module/config/character-defaults.mjs`.
 - `system.temphealth` is presented as **temporary stress** for backwards compatibility and directly extends the base stress track.
+- Armor force shield (`itemShield`) directly extends the total stress track like temporary stress.
+- GMs may edit an actor's maximum stress manually through `system.stress.maxOverride`; non-GM users see the resolved maximum as read-only.
 - Shipped defense labels use **Fortitude / Control / Will** in English and **Стойкость / Контроль / Воля** in Russian: Fortitude maps to Body, Control maps to Mind, and Will maps to Spirit.
 - Fortitude, Control, and Will are currently independent, manually editable values stored under `system.defenses`. They have no automatic formula until the next defense-system revision.
 
@@ -299,4 +303,4 @@ The shipped gear catalog lives in the **`gear-library` compendium pack**, built 
 
 ---
 
-_Last updated: 2026-06-24_
+_Last updated: 2026-06-27_

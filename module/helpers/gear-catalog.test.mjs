@@ -203,7 +203,7 @@ test('gear catalog transform splits weapon-skilled equipment into the weapon gro
   const shotgunData = getSystemData(
     remoteData.sheets.weapons.find((row) => row.name === 'Hunting Shotgun')
   );
-  assert.equal(shotgunData.skillBonus, 2);
+  assert.equal(shotgunData.skillBonus, '0/2/2/2');
 
   // Everything else stays a general equipment item filed under "Предметы".
   assert.equal(remoteData.sheets.equipment.length, 1);

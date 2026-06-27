@@ -1,17 +1,22 @@
 {
   "name": "project-andromeda",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.3.10",
+  "private": true,
+  "description": "Foundry VTT system and public rulebook tooling for Project Andromeda.",
   "scripts": {
     "build:pack": "node tools/build-pack.mjs",
     "lint": "eslint .",
     "format": "prettier . --write",
-    "test": "node --test \"module/**/*.test.mjs\" \"data/gear/tests/**/*.test.mjs\""
+    "format:catalogs": "node tools/format-catalogs.mjs",
+    "test": "npm run test:foundry",
+    "test:foundry": "node --test \"module/**/*.test.mjs\" \"data/gear/tests/**/*.test.mjs\"",
+    "test:quartz": "npm --prefix .quartz-site test",
+    "check:quartz": "npm --prefix .quartz-site run check",
+    "check:all": "npm run lint && npm run test:foundry && npm run check:quartz && npm run test:quartz"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "CC-BY-NC-SA-4.0",
   "devDependencies": {
     "classic-level": "^3.0.0",
     "eslint": "^9.28.0",

@@ -1,3 +1,5 @@
+import { formatDamageProfile } from './damage-profile.mjs';
+
 export const ITEM_BASE_DEFAULTS = {
   description: '',
   rank: '',
@@ -177,6 +179,14 @@ function buildSkillField(options = {}) {
   };
 }
 
+function buildDamageField() {
+  return {
+    path: 'skillBonus',
+    labelKey: 'MY_RPG.WeaponsTable.DamageLabel',
+    type: 'text'
+  };
+}
+
 const EQUIPMENT_ITEM_FIELDS = [
   buildRankField(),
   buildUsageFrequencyField(),
@@ -187,7 +197,8 @@ const EQUIPMENT_ITEM_FIELDS = [
   buildDefenseField(),
   buildTargetsField(),
   buildRequiresRollField(),
-  buildSkillField({ showWhenPath: 'requiresRoll' })
+  buildSkillField({ showWhenPath: 'requiresRoll' }),
+  buildDamageField()
 ];
 const TRAIT_ITEM_FIELDS = [
   buildUsageFrequencyField(),
@@ -198,7 +209,8 @@ const TRAIT_ITEM_FIELDS = [
   buildDefenseField(),
   buildTargetsField(),
   buildRequiresRollField(),
-  buildSkillField({ showWhenPath: 'requiresRoll' })
+  buildSkillField({ showWhenPath: 'requiresRoll' }),
+  buildDamageField()
 ];
 const WEAPON_ITEM_FIELDS = [
   buildUsageFrequencyField(),
@@ -235,7 +247,7 @@ export const ITEM_TYPE_CONFIGS = [
     defaults: {
       requiresRoll: true,
       skill: '',
-      skillBonus: 0
+      skillBonus: '0/0/0/0'
     },
     fields: EQUIPMENT_ITEM_FIELDS
   },
@@ -252,7 +264,7 @@ export const ITEM_TYPE_CONFIGS = [
     defaults: {
       requiresRoll: true,
       skill: '',
-      skillBonus: 0
+      skillBonus: '0/0/0/0'
     },
     fields: EQUIPMENT_ITEM_FIELDS
   },
@@ -270,7 +282,7 @@ export const ITEM_TYPE_CONFIGS = [
       quantity: 1,
       requiresRoll: true,
       skill: '',
-      skillBonus: 0
+      skillBonus: '0/0/0/0'
     },
     fields: WEAPON_ITEM_FIELDS
   },
@@ -305,7 +317,7 @@ export const ITEM_TYPE_CONFIGS = [
       rank: '',
       requiresRoll: false,
       skill: '',
-      skillBonus: 0
+      skillBonus: '0/0/0/0'
     },
     fields: EQUIPMENT_ITEM_FIELDS
   },
@@ -319,7 +331,7 @@ export const ITEM_TYPE_CONFIGS = [
       rank: '',
       requiresRoll: false,
       skill: '',
-      skillBonus: 0
+      skillBonus: '0/0/0/0'
     },
     fields: EQUIPMENT_ITEM_FIELDS
   },
@@ -395,7 +407,8 @@ export const ITEM_TYPE_CONFIGS = [
       defense: '',
       targets: '',
       requiresRoll: false,
-      skill: ''
+      skill: '',
+      skillBonus: '0/0/0/0'
     },
     fields: TRAIT_ITEM_FIELDS
   },
@@ -414,7 +427,8 @@ export const ITEM_TYPE_CONFIGS = [
       defense: '',
       targets: '',
       requiresRoll: false,
-      skill: ''
+      skill: '',
+      skillBonus: '0/0/0/0'
     },
     fields: TRAIT_ITEM_FIELDS
   },
@@ -433,7 +447,8 @@ export const ITEM_TYPE_CONFIGS = [
       defense: '',
       targets: '',
       requiresRoll: false,
-      skill: ''
+      skill: '',
+      skillBonus: '0/0/0/0'
     },
     fields: TRAIT_ITEM_FIELDS
   },
@@ -452,7 +467,8 @@ export const ITEM_TYPE_CONFIGS = [
       defense: '',
       targets: '',
       requiresRoll: false,
-      skill: ''
+      skill: '',
+      skillBonus: '0/0/0/0'
     },
     fields: TRAIT_ITEM_FIELDS
   },
@@ -471,7 +487,8 @@ export const ITEM_TYPE_CONFIGS = [
       defense: '',
       targets: '',
       requiresRoll: false,
-      skill: ''
+      skill: '',
+      skillBonus: '0/0/0/0'
     },
     fields: TRAIT_ITEM_FIELDS
   },
@@ -490,7 +507,8 @@ export const ITEM_TYPE_CONFIGS = [
       defense: '',
       targets: '',
       requiresRoll: false,
-      skill: ''
+      skill: '',
+      skillBonus: '0/0/0/0'
     },
     fields: TRAIT_ITEM_FIELDS
   },
@@ -509,7 +527,8 @@ export const ITEM_TYPE_CONFIGS = [
       defense: '',
       targets: '',
       requiresRoll: false,
-      skill: ''
+      skill: '',
+      skillBonus: '0/0/0/0'
     },
     fields: TRAIT_ITEM_FIELDS
   },
@@ -528,7 +547,8 @@ export const ITEM_TYPE_CONFIGS = [
       defense: '',
       targets: '',
       requiresRoll: false,
-      skill: ''
+      skill: '',
+      skillBonus: '0/0/0/0'
     },
     fields: TRAIT_ITEM_FIELDS
   },
@@ -547,7 +567,8 @@ export const ITEM_TYPE_CONFIGS = [
       defense: '',
       targets: '',
       requiresRoll: false,
-      skill: ''
+      skill: '',
+      skillBonus: '0/0/0/0'
     },
     fields: TRAIT_ITEM_FIELDS
   },
@@ -565,7 +586,8 @@ export const ITEM_TYPE_CONFIGS = [
       defense: '',
       targets: '',
       requiresRoll: false,
-      skill: ''
+      skill: '',
+      skillBonus: '0/0/0/0'
     },
     fields: TRAIT_ITEM_FIELDS
   },
@@ -812,6 +834,11 @@ function buildTraitBadges(item, helpers) {
     }
   }
 
+  const damage = formatDamageProfile(system.skillBonus);
+  if (damage !== '0/0/0/0') {
+    badges.push(`${t.localize('MY_RPG.WeaponsTable.DamageLabel')}: ${damage}`);
+  }
+
   return badges;
 }
 
@@ -823,7 +850,7 @@ export const ITEM_BADGE_BUILDERS = {
     const t = helpers.t;
     return [
       `${t.localize('MY_RPG.WeaponsTable.SkillLabel')}: ${helpers.skillLabel(system.skill)}`,
-      `${t.localize('MY_RPG.WeaponsTable.DamageLabel')}: ${helpers.formatDamage(system.skillBonus)}`
+      `${t.localize('MY_RPG.WeaponsTable.DamageLabel')}: ${formatDamageProfile(system.skillBonus)}`
     ];
   },
   armor: (item, helpers) => {

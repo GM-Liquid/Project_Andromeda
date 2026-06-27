@@ -58,6 +58,23 @@ test('transformSkillsReferenceSource fails loudly when the skills list heading i
   );
 });
 
+test('transformSkillsReferenceSource accepts the revised skills intro heading', () => {
+  const transformed =
+    syncBookModule.transformSkillsReferenceSource(`### Что означают ранг и значение навыка
+
+Навыки растут от **0** до **4**.
+
+### Список навыков
+#### Навыки Тела
+
+**Мощь**
+Описание мощи.
+`);
+
+  assert.match(transformed, /### Что означают ранг и значение навыка/);
+  assert.match(transformed, /:::accordion "Мощь" \| Тело/);
+});
+
 test('extractSkillTitles returns the current public skill list in source order', () => {
   assert.equal(typeof syncBookModule.extractSkillTitles, 'function');
 

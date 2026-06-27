@@ -1,10 +1,10 @@
 import { debugLog } from '../config.mjs';
 import {
-  isEliteActorType,
-  isGmCharacterActorType,
   isSupportedCharacterActorType,
+  normalizeActorType,
   supportsAzureStress
 } from '../helpers/actor-types.mjs';
+import { getBaseStressByRank } from '../config/character-defaults.mjs';
 import { getTotalAdvancementSpent } from '../helpers/advancement-points.mjs';
 import { calcMovementSpeed } from '../helpers/movement-speed.mjs';
 import { normalizeSkill } from '../helpers/skill-check.mjs';
@@ -26,7 +26,6 @@ export class ProjectAndromedaActor extends Actor {
     const cache = (s.cache ??= {});
     cache.itemTotals = this._computeItemTotals();
     const itemTotals = cache.itemTotals;
-    const isGmCharacter = isGmCharacterActorType(this.type);
     const usesAzureStress = supportsAzureStress(this.type);
 
     /* 1. Skills ---------------------------------------------------------- */
@@ -46,31 +45,26 @@ export class ProjectAndromedaActor extends Actor {
 
     const stress = s.stress ?? (s.stress = {});
     const forceShield = s.forceShield ?? (s.forceShield = {});
-    const calcStressMax = isEliteActorType(this.type)
-      ? this._calcEliteStressMax
-      : isGmCharacter
-        ? this._calcGmStressMax
-        : this._calcStressMax;
-    const calcForceShieldMax = isGmCharacter
-      ? this._calcGmForceShieldMax
-      : this._calcForceShieldMax;
-    stress.max = calcStressMax.call(this, s);
-    forceShield.max = calcForceShieldMax.call(this, s, itemTotals);
+    const calculatedStressMax = this._calcStressMax(s, itemTotals);
+    const rawStressMaxOverride = stress.maxOverride;
+    const hasStressMaxOverride =
+      rawStressMaxOverride !== undefined &&
+      rawStressMaxOverride !== null &&
+      String(rawStressMaxOverride).trim() !== '';
+    const overrideStressMax = Number(rawStressMaxOverride);
+    stress.max =
+      hasStressMaxOverride && Number.isFinite(overrideStressMax) && overrideStressMax >= 0
+        ? Math.trunc(overrideStressMax)
+        : calculatedStressMax;
+    forceShield.max = 0;
     const clamp = Math.clamp
       ? (value, min, max) => Math.clamp(value, min, max)
       : (value, min, max) => Math.min(Math.max(value, min), max);
     const legacyCombinedStress = Number(stress.value) || 0;
     const storedForceShield = Number(forceShield.value);
     const hasStoredForceShield = Number.isFinite(storedForceShield);
-    const inferredShieldFromOverflow = Math.max(legacyCombinedStress - stress.max, 0);
-    const useInferredShield =
-      inferredShieldFromOverflow > 0 && (!hasStoredForceShield || storedForceShield <= 0);
-    const currentStress = useInferredShield ? stress.max : legacyCombinedStress;
-    const currentForceShield = useInferredShield
-      ? inferredShieldFromOverflow
-      : hasStoredForceShield
-        ? storedForceShield
-        : 0;
+    const currentStress = legacyCombinedStress;
+    const currentForceShield = hasStoredForceShield ? storedForceShield : 0;
     stress.value = clamp(currentStress, 0, stress.max);
     forceShield.value = clamp(currentForceShield, 0, forceShield.max);
     const marked = Array.isArray(stress.marked) ? stress.marked : [];
@@ -90,32 +84,12 @@ export class ProjectAndromedaActor extends Actor {
   }
 
   /* ------------------------ Формулы ------------------------------ */
-  _calcStressMax(s) {
+  _calcStressMax(s, itemTotals = {}) {
+    const actorType = normalizeActorType(this.type);
     const rank = Math.max(Number(s.currentRank) || 0, 0);
     const tempStress = Math.max(Number(s?.temphealth) || 0, 0);
-    return Math.max(0, rank * 6 + tempStress);
-  }
-
-  _calcGmStressMax(s) {
-    const rank = Math.max(Number(s.currentRank) || 0, 0);
-    const tempStress = Math.max(Number(s?.temphealth) || 0, 0);
-    return Math.max(0, rank * 6 + tempStress);
-  }
-
-  _calcEliteStressMax(s) {
-    const rank = Math.max(Number(s.currentRank) || 0, 0);
-    const tempStress = Math.max(Number(s?.temphealth) || 0, 0);
-    return Math.max(0, rank * 10 + tempStress);
-  }
-
-  _calcForceShieldMax(_s, itemTotals = {}) {
     const shield = Number(itemTotals?.armor?.shield) || 0;
-    return Math.max(shield, 0);
-  }
-
-  _calcGmForceShieldMax(_s, itemTotals = {}) {
-    const shield = Number(itemTotals?.armor?.shield) || 0;
-    return Math.max(shield, 0);
+    return Math.max(0, getBaseStressByRank(actorType, rank) + tempStress + shield);
   }
 
   _calcFlux(s) {

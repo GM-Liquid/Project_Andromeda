@@ -1,5 +1,8 @@
-const INTRO_HEADING = '### Что означают значения навыков';
-const SKILLS_LIST_HEADING = '### Список навыков';
+const INTRO_HEADINGS = [
+  '### Что означают значения навыков',
+  '### Что означают ранг и значение навыка'
+];
+const SKILLS_LIST_HEADINGS = ['### Список навыков'];
 
 const skillGroupAbilityMap = new Map([
   ['Навыки Тела', 'Тело'],
@@ -27,6 +30,17 @@ function parseSkillTitle(line) {
   return match ? match[1].trim() : null;
 }
 
+function findHeadingIndex(lines, acceptedHeadings, label) {
+  const accepted = new Set(acceptedHeadings);
+  const index = lines.findIndex((line) => accepted.has(line.trim()));
+
+  if (index === -1) {
+    throw new Error(`Missing required ${label} heading. Accepted headings: ${acceptedHeadings.join(', ')}`);
+  }
+
+  return index;
+}
+
 function parseSkillsReference(source) {
   const cleaned = source.replace(/^\uFEFF/, '').trim();
   if (!cleaned) {
@@ -34,15 +48,8 @@ function parseSkillsReference(source) {
   }
 
   const lines = cleaned.split(/\r?\n/);
-  const introIndex = lines.findIndex((line) => line.trim() === INTRO_HEADING);
-  if (introIndex === -1) {
-    throw new Error(`Missing required heading: ${INTRO_HEADING}`);
-  }
-
-  const skillsListIndex = lines.findIndex((line) => line.trim() === SKILLS_LIST_HEADING);
-  if (skillsListIndex === -1) {
-    throw new Error(`Missing required heading: ${SKILLS_LIST_HEADING}`);
-  }
+  const introIndex = findHeadingIndex(lines, INTRO_HEADINGS, 'skills intro');
+  const skillsListIndex = findHeadingIndex(lines, SKILLS_LIST_HEADINGS, 'skills list');
 
   if (skillsListIndex <= introIndex) {
     throw new Error('Список навыков must appear after the intro section.');

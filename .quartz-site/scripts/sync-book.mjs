@@ -243,6 +243,28 @@ function renderMarkdownTable(headers, rows) {
   ].join('\n');
 }
 
+function normalizeDamageNumber(value) {
+  const numeric = Math.trunc(Number(value));
+  return Number.isFinite(numeric) ? Math.max(numeric, 0) : 0;
+}
+
+function formatDamageProfile(value) {
+  const text = String(value ?? '').trim();
+  if (!text) return '';
+
+  if (!text.includes('/')) {
+    const legacyDamage = normalizeDamageNumber(text);
+    return `0/${legacyDamage}/${legacyDamage}/${legacyDamage}`;
+  }
+
+  const values = text
+    .split('/')
+    .slice(0, 4)
+    .map((part) => normalizeDamageNumber(part));
+  while (values.length < 4) values.push(0);
+  return values.join('/');
+}
+
 function getGearQuartzValue(item, key) {
   const value = item?.quartz?.[key];
   if (value === null || value === undefined) {
@@ -700,7 +722,18 @@ function getGearPropertyValue(item, propertyKey) {
   const normalizedPropertyKey = legacyPropertyKeyMap[propertyKey] || propertyKey;
   const mechanicsValue = item?.mechanics?.properties?.[normalizedPropertyKey];
   if (mechanicsValue !== null && mechanicsValue !== undefined) {
-    return String(mechanicsValue);
+    return normalizedPropertyKey === 'damage'
+      ? formatDamageProfile(mechanicsValue)
+      : String(mechanicsValue);
+  }
+
+  for (const effect of item?.mechanics?.effects ?? []) {
+    for (const outcome of effect?.outcomes ?? []) {
+      if (String(outcome?.key ?? '') !== normalizedPropertyKey) continue;
+      const value = outcome?.value ?? outcome?.amount;
+      if (value === null || value === undefined) continue;
+      return normalizedPropertyKey === 'damage' ? formatDamageProfile(value) : String(value);
+    }
   }
 
   const property = item.properties?.find((candidate) => candidate.key === propertyKey);
@@ -708,7 +741,9 @@ function getGearPropertyValue(item, propertyKey) {
     return '';
   }
 
-  return String(property.value);
+  return normalizedPropertyKey === 'damage'
+    ? formatDamageProfile(property.value)
+    : String(property.value);
 }
 
 function getGearSpeedValue(item) {
@@ -776,7 +811,7 @@ function getEquipmentDamageValue(item) {
 
   const description = getGearDescription(item);
   const damageMatch = description.match(/Урон:\s*([^.;]+)/u);
-  return damageMatch ? damageMatch[1].trim() : '';
+  return damageMatch ? formatDamageProfile(damageMatch[1].trim()) : '';
 }
 
 function buildArmorCatalogTable(catalog) {
@@ -906,6 +941,7 @@ function buildAbilityCatalogTable(catalog) {
   const rows = getRenderableGearCatalogItems(catalog).map((item) => [
     item.name,
     item.rank,
+    getGearQuartzValue(item, 'damage') || getGearPropertyValue(item, 'damage'),
     getGearShortDescription(item),
     getGearDescription(item),
     getGearUsageOrQuartzValue(item, 'frequency'),
@@ -923,6 +959,7 @@ function buildAbilityCatalogTable(catalog) {
     [
       'Название',
       'Ранг',
+      'Урон',
       'Краткое описание',
       'Полное описание',
       'Частота использования',

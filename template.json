@@ -12,6 +12,7 @@
         "stress": {
           "value": 0,
           "max": 4,
+          "maxOverride": null,
           "marked": []
         },
         "forceShield": {
@@ -195,14 +196,14 @@
       "requiresRoll": true,
       "rank": "",
       "skill": "",
-      "skillBonus": 0
+      "skillBonus": "0/0/0/0"
     },
     "implant": {
       "templates": ["base"],
       "requiresRoll": true,
       "rank": "",
       "skill": "",
-      "skillBonus": 0
+      "skillBonus": "0/0/0/0"
     },
     "armor": {
       "templates": ["base"],
@@ -222,21 +223,21 @@
       "rank": "",
       "requiresRoll": true,
       "skill": "",
-      "skillBonus": 0
+      "skillBonus": "0/0/0/0"
     },
     "equipment": {
       "templates": ["base"],
       "rank": "",
       "requiresRoll": false,
       "skill": "",
-      "skillBonus": 0
+      "skillBonus": "0/0/0/0"
     },
     "equipment-consumable": {
       "templates": ["base"],
       "rank": "",
       "requiresRoll": false,
       "skill": "",
-      "skillBonus": 0
+      "skillBonus": "0/0/0/0"
     },
     "environment-consumable": {
       "templates": ["base"],

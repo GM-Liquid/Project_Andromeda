@@ -49,9 +49,21 @@
                   min='0'
                 />
                 <span class='andromeda-status-separator'>/</span>
-                <strong class='andromeda-status-value' data-field='system.stress.max'>
-                  {{system.stress.max}}
-                </strong>
+                {{#if canEditStressMax}}
+                  <input
+                    type='number'
+                    name='system.stress.maxOverride'
+                    value='{{system.stress.maxOverride}}'
+                    placeholder='{{system.stress.max}}'
+                    step='1'
+                    inputmode='numeric'
+                    min='0'
+                  />
+                {{else}}
+                  <strong class='andromeda-status-value' data-field='system.stress.max'>
+                    {{system.stress.max}}
+                  </strong>
+                {{/if}}
               </div>
             </section>
 

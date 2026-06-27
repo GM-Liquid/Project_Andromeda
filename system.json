@@ -16,7 +16,7 @@
       "thumbnail": "systems/project-andromeda/assets/Art_core_1.webp"
     }
   ],
-  "version": "0.3.9.0",
+  "version": "0.3.10.0",
   "compatibility": {
     "minimum": "12",
     "verified": "13"
@@ -31,7 +31,7 @@
   "languages": [
     {
       "lang": "ru",
-      "name": "\u0420\u0443\u0441\u0441\u043a\u0438\u0439",
+      "name": "Русский",
       "path": "lang/ru.json"
     },
     {
@@ -60,7 +60,7 @@
   "background": "systems/project-andromeda/assets/Art_core_1.webp",
   "grid": {
     "distance": 2,
-    "units": "\u043c"
+    "units": "м"
   },
   "primaryTokenAttribute": {
     "attribute": "system.stress.value",

@@ -72,6 +72,56 @@ test('character defenses remain independent from skill ranks', () => {
   assert.equal(actor.system.defenses.azure, 3);
   assert.equal(actor.system.defenses.mental, 2);
   assert.equal(actor.system.speed.value, 66);
-  assert.equal(actor.system.stress.max, 17);
-  assert.equal(actor.system.forceShield.max, 4);
+  assert.equal(actor.system.stress.max, 19);
+  assert.equal(actor.system.forceShield.max, 0);
+});
+
+test('character stress max follows actor type defaults and GM overrides', () => {
+  const cases = [
+    ['playerCharacter', 3, 15],
+    ['minion', 3, 9],
+    ['rankAndFile', 3, 21],
+    ['elite', 1, 15],
+    ['elite', 3, 50]
+  ];
+
+  for (const [type, currentRank, expectedStress] of cases) {
+    const actor = new ProjectAndromedaActor({
+      type,
+      system: {
+        currentRank,
+        temphealth: 0,
+        tempspeed: 0,
+        progressPoints: 0,
+        defenses: {},
+        skills: {},
+        stress: { value: 0, max: 0 },
+        forceShield: { value: 0, max: 0 }
+      },
+      itemTypes: {}
+    });
+
+    actor.prepareDerivedData();
+
+    assert.equal(actor.system.stress.max, expectedStress);
+  }
+
+  const actor = new ProjectAndromedaActor({
+    type: 'playerCharacter',
+    system: {
+      currentRank: 2,
+      temphealth: 0,
+      tempspeed: 0,
+      progressPoints: 0,
+      defenses: {},
+      skills: {},
+      stress: { value: 0, max: 0, maxOverride: 99 },
+      forceShield: { value: 0, max: 0 }
+    },
+    itemTypes: {}
+  });
+
+  actor.prepareDerivedData();
+
+  assert.equal(actor.system.stress.max, 99);
 });

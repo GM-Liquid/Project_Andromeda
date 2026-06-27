@@ -81,7 +81,8 @@
       "SkillNoneOption": "Навык не выбран",
       "DamageLabel": "Урон",
       "DescriptionLabel": "Описание",
-      "EquippedLabel": "Экипировано"
+      "EquippedLabel": "Экипировано",
+      "OutcomeDamageLabel": "Урон исхода"
     },
     "Resources": {
       "Title": "Ресурсы",
@@ -512,8 +513,8 @@
     "Actor": {
       "playerCharacter": "Персонаж игрока",
       "minion": "Миньон",
-      "rankAndFile": "Рядовой",
-      "elite": "Элита"
+      "rankAndFile": "Стандартный",
+      "elite": "Босс"
     },
     "Item": {
       "item": "Предмет",

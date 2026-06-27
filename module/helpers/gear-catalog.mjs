@@ -4,6 +4,7 @@ import {
   ITEM_ACTIVATION_TYPE_LABEL_KEYS,
   normalizeUsageFrequency
 } from './item-config.mjs';
+import { formatDamageProfile } from './damage-profile.mjs';
 
 // Pure JSON -> Item-system transform for the shipped gear catalog. This is the
 // single source of truth used to compile the `gear-library` compendium pack
@@ -154,14 +155,13 @@ function getOutcomeNumber(entry, keys) {
   }, 0);
 }
 
-function getFirstOutcomeNumber(entry, keys) {
-  const keySet = new Set(keys);
+function getFirstOutcomeDamageProfile(entry) {
   for (const outcome of getGearCatalogOutcomes(entry)) {
-    if (!keySet.has(String(outcome?.key ?? ''))) continue;
-    const value = Number(outcome?.value ?? outcome?.amount ?? 0);
-    if (Number.isFinite(value)) return value;
+    if (String(outcome?.key ?? '') !== 'damage') continue;
+    const value = outcome?.value ?? outcome?.amount ?? 0;
+    return formatDamageProfile(value);
   }
-  return 0;
+  return formatDamageProfile(0);
 }
 
 function getGearCatalogActivationType(entry) {
@@ -205,7 +205,9 @@ function formatGearCatalogArea(area) {
 }
 
 function getGearCatalogArea(entry) {
-  return getGearCatalogConditionValue(entry, (conditions) => formatGearCatalogArea(conditions.area));
+  return getGearCatalogConditionValue(entry, (conditions) =>
+    formatGearCatalogArea(conditions.area)
+  );
 }
 
 function getGearCatalogUsageFrequency(entry) {
@@ -288,7 +290,8 @@ function buildGearCatalogSystemData(entry, config) {
     return {
       ...systemData,
       requiresRoll: getGearCatalogRequiresRoll(entry, { fallbackToSkill: false }),
-      skill
+      skill,
+      skillBonus: getFirstOutcomeDamageProfile(entry)
     };
   }
 
@@ -299,7 +302,7 @@ function buildGearCatalogSystemData(entry, config) {
       quantity: 1,
       requiresRoll: getGearCatalogRequiresRoll(entry),
       skill,
-      skillBonus: getFirstOutcomeNumber(entry, ['damage'])
+      skillBonus: getFirstOutcomeDamageProfile(entry)
     };
   }
 
@@ -308,7 +311,7 @@ function buildGearCatalogSystemData(entry, config) {
     ...systemData,
     requiresRoll: getGearCatalogRequiresRoll(entry),
     skill,
-    skillBonus: getFirstOutcomeNumber(entry, ['damage'])
+    skillBonus: getFirstOutcomeDamageProfile(entry)
   };
 }
 
@@ -344,7 +347,7 @@ function buildGearCatalogImportRow(entry, config) {
   row['system.skill'] = systemData.skill ?? '';
   row['system.requiresRoll'] = Boolean(systemData.requiresRoll);
 
-  if (config.itemType !== 'trait-source-ability' && config.itemType !== 'armor') {
+  if (config.itemType !== 'armor') {
     row['system.skillBonus'] = systemData.skillBonus;
   }
 
