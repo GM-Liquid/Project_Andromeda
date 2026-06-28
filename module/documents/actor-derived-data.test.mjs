@@ -110,6 +110,37 @@ test('character stress max follows actor type defaults', () => {
   }
 });
 
+test('advancement progress displays spent points from zero and keeps remaining budget separate', () => {
+  const actor = new ProjectAndromedaActor({
+    type: 'playerCharacter',
+    system: {
+      currentRank: 2,
+      temphealth: 0,
+      tempspeed: 0,
+      progressPoints: 10,
+      defenses: {},
+      skills: {
+        moshch: { rank: 1, value: 0 },
+        lovkost: { rank: 1, value: 0 }
+      },
+      stress: { value: 0, max: 0 },
+      forceShield: { value: 0, max: 0 }
+    },
+    itemTypes: {}
+  });
+
+  actor.prepareDerivedData();
+
+  assert.equal(actor.system.advancement.totalSpent, 0);
+  assert.equal(actor.system.advancement.remaining, 10);
+
+  actor.system.skills.moshch.value = 3;
+  actor.prepareDerivedData();
+
+  assert.equal(actor.system.advancement.totalSpent, 3);
+  assert.equal(actor.system.advancement.remaining, 7);
+});
+
 test('temporary stress and armor shield add to stress max', () => {
   const actor = new ProjectAndromedaActor({
     type: 'playerCharacter',

@@ -684,7 +684,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
   }
 
   _getAdvancementAvailable(system = this.actor.system) {
-    return Number(system?.advancement?.available) || 0;
+    return Number(system?.advancement?.remaining ?? system?.advancement?.available) || 0;
   }
 
   _getSkillAdvancementInfo(system, skillKey) {
@@ -1097,8 +1097,8 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     setVal('system.progressPoints', s?.progressPoints);
     setVal('system.stress.value', s?.stress?.value);
     setVal('system.advancement.totalSpent', s?.advancement?.totalSpent);
-    setText('system.advancement.available', s?.advancement?.available);
     setText('system.advancement.totalSpent', s?.advancement?.totalSpent);
+    setText('system.advancement.remaining', s?.advancement?.remaining);
     setText('system.stress.max', s?.stress?.max);
     setRankBadge(s?.currentRank);
     setVal('system.temphealth', s?.temphealth);

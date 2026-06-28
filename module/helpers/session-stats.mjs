@@ -84,9 +84,7 @@ function getActiveGMIds() {
 
 function getTrackedPlayerUsers() {
   const minimumRole = CONST.USER_ROLES?.PLAYER ?? 1;
-  return (game.users?.filter(
-    (user) => !user.isGM && Number(user.role ?? 0) >= minimumRole
-  ) ?? [])
+  return (game.users?.filter((user) => !user.isGM && Number(user.role ?? 0) >= minimumRole) ?? [])
     .slice()
     .sort((left, right) => String(left.id).localeCompare(String(right.id)));
 }
@@ -142,7 +140,9 @@ export class SessionStatsService {
 
     const active = this.getActiveSession();
     if (active) {
-      ui.notifications.warn(game.i18n.localize('MY_RPG.SessionTracker.Notifications.AlreadyActive'));
+      ui.notifications.warn(
+        game.i18n.localize('MY_RPG.SessionTracker.Notifications.AlreadyActive')
+      );
       return active;
     }
 
@@ -178,7 +178,9 @@ export class SessionStatsService {
     const active = this.getActiveSession();
     if (!active) {
       if (!silent) {
-        ui.notifications.warn(game.i18n.localize('MY_RPG.SessionTracker.Notifications.NoActiveSession'));
+        ui.notifications.warn(
+          game.i18n.localize('MY_RPG.SessionTracker.Notifications.NoActiveSession')
+        );
       }
       return null;
     }
@@ -281,6 +283,17 @@ export class SessionStatsService {
 
     await this._setCurrentSession(active);
     this._emitStatsUpdated(active, 'roll');
+  }
+
+  async recordMomentOfGloryUsage(message) {
+    if (!this._isTrackingAuthority()) return;
+    const active = this.getActiveSession();
+    if (!active) return;
+
+    this._recordMomentOfGloryUsageFromMessage(active, message);
+
+    await this._setCurrentSession(active);
+    this._emitStatsUpdated(active, 'momentOfGlory');
   }
 
   async recordCombatEvent(eventName) {
@@ -460,7 +473,10 @@ export class SessionStatsService {
     return {
       requiredPlayerIds,
       offlineParticipantIds,
-      canStart: Boolean(activeGMIds.length) && Boolean(requiredPlayerIds.length) && !offlineParticipantIds.length
+      canStart:
+        Boolean(activeGMIds.length) &&
+        Boolean(requiredPlayerIds.length) &&
+        !offlineParticipantIds.length
     };
   }
 
@@ -571,7 +587,9 @@ export class SessionStatsService {
     const reasonKey = `MY_RPG.SessionTracker.EndReasons.${session.endReason ?? END_REASON_MANUAL}`;
     const reason = game.i18n.localize(reasonKey);
 
-    const actorRows = this._buildCounterListItems(rolls.byActor, (key) => this._resolveActorLabel(key));
+    const actorRows = this._buildCounterListItems(rolls.byActor, (key) =>
+      this._resolveActorLabel(key)
+    );
     const formulaRows = this._buildCounterListItems(rolls.byFormula, (key) => key);
     const momentRows = this._buildCounterListItems(momentOfGlory.byActor, (key) =>
       this._resolveActorLabel(key)

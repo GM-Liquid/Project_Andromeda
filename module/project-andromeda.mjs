@@ -52,9 +52,12 @@ import {
   clearArchetypeEffects
 } from './helpers/archetype.mjs';
 import { SessionStatsService } from './helpers/session-stats.mjs';
-import { buildRollRerollSpec, rerollRollPreservingContext } from './helpers/roll-reroll.mjs';
 import { buildSkillCheckRollFlavorFromData } from './helpers/roll-card.mjs';
-import { getSkillCheckOutcomeKey, normalizeOutcomeShift } from './helpers/skill-check.mjs';
+import {
+  getSkillCheckOutcomeKey,
+  normalizeOutcomeShift,
+  shiftOutcomeKey
+} from './helpers/skill-check.mjs';
 import {
   cleanupLibraryLinkOnActorItemDelete,
   ensureActorItemLibraryLink,
@@ -89,6 +92,12 @@ const ENVIRONMENT_PROXY_ACTOR_FLAG = 'isEnvironmentTokenProxy';
 const ENVIRONMENT_TOKEN_ACTOR_TYPE = MINION_ACTOR_TYPE;
 const HERO_POINT_INPUT_SELECTOR = 'input[name="system.momentOfGlory"]';
 const SHARED_HERO_POOL_INPUT_SELECTOR = '.shared-hero-pool-input';
+// Highlight Point economy (rulebook §"Очки Свершений"): each hero gains 1 at the
+// start of a session and can hold no more than 3 at once.
+const HERO_POINT_MAX = 3;
+const HERO_POINT_SESSION_GRANT = 1;
+const SESSION_HOOK_STARTED = 'projectAndromeda.sessionStarted';
+const SESSION_HOOK_ENDED = 'projectAndromeda.sessionEnded';
 const OBSOLETE_CARTRIDGE_ITEM_FIELDS = ['runeType'];
 const LEGACY_EQUIPMENT_TYPES = new Set(['cartridge', 'implant', 'equipment-consumable']);
 const LEGACY_TRAIT_TYPES = new Set([
@@ -243,9 +252,10 @@ async function updateActorHeroPoints(actor, nextValue) {
     return value;
   }
 
-  await actor.update({ 'system.momentOfGlory': value }, { render: false });
-  syncHeroPointInputs(actor, value);
-  return value;
+  const cappedValue = Math.min(value, HERO_POINT_MAX);
+  await actor.update({ 'system.momentOfGlory': cappedValue }, { render: false });
+  syncHeroPointInputs(actor, cappedValue);
+  return cappedValue;
 }
 
 function isPrimaryActiveGM() {
@@ -256,20 +266,6 @@ function isPrimaryActiveGM() {
   return activeGMs[0]?.id === game.user?.id;
 }
 
-function canGrantHeroPoint(message, actor) {
-  if (!message || !actor || !isPlayerCharacterActorType(actor.type)) return false;
-
-  if (game.user?.isGM) {
-    return isPrimaryActiveGM();
-  }
-
-  const activeGMs = game.users?.some((user) => user.isGM && user.active) ?? false;
-  if (activeGMs) return false;
-
-  const messageUserId = String(message?.user?.id ?? message?.user ?? '').trim();
-  return Boolean(messageUserId && messageUserId === game.user?.id && actor.isOwner);
-}
-
 function canSpendHeroPoints(actor) {
   if (!actor) return false;
   if (isGmCharacterActorType(actor.type)) {
@@ -278,83 +274,29 @@ function canSpendHeroPoints(actor) {
   return Boolean(game.user?.isGM || actor.isOwner);
 }
 
-function rollHasExtremeResult(roll) {
-  for (const die of roll?.dice ?? []) {
-    const faces = Number(die?.faces);
-    if (!Number.isFinite(faces) || faces < 1) continue;
+function getPlayerCharacterActors() {
+  return (game.actors ?? []).filter((actor) => isPlayerCharacterActorType(actor?.type));
+}
 
-    for (const result of die?.results ?? []) {
-      if (result?.discarded || result?.active === false) continue;
-      const value = Number(result?.result);
-      if (!Number.isFinite(value)) continue;
-      if (value === 1 || value === faces) return true;
-    }
+// Grants +1 Highlight Point (capped at HERO_POINT_MAX) to every player character when a
+// session starts. Runs once on the primary active GM to avoid duplicate world writes.
+async function grantSessionStartHeroPoints() {
+  if (!isPrimaryActiveGM()) return;
+  for (const actor of getPlayerCharacterActors()) {
+    const current = getActorHeroPoints(actor);
+    if (current >= HERO_POINT_MAX) continue;
+    await updateActorHeroPoints(actor, current + HERO_POINT_SESSION_GRANT);
   }
-
-  return false;
 }
 
-function messageHasExtremeResult(message) {
-  return getMessageRolls(message).some((roll) => rollHasExtremeResult(roll));
-}
-
-async function grantHeroPointForExtremeRoll(message) {
-  const actor = getMessageActor(message);
-  if (!canGrantHeroPoint(message, actor)) return;
-  const momentOfGloryFlag = getMomentOfGloryFlag(message);
-  if (Number(momentOfGloryFlag?.spent) > 0) return;
-  if (!messageHasExtremeResult(message)) return;
-
-  const nextHeroPoints = getActorHeroPoints(actor) + 1;
-  await updateActorHeroPoints(actor, nextHeroPoints);
-}
-
-function getRollMomentOfGloryBonus(roll) {
-  let maxFaces = 0;
-  for (const die of roll?.dice ?? []) {
-    const faces = Number(die?.faces);
-    if (!Number.isFinite(faces) || faces < 1) continue;
-    maxFaces = Math.max(maxFaces, faces);
+// Clears unspent Highlight Points from player characters when a session ends, since
+// unused points do not carry over to the next session.
+async function clearSessionHeroPoints() {
+  if (!isPrimaryActiveGM()) return;
+  for (const actor of getPlayerCharacterActors()) {
+    if (getActorHeroPoints(actor) <= 0) continue;
+    await updateActorHeroPoints(actor, 0);
   }
-  return maxFaces > 0 ? maxFaces / 2 : 0;
-}
-
-function formatMomentOfGloryBonus(value) {
-  const numeric = Number(value);
-  if (!Number.isFinite(numeric)) return '0';
-  if (Number.isInteger(numeric)) return `${numeric}`;
-  return `${Number(numeric.toFixed(2))}`;
-}
-
-function cloneRollWithMomentOfGloryBonus(sourceRoll, bonus) {
-  const rollData =
-    typeof sourceRoll?.toJSON === 'function'
-      ? foundry.utils.deepClone(sourceRoll.toJSON())
-      : foundry.utils.deepClone(sourceRoll);
-  const RollClass = sourceRoll?.constructor?.fromData ? sourceRoll.constructor : Roll;
-  const clonedRoll = RollClass.fromData(rollData);
-  if (!bonus) return clonedRoll;
-
-  const operatorTerm = new foundry.dice.terms.OperatorTerm({ operator: '+' });
-  operatorTerm._evaluated = true;
-  const numericTerm = new foundry.dice.terms.NumericTerm({ number: bonus });
-  numericTerm._evaluated = true;
-
-  clonedRoll.terms.push(operatorTerm, numericTerm);
-  clonedRoll.resetFormula();
-  clonedRoll._evaluated = true;
-  clonedRoll._total = (Number(sourceRoll?.total) || 0) + bonus;
-  return clonedRoll;
-}
-
-function updateSkillCheckFlavorForRoll(flags, fallbackFlavor, roll) {
-  const skillCheck = flags?.[MODULE_ID]?.skillCheck;
-  if (!skillCheck || !roll) return fallbackFlavor ?? '';
-  const total = Number(roll?.total);
-  if (!Number.isFinite(total)) return fallbackFlavor ?? '';
-  const outcome = getSkillCheckOutcomeKey(total);
-  skillCheck.outcome = outcome;
-  return buildSkillCheckRollFlavorFromData(skillCheck, total) || fallbackFlavor || '';
 }
 
 function getMessageSkillCheck(message) {
@@ -422,41 +364,42 @@ function wireSkillCheckShiftControls(message, html) {
   }
 }
 
-function canUseMomentOfGloryBonus(message) {
-  if (!message) return false;
-  const rolls = getMessageRolls(message);
-  const hasRoll = Boolean(rolls.length);
-  if (!hasRoll) return false;
-  const hasEligibleDice = rolls.some((roll) => getRollMomentOfGloryBonus(roll) > 0);
-  if (!hasEligibleDice) return false;
-  const actor = getMessageActor(message);
-  if (!actor) return false;
-  return canSpendHeroPoints(actor);
+// Resolves the current effective outcome (rolled result + any applied shift) for a
+// skill-check message, or null if the message is not an improvable skill check.
+function getSkillCheckImproveState(message) {
+  const skillCheck = getMessageSkillCheck(message);
+  if (!skillCheck) return null;
+  const total = Number(getMessageRolls(message)[0]?.total);
+  if (!Number.isFinite(total)) return null;
+  const rolledOutcome = getSkillCheckOutcomeKey(total);
+  const currentShift = Number(skillCheck.shift) || 0;
+  const currentOutcome = shiftOutcomeKey(rolledOutcome, currentShift);
+  return { skillCheck, total, rolledOutcome, currentShift, currentOutcome };
 }
 
-function canUseMomentOfGloryReroll(message) {
+function canUseMomentOfGloryImprove(message) {
   if (!message) return false;
-  const rolls = getMessageRolls(message);
-  if (!rolls.some((roll) => buildRollRerollSpec(roll))) return false;
+  // A Highlight Point may only improve a single check once (rulebook §"Очки Свершений").
+  if (Number(getMomentOfGloryFlag(message)?.spent) > 0) return false;
+  const state = getSkillCheckImproveState(message);
+  if (!state) return false;
+  // The outcome cannot rise above a critical success.
+  if (state.currentOutcome === 'CriticalSuccess') return false;
   const actor = getMessageActor(message);
   if (!actor) return false;
-  return canSpendHeroPoints(actor);
+  if (!canSpendHeroPoints(actor)) return false;
+  return getActorHeroPoints(actor) > 0;
 }
 
-async function applyMomentOfGloryBonusToMessage(message, actor) {
-  const sourceRolls = getMessageRolls(message);
-  if (!sourceRolls.length) {
-    throw new Error('No roll data found on the source message.');
-  }
+// Spends 1 Highlight Point to raise the check outcome by one step, in place on the
+// original message (no reroll, no new chat card).
+async function applyMomentOfGloryImproveOutcome(message, actor) {
+  const state = getSkillCheckImproveState(message);
+  if (!state) return { spent: false, noCheck: true };
+  if (Number(getMomentOfGloryFlag(message)?.spent) > 0) return { spent: false, alreadyUsed: true };
 
-  const enhancedRolls = [];
-  let totalBonus = 0;
-  for (const roll of sourceRolls) {
-    const bonus = getRollMomentOfGloryBonus(roll);
-    totalBonus += bonus;
-    enhancedRolls.push(cloneRollWithMomentOfGloryBonus(roll, bonus));
-  }
-  if (totalBonus <= 0) return { spent: false, totalBonus: 0 };
+  const nextShift = normalizeOutcomeShift(state.rolledOutcome, state.currentShift + 1);
+  if (nextShift === state.currentShift) return { spent: false, maxed: true };
 
   const currentHeroPoints = getActorHeroPoints(actor);
   if (!currentHeroPoints) return { spent: false };
@@ -465,77 +408,23 @@ async function applyMomentOfGloryBonusToMessage(message, actor) {
 
   const flags = foundry.utils.deepClone(message.flags ?? {});
   flags[MODULE_ID] ??= {};
-  const flavor = updateSkillCheckFlavorForRoll(flags, message.flavor, enhancedRolls[0]);
+  flags[MODULE_ID].skillCheck = {
+    ...state.skillCheck,
+    shift: nextShift,
+    outcome: state.rolledOutcome
+  };
   flags[MODULE_ID].momentOfGlory = {
     spent: 1,
-    bonus: totalBonus,
+    action: 'improve',
     actorId: actor.id,
     sourceMessageId: message.id,
     timestamp: Date.now()
   };
+  const flavor =
+    buildSkillCheckRollFlavorFromData(flags[MODULE_ID].skillCheck, state.total) || message.flavor;
 
   try {
-    await ChatMessage.create({
-      user: game.user?.id,
-      speaker: foundry.utils.deepClone(message.speaker ?? {}),
-      flavor,
-      rolls: enhancedRolls,
-      style: message.style,
-      type: message.type,
-      whisper: Array.from(message.whisper ?? []),
-      blind: Boolean(message.blind),
-      flags
-    });
-  } catch (error) {
-    await updateActorHeroPoints(actor, currentHeroPoints);
-    throw error;
-  }
-
-  return { spent: true, nextHeroPoints, totalBonus };
-}
-
-async function applyMomentOfGloryRerollToMessage(message, actor) {
-  const sourceRolls = getMessageRolls(message);
-  if (!sourceRolls.length) {
-    throw new Error('No roll data found on the source message.');
-  }
-
-  const currentHeroPoints = getActorHeroPoints(actor);
-  if (!currentHeroPoints) return { spent: false };
-
-  const rerolledRolls = [];
-  for (const roll of sourceRolls) {
-    const rerolledRoll = await rerollRollPreservingContext(roll);
-    if (rerolledRoll) rerolledRolls.push(rerolledRoll);
-  }
-  if (!rerolledRolls.length) return { spent: false, noRolls: true };
-
-  const nextHeroPoints = currentHeroPoints - 1;
-  await updateActorHeroPoints(actor, nextHeroPoints);
-
-  const flags = foundry.utils.deepClone(message.flags ?? {});
-  flags[MODULE_ID] ??= {};
-  const flavor = updateSkillCheckFlavorForRoll(flags, message.flavor, rerolledRolls[0]);
-  flags[MODULE_ID].momentOfGlory = {
-    spent: 1,
-    action: 'reroll',
-    actorId: actor.id,
-    sourceMessageId: message.id,
-    timestamp: Date.now()
-  };
-
-  try {
-    await ChatMessage.create({
-      user: game.user?.id,
-      speaker: foundry.utils.deepClone(message.speaker ?? {}),
-      flavor,
-      rolls: rerolledRolls,
-      style: message.style,
-      type: message.type,
-      whisper: Array.from(message.whisper ?? []),
-      blind: Boolean(message.blind),
-      flags
-    });
+    await message.update({ flavor, flags });
   } catch (error) {
     await updateActorHeroPoints(actor, currentHeroPoints);
     throw error;
@@ -795,104 +684,58 @@ function registerActorDirectoryContextOptions(options) {
 
 function registerChatMessageContextOptions(options) {
   pushUniqueContextOption(options, {
-    name: 'MY_RPG.MomentOfGloryBonus.ContextLabel',
-    icon: '<i class="fas fa-dice"></i>',
+    name: 'MY_RPG.MomentOfGloryImprove.ContextLabel',
+    icon: '<i class="fas fa-arrow-up"></i>',
     condition: (target) => {
       const message = getContextMessage(target);
-      return canUseMomentOfGloryBonus(message);
+      return canUseMomentOfGloryImprove(message);
     },
     callback: async (target) => {
       const message = getContextMessage(target);
       if (!message) {
-        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.NoMessage'));
+        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryImprove.Errors.NoMessage'));
         return;
       }
       const actor = getMessageActor(message);
       if (!actor) {
-        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.NoActor'));
+        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryImprove.Errors.NoActor'));
         return;
       }
       if (!canSpendHeroPoints(actor)) {
-        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.NoPermission'));
-        return;
-      }
-      if (getActorHeroPoints(actor) <= 0) {
-        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.NoPoints'));
-        return;
-      }
-
-      try {
-        const result = await applyMomentOfGloryBonusToMessage(message, actor);
-        if (!result?.spent) {
-          const errorKey = result?.totalBonus === 0 ? 'NoDice' : 'NoPoints';
-          ui.notifications.warn(game.i18n.localize(`MY_RPG.MomentOfGloryBonus.Errors.${errorKey}`));
-          return;
-        }
-        ui.notifications.info(
-          game.i18n.format('MY_RPG.MomentOfGloryBonus.Success', {
-            bonus: formatMomentOfGloryBonus(result.totalBonus),
-            value: result.nextHeroPoints
-          })
+        ui.notifications.warn(
+          game.i18n.localize('MY_RPG.MomentOfGloryImprove.Errors.NoPermission')
         );
-      } catch (error) {
-        debugLog('Highlight Point bonus failed', {
-          messageId: message.id,
-          actorId: actor.id,
-          error
-        });
-        ui.notifications.error(game.i18n.localize('MY_RPG.MomentOfGloryBonus.Errors.Failed'));
-      }
-    }
-  });
-
-  pushUniqueContextOption(options, {
-    name: 'MY_RPG.MomentOfGloryReroll.ContextLabel',
-    icon: '<i class="fas fa-rotate-right"></i>',
-    condition: (target) => {
-      const message = getContextMessage(target);
-      return canUseMomentOfGloryReroll(message);
-    },
-    callback: async (target) => {
-      const message = getContextMessage(target);
-      if (!message) {
-        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoMessage'));
-        return;
-      }
-      const actor = getMessageActor(message);
-      if (!actor) {
-        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoActor'));
-        return;
-      }
-      if (!canSpendHeroPoints(actor)) {
-        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoPermission'));
         return;
       }
       if (getActorHeroPoints(actor) <= 0) {
-        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.NoPoints'));
+        ui.notifications.warn(game.i18n.localize('MY_RPG.MomentOfGloryImprove.Errors.NoPoints'));
         return;
       }
 
       try {
-        const result = await applyMomentOfGloryRerollToMessage(message, actor);
+        const result = await applyMomentOfGloryImproveOutcome(message, actor);
         if (!result?.spent) {
-          const errorKey = result?.noRolls ? 'NoRoll' : 'NoPoints';
+          let errorKey = 'NoPoints';
+          if (result?.noCheck) errorKey = 'NoCheck';
+          else if (result?.alreadyUsed) errorKey = 'AlreadyUsed';
+          else if (result?.maxed) errorKey = 'Maxed';
           ui.notifications.warn(
-            game.i18n.localize(`MY_RPG.MomentOfGloryReroll.Errors.${errorKey}`)
+            game.i18n.localize(`MY_RPG.MomentOfGloryImprove.Errors.${errorKey}`)
           );
           return;
         }
         ui.notifications.info(
-          game.i18n.format('MY_RPG.MomentOfGloryReroll.Success', {
+          game.i18n.format('MY_RPG.MomentOfGloryImprove.Success', {
             value: result.nextHeroPoints
           })
         );
       } catch (error) {
-        debugLog('Highlight Point reroll failed', {
+        debugLog('Highlight Point improve failed', {
           messageId: message.id,
           actorId: actor.id,
           error
         });
-        ui.notifications.error(game.i18n.localize('MY_RPG.MomentOfGloryReroll.Errors.Failed'));
+        ui.notifications.error(game.i18n.localize('MY_RPG.MomentOfGloryImprove.Errors.Failed'));
       }
     }
   });
@@ -1778,7 +1621,15 @@ Hooks.on('createChatMessage', (message) => {
   if (sessionStats) {
     void sessionStats.recordRoll(message);
   }
-  void grantHeroPointForExtremeRoll(message);
+});
+
+// "Improve outcome" updates the roll message in place rather than posting a new card,
+// so the spent Highlight Point is recorded from the flag the update stamps on.
+Hooks.on('updateChatMessage', (message, changes) => {
+  const sessionStats = getSessionStatsService();
+  if (!sessionStats) return;
+  if (!foundry.utils.hasProperty(changes, `flags.${MODULE_ID}.momentOfGlory`)) return;
+  void sessionStats.recordMomentOfGloryUsage(message);
 });
 
 // Foundry v13 renders chat messages through renderChatMessageHTML; v12 uses renderChatMessage.
@@ -1790,10 +1641,32 @@ Hooks.on('renderChatMessage', (message, html) => {
   wireSkillCheckShiftControls(message, html);
 });
 
+// Keep the stored Highlight Point total within [0, HERO_POINT_MAX] no matter the
+// source of the update (sheet input, programmatic spend, session grant).
+Hooks.on('preUpdateActor', (actor, changes) => {
+  if (isGmCharacterActorType(actor?.type)) return;
+  const raw = foundry.utils.getProperty(changes, 'system.momentOfGlory');
+  if (raw === undefined) return;
+  const clamped = Math.min(Math.max(Math.floor(Number(raw) || 0), 0), HERO_POINT_MAX);
+  if (clamped !== raw) {
+    foundry.utils.setProperty(changes, 'system.momentOfGlory', clamped);
+  }
+});
+
 Hooks.on('updateActor', (actor, changes) => {
   if (!foundry.utils.hasProperty(changes, 'system.momentOfGlory')) return;
   if (isGmCharacterActorType(actor?.type)) return;
   syncHeroPointInputs(actor);
+});
+
+// Highlight Point economy: each player character gains 1 at the start of a session
+// (capped at HERO_POINT_MAX) and loses any unspent points when the session ends.
+Hooks.on(SESSION_HOOK_STARTED, () => {
+  void grantSessionStartHeroPoints();
+});
+
+Hooks.on(SESSION_HOOK_ENDED, () => {
+  void clearSessionHeroPoints();
 });
 
 Hooks.on('updateActor', (actor, changes, options) => {

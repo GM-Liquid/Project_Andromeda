@@ -51,8 +51,10 @@ export class ProjectAndromedaActor extends Actor {
     s.defensesLocked = getArchetypeDefenseProfile(this) !== null;
     s.effectiveDefenses = this._calcEffectiveDefenses(s, baseDefenses);
     s.advancement ??= {};
-    s.advancement.totalSpent = getTotalAdvancementSpent(s, { archetypeSkillKey });
-    s.advancement.available = (Number(s.progressPoints) || 0) - s.advancement.totalSpent;
+    const totalAdvancementSpent = getTotalAdvancementSpent(s, { archetypeSkillKey });
+    s.advancement.totalSpent = totalAdvancementSpent;
+    s.advancement.remaining = (Number(s.progressPoints) || 0) - totalAdvancementSpent;
+    s.advancement.available = s.advancement.remaining;
 
     const stress = s.stress ?? (s.stress = {});
     const forceShield = s.forceShield ?? (s.forceShield = {});

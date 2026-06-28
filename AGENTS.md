@@ -182,14 +182,15 @@ project-andromeda/
 - Chat output immediately shows the unshifted outcome and the used skill rank. Players and GMs apply rank-versus-task shifts manually after the roll.
 - Damage from weapons, abilities, and other damaging effects is stored and shown as four slash-separated values: **failure / success with a cost / success / critical success**. For example, `0/1/2/4` means 0 damage on failure, 1 on success with a cost, 2 on success, and 4 on critical success.
 
-### 3.4 Points of Heroism
+### 3.4 Points of Heroism (Highlight Points / Очки Свершений)
 
-- `system.momentOfGlory` stores **Points of Heroism** and remains the spendable heroism resource for backwards compatibility.
-- Chat roll messages support a context-menu action to spend **1** point of heroism and add a bonus equal to **half the highest die maximum** in that roll.
+- `system.momentOfGlory` stores **Points of Heroism** (rulebook **Очки Свершений**, shown in EN UI as **Highlight Points**) and is the spendable heroism resource.
+- **Economy:** a player character holds at most **3** points (`HERO_POINT_MAX`). Each player character gains **+1** point at the **start of a session** (capped at 3) via the `projectAndromeda.sessionStarted` hook, and loses any unspent points when the session **ends** (`projectAndromeda.sessionEnded`) because unused points do not carry over. The clamp to `[0, 3]` is enforced on every player-character update through a `preUpdateActor` hook plus `updateActorHeroPoints`, so the sheet input cannot exceed 3. Both session grants/clears run only on the **primary active GM**.
+- **Spending — Improve outcome:** the only mechanical spend is a chat context-menu action **"Improve outcome"** on a skill-check message. It spends **1** point and raises the rolled outcome by **one step** (failure → success with a cost → success → critical success) by bumping the stored `skillCheck.shift`. It updates the original message in place (no reroll, no new card), cannot raise the outcome above critical success, and can be used at most **once per check** (guarded by the `flags.project-andromeda.momentOfGlory` spent flag). The other two book uses — **add a scene detail** and **remove a condition** — are narrative and handled by the GM manually decrementing the sheet value.
+- **Earning:** points are awarded narratively by the GM (when a motivation/complication actually worsens the situation), via the manual sheet field. There is **no** automatic grant — the previous extreme-roll (min/max die face) auto-grant has been removed.
 - **Player characters** use their own personal Points of Heroism pool.
-- **GM characters** (minion, Standard, Boss) do **not** gain hero points from player-only reward logic and instead spend from a **shared GM heroism pool** that is visible on all GM character sheets. Internal actor type keys remain `minion`, `rankAndFile`, and `elite` unless an explicit migration is added later.
-- Spending a point of heroism must keep the original roll context (dice results, flavor/modifiers, speaker, and roll visibility mode) without rerolling the dice.
-- Session tracking must count points of heroism spent per actor inside the active session window.
+- **GM characters** (minion, Standard, Boss) spend from a **shared GM heroism pool** (`GM_HERO_POOL_SETTING`) visible on all GM character sheets; it is uncapped and not governed by the player session economy. Internal actor type keys remain `minion`, `rankAndFile`, and `elite` unless an explicit migration is added later.
+- Session tracking counts points of heroism spent per actor inside the active session window. Because "Improve outcome" updates the message in place, the spend is recorded via the `updateChatMessage` hook (`SessionStatsService.recordMomentOfGloryUsage`) rather than `createChatMessage`.
 - A session starts automatically when at least one GM and all player users in the world are connected.
 - An active session ends automatically after any required participant stays offline for more than **15 minutes**.
 
@@ -216,9 +217,9 @@ project-andromeda/
 - Armor speed modifiers and `system.tempspeed` remain additive on top of that rank-based base value. `system.tempspeed` may be positive or negative.
 - Movement speed is formula-derived. For manual scene adjustments, GMs should use temporary speed (`system.tempspeed`) rather than editing the derived speed.
 
-### 3.7 Extreme Roll Reward
+### 3.7 Extreme Roll Reward (removed)
 
-- When a player character roll contains at least one die showing its minimum or maximum face, that actor gains **1** point of heroism.
+- Points of Heroism are no longer auto-granted for extreme rolls. The earlier rule that gave **1** point when a player-character roll showed a die at its minimum or maximum face has been removed; earning is now narrative/GM-driven (see §3.4).
 
 ---
 

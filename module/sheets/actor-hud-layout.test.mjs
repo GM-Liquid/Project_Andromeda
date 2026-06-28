@@ -43,6 +43,7 @@ test('player-character HUD uses the updated progression label and no-wrap stat c
   const english = JSON.parse(readFile('lang/en.json'));
 
   assert.match(template, /MY_RPG\.KeyInfo\.ProgressPoints/);
+  assert.match(template, /data-field='system\.advancement\.totalSpent'/);
   assert.match(template, /andromeda-status-card--rank-progress/);
   assert.equal(english.MY_RPG.KeyInfo.ProgressPoints, 'Progression Points');
   assert.match(
