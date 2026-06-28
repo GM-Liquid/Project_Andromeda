@@ -814,6 +814,28 @@ function getEquipmentDamageValue(item) {
   return damageMatch ? formatDamageProfile(damageMatch[1].trim()) : '';
 }
 
+const STEP_EFFECT_THRESHOLD_LABELS_RU = {
+  SuccessWithCost: 'Успех с ценой',
+  Success: 'Успех',
+  CriticalSuccess: 'Крит. успех'
+};
+
+// Optional step effects authored on the catalog entry, rendered as a readable
+// "text (с «threshold»)" list. Absent field -> empty cell.
+function getGearStepEffectsValue(item) {
+  const effects = Array.isArray(item?.stepEffects) ? item.stepEffects : [];
+  return effects
+    .map((effect) => {
+      const text = String(effect?.text ?? '').trim();
+      if (!text) return '';
+      const label =
+        STEP_EFFECT_THRESHOLD_LABELS_RU[effect?.minOutcome] ?? STEP_EFFECT_THRESHOLD_LABELS_RU.Success;
+      return `${text} (с «${label}»)`;
+    })
+    .filter(Boolean)
+    .join('; ');
+}
+
 function buildArmorCatalogTable(catalog) {
   const rows = getRenderableGearCatalogItems(catalog).map((item) => [
     item.name,
@@ -860,6 +882,7 @@ function buildEquipmentCatalogTable(catalog) {
       item.rank,
       getGearSkillValue(item),
       getGearQuartzValue(item, 'damage') || getEquipmentDamageValue(item),
+      getGearStepEffectsValue(item),
       getGearUsageOrQuartzValue(item, 'frequency'),
       getGearUsageOrQuartzValue(item, 'actions'),
       getGearUsageOrQuartzValue(item, 'range'),
@@ -879,6 +902,7 @@ function buildEquipmentCatalogTable(catalog) {
       'Ранг',
       'Навык',
       'Урон',
+      'Эффекты',
       'Частота использования',
       'Цена в действиях',
       'Дальность',
@@ -903,6 +927,7 @@ function buildWeaponCatalogTable(catalog) {
       item.rank,
       getGearSkillValue(item),
       getGearQuartzValue(item, 'damage') || getEquipmentDamageValue(item),
+      getGearStepEffectsValue(item),
       getGearUsageOrQuartzValue(item, 'frequency'),
       getGearUsageOrQuartzValue(item, 'actions'),
       getGearUsageOrQuartzValue(item, 'range'),
@@ -922,6 +947,7 @@ function buildWeaponCatalogTable(catalog) {
       'Ранг',
       'Навык',
       'Урон',
+      'Эффекты',
       'Частота использования',
       'Цена в действиях',
       'Дальность',
@@ -942,6 +968,7 @@ function buildAbilityCatalogTable(catalog) {
     item.name,
     item.rank,
     getGearQuartzValue(item, 'damage') || getGearPropertyValue(item, 'damage'),
+    getGearStepEffectsValue(item),
     getGearShortDescription(item),
     getGearDescription(item),
     getGearUsageOrQuartzValue(item, 'frequency'),
@@ -960,6 +987,7 @@ function buildAbilityCatalogTable(catalog) {
       'Название',
       'Ранг',
       'Урон',
+      'Эффекты',
       'Краткое описание',
       'Полное описание',
       'Частота использования',

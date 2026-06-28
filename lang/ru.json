@@ -40,18 +40,29 @@
       "SkillRankLabel": "Ранг навыка",
       "OutcomeLabel": "Исход",
       "OutcomeDamageLabel": "Урон",
+      "RolledOutcome": "Выпало",
+      "ShiftWord": "сдвиг",
+      "ShiftUp": "Сдвинуть исход вверх",
+      "ShiftDown": "Сдвинуть исход вниз",
+      "EffectsLabel": "Эффекты",
       "RollDetails": "Детали броска",
       "ActivatedDescription": "Описание",
       "RollFormula": "Формула",
       "RollTotal": "Итог проверки",
       "DamageProfile": "Профиль урона",
       "Outcomes": {
-        "FailureWithConsequence": "Провал с последствием",
         "Failure": "Провал",
         "SuccessWithCost": "Успех с ценой",
         "Success": "Успех",
         "CriticalSuccess": "Критический успех"
       }
+    },
+    "StepEffects": {
+      "SectionTitle": "Ступенчатые эффекты",
+      "TextPlaceholder": "Эффект (напр. Оглушение на 1 раунд)",
+      "ThresholdLabel": "Срабатывает с",
+      "Add": "Добавить эффект",
+      "Remove": "Удалить эффект"
     },
     "RankNumeric": {
       "Title": "Ранг",

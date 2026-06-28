@@ -54,7 +54,7 @@ import {
 import { SessionStatsService } from './helpers/session-stats.mjs';
 import { buildRollRerollSpec, rerollRollPreservingContext } from './helpers/roll-reroll.mjs';
 import { buildSkillCheckRollFlavorFromData } from './helpers/roll-card.mjs';
-import { getSkillCheckOutcomeKey } from './helpers/skill-check.mjs';
+import { getSkillCheckOutcomeKey, normalizeOutcomeShift } from './helpers/skill-check.mjs';
 import {
   cleanupLibraryLinkOnActorItemDelete,
   ensureActorItemLibraryLink,
@@ -355,6 +355,71 @@ function updateSkillCheckFlavorForRoll(flags, fallbackFlavor, roll) {
   const outcome = getSkillCheckOutcomeKey(total);
   skillCheck.outcome = outcome;
   return buildSkillCheckRollFlavorFromData(skillCheck, total) || fallbackFlavor || '';
+}
+
+function getMessageSkillCheck(message) {
+  return (
+    message?.getFlag?.(MODULE_ID, 'skillCheck') ?? message?.flags?.[MODULE_ID]?.skillCheck ?? null
+  );
+}
+
+function canShiftSkillCheckOutcome(message) {
+  if (!getMessageSkillCheck(message)) return false;
+  return Boolean(message?.isAuthor || game.user?.isGM);
+}
+
+async function applySkillCheckOutcomeShift(message, delta) {
+  const skillCheck = getMessageSkillCheck(message);
+  if (!skillCheck) return;
+  const total = Number(getMessageRolls(message)[0]?.total);
+  if (!Number.isFinite(total)) return;
+
+  const rolledOutcome = getSkillCheckOutcomeKey(total);
+  const currentShift = Number(skillCheck.shift) || 0;
+  const nextShift = normalizeOutcomeShift(rolledOutcome, currentShift + (Number(delta) || 0));
+  if (nextShift === currentShift) return;
+
+  const flags = foundry.utils.deepClone(message.flags ?? {});
+  flags[MODULE_ID] ??= {};
+  flags[MODULE_ID].skillCheck = { ...skillCheck, shift: nextShift, outcome: rolledOutcome };
+  const flavor =
+    buildSkillCheckRollFlavorFromData(flags[MODULE_ID].skillCheck, total) || message.flavor;
+
+  await message.update({ flavor, flags });
+}
+
+function getChatMessageRenderRoot(html) {
+  if (!html) return null;
+  // Foundry v13 passes a raw HTMLElement; v12 passes a jQuery object.
+  if (typeof html.querySelector === 'function') return html;
+  if (html[0] && typeof html[0].querySelector === 'function') return html[0];
+  return null;
+}
+
+function wireSkillCheckShiftControls(message, html) {
+  const root = getChatMessageRenderRoot(html);
+  const card = root?.querySelector?.('[data-skill-check-card]');
+  if (!card) return;
+  const buttons = card.querySelectorAll('.myrpg-roll-card__shift');
+  if (!buttons.length) return;
+
+  const allowed = canShiftSkillCheckOutcome(message);
+  for (const button of buttons) {
+    if (!allowed) {
+      button.setAttribute('disabled', 'disabled');
+      continue;
+    }
+    if (button.dataset.skillShiftBound === '1') continue;
+    button.dataset.skillShiftBound = '1';
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const delta = Number(button.dataset.skillShiftStep) || 0;
+      void applySkillCheckOutcomeShift(message, delta).catch((error) => {
+        debugLog('Skill check outcome shift failed', { messageId: message?.id, error });
+      });
+    });
+  }
 }
 
 function canUseMomentOfGloryBonus(message) {
@@ -1714,6 +1779,15 @@ Hooks.on('createChatMessage', (message) => {
     void sessionStats.recordRoll(message);
   }
   void grantHeroPointForExtremeRoll(message);
+});
+
+// Foundry v13 renders chat messages through renderChatMessageHTML; v12 uses renderChatMessage.
+Hooks.on('renderChatMessageHTML', (message, html) => {
+  wireSkillCheckShiftControls(message, html);
+});
+
+Hooks.on('renderChatMessage', (message, html) => {
+  wireSkillCheckShiftControls(message, html);
 });
 
 Hooks.on('updateActor', (actor, changes) => {

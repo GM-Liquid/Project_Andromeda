@@ -251,3 +251,57 @@ test('gear catalog transform splits weapon-skilled equipment into the weapon gro
   assert.equal(itemRow.type, 'equipment');
   assert.ok(itemRow.folderPath.startsWith('Предметы/'));
 });
+
+test('gear catalog transform carries optional step effects through to system data', () => {
+  const remoteData = buildGearCatalogRemoteDataFromCatalogs({
+    armor: [],
+    abilities: [],
+    equipment: [
+      {
+        id: 'shock-baton',
+        name: 'Shock Baton',
+        type: 'equipment',
+        rank: 1,
+        skill: 'blizhniy_boy',
+        description: 'Damage: 1.',
+        mechanics: {
+          effects: [{ activation: { type: 'action' }, outcomes: [{ key: 'damage', value: 1 }] }]
+        },
+        stepEffects: [
+          { text: 'Stun', minOutcome: 'CriticalSuccess' },
+          { text: '', minOutcome: 'Success' },
+          { text: 'Knockback', minOutcome: 'bogus' }
+        ]
+      }
+    ]
+  });
+
+  const systemData = getSystemData(remoteData.sheets.weapons[0]);
+  // Blank entries are dropped; invalid thresholds fall back to Success.
+  assert.deepEqual(systemData.stepEffects, [
+    { text: 'Stun', minOutcome: 'CriticalSuccess' },
+    { text: 'Knockback', minOutcome: 'Success' }
+  ]);
+});
+
+test('gear catalog transform defaults step effects to an empty list', () => {
+  const remoteData = buildGearCatalogRemoteDataFromCatalogs({
+    armor: [],
+    abilities: [],
+    equipment: [
+      {
+        id: 'plain-knife',
+        name: 'Plain Knife',
+        type: 'equipment',
+        rank: 1,
+        skill: 'blizhniy_boy',
+        description: 'Damage: 1.',
+        mechanics: {
+          effects: [{ activation: { type: 'action' }, outcomes: [{ key: 'damage', value: 1 }] }]
+        }
+      }
+    ]
+  });
+
+  assert.deepEqual(getSystemData(remoteData.sheets.weapons[0]).stepEffects, []);
+});

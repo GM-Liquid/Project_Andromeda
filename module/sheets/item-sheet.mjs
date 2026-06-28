@@ -12,8 +12,41 @@ import {
   isPersonalityValueItem,
   normalizeUsageFrequency
 } from '../helpers/item-config.mjs';
+import { STEP_EFFECT_THRESHOLDS } from '../helpers/step-effects.mjs';
 
 export const FoundryItemSheet = getFoundryItemSheetClass();
+
+// Item types that carry a damage profile and therefore support step effects.
+const STEP_EFFECT_ITEM_TYPES = new Set([
+  'weapon',
+  'equipment',
+  'equipment-consumable',
+  'implant',
+  'cartridge'
+]);
+
+const DEFAULT_STEP_EFFECT_THRESHOLD = 'Success';
+
+function buildStepEffectThresholdOptions(selected) {
+  const normalized = STEP_EFFECT_THRESHOLDS.includes(selected)
+    ? selected
+    : DEFAULT_STEP_EFFECT_THRESHOLD;
+  return STEP_EFFECT_THRESHOLDS.map((key) => ({
+    value: key,
+    label: game.i18n.localize(`MY_RPG.SkillCheck.Outcomes.${key}`),
+    selected: key === normalized
+  }));
+}
+
+// Raw (unfiltered) rows so blank authoring rows survive between renders.
+function buildStepEffectRows(value) {
+  const list = Array.isArray(value) ? value : [];
+  return list.map((effect, index) => ({
+    index,
+    text: String(effect?.text ?? ''),
+    thresholdOptions: buildStepEffectThresholdOptions(effect?.minOutcome)
+  }));
+}
 
 function buildRankOptions(selected) {
   const selectedNumber = Number(selected) || 0;
@@ -242,11 +275,54 @@ export class ProjectAndromedaItemSheet extends FoundryItemSheet {
       });
     }
 
+    this._activateStepEffectControls(root);
+
     setTimeout(() => {
       for (const area of descriptionAreas) {
         autoResizeDescriptionArea(area);
       }
     }, 0);
+  }
+
+  _activateStepEffectControls(root) {
+    const addButton = root.querySelector('[data-step-effect-add]');
+    if (addButton && !addButton.dataset.stepEffectBound) {
+      addButton.dataset.stepEffectBound = '1';
+      addButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        void this._addStepEffect(root);
+      });
+    }
+
+    for (const button of root.querySelectorAll('[data-step-effect-remove]')) {
+      if (button.dataset.stepEffectBound) continue;
+      button.dataset.stepEffectBound = '1';
+      button.addEventListener('click', (event) => {
+        event.preventDefault();
+        void this._removeStepEffect(root, Number(button.dataset.stepEffectIndex));
+      });
+    }
+  }
+
+  _collectStepEffects(root) {
+    return Array.from(root.querySelectorAll('[data-step-effect-row]')).map((row) => ({
+      text: row.querySelector('[data-step-effect-text]')?.value ?? '',
+      minOutcome:
+        row.querySelector('[data-step-effect-threshold]')?.value ?? DEFAULT_STEP_EFFECT_THRESHOLD
+    }));
+  }
+
+  async _addStepEffect(root) {
+    const effects = this._collectStepEffects(root);
+    effects.push({ text: '', minOutcome: DEFAULT_STEP_EFFECT_THRESHOLD });
+    await this.item.update({ 'system.stepEffects': effects });
+  }
+
+  async _removeStepEffect(root, index) {
+    const effects = this._collectStepEffects(root);
+    if (!Number.isInteger(index) || index < 0 || index >= effects.length) return;
+    effects.splice(index, 1);
+    await this.item.update({ 'system.stepEffects': effects });
   }
 
   async getData(options) {
@@ -255,6 +331,10 @@ export class ProjectAndromedaItemSheet extends FoundryItemSheet {
     sheetData.system = sheetData.system ?? itemData?.system ?? {};
     sheetData.config = CONFIG.ProjectAndromeda ?? {};
     sheetData.itemConfig = getItemTypeConfig(this.item?.type);
+    sheetData.showStepEffects = STEP_EFFECT_ITEM_TYPES.has(this.item?.type);
+    sheetData.stepEffects = sheetData.showStepEffects
+      ? buildStepEffectRows(sheetData.system.stepEffects)
+      : [];
 
     if (game.settings.get(MODULE_ID, 'debugMode')) {
       // DEBUG-LOG

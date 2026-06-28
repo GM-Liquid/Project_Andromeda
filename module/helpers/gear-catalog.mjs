@@ -5,6 +5,7 @@ import {
   normalizeUsageFrequency
 } from './item-config.mjs';
 import { formatDamageProfile } from './damage-profile.mjs';
+import { normalizeStepEffects } from './step-effects.mjs';
 
 // Pure JSON -> Item-system transform for the shipped gear catalog. This is the
 // single source of truth used to compile the `gear-library` compendium pack
@@ -164,6 +165,12 @@ function getOutcomeNumber(entry, keys) {
   }, 0);
 }
 
+// Optional, hand-authored step effects carried straight through from the catalog
+// entry. Absent field -> empty list (backward compatible with older catalogs).
+function getGearCatalogStepEffects(entry) {
+  return normalizeStepEffects(entry?.stepEffects);
+}
+
 function getFirstOutcomeDamageProfile(entry) {
   for (const outcome of getGearCatalogOutcomes(entry)) {
     if (String(outcome?.key ?? '') !== 'damage') continue;
@@ -300,7 +307,8 @@ function buildGearCatalogSystemData(entry, config) {
       ...systemData,
       requiresRoll: getGearCatalogRequiresRoll(entry, { fallbackToSkill: false }),
       skill,
-      skillBonus: getFirstOutcomeDamageProfile(entry)
+      skillBonus: getFirstOutcomeDamageProfile(entry),
+      stepEffects: getGearCatalogStepEffects(entry)
     };
   }
 
@@ -311,7 +319,8 @@ function buildGearCatalogSystemData(entry, config) {
       quantity: 1,
       requiresRoll: getGearCatalogRequiresRoll(entry),
       skill,
-      skillBonus: getFirstOutcomeDamageProfile(entry)
+      skillBonus: getFirstOutcomeDamageProfile(entry),
+      stepEffects: getGearCatalogStepEffects(entry)
     };
   }
 
@@ -320,7 +329,8 @@ function buildGearCatalogSystemData(entry, config) {
     ...systemData,
     requiresRoll: getGearCatalogRequiresRoll(entry),
     skill,
-    skillBonus: getFirstOutcomeDamageProfile(entry)
+    skillBonus: getFirstOutcomeDamageProfile(entry),
+    stepEffects: getGearCatalogStepEffects(entry)
   };
 }
 

@@ -52,6 +52,7 @@ import {
   getSkillRankBonus
 } from '../helpers/archetype.mjs';
 import { formatDamageProfile, hasDamageProfileValue } from '../helpers/damage-profile.mjs';
+import { hasStepEffects, normalizeStepEffects } from '../helpers/step-effects.mjs';
 import { buildSkillCheckRollFlavor } from '../helpers/roll-card.mjs';
 
 export const FoundryActorSheet = getFoundryActorSheetClass();
@@ -1983,6 +1984,9 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       skill: this._skillLabel(skillKey)
     });
     const damageProfile = hasDamageProfileValue(system.skillBonus) ? system.skillBonus : null;
+    const stepEffects = hasStepEffects(system.stepEffects)
+      ? normalizeStepEffects(system.stepEffects)
+      : [];
     const itemContent = includeItemContent
       ? this._buildItemChatContent(item, displayConfig, { includeName: false })
       : '';
@@ -1993,6 +1997,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     const flavor = this._buildSkillCheckFlavor(flavorLabel, parts, skillData.rank, outcomeKey, {
       total: roll.total,
       damageProfile,
+      stepEffects,
       note: rollNote
     });
 
@@ -2006,9 +2011,11 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
             skill: skillKey,
             rank: skillData.rank,
             outcome: outcomeKey,
+            shift: 0,
             label: flavorLabel,
             parts,
             damageProfile,
+            stepEffects,
             note: rollNote
           }
         }
@@ -2216,8 +2223,10 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       parts,
       skillRank,
       outcomeKey,
+      shift: options.shift ?? 0,
       total: options.total ?? null,
       damageProfile: options.damageProfile ?? null,
+      stepEffects: options.stepEffects ?? [],
       note: options.note ?? ''
     });
   }

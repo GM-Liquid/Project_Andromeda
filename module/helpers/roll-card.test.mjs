@@ -10,6 +10,11 @@ const translations = {
   'MY_RPG.SkillCheck.Outcomes.CriticalSuccess': 'Critical success',
   'MY_RPG.SkillCheck.OutcomeLabel': 'Outcome',
   'MY_RPG.SkillCheck.OutcomeDamageLabel': 'Damage',
+  'MY_RPG.SkillCheck.RolledOutcome': 'Rolled',
+  'MY_RPG.SkillCheck.ShiftWord': 'shift',
+  'MY_RPG.SkillCheck.ShiftUp': 'Shift up',
+  'MY_RPG.SkillCheck.ShiftDown': 'Shift down',
+  'MY_RPG.SkillCheck.EffectsLabel': 'Effects',
   'MY_RPG.SkillCheck.RollDetails': 'Roll details',
   'MY_RPG.SkillCheck.ActivatedDescription': 'Description',
   'MY_RPG.SkillCheck.RollFormula': 'Formula',
@@ -42,13 +47,17 @@ test('skill check roll card prioritizes recalculated outcome and outcome damage'
   );
 
   assert.match(html, /myrpg-roll-card--criticalsuccess/);
-  assert.match(html, /Critical success/);
-  assert.match(html, /<span>Damage<\/span><strong>4<\/strong>/);
+  assert.match(html, /<div class="myrpg-roll-card__outcome">Critical success<\/div>/);
+  assert.match(
+    html,
+    /<div class="myrpg-roll-card__damage"><strong>4<\/strong><span>Damage<\/span>/
+  );
+  assert.match(html, /Skill rank: 2/);
   assert.match(html, /<summary>Roll details<\/summary>/);
   assert.match(html, /Damage profile/);
 });
 
-test('skill check roll card omits damage metric when no damage profile is present', () => {
+test('skill check roll card omits the damage block when no damage profile is present', () => {
   const html = buildSkillCheckRollFlavorFromData(
     {
       label: 'Rolling Stealth',
@@ -60,7 +69,54 @@ test('skill check roll card omits damage metric when no damage profile is presen
 
   assert.match(html, /myrpg-roll-card--successwithcost/);
   assert.match(html, /Success with a cost/);
-  assert.doesNotMatch(html, /myrpg-roll-card__metric--damage/);
+  assert.doesNotMatch(html, /myrpg-roll-card__damage/);
+});
+
+test('a stored shift recalculates outcome, damage, and step-effect activation', () => {
+  const html = buildSkillCheckRollFlavorFromData(
+    {
+      label: 'Rolling Blade',
+      rank: 3,
+      shift: 1,
+      parts: [{ label: 'Skill (Melee)', value: 2 }],
+      damageProfile: '0/1/2/4',
+      stepEffects: [
+        { text: 'Knockback', minOutcome: 'Success' },
+        { text: 'Stun', minOutcome: 'CriticalSuccess' }
+      ]
+    },
+    // total 10 = success with a cost; +1 shift -> success
+    10
+  );
+
+  assert.match(html, /myrpg-roll-card--success/);
+  assert.match(html, /<div class="myrpg-roll-card__outcome">Success<\/div>/);
+  assert.match(html, /<div class="myrpg-roll-card__damage"><strong>2<\/strong>/);
+  assert.match(html, /Rolled: Success with a cost · shift \+1/);
+  // Knockback unlocks at Success (active), Stun only at Critical (locked).
+  assert.match(
+    html,
+    /myrpg-roll-card__effect--on"><span class="myrpg-roll-card__effect-icon">✓<\/span><span class="myrpg-roll-card__effect-text">Knockback/
+  );
+  assert.match(
+    html,
+    /myrpg-roll-card__effect"><span class="myrpg-roll-card__effect-icon">🔒<\/span><span class="myrpg-roll-card__effect-text">Stun/
+  );
+});
+
+test('shifting cannot move the outcome past the top of the ladder', () => {
+  const html = buildSkillCheckRollFlavorFromData(
+    {
+      label: 'Rolling Blade',
+      rank: 3,
+      shift: 5,
+      damageProfile: '0/1/2/4'
+    },
+    17
+  );
+
+  assert.match(html, /myrpg-roll-card--criticalsuccess/);
+  assert.match(html, /<div class="myrpg-roll-card__damage"><strong>4<\/strong>/);
 });
 
 test('skill check roll card renders activation description before collapsed roll details', () => {
