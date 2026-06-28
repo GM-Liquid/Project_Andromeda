@@ -23,5 +23,16 @@ test('advancement total uses skill ranks and values and ignores obsolete skill k
     }
   };
 
-  assert.equal(getTotalAdvancementSpent(system), 22);
+  assert.equal(getTotalAdvancementSpent(system), 10);
+});
+
+test('archetype skill is measured from its free rank-2 baseline', () => {
+  const system = {
+    skills: {
+      strelba: { rank: 2, value: 0 }
+    }
+  };
+
+  assert.equal(getTotalAdvancementSpent(system), 4);
+  assert.equal(getTotalAdvancementSpent(system, { archetypeSkillKey: 'strelba' }), 0);
 });

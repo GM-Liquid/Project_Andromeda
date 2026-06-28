@@ -27,7 +27,8 @@ const PACK_PATH = path.join(ROOT, 'packs', 'gear-library');
 const CATALOG_FILES = {
   armor: 'armor.json',
   equipment: 'equipment.json',
-  abilities: 'abilities.json'
+  abilities: 'abilities.json',
+  archetypes: 'archetypes.json'
 };
 
 // Foundry document ids are 16-char [A-Za-z0-9]. Derive them deterministically from

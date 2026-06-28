@@ -236,6 +236,14 @@
       "Appearance": "Appearance",
       "Backstory": "Backstory"
     },
+    "Archetype": {
+      "StrongDefense": "Strong defense",
+      "MediumDefense": "Medium defense",
+      "WeakDefense": "Weak defense",
+      "DefensesLocked": "Defenses are set by the archetype and scale with rank.",
+      "PlayerOnly": "Archetypes can only be applied to player characters.",
+      "AbilityMissing": "The archetype's signature ability was not found in the gear-library compendium."
+    },
     "CombatCheatSheet": {
       "CombatActionsTitle": "Combat Actions",
       "HeroismTitle": "Highlight Points",
@@ -275,6 +283,10 @@
       "EmptyAbilities": "No abilities yet.",
       "CreateAbility": "Add ability",
       "NewAbility": "New Ability",
+      "Archetypes": "Archetype",
+      "EmptyArchetypes": "No archetype yet.",
+      "CreateArchetype": "Add archetype",
+      "NewArchetype": "New Archetype",
       "Genomes": "Genomes",
       "EmptyGenomes": "No genomes yet.",
       "CreateGenome": "Add genome",
@@ -549,7 +561,8 @@
       "trait-professional": "Professional Trait",
       "trait-technological": "Technological Trait",
       "trait-genome": "Genome",
-      "trait-source-ability": "Source Ability"
+      "trait-source-ability": "Source Ability",
+      "archetype": "Archetype"
     }
   }
 }

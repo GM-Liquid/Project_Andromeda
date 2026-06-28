@@ -20,19 +20,19 @@ PROJECT_ANDROMEDA.skillCategories = {
   body: {
     label: 'MY_RPG.SkillCategory.Body',
     defenseLabel: 'MY_RPG.Defenses.FortitudeLabel',
-    defenseKey: 'physical',
+    defenseKey: 'fortitude',
     skills: ['moshch', 'lovkost', 'sokrytie', 'strelba', 'blizhniy_boy']
   },
   mind: {
     label: 'MY_RPG.SkillCategory.Mind',
     defenseLabel: 'MY_RPG.Defenses.ControlLabel',
-    defenseKey: 'azure',
+    defenseKey: 'control',
     skills: ['nablyudatelnost', 'analiz', 'khakerstvo', 'inzheneriya']
   },
   spirit: {
     label: 'MY_RPG.SkillCategory.Spirit',
     defenseLabel: 'MY_RPG.Defenses.WillLabel',
-    defenseKey: 'mental',
+    defenseKey: 'will',
     skills: ['dominirovanie', 'rezonans', 'mistika', 'obayanie']
   }
 };

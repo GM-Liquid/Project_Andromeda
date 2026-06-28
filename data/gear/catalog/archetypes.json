@@ -1,0 +1,232 @@
+[
+  {
+    "id": "avangard",
+    "name": "Авангард",
+    "type": "archetype",
+    "skill": "blizhniy_boy",
+    "description": "Первым врывается в бой и продавливает проход для группы.",
+    "defenseProfile": { "strong": "fortitude", "medium": "will", "weak": "control" },
+    "ability": {
+      "id": "prolom",
+      "name": "Пролом",
+      "type": "ability",
+      "rank": 1,
+      "skill": "blizhniy_boy",
+      "description": "1 раз за сцену, действие: переместитесь к видимой цели на расстояние до вашей Скорости и сразу совершите атаку Ближним боем. При успехе цель также становится Уязвимой до начала вашего следующего хода.",
+      "mechanics": {
+        "effects": [
+          {
+            "activation": { "type": "action" },
+            "conditions": { "frequency": "oncePerScene", "targets": "single" }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "strelok",
+    "name": "Стрелок",
+    "type": "archetype",
+    "skill": "strelba",
+    "description": "Метко стреляет даже по целям в движении.",
+    "defenseProfile": { "strong": "fortitude", "medium": "control", "weak": "will" },
+    "ability": {
+      "id": "otsechka",
+      "name": "Отсечка",
+      "type": "ability",
+      "rank": 1,
+      "skill": "strelba",
+      "description": "1 раз за сцену, реакция: когда видимая цель в пределах дальности перемещается по открытому месту или совершает дальнюю атаку, вы немедленно совершаете по ней атаку Стрельбой. Если попадание случилось во время движения, движение цели сразу заканчивается.",
+      "mechanics": {
+        "effects": [
+          {
+            "activation": { "type": "reaction" },
+            "conditions": { "frequency": "oncePerScene", "targets": "single" }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "ten",
+    "name": "Тень",
+    "type": "archetype",
+    "skill": "sokrytie",
+    "description": "Заходит с выгодной позиции и бьёт, пока её не заметили.",
+    "defenseProfile": { "strong": "fortitude", "medium": "control", "weak": "will" },
+    "ability": {
+      "id": "shag_v_ten",
+      "name": "Шаг в тень",
+      "type": "ability",
+      "rank": 1,
+      "skill": "sokrytie",
+      "description": "1 раз за сцену, свободное действие: вы можете стать невидимым, пока находитесь в тусклом свете или темноте. Невидимость заканчивается, если вы атакуете существо или выйдете из темноты. После выхода из невидимости ваша первая проверка навыка получает +2.",
+      "mechanics": {
+        "effects": [
+          {
+            "activation": { "type": "freeAction" },
+            "conditions": { "frequency": "oncePerScene", "targets": "self" }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "taktik",
+    "name": "Тактик",
+    "type": "archetype",
+    "skill": "analiz",
+    "description": "Находит слабые места и помогает группе давить одну цель.",
+    "defenseProfile": { "strong": "control", "medium": "will", "weak": "fortitude" },
+    "ability": {
+      "id": "razmetka",
+      "name": "Разметка",
+      "type": "ability",
+      "rank": 1,
+      "skill": "analiz",
+      "description": "1 раз за сцену, действие: выберите видимую цель в 30 м и совершите проверку Анализа против её Контроля. Выберите союзника. Его первая атака по этой цели до начала вашего следующего хода получает +2. При успехе цель дополнительно становится Уязвимой до начала своего следующего хода.",
+      "mechanics": {
+        "effects": [
+          {
+            "activation": { "type": "action" },
+            "conditions": {
+              "frequency": "oncePerScene",
+              "range": { "type": "meters", "value": 30 },
+              "defense": "control",
+              "targets": "single"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "tehnik",
+    "name": "Техник",
+    "type": "archetype",
+    "skill": "khakerstvo",
+    "description": "Быстро понимает, как взломать, обойти или починить технику.",
+    "defenseProfile": { "strong": "control", "medium": "fortitude", "weak": "will" },
+    "ability": {
+      "id": "perehvat",
+      "name": "Перехват",
+      "type": "ability",
+      "rank": 1,
+      "skill": "khakerstvo",
+      "description": "1 раз за сцену, реакция: когда видимая цель в 30 м использует технологическое устройство, совершите проверку Хакерства или Инженерии против её Контроля. При успехе выберите одно: сорвать (отменить) это действие, или после окончания действия заставить цель выполнить одну простую команду.",
+      "mechanics": {
+        "effects": [
+          {
+            "activation": { "type": "reaction" },
+            "conditions": {
+              "frequency": "oncePerScene",
+              "range": { "type": "meters", "value": 30 },
+              "defense": "control",
+              "targets": "single"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "mistik",
+    "name": "Мистик",
+    "type": "archetype",
+    "skill": "mistika",
+    "description": "Снимает состояния и быстро возвращает союзников в строй.",
+    "defenseProfile": { "strong": "will", "medium": "control", "weak": "fortitude" },
+    "ability": {
+      "id": "stabilizatsiya",
+      "name": "Стабилизация",
+      "type": "ability",
+      "rank": 1,
+      "skill": "mistika",
+      "description": "1 раз за сцену, свободное действие, касание: союзник либо снимает с себя одно состояние, либо восстанавливает 2 ячейки стресса.",
+      "mechanics": {
+        "effects": [
+          {
+            "activation": { "type": "freeAction" },
+            "conditions": {
+              "frequency": "oncePerScene",
+              "range": { "type": "melee" },
+              "targets": "single"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "diplomat",
+    "name": "Дипломат",
+    "type": "archetype",
+    "skill": "obayanie",
+    "description": "Легко выкручивается, если разговор зашёл не туда.",
+    "defenseProfile": { "strong": "will", "medium": "control", "weak": "fortitude" },
+    "ability": {
+      "id": "umelye_peregovory",
+      "name": "Умелые переговоры",
+      "type": "ability",
+      "rank": 1,
+      "skill": "obayanie",
+      "description": "1 раз за сцену переговоров: после успешного аргумента, который не задел Триггер, Интерес растёт ещё на 1. Если аргумент был вслепую, Терпение при этом не уменьшается.",
+      "mechanics": {
+        "effects": [
+          {
+            "activation": { "type": "freeAction" },
+            "conditions": { "frequency": "oncePerScene", "targets": "self" }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "pretor",
+    "name": "Претор",
+    "type": "archetype",
+    "skill": "dominirovanie",
+    "description": "Давит волей и заставляет цель подчиниться.",
+    "defenseProfile": { "strong": "will", "medium": "fortitude", "weak": "control" },
+    "ability": {
+      "id": "verdikt",
+      "name": "Вердикт",
+      "type": "ability",
+      "rank": 1,
+      "skill": "dominirovanie",
+      "description": "1 раз за сцену, действие: выберите цель, которая вас ясно слышит, совершите проверку Доминирования против её Воли. При успехе цель обязана выполнить один ваш приказ. Приказ не должен напрямую вредить цели. При провале цель становится Уязвимой до начала вашего следующего хода.",
+      "mechanics": {
+        "effects": [
+          {
+            "activation": { "type": "action" },
+            "conditions": { "frequency": "oncePerScene", "defense": "will", "targets": "single" }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "zaklinatel",
+    "name": "Заклинатель",
+    "type": "archetype",
+    "skill": "rezonans",
+    "description": "Бьёт магией даже в неудобных ситуациях.",
+    "defenseProfile": { "strong": "will", "medium": "control", "weak": "fortitude" },
+    "ability": {
+      "id": "vsplesk",
+      "name": "Всплеск",
+      "type": "ability",
+      "rank": 1,
+      "skill": "rezonans",
+      "description": "1 раз за сцену, свободное действие: перед атакой Резонансом выберите одно: увеличить её дальность до видимости, подействовать на вторую цель или при успехе сделать основную цель Уязвимой до начала вашего следующего хода.",
+      "mechanics": {
+        "effects": [
+          {
+            "activation": { "type": "freeAction" },
+            "conditions": { "frequency": "oncePerScene", "targets": "single" }
+          }
+        ]
+      }
+    }
+  }
+]

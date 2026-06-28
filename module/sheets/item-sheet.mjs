@@ -1,6 +1,7 @@
 import { MODULE_ID, debugLog } from '../config.mjs';
 import { getFoundryItemSheetClass } from '../helpers/foundry-compat.mjs';
 import {
+  ARCHETYPE_DEFENSE_LABEL_KEYS,
   DEFAULT_ITEM_USAGE_FREQUENCY,
   ITEM_DEFENSE_LABEL_KEYS,
   ITEM_DURATION_LABEL_KEYS,
@@ -103,6 +104,9 @@ function getFieldOptions(field, data) {
   if (field.type === 'defense') {
     return data.defenseOptions;
   }
+  if (field.type === 'archetypeDefense') {
+    return data.archetypeDefenseOptions;
+  }
   if (field.type === 'duration') {
     return data.durationOptions;
   }
@@ -126,12 +130,39 @@ function autoResizeDescriptionArea(area) {
   area.style.height = `${Math.max(area.scrollHeight, minHeight)}px`;
 }
 
+// These select types map their value directly to an option value (plain string
+// equality, no normalization), so when several fields of the same type share one
+// option list (e.g. an archetype's strong/medium/weak defenses) the `selected`
+// flag must be recomputed per field from that field's own value.
+const PER_FIELD_SELECTED_TYPES = new Set([
+  'skill',
+  'defense',
+  'archetypeDefense',
+  'duration',
+  'targets'
+]);
+
 function buildRenderableItemFields(data, itemFields = []) {
   return itemFields
     .filter((field) => shouldDisplayField(field, data.system))
     .map((field) => {
       const value = foundry.utils.getProperty(data.system, field.path) ?? '';
-      const hasOptions = ['usageFrequency', 'activationCost', 'skill', 'defense', 'duration', 'targets'].includes(field.type);
+      const hasOptions = [
+        'usageFrequency',
+        'activationCost',
+        'skill',
+        'defense',
+        'archetypeDefense',
+        'duration',
+        'targets'
+      ].includes(field.type);
+      let options = getFieldOptions(field, data);
+      if (hasOptions && PER_FIELD_SELECTED_TYPES.has(field.type)) {
+        options = options.map((option) => ({
+          ...option,
+          selected: String(option.value) === String(value)
+        }));
+      }
       return {
         ...field,
         value,
@@ -141,7 +172,7 @@ function buildRenderableItemFields(data, itemFields = []) {
         isRank: field.type === 'rank',
         isCheckbox: field.type === 'checkbox',
         hasOptions,
-        options: getFieldOptions(field, data)
+        options
       };
     });
 }
@@ -395,6 +426,13 @@ export class ProjectAndromedaGenericItemSheet extends ProjectAndromedaItemSheet 
     data.defenseOptions = buildSelectOptions(
       data.system.defense,
       ITEM_DEFENSE_LABEL_KEYS,
+      'MY_RPG.ItemFields.None'
+    );
+    // Per-field `selected` is recomputed in buildRenderableItemFields, so the base
+    // list just needs the option values (the strong/medium/weak fields share it).
+    data.archetypeDefenseOptions = buildSelectOptions(
+      '',
+      ARCHETYPE_DEFENSE_LABEL_KEYS,
       'MY_RPG.ItemFields.None'
     );
     data.durationOptions = buildSelectOptions(

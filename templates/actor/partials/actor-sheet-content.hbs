@@ -109,8 +109,8 @@
               <span>{{localize 'MY_RPG.Temp.BonusFortitudeLabel'}}</span>
               <input
                 type='number'
-                name='system.tempphys'
-                value='{{system.tempphys}}'
+                name='system.tempfortitude'
+                value='{{system.tempfortitude}}'
                 step='1'
               />
             </label>
@@ -118,8 +118,8 @@
               <span>{{localize 'MY_RPG.Temp.BonusControlLabel'}}</span>
               <input
                 type='number'
-                name='system.tempazure'
-                value='{{system.tempazure}}'
+                name='system.tempcontrol'
+                value='{{system.tempcontrol}}'
                 step='1'
               />
             </label>
@@ -127,8 +127,8 @@
               <span>{{localize 'MY_RPG.Temp.BonusWillLabel'}}</span>
               <input
                 type='number'
-                name='system.tempmental'
-                value='{{system.tempmental}}'
+                name='system.tempwill'
+                value='{{system.tempwill}}'
                 step='1'
               />
             </label>
@@ -222,6 +222,10 @@
                       step='1'
                       min='0'
                       inputmode='numeric'
+                      {{#if @root.defensesLocked}}
+                        readonly
+                        title='{{localize "MY_RPG.Archetype.DefensesLocked"}}'
+                      {{/if}}
                     />
                     <strong
                       class='andromeda-defense-effective'

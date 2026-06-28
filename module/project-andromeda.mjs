@@ -46,6 +46,11 @@ import {
   isGmCharacterActorType,
   isPlayerCharacterActorType
 } from './helpers/actor-types.mjs';
+import {
+  ARCHETYPE_ITEM_TYPE,
+  ARCHETYPE_SWAP_OPTION,
+  clearArchetypeEffects
+} from './helpers/archetype.mjs';
 import { SessionStatsService } from './helpers/session-stats.mjs';
 import { buildRollRerollSpec, rerollRollPreservingContext } from './helpers/roll-reroll.mjs';
 import { buildSkillCheckRollFlavorFromData } from './helpers/roll-card.mjs';
@@ -1824,6 +1829,25 @@ Hooks.on('deleteItem', (item, options) => {
 
   void handleWorldItemDelete(item, options).catch((error) => {
     debugLog('Library item unlink failed on delete', {
+      itemId: item?.id ?? null,
+      error
+    });
+  });
+});
+
+// When a player character's archetype is removed, revert what it granted: delete its
+// signature ability, reset its skill rank, and reset defenses to the rank default.
+// Only the user performing the delete runs this, and drop-replace swaps suppress it.
+Hooks.on('deleteItem', (item, options, userId) => {
+  if (game.userId !== userId) return;
+  if (options?.[ARCHETYPE_SWAP_OPTION]) return;
+  if (item?.type !== ARCHETYPE_ITEM_TYPE) return;
+  const actor = item?.parent;
+  if (!actor || actor.documentName !== 'Actor') return;
+
+  void clearArchetypeEffects(actor, item).catch((error) => {
+    debugLog('Archetype effect cleanup failed on delete', {
+      actor: actor?.uuid ?? null,
       itemId: item?.id ?? null,
       error
     });

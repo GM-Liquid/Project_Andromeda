@@ -46,6 +46,12 @@ export const ITEM_DEFENSE_LABEL_KEYS = {
   will: 'MY_RPG.Defenses.WillLabel'
 };
 
+export const ARCHETYPE_DEFENSE_LABEL_KEYS = {
+  fortitude: 'MY_RPG.Defenses.FortitudeLabel',
+  control: 'MY_RPG.Defenses.ControlLabel',
+  will: 'MY_RPG.Defenses.WillLabel'
+};
+
 export const ITEM_DURATION_LABEL_KEYS = {
   untilCanceled: 'MY_RPG.ItemDurations.UntilCanceled',
   untilEndOfScene: 'MY_RPG.ItemDurations.UntilEndOfScene',
@@ -221,6 +227,24 @@ const WEAPON_ITEM_FIELDS = [
   buildDefenseField(),
   buildTargetsField()
 ];
+const ARCHETYPE_ITEM_FIELDS = [
+  buildSkillField(),
+  {
+    path: 'defenseProfile.strong',
+    labelKey: 'MY_RPG.Archetype.StrongDefense',
+    type: 'archetypeDefense'
+  },
+  {
+    path: 'defenseProfile.medium',
+    labelKey: 'MY_RPG.Archetype.MediumDefense',
+    type: 'archetypeDefense'
+  },
+  {
+    path: 'defenseProfile.weak',
+    labelKey: 'MY_RPG.Archetype.WeakDefense',
+    type: 'archetypeDefense'
+  }
+];
 const ARMOR_ITEM_FIELDS = [
   buildUsageFrequencyField(),
   buildActivationTypeField(),
@@ -298,9 +322,9 @@ export const ITEM_TYPE_CONFIGS = [
     canRoll: false,
     defaults: {
       quantity: 1,
-      itemPhys: 0,
-      itemAzure: 0,
-      itemMental: 0,
+      itemFortitude: 0,
+      itemControl: 0,
+      itemWill: 0,
       itemShield: 0,
       itemSpeed: 0,
       requiresRoll: false,
@@ -608,6 +632,23 @@ export const ITEM_TYPE_CONFIGS = [
       skill: ''
     },
     fields: TRAIT_ITEM_FIELDS
+  },
+  {
+    type: 'archetype',
+    supertype: 'other',
+    groupKey: 'archetypes',
+    sheet: 'generic',
+    showQuantity: false,
+    allowEquip: false,
+    exclusive: false,
+    canRoll: false,
+    defaults: {
+      skill: '',
+      defenseProfile: { strong: '', medium: '', weak: '' },
+      abilitySyncId: '',
+      abilityName: ''
+    },
+    fields: ARCHETYPE_ITEM_FIELDS
   }
 ];
 
@@ -617,6 +658,23 @@ export const ITEM_TYPE_CONFIGS = [
 // "Browse Compendium" action can open straight to the matching section. Groups
 // without a catalog (e.g. personality complications) omit it and create directly.
 export const ITEM_GROUP_CONFIGS = [
+  {
+    key: 'archetypes',
+    compendiumFolder: 'Архетипы',
+    types: ['archetype'],
+    createTypes: ['archetype'],
+    tab: 'abilities',
+    icon: 'fas fa-user-astronaut',
+    labelKey: 'MY_RPG.ItemGroups.Archetypes',
+    emptyKey: 'MY_RPG.ItemGroups.EmptyArchetypes',
+    createKey: 'MY_RPG.ItemGroups.CreateArchetype',
+    newNameKey: 'MY_RPG.ItemGroups.NewArchetype',
+    showQuantity: false,
+    allowEquip: false,
+    exclusive: false,
+    canRoll: false,
+    showKindBadge: false
+  },
   {
     key: 'abilities',
     compendiumFolder: 'Способности',
@@ -857,14 +915,16 @@ export const ITEM_BADGE_BUILDERS = {
     const system = item.system ?? {};
     const t = helpers.t;
     const badges = [];
-    const phys = Number(system.itemPhys) || 0;
-    const azure = Number(system.itemAzure) || 0;
-    const mental = Number(system.itemMental) || 0;
+    const fortitude = Number(system.itemFortitude) || 0;
+    const control = Number(system.itemControl) || 0;
+    const will = Number(system.itemWill) || 0;
     const shield = Number(system.itemShield) || 0;
     const speed = Number(system.itemSpeed) || 0;
-    if (phys) badges.push(`${t.localize('MY_RPG.ArmorItem.BonusFortitudeLabel')}: ${phys}`);
-    if (azure) badges.push(`${t.localize('MY_RPG.ArmorItem.BonusControlLabel')}: ${azure}`);
-    if (mental) badges.push(`${t.localize('MY_RPG.ArmorItem.BonusWillLabel')}: ${mental}`);
+    if (fortitude) {
+      badges.push(`${t.localize('MY_RPG.ArmorItem.BonusFortitudeLabel')}: ${fortitude}`);
+    }
+    if (control) badges.push(`${t.localize('MY_RPG.ArmorItem.BonusControlLabel')}: ${control}`);
+    if (will) badges.push(`${t.localize('MY_RPG.ArmorItem.BonusWillLabel')}: ${will}`);
     if (shield) badges.push(`${t.localize('MY_RPG.ArmorItem.ShieldLabel')}: ${shield}`);
     if (speed) badges.push(`${t.localize('MY_RPG.ArmorItem.BonusSpeedLabel')}: ${speed}`);
     return badges;

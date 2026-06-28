@@ -19,9 +19,9 @@
           "max": 0
         },
         "defenses": {
-          "physical": 1,
-          "azure": 1,
-          "mental": 1
+          "fortitude": 1,
+          "control": 1,
+          "will": 1
         },
         "flux": {
           "value": 0
@@ -35,9 +35,9 @@
           "value": 0
         },
         "temphealth": 0,
-        "tempphys": 0,
-        "tempazure": 0,
-        "tempmental": 0,
+        "tempfortitude": 0,
+        "tempcontrol": 0,
+        "tempwill": 0,
         "tempspeed": 0,
         "biography": "",
         "skills": {
@@ -171,7 +171,8 @@
       "trait-professional",
       "trait-technological",
       "trait-genome",
-      "trait-source-ability"
+      "trait-source-ability",
+      "archetype"
     ],
     "templates": {
       "base": {
@@ -211,9 +212,9 @@
       "templates": ["base"],
       "quantity": 1,
       "rank": "",
-      "itemPhys": 0,
-      "itemAzure": 0,
-      "itemMental": 0,
+      "itemFortitude": 0,
+      "itemControl": 0,
+      "itemWill": 0,
       "itemShield": 0,
       "itemSpeed": 0,
       "requiresRoll": false,
@@ -392,6 +393,17 @@
       "targets": "",
       "requiresRoll": false,
       "skill": ""
+    },
+    "archetype": {
+      "templates": ["base"],
+      "skill": "",
+      "defenseProfile": {
+        "strong": "",
+        "medium": "",
+        "weak": ""
+      },
+      "abilitySyncId": "",
+      "abilityName": ""
     }
   }
 }

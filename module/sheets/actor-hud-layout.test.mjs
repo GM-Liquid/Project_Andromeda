@@ -125,13 +125,14 @@ test('skill check formula is centered within each category header', () => {
   );
 });
 
-test('defense fields are editable sheet inputs', () => {
+test('defense fields are sheet inputs that lock when the archetype sets them', () => {
   const template = readFile('templates/actor/partials/actor-sheet-content.hbs');
   const defenseInput = template.match(/<input\s+class='andromeda-defense-input'[\s\S]*?\/>/)?.[0];
 
   assert.ok(defenseInput);
-  assert.doesNotMatch(defenseInput, /readonly/);
   assert.match(defenseInput, /name='\{\{column\.defensePath\}\}'/);
+  // Defenses become read-only only when the archetype-derived profile is active.
+  assert.match(defenseInput, /\{\{#if @root\.defensesLocked\}\}[\s\S]*readonly[\s\S]*\{\{\/if\}\}/);
 });
 
 test('effective defenses render outside named form inputs', () => {
@@ -157,9 +158,9 @@ test('effective defenses render outside named form inputs', () => {
 test('HUD exposes temporary defense fields', () => {
   const template = readFile('templates/actor/partials/actor-sheet-content.hbs');
 
-  assert.match(template, /name='system\.tempphys'/);
-  assert.match(template, /name='system\.tempazure'/);
-  assert.match(template, /name='system\.tempmental'/);
+  assert.match(template, /name='system\.tempfortitude'/);
+  assert.match(template, /name='system\.tempcontrol'/);
+  assert.match(template, /name='system\.tempwill'/);
   assert.match(template, /MY_RPG\.Temp\.BonusFortitudeLabel/);
   assert.match(template, /MY_RPG\.Temp\.BonusControlLabel/);
   assert.match(template, /MY_RPG\.Temp\.BonusWillLabel/);

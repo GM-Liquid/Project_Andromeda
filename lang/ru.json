@@ -236,6 +236,14 @@
       "Appearance": "Внешний вид",
       "Backstory": "Предыстория"
     },
+    "Archetype": {
+      "StrongDefense": "Сильная защита",
+      "MediumDefense": "Средняя защита",
+      "WeakDefense": "Слабая защита",
+      "DefensesLocked": "Защиты задаёт архетип, они растут вместе с рангом.",
+      "PlayerOnly": "Архетип можно применить только к персонажу игрока.",
+      "AbilityMissing": "Способность архетипа не найдена в компендиуме gear-library."
+    },
     "CombatCheatSheet": {
       "CombatActionsTitle": "Действия в бою",
       "HeroismTitle": "Очки Свершений",
@@ -275,6 +283,10 @@
       "EmptyAbilities": "Пока нет способностей.",
       "CreateAbility": "Добавить способность",
       "NewAbility": "Новая способность",
+      "Archetypes": "Архетип",
+      "EmptyArchetypes": "Архетип ещё не выбран.",
+      "CreateArchetype": "Добавить архетип",
+      "NewArchetype": "Новый архетип",
       "Genomes": "Геномы",
       "EmptyGenomes": "Пока нет геномов.",
       "CreateGenome": "Добавить геном",
@@ -549,7 +561,8 @@
       "trait-professional": "Профессиональная черта",
       "trait-technological": "Технологическая черта",
       "trait-genome": "Геном",
-      "trait-source-ability": "Способность источника"
+      "trait-source-ability": "Способность источника",
+      "archetype": "Архетип"
     }
   }
 }

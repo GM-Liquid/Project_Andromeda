@@ -153,9 +153,20 @@ project-andromeda/
 
 - Characters have ranks **1-4** and do not have characteristics.
 - Skills remain grouped into the Body / Mind / Spirit categories used by the sheet, but those categories are not characteristics and have no independent values.
-- Every skill stores `rank` (**1-4**) and `value` (**0-4**). A skill's rank cannot exceed `system.currentRank`.
-- Improving a skill value to 1 / 2 / 3 / 4 costs 1 / 2 / 3 / 4 progression points respectively. Advancing from `rank N, value 4` to `rank N+1, value 0` costs 2 progression points.
+- Every skill stores `rank` (**1-4**) and `value` (**0-4**). A skill's rank cannot exceed `system.currentRank`, except the **archetype skill**, whose cap is `system.currentRank + 1` (so it can reach rank **5**).
+- Raising a skill value by one step costs as many progression points as the skill's **current rank** (rank 1 → 1 point per step, rank 2 → 2, etc.). A full rank (value `0` → `4`) therefore costs `4 × rank`. Rolling a completed rank into the next one (`value 4` → `rank+1, value 0`) is **free**.
+- The base set (all skills at rank 1, value 0) costs nothing. The archetype skill starts at rank **2**, value 0 for free — its progression cost is measured from that rank-2 baseline. Cost logic lives in `module/helpers/skill-check.mjs`; the spent total is summed in `module/helpers/advancement-points.mjs`.
+- Defenses are **not** bought with progression points; see §3.5.
 - No migration from the removed characteristic / legacy skill model is shipped; the new model targets new worlds on the experimental branch.
+
+### 3.1a Archetypes
+
+- An **archetype** is a single `archetype` Item type (`template.json`, `module/helpers/item-config.mjs`) dropped onto a player character from the shipped `gear-library` pack (folder **«Архетипы»**). It stays on the sheet and is the source of three things while present: the **archetype skill** (`system.skill`), the **defense profile** (`system.defenseProfile` = `{strong, medium, weak}` defense keys), and the **signature ability** (`system.abilitySyncId`, referencing a pack ability).
+- The archetype's own `system.description` contains only the archetype concept text. Its signature ability is emitted as a separate linked ability item and is granted on drop.
+- Dropping an archetype (`_onDropArchetype` in `module/sheets/actor-sheet.mjs`) replaces any existing archetype and the ability it previously granted, creates the compendium-linked archetype, grants the linked signature ability (flagged `flags.project-andromeda.grantedByArchetype`), and starts the archetype skill at rank 2. Archetypes only apply to `playerCharacter`.
+- Removing an archetype reverts what it granted: `clearArchetypeEffects` deletes the granted ability, resets the archetype skill rank to the base (rank 1), and resets the three defenses to the rank default (defense = rank). This runs from the `deleteItem` hook on manual deletion (only for the acting user) and inline during a drop-replace (the replace delete passes `ARCHETYPE_SWAP_OPTION` so the hook does not double-run).
+- Archetype helpers (resolve the actor's archetype, skill key, defense profile, rank bonus, derived defenses) live in `module/helpers/archetype.mjs`.
+- Archetype content is authored in `data/gear/catalog/archetypes.json`; the build (`module/helpers/gear-catalog.mjs` + `tools/build-pack.mjs`) emits the archetype item into «Архетипы» and its embedded ability into «Способности».
 
 ### 3.2 Motivation & Complications
 
@@ -193,9 +204,10 @@ project-andromeda/
 - `system.temphealth` is presented as **temporary stress** for backwards compatibility and directly extends the base stress track. It may be positive or negative, but the resolved stress maximum never drops below 0.
 - Armor force shield (`itemShield`) directly extends the total stress track like temporary stress.
 - Maximum stress is formula-derived. For manual scene adjustments, GMs should use temporary stress (`system.temphealth`) rather than editing the derived maximum.
-- Shipped defense labels use **Fortitude / Control / Will** in English and **Стойкость / Контроль / Воля** in Russian: Fortitude maps to Body, Control maps to Mind, and Will maps to Spirit.
-- Fortitude, Control, and Will are currently independent, manually editable values stored under `system.defenses`. They have no automatic formula until the next defense-system revision.
-- Temporary defense modifiers live in `system.tempphys`, `system.tempazure`, and `system.tempmental`. They may be positive or negative and produce derived effective defenses without overwriting the base `system.defenses` values.
+- Shipped defense labels use **Fortitude / Control / Will** in English and **Стойкость / Контроль / Воля** in Russian. The system keys are `fortitude`, `control`, and `will`.
+- For a player character **with an archetype**, the three base defenses are **derived from rank + the archetype's defense profile** (strong = rank + 1, medium = rank, weak = rank − 1, never below 0) and the `system.defenses` inputs are locked (read-only) on the sheet. The derivation lives in `module/documents/actor.mjs` (`_resolveBaseDefenses`); the locked flag is `system.defensesLocked`.
+- For GM actors (minion / Standard / Boss) and player characters **without** an archetype, `system.defenses` stays manually editable as before (no automatic formula).
+- Temporary defense modifiers live in `system.tempfortitude`, `system.tempcontrol`, and `system.tempwill`. They may be positive or negative and produce derived effective defenses without overwriting the base `system.defenses` values. Armor bonuses still apply on top.
 
 ### 3.6 Movement Speed
 
@@ -276,10 +288,10 @@ Balance simulations and data-prep tooling live in the **private companion source
 
 The shipped gear catalog lives in the **`gear-library` compendium pack**, built from JSON. Canon is edited in JSON between releases; the pack is regenerated at release and applied to campaigns only on a system update.
 
-- **Source of truth:** `data/gear/catalog/armor.json`, `equipment.json`, and `abilities.json` (mirrored from `Docs_Project_Andromeda/data/gear/catalog/` when the private repo is available). `concept-abilities.json` is never shipped.
+- **Source of truth:** `data/gear/catalog/armor.json`, `equipment.json`, `abilities.json`, and `archetypes.json` (mirrored from `Docs_Project_Andromeda/data/gear/catalog/` when the private repo is available). `concept-abilities.json` is never shipped. Each `archetypes.json` entry embeds its signature `ability`, which the build also emits into the «Способности» folder so the archetype's drop flow can link it as a compendium item.
 - **Build step:** `tools/build-pack.mjs` (`npm run build:pack`, uses `classic-level`) compiles those JSON files into `packs/gear-library`, reusing the runtime `buildGearCatalogRemoteDataFromCatalogs` transform so the pack never drifts from the catalog. The pack is a **build artifact**: gitignored, built locally and in CI (`release.yml`), and copied into the release zip. The pack is registered in `system.json` `packs[]`.
 - **Stable identity:** each pack item carries `flags.project-andromeda.sheetSyncId` (`gear:<catalog>:<id>`) and a `_id` derived deterministically from that sync id, so rebuilds keep the same compendium UUIDs and existing actor links survive.
-- **Folder layout:** pack folders group items by type and rank (`Броня/Ранг N`, `Оружие/Ранг N`, `Предметы/Ранг N`, `Способности/Ранг N`; no valid rank → `Без ранга`). The `equipment.json` catalog is split exactly like the public rulebook's two tables: weapon-skilled entries (`blizhniy_boy`/`strelba`) build real `weapon` items under `Оружие`, everything else stays `equipment` items (shown as **Предметы / Items**) under `Предметы`.
+- **Folder layout:** pack folders group items by type and rank (`Броня/Ранг N`, `Оружие/Ранг N`, `Предметы/Ранг N`, `Способности/Ранг N`; no valid rank → `Без ранга`). Archetypes live flat under `Архетипы` (no rank subfolder). The `equipment.json` catalog is split exactly like the public rulebook's two tables: weapon-skilled entries (`blizhniy_boy`/`strelba`) build real `weapon` items under `Оружие`, everything else stays `equipment` items (shown as **Предметы / Items**) under `Предметы`.
 - **Actor links:** a character-sheet item links to its pack source via `flags.project-andromeda.libraryItemUuid` set to the `Compendium.…` UUID. Dropping a pack (or world) item onto an actor stamps this link in the sheet's `_onDropItem`, so it reuses the source instead of creating a folderless world duplicate.
 - **Read-only canon:** compendium-linked items are canonical and read-only. A local edit on a character sheet stays local (it is never written back to the pack). On a system **version change**, `refreshCompendiumLinkedActorItems` pulls shared fields (name/img/system) down to every linked actor item while preserving local `quantity`/`equipped`/`cooldown`. Re-entering the world on an unchanged version touches nothing.
 - **One-time migration:** `migrateActorLinksToCompendium` (gated by `packLinkMigrationVersion`) repoints actor items that still link to a legacy world catalog item — or carry a gear-catalog key — at the matching pack item. It is non-destructive. The opt-in `game.projectAndromeda.removeOrphanCatalogWorldItems({ dryRun })` cleans up leftover `gear:*` world items afterwards.
@@ -305,4 +317,4 @@ The shipped gear catalog lives in the **`gear-library` compendium pack**, built 
 
 ---
 
-_Last updated: 2026-06-27_
+_Last updated: 2026-06-28_

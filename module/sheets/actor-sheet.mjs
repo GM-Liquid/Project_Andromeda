@@ -15,6 +15,7 @@ import {
   supportsAzureStress
 } from '../helpers/actor-types.mjs';
 import {
+  ARCHETYPE_BASELINE_RANK,
   getNextSkillAdvancement,
   getSkillCheckOutcomeKey,
   normalizeCharacterRank,
@@ -37,10 +38,19 @@ import {
   getItemTabLabel
 } from '../helpers/item-config.mjs';
 import {
+  findGearLibraryUuidBySyncId,
   getGearLibraryPack,
   isLibrarySyncManagedType,
   setLibraryItemLinkOnData
 } from '../helpers/item-library-sync.mjs';
+import {
+  ARCHETYPE_GRANT_FLAG,
+  ARCHETYPE_ITEM_TYPE,
+  ARCHETYPE_SWAP_OPTION,
+  clearArchetypeEffects,
+  getArchetypeSkillKey,
+  getSkillRankBonus
+} from '../helpers/archetype.mjs';
 import { formatDamageProfile, hasDamageProfileValue } from '../helpers/damage-profile.mjs';
 import { buildSkillCheckRollFlavor } from '../helpers/roll-card.mjs';
 
@@ -91,9 +101,9 @@ const ADVANCEMENT_STATES = ['available', 'insufficient', 'capped'];
 const ACTOR_SHEET_MIN_WIDTH = 730;
 const TEMPORARY_PARAMETER_PATHS = new Set([
   'system.temphealth',
-  'system.tempphys',
-  'system.tempazure',
-  'system.tempmental',
+  'system.tempfortitude',
+  'system.tempcontrol',
+  'system.tempwill',
   'system.tempspeed'
 ]);
 
@@ -251,15 +261,83 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       return this._onSortItem(event, itemData);
     }
 
+    const sourceUuid = String(data?.uuid ?? '').trim();
+
+    // Dropping an archetype applies its bonuses (skill, defenses, signature ability)
+    // and keeps the archetype on the sheet instead of creating a plain item.
+    if (item.type === ARCHETYPE_ITEM_TYPE) {
+      return this._onDropArchetype(itemData, sourceUuid);
+    }
+
     // Dropping a library source (a compendium catalog item or a world Item) of a
     // managed type: link the new actor item to that source so the library-sync
     // hook reuses it instead of creating a folderless world duplicate.
-    const sourceUuid = String(data?.uuid ?? '').trim();
     if (sourceUuid && !item.parent && isLibrarySyncManagedType(item.type)) {
       setLibraryItemLinkOnData(itemData, sourceUuid);
     }
 
     return this._onDropItemCreate(itemData, event);
+  }
+
+  // Apply an archetype to a player character: replace any existing archetype and the
+  // ability it previously granted, then create the new archetype (compendium-linked),
+  // grant its signature ability from the pack, and start the archetype skill at rank 2.
+  async _onDropArchetype(itemData, sourceUuid) {
+    if (!isPlayerCharacterActorType(this.actor.type)) {
+      ui.notifications?.warn(game.i18n.localize('MY_RPG.Archetype.PlayerOnly'));
+      return false;
+    }
+
+    // Remove the current archetype and revert its effects before applying the new
+    // one. The delete is flagged as a swap so the deleteItem hook does not also run
+    // cleanup (we control ordering here so the new skill/defenses are not clobbered).
+    const existing = this.actor.items.filter((item) => item.type === ARCHETYPE_ITEM_TYPE);
+    for (const old of existing) {
+      await clearArchetypeEffects(this.actor, old);
+    }
+    if (existing.length) {
+      await this.actor.deleteEmbeddedDocuments(
+        'Item',
+        existing.map((item) => item.id),
+        { [ARCHETYPE_SWAP_OPTION]: true }
+      );
+    }
+
+    if (sourceUuid) setLibraryItemLinkOnData(itemData, sourceUuid);
+    const [createdArchetype] = await this.actor.createEmbeddedDocuments('Item', [itemData]);
+
+    // Grant the signature ability from the gear-library pack (compendium-linked).
+    const abilitySyncId = String(createdArchetype?.system?.abilitySyncId ?? '').trim();
+    if (abilitySyncId) {
+      const abilityUuid = await findGearLibraryUuidBySyncId(abilitySyncId);
+      const abilitySource = abilityUuid ? await fromUuid(abilityUuid) : null;
+      if (abilitySource) {
+        const abilityData = abilitySource.toObject();
+        delete abilityData._id;
+        setLibraryItemLinkOnData(abilityData, abilityUuid);
+        abilityData.flags = abilityData.flags ?? {};
+        abilityData.flags[MODULE_ID] = {
+          ...(abilityData.flags[MODULE_ID] ?? {}),
+          [ARCHETYPE_GRANT_FLAG]: createdArchetype.id
+        };
+        await this.actor.createEmbeddedDocuments('Item', [abilityData]);
+      } else {
+        ui.notifications?.warn(game.i18n.localize('MY_RPG.Archetype.AbilityMissing'));
+      }
+    }
+
+    // Start the archetype skill one rank above the base (rank 2) if it is lower.
+    const skillKey = String(createdArchetype?.system?.skill ?? '').trim();
+    const currentSkillRank = Number(this.actor.system?.skills?.[skillKey]?.rank) || 0;
+    if (skillKey && currentSkillRank < ARCHETYPE_BASELINE_RANK) {
+      await this.actor.update(
+        { [`system.skills.${skillKey}.rank`]: ARCHETYPE_BASELINE_RANK },
+        { render: false }
+      );
+    }
+
+    this.render(false);
+    return createdArchetype;
   }
   initializeRichEditor(element) {
     if (!element._tinyMCEInitialized) {
@@ -363,9 +441,9 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       "input[name='system.currentRank']",
       "input[name='system.stress.value']",
       "input[name='system.temphealth']",
-      "input[name='system.tempphys']",
-      "input[name='system.tempazure']",
-      "input[name='system.tempmental']",
+      "input[name='system.tempfortitude']",
+      "input[name='system.tempcontrol']",
+      "input[name='system.tempwill']",
       "input[name='system.tempspeed']",
       "input[name^='system.defenses.']"
     ].join(', ');
@@ -392,8 +470,13 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     $html.find('input[name^="system.skills."]').on('change', async (ev) => {
       const input = ev.currentTarget;
       const isRank = input.name.endsWith('.rank');
+      const skillKey = input.name.split('.')[2] ?? '';
       const validatedValue = isRank
-        ? normalizeSkillRank(input.value, this.actor.system?.currentRank)
+        ? normalizeSkillRank(
+            input.value,
+            this.actor.system?.currentRank,
+            getSkillRankBonus(this.actor, skillKey)
+          )
         : normalizeSkillValue(input.value);
       input.value = validatedValue;
       await this.actor.update({ [input.name]: validatedValue }, { render: false });
@@ -520,11 +603,13 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
   _prepareCharacterData(context) {
     context.system.skills ??= {};
     context.system.temphealth ??= 0;
-    context.system.tempphys ??= 0;
-    context.system.tempazure ??= 0;
-    context.system.tempmental ??= 0;
+    context.system.tempfortitude ??= 0;
+    context.system.tempcontrol ??= 0;
+    context.system.tempwill ??= 0;
     context.system.tempspeed ??= 0;
     const effectiveDefenses = context.system?.effectiveDefenses ?? context.system?.defenses ?? {};
+    const archetypeSkillKey = getArchetypeSkillKey(this.actor);
+    context.defensesLocked = Boolean(this.actor.system?.defensesLocked);
 
     const sortedSkills = {};
     const skillColumns = [];
@@ -535,9 +620,14 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       for (const key of category.skills ?? []) {
         const skill = context.system.skills[key];
         if (!skill) continue;
-        const normalized = normalizeSkill(skill, context.system.currentRank);
+        const normalized = normalizeSkill(
+          skill,
+          context.system.currentRank,
+          getSkillRankBonus(this.actor, key)
+        );
         skill.rank = normalized.rank;
         skill.value = normalized.value;
+        skill.isArchetypeSkill = key === archetypeSkillKey;
         skill.label = game.i18n.localize(CONFIG.ProjectAndromeda.skills[key]) ?? key;
         skill.rankClass = `rank${skill.rank}`;
         skill.key = key;
@@ -597,7 +687,9 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
   }
 
   _getSkillAdvancementInfo(system, skillKey) {
-    const next = getNextSkillAdvancement(system?.skills?.[skillKey], system?.currentRank);
+    const next = getNextSkillAdvancement(system?.skills?.[skillKey], system?.currentRank, {
+      rankBonus: getSkillRankBonus(this.actor, skillKey)
+    });
     if (!next) return { state: 'capped', cost: 0 };
     const cost = next.cost;
     const available = this._getAdvancementAvailable(system);
@@ -833,7 +925,8 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     if (!skillKey) return;
     const next = getNextSkillAdvancement(
       this.actor.system?.skills?.[skillKey],
-      this.actor.system?.currentRank
+      this.actor.system?.currentRank,
+      { rankBonus: getSkillRankBonus(this.actor, skillKey) }
     );
     if (!next) return;
     if (this._getAdvancementAvailable() < next.cost) {
@@ -884,7 +977,11 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     const updates = { [input.name]: nextValue };
     if (input.name === 'system.currentRank') {
       for (const [skillKey, skill] of Object.entries(this.actor.system?.skills ?? {})) {
-        const rank = normalizeSkillRank(skill?.rank, nextValue);
+        const rank = normalizeSkillRank(
+          skill?.rank,
+          nextValue,
+          getSkillRankBonus(this.actor, skillKey)
+        );
         if (rank !== Number(skill?.rank)) updates[`system.skills.${skillKey}.rank`] = rank;
       }
     }
@@ -921,7 +1018,8 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     for (const key of skillKeys) {
       const skill = normalizeSkill(
         this.actor.system?.skills?.[key],
-        this.actor.system?.currentRank
+        this.actor.system?.currentRank,
+        getSkillRankBonus(this.actor, key)
       );
       const $row = $root.find(`.andromeda-skill-row[data-skill-key="${key}"]`);
       $row.find(`input[name="system.skills.${key}.rank"]`).val(skill.rank);
@@ -941,7 +1039,8 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     if (!skill) return;
     const skillData = normalizeSkill(
       this.actor.system.skills?.[skill],
-      this.actor.system.currentRank
+      this.actor.system.currentRank,
+      getSkillRankBonus(this.actor, skill)
     );
     const parts = [
       {
@@ -1002,9 +1101,9 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     setText('system.stress.max', s?.stress?.max);
     setRankBadge(s?.currentRank);
     setVal('system.temphealth', s?.temphealth);
-    setVal('system.tempphys', s?.tempphys);
-    setVal('system.tempazure', s?.tempazure);
-    setVal('system.tempmental', s?.tempmental);
+    setVal('system.tempfortitude', s?.tempfortitude);
+    setVal('system.tempcontrol', s?.tempcontrol);
+    setVal('system.tempwill', s?.tempwill);
     setVal('system.tempspeed', s?.tempspeed);
     this._refreshDefenseInputs($root);
 
@@ -1019,12 +1118,12 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     const setVal = (name, val) => {
       $root.find(`input[name="${name}"]`).val(val ?? 0);
     };
-    setVal('system.defenses.physical', defenses?.physical);
-    setVal('system.defenses.azure', defenses?.azure);
-    setVal('system.defenses.mental', defenses?.mental);
-    $root.find('[data-defense-effective="physical"]').text(effectiveDefenses?.physical ?? 0);
-    $root.find('[data-defense-effective="azure"]').text(effectiveDefenses?.azure ?? 0);
-    $root.find('[data-defense-effective="mental"]').text(effectiveDefenses?.mental ?? 0);
+    setVal('system.defenses.fortitude', defenses?.fortitude);
+    setVal('system.defenses.control', defenses?.control);
+    setVal('system.defenses.will', defenses?.will);
+    $root.find('[data-defense-effective="fortitude"]').text(effectiveDefenses?.fortitude ?? 0);
+    $root.find('[data-defense-effective="control"]').text(effectiveDefenses?.control ?? 0);
+    $root.find('[data-defense-effective="will"]').text(effectiveDefenses?.will ?? 0);
   }
 
   _updateStressTrack(root, options = {}) {
@@ -1473,17 +1572,17 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       this._pushItemDetailEntry(
         secondaryEntries,
         'MY_RPG.ArmorItem.BonusFortitudeLabel',
-        this._formatNumericDetail(system.itemPhys)
+        this._formatNumericDetail(system.itemFortitude)
       );
       this._pushItemDetailEntry(
         secondaryEntries,
         'MY_RPG.ArmorItem.BonusControlLabel',
-        this._formatNumericDetail(system.itemAzure)
+        this._formatNumericDetail(system.itemControl)
       );
       this._pushItemDetailEntry(
         secondaryEntries,
         'MY_RPG.ArmorItem.BonusWillLabel',
-        this._formatNumericDetail(system.itemMental)
+        this._formatNumericDetail(system.itemWill)
       );
       this._pushItemDetailEntry(
         secondaryEntries,
@@ -1864,7 +1963,8 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     }
     const skillData = normalizeSkill(
       this.actor.system?.skills?.[skillKey],
-      this.actor.system?.currentRank
+      this.actor.system?.currentRank,
+      getSkillRankBonus(this.actor, skillKey)
     );
     const parts = [
       {
@@ -2139,14 +2239,18 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     const source = item ?? {};
     const system = source.system ?? source;
     const lines = [];
-    const phys = Number(system.itemPhys) || 0;
-    const azure = Number(system.itemAzure) || 0;
-    const mental = Number(system.itemMental) || 0;
+    const fortitude = Number(system.itemFortitude) || 0;
+    const control = Number(system.itemControl) || 0;
+    const will = Number(system.itemWill) || 0;
     const shield = Number(system.itemShield) || 0;
     const speed = Number(system.itemSpeed) || 0;
-    if (phys) lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.BonusFortitudeLabel')}: ${phys}`);
-    if (azure) lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.BonusControlLabel')}: ${azure}`);
-    if (mental) lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.BonusWillLabel')}: ${mental}`);
+    if (fortitude) {
+      lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.BonusFortitudeLabel')}: ${fortitude}`);
+    }
+    if (control) {
+      lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.BonusControlLabel')}: ${control}`);
+    }
+    if (will) lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.BonusWillLabel')}: ${will}`);
     if (shield) lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.ShieldLabel')}: ${shield}`);
     if (speed) lines.push(`${game.i18n.localize('MY_RPG.ArmorItem.BonusSpeedLabel')}: ${speed}`);
     let html = lines.join('<br>');

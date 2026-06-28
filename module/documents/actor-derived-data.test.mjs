@@ -28,15 +28,15 @@ test('character base defenses remain independent from skill ranks and temporary 
     system: {
       currentRank: 2,
       temphealth: 5,
-      tempphys: 3,
-      tempazure: 4,
-      tempmental: 6,
+      tempfortitude: 3,
+      tempcontrol: 4,
+      tempwill: 6,
       tempspeed: 9,
       progressPoints: 0,
       defenses: {
-        physical: 4,
-        azure: 3,
-        mental: 2
+        fortitude: 4,
+        control: 3,
+        will: 2
       },
       skills: {
         moshch: { rank: 1, value: 2 },
@@ -55,9 +55,9 @@ test('character base defenses remain independent from skill ranks and temporary 
           system: {
             equipped: true,
             quantity: 1,
-            itemPhys: 2,
-            itemAzure: 1,
-            itemMental: 5,
+            itemFortitude: 2,
+            itemControl: 1,
+            itemWill: 5,
             itemShield: 4,
             itemSpeed: 7
           }
@@ -68,12 +68,12 @@ test('character base defenses remain independent from skill ranks and temporary 
 
   actor.prepareDerivedData();
 
-  assert.equal(actor.system.defenses.physical, 4);
-  assert.equal(actor.system.defenses.azure, 3);
-  assert.equal(actor.system.defenses.mental, 2);
-  assert.equal(actor.system.effectiveDefenses.physical, 7);
-  assert.equal(actor.system.effectiveDefenses.azure, 7);
-  assert.equal(actor.system.effectiveDefenses.mental, 8);
+  assert.equal(actor.system.defenses.fortitude, 4);
+  assert.equal(actor.system.defenses.control, 3);
+  assert.equal(actor.system.defenses.will, 2);
+  assert.equal(actor.system.effectiveDefenses.fortitude, 7);
+  assert.equal(actor.system.effectiveDefenses.control, 7);
+  assert.equal(actor.system.effectiveDefenses.will, 8);
   assert.equal(actor.system.speed.value, 46);
   assert.equal(actor.system.stress.max, 19);
   assert.equal(actor.system.forceShield.max, 0);
@@ -147,15 +147,15 @@ test('temporary parameters accept penalties', () => {
     system: {
       currentRank: 2,
       temphealth: -10,
-      tempphys: -2,
-      tempazure: -10,
-      tempmental: 3,
+      tempfortitude: -2,
+      tempcontrol: -10,
+      tempwill: 3,
       tempspeed: -35,
       progressPoints: 0,
       defenses: {
-        physical: 4,
-        azure: 3,
-        mental: 2
+        fortitude: 4,
+        control: 3,
+        will: 2
       },
       skills: {},
       speed: { value: 0 },
@@ -168,15 +168,15 @@ test('temporary parameters accept penalties', () => {
   actor.prepareDerivedData();
 
   assert.equal(actor.system.temphealth, -10);
-  assert.equal(actor.system.tempphys, -2);
-  assert.equal(actor.system.tempazure, -10);
-  assert.equal(actor.system.tempmental, 3);
+  assert.equal(actor.system.tempfortitude, -2);
+  assert.equal(actor.system.tempcontrol, -10);
+  assert.equal(actor.system.tempwill, 3);
   assert.equal(actor.system.tempspeed, -35);
   assert.equal(actor.system.stress.max, 0);
   assert.equal(actor.system.speed.value, -5);
-  assert.equal(actor.system.effectiveDefenses.physical, 2);
-  assert.equal(actor.system.effectiveDefenses.azure, 0);
-  assert.equal(actor.system.effectiveDefenses.mental, 5);
+  assert.equal(actor.system.effectiveDefenses.fortitude, 2);
+  assert.equal(actor.system.effectiveDefenses.control, 0);
+  assert.equal(actor.system.effectiveDefenses.will, 5);
 });
 
 test('movement speed uses rank defaults with additive bonuses', () => {

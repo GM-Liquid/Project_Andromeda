@@ -116,9 +116,9 @@ export class GmToolsApp extends HandlebarsApplicationMixin(ApplicationV2) {
         'system.stress.value': 0,
         'system.stress.marked': [],
         'system.temphealth': 0,
-        'system.tempphys': 0,
-        'system.tempazure': 0,
-        'system.tempmental': 0,
+        'system.tempfortitude': 0,
+        'system.tempcontrol': 0,
+        'system.tempwill': 0,
         'system.tempspeed': 0
       });
 

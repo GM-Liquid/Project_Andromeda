@@ -830,6 +830,26 @@ export function getGearLibraryPack() {
   return game.packs?.get(GEAR_LIBRARY_PACK_ID) ?? null;
 }
 
+// Resolve the `Compendium.…` UUID of a gear-library pack item from its stable
+// sheetSyncId (e.g. `gear:abilities:shag_v_ten`). Returns '' when the pack or the
+// entry is unavailable. Used by the archetype drop flow to link the granted ability.
+export async function findGearLibraryUuidBySyncId(syncId) {
+  const target = String(syncId ?? '').trim();
+  if (!target) return '';
+  const pack = getGearLibraryPack();
+  if (!pack) return '';
+  const index = await pack.getIndex({
+    fields: [`flags.${MODULE_ID}.${GEAR_CATALOG_SYNC_ID_FLAG}`]
+  });
+  for (const entry of index) {
+    const entrySyncId = entry?.flags?.[MODULE_ID]?.[GEAR_CATALOG_SYNC_ID_FLAG];
+    if (String(entrySyncId ?? '').trim() === target) {
+      return `Compendium.${GEAR_LIBRARY_PACK_ID}.Item.${entry._id}`;
+    }
+  }
+  return '';
+}
+
 async function buildPackSyncIdToUuidMap() {
   const pack = getGearLibraryPack();
   if (!pack) return new Map();

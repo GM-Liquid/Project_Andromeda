@@ -7,7 +7,12 @@ import {
 import { getBaseStressByRank } from '../config/character-defaults.mjs';
 import { getTotalAdvancementSpent } from '../helpers/advancement-points.mjs';
 import { calcMovementSpeed } from '../helpers/movement-speed.mjs';
-import { normalizeSkill } from '../helpers/skill-check.mjs';
+import { ARCHETYPE_RANK_BONUS, normalizeSkill } from '../helpers/skill-check.mjs';
+import {
+  computeArchetypeDefenses,
+  getArchetypeDefenseProfile,
+  getArchetypeSkillKey
+} from '../helpers/archetype.mjs';
 
 /**
  * Extend the base Actor document by defining a custom roll data structure which is ideal for the Simple system.
@@ -29,8 +34,10 @@ export class ProjectAndromedaActor extends Actor {
     const usesAzureStress = supportsAzureStress(this.type);
 
     /* 1. Skills ---------------------------------------------------------- */
-    for (const sk of Object.values(s.skills ?? {})) {
-      const normalized = normalizeSkill(sk, s.currentRank);
+    const archetypeSkillKey = getArchetypeSkillKey(this);
+    for (const [key, sk] of Object.entries(s.skills ?? {})) {
+      const rankBonus = key === archetypeSkillKey ? ARCHETYPE_RANK_BONUS : 0;
+      const normalized = normalizeSkill(sk, s.currentRank, rankBonus);
       sk.rank = normalized.rank;
       sk.value = normalized.value;
       sk.mod = normalized.value;
@@ -39,9 +46,12 @@ export class ProjectAndromedaActor extends Actor {
     /* 2. Derived values -------------------------------------------------- */
     s.speed ??= {};
     s.speed.value = this._calcSpeed(s, itemTotals);
-    s.effectiveDefenses = this._calcEffectiveDefenses(s);
+    const baseDefenses = this._resolveBaseDefenses(s);
+    s.defenses = { ...(s.defenses ?? {}), ...baseDefenses };
+    s.defensesLocked = getArchetypeDefenseProfile(this) !== null;
+    s.effectiveDefenses = this._calcEffectiveDefenses(s, baseDefenses);
     s.advancement ??= {};
-    s.advancement.totalSpent = getTotalAdvancementSpent(s);
+    s.advancement.totalSpent = getTotalAdvancementSpent(s, { archetypeSkillKey });
     s.advancement.available = (Number(s.progressPoints) || 0) - s.advancement.totalSpent;
 
     const stress = s.stress ?? (s.stress = {});
@@ -83,12 +93,29 @@ export class ProjectAndromedaActor extends Actor {
     return Math.max(0, getBaseStressByRank(actorType, rank) + tempStress + shield);
   }
 
-  _calcEffectiveDefenses(s) {
+  // Base defenses come from the archetype profile (rank-scaled, locked) for player
+  // characters that have one; otherwise they are the manually edited stored values.
+  _resolveBaseDefenses(s) {
+    const profile = getArchetypeDefenseProfile(this);
+    if (profile) {
+      return computeArchetypeDefenses(s?.currentRank, profile);
+    }
     const defenses = s?.defenses ?? {};
     return {
-      physical: Math.max(0, (Number(defenses.physical) || 0) + (Number(s?.tempphys) || 0)),
-      azure: Math.max(0, (Number(defenses.azure) || 0) + (Number(s?.tempazure) || 0)),
-      mental: Math.max(0, (Number(defenses.mental) || 0) + (Number(s?.tempmental) || 0))
+      fortitude: Number(defenses.fortitude) || 0,
+      control: Number(defenses.control) || 0,
+      will: Number(defenses.will) || 0
+    };
+  }
+
+  _calcEffectiveDefenses(s, baseDefenses = this._resolveBaseDefenses(s)) {
+    return {
+      fortitude: Math.max(
+        0,
+        (Number(baseDefenses.fortitude) || 0) + (Number(s?.tempfortitude) || 0)
+      ),
+      control: Math.max(0, (Number(baseDefenses.control) || 0) + (Number(s?.tempcontrol) || 0)),
+      will: Math.max(0, (Number(baseDefenses.will) || 0) + (Number(s?.tempwill) || 0))
     };
   }
 
@@ -103,9 +130,9 @@ export class ProjectAndromedaActor extends Actor {
   _computeItemTotals() {
     const totals = {
       armor: {
-        physical: 0,
-        azure: 0,
-        mental: 0,
+        fortitude: 0,
+        control: 0,
+        will: 0,
         shield: 0,
         speed: 0
       }
@@ -116,9 +143,9 @@ export class ProjectAndromedaActor extends Actor {
       const system = armor.system ?? {};
       if (!system.equipped) continue;
       const quantity = Math.max(Number(system.quantity) || 1, 0);
-      totals.armor.physical += (Number(system.itemPhys) || 0) * quantity;
-      totals.armor.azure += (Number(system.itemAzure) || 0) * quantity;
-      totals.armor.mental += (Number(system.itemMental) || 0) * quantity;
+      totals.armor.fortitude += (Number(system.itemFortitude) || 0) * quantity;
+      totals.armor.control += (Number(system.itemControl) || 0) * quantity;
+      totals.armor.will += (Number(system.itemWill) || 0) * quantity;
       totals.armor.shield += (Number(system.itemShield) || 0) * quantity;
       totals.armor.speed += (Number(system.itemSpeed) || 0) * quantity;
     }

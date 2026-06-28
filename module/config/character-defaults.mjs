@@ -36,9 +36,9 @@ export const MOVEMENT_SPEED_BY_RANK = Object.freeze({
 });
 
 export const DEFAULT_CHARACTER_DEFENSES = Object.freeze({
-  physical: 1,
-  azure: 1,
-  mental: 1
+  fortitude: 1,
+  control: 1,
+  will: 1
 });
 
 function normalizeRank(rank, maxRank = 4) {

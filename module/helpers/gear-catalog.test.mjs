@@ -110,6 +110,45 @@ test('gear catalog transform maps activation metadata for abilities, equipment, 
   assert.equal(armorData.usageFrequency, 'scene');
   assert.equal(armorData.targets, 'self');
   assert.equal(armorData.duration, 'untilEndOfTurn');
+  assert.equal(armorData.itemFortitude, 2);
+  assert.equal(armorData.itemControl, 0);
+  assert.equal(armorData.itemWill, 0);
+});
+
+test('gear catalog transform keeps archetype descriptions separate from signature abilities', () => {
+  const remoteData = buildGearCatalogRemoteDataFromCatalogs({
+    armor: [],
+    equipment: [],
+    abilities: [],
+    archetypes: [
+      {
+        id: 'vanguard',
+        name: 'Vanguard',
+        type: 'archetype',
+        skill: 'blizhniy_boy',
+        description: 'First through the breach.',
+        defenseProfile: { strong: 'fortitude', medium: 'will', weak: 'control' },
+        ability: {
+          id: 'breach',
+          name: 'Breach',
+          type: 'ability',
+          rank: 1,
+          skill: 'blizhniy_boy',
+          description: 'Dash forward and attack.'
+        }
+      }
+    ]
+  });
+
+  const archetypeData = getSystemData(remoteData.sheets.archetypes[0]);
+  assert.equal(archetypeData.description, 'First through the breach.');
+  assert.deepEqual(archetypeData.defenseProfile, {
+    strong: 'fortitude',
+    medium: 'will',
+    weak: 'control'
+  });
+  assert.equal(archetypeData.abilityName, 'Breach');
+  assert.equal(remoteData.sheets.abilities.length, 1);
 });
 
 test('gear catalog transform preserves freeAction abilities as freeAction activation cost', () => {

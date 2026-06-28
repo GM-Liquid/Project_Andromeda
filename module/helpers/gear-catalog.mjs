@@ -50,6 +50,15 @@ const GEAR_ABILITY_CONFIG = {
   folderName: 'Способности'
 };
 
+const GEAR_ARCHETYPE_CONFIG = {
+  catalogKey: 'archetypes',
+  sheetKey: 'archetypes',
+  itemType: 'archetype',
+  folderName: 'Архетипы'
+};
+
+const GEAR_DEFENSE_KEYS = new Set(['fortitude', 'control', 'will']);
+
 function isWeaponCatalogEntry(entry) {
   return GEAR_WEAPON_SKILL_KEYS.has(getGearCatalogSkill(entry));
 }
@@ -65,7 +74,7 @@ const GEAR_CATALOG_SOURCES = [
   { catalogKey: 'abilities', resolveConfig: () => GEAR_ABILITY_CONFIG }
 ];
 
-const GEAR_CATALOG_SHEET_KEYS = ['armor', 'weapons', 'equipment', 'abilities'];
+const GEAR_CATALOG_SHEET_KEYS = ['armor', 'weapons', 'equipment', 'abilities', 'archetypes'];
 
 function deepClone(value) {
   if (typeof foundry !== 'undefined' && foundry.utils?.deepClone) {
@@ -276,9 +285,9 @@ function buildGearCatalogSystemData(entry, config) {
   if (config.itemType === 'armor') {
     return {
       ...systemData,
-      itemPhys: getOutcomeNumber(entry, ['fortitudeBonus']),
-      itemAzure: getOutcomeNumber(entry, ['controlBonus']),
-      itemMental: getOutcomeNumber(entry, ['willBonus']),
+      itemFortitude: getOutcomeNumber(entry, ['fortitudeBonus']),
+      itemControl: getOutcomeNumber(entry, ['controlBonus']),
+      itemWill: getOutcomeNumber(entry, ['willBonus']),
       itemShield: getOutcomeNumber(entry, ['shieldBonus', 'grantTempStress']),
       itemSpeed: getOutcomeNumber(entry, ['speedBonus']),
       quantity: 1
@@ -329,9 +338,9 @@ function buildGearCatalogImportRow(entry, config) {
   };
 
   if (config.itemType === 'armor') {
-    row['system.itemPhys'] = systemData.itemPhys;
-    row['system.itemAzure'] = systemData.itemAzure;
-    row['system.itemMental'] = systemData.itemMental;
+    row['system.itemFortitude'] = systemData.itemFortitude;
+    row['system.itemControl'] = systemData.itemControl;
+    row['system.itemWill'] = systemData.itemWill;
     row['system.itemShield'] = systemData.itemShield;
     row['system.itemSpeed'] = systemData.itemSpeed;
   }
@@ -354,6 +363,49 @@ function buildGearCatalogImportRow(entry, config) {
   return row;
 }
 
+function normalizeArchetypeDefenseKey(value) {
+  const key = normalizeOptionalString(value);
+  return GEAR_DEFENSE_KEYS.has(key) ? key : '';
+}
+
+function buildArchetypeAbilitySyncId(entry) {
+  const abilityId = normalizeOptionalString(entry?.ability?.id);
+  return abilityId ? buildGearCatalogEntrySyncId('abilities', entry.ability) : '';
+}
+
+function buildArchetypeDescription(entry) {
+  return getGearCatalogDescription(entry);
+}
+
+function buildArchetypeImportRow(entry, config) {
+  const profile = entry?.defenseProfile ?? {};
+  const abilitySyncId = buildArchetypeAbilitySyncId(entry);
+  const systemData = {
+    description: buildArchetypeDescription(entry),
+    skill: getGearCatalogSkill(entry),
+    defenseProfile: {
+      strong: normalizeArchetypeDefenseKey(profile.strong),
+      medium: normalizeArchetypeDefenseKey(profile.medium),
+      weak: normalizeArchetypeDefenseKey(profile.weak)
+    },
+    abilitySyncId,
+    abilityName: normalizeString(entry?.ability?.name),
+    details: buildGearCatalogDetails(config.catalogKey, entry)
+  };
+
+  return {
+    syncId: buildGearCatalogEntrySyncId(config.catalogKey, entry),
+    type: config.itemType,
+    name: normalizeString(entry?.name),
+    ownerName: '',
+    folderPath: config.folderName,
+    [GEAR_CATALOG_SYNC_SYSTEM_JSON_COLUMN]: stableStringify(systemData),
+    'system.description': systemData.description ?? '',
+    'system.skill': systemData.skill ?? '',
+    'system.abilitySyncId': abilitySyncId
+  };
+}
+
 export function buildGearCatalogRemoteDataFromCatalogs(catalogs = {}) {
   const sheets = {};
   for (const sheetKey of GEAR_CATALOG_SHEET_KEYS) {
@@ -364,6 +416,21 @@ export function buildGearCatalogRemoteDataFromCatalogs(catalogs = {}) {
     for (const entry of normalizeCatalogEntries(catalogs[source.catalogKey])) {
       const config = source.resolveConfig(entry);
       sheets[config.sheetKey].push(buildGearCatalogImportRow(entry, config));
+    }
+  }
+
+  // Archetypes build their own item plus the signature ability they grant: the
+  // ability is emitted into the shared "Способности" folder so the drop flow can
+  // link it as a compendium item, and the archetype keeps a reference to its syncId.
+  for (const entry of normalizeCatalogEntries(catalogs[GEAR_ARCHETYPE_CONFIG.catalogKey])) {
+    sheets[GEAR_ARCHETYPE_CONFIG.sheetKey].push(
+      buildArchetypeImportRow(entry, GEAR_ARCHETYPE_CONFIG)
+    );
+    const ability = entry?.ability;
+    if (ability && ability.id && ability.name) {
+      sheets[GEAR_ABILITY_CONFIG.sheetKey].push(
+        buildGearCatalogImportRow(ability, GEAR_ABILITY_CONFIG)
+      );
     }
   }
 
