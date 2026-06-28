@@ -77,9 +77,10 @@ export function getSkillRankBonus(actor, skillKey) {
   return archetypeSkill && archetypeSkill === skillKey ? ARCHETYPE_RANK_BONUS : 0;
 }
 
-// Revert everything an archetype granted: remove the ability it added, drop its
-// skill back to the base rank, and reset the three defenses to the rank default
-// (defense = rank). Used both when an archetype is deleted and when it is replaced.
+// Revert everything an archetype granted: remove the ability it added, take back the
+// +1 rank it gave its skill (preserving any rank the player bought on top), and reset
+// the three defenses to the rank default (defense = rank). Used both when an archetype
+// is deleted and when it is replaced.
 export async function clearArchetypeEffects(actor, archetypeItem) {
   if (!actor || !archetypeItem) return;
 
@@ -93,7 +94,16 @@ export async function clearArchetypeEffects(actor, archetypeItem) {
   const updates = {};
   const skillKey = String(archetypeItem.system?.skill ?? '').trim();
   if (skillKey && actor.system?.skills?.[skillKey]) {
-    updates[`system.skills.${skillKey}.rank`] = MIN_SKILL_RANK;
+    // Read the stored (source) rank so a skill sitting at the archetype-only cap
+    // (rank 5) is not first clamped to the base cap before the bonus is removed.
+    const storedRank = Number(actor._source?.system?.skills?.[skillKey]?.rank);
+    const baseRank = Number.isFinite(storedRank)
+      ? storedRank
+      : Number(actor.system.skills[skillKey].rank) || MIN_SKILL_RANK;
+    updates[`system.skills.${skillKey}.rank`] = Math.max(
+      MIN_SKILL_RANK,
+      baseRank - ARCHETYPE_RANK_BONUS
+    );
   }
   const rank = normalizeCharacterRank(actor.system?.currentRank);
   updates['system.defenses.fortitude'] = rank;

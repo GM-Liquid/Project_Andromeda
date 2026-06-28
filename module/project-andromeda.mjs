@@ -1792,13 +1792,20 @@ Hooks.on('deleteItem', (item, options, userId) => {
   const actor = item?.parent;
   if (!actor || actor.documentName !== 'Actor') return;
 
-  void clearArchetypeEffects(actor, item).catch((error) => {
-    debugLog('Archetype effect cleanup failed on delete', {
-      actor: actor?.uuid ?? null,
-      itemId: item?.id ?? null,
-      error
+  void clearArchetypeEffects(actor, item)
+    .then(() => {
+      // clearArchetypeEffects updates with { render: false }; the sheet already
+      // re-rendered on the item deletion with stale skill/defense values, so refresh
+      // it once the reverted data is in place.
+      if (actor.sheet?.rendered) actor.sheet.render(false);
+    })
+    .catch((error) => {
+      debugLog('Archetype effect cleanup failed on delete', {
+        actor: actor?.uuid ?? null,
+        itemId: item?.id ?? null,
+        error
+      });
     });
-  });
 });
 
 Hooks.on('dropCanvasData', async (droppedCanvas, data) => {

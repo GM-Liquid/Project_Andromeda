@@ -247,6 +247,13 @@
                         data-label='{{skill.label}}'
                       >
                         <span class='skill-name__label'>{{skill.label}}</span>
+                        {{#if skill.isArchetypeSkill}}
+                          <span
+                            class='skill-name__archetype-star'
+                            title='{{localize "MY_RPG.Archetype.SkillStar"}}'
+                            aria-label='{{localize "MY_RPG.Archetype.SkillStar"}}'
+                          >★</span>
+                        {{/if}}
                       </button>
                       {{#if @root.isPlayerCharacter}}
                         <button

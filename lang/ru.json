@@ -253,7 +253,8 @@
       "WeakDefense": "Слабая защита",
       "DefensesLocked": "Защиты задаёт архетип, они растут вместе с рангом.",
       "PlayerOnly": "Архетип можно применить только к персонажу игрока.",
-      "AbilityMissing": "Способность архетипа не найдена в компендиуме gear-library."
+      "AbilityMissing": "Способность архетипа не найдена в компендиуме gear-library.",
+      "SkillStar": "Навык архетипа (+1 ранг от архетипа)."
     },
     "CombatCheatSheet": {
       "CombatActionsTitle": "Действия в бою",

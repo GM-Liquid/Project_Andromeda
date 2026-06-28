@@ -15,7 +15,8 @@ import {
   supportsAzureStress
 } from '../helpers/actor-types.mjs';
 import {
-  ARCHETYPE_BASELINE_RANK,
+  ARCHETYPE_RANK_BONUS,
+  MIN_SKILL_RANK,
   getNextSkillAdvancement,
   getSkillCheckOutcomeKey,
   normalizeCharacterRank,
@@ -327,12 +328,23 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       }
     }
 
-    // Start the archetype skill one rank above the base (rank 2) if it is lower.
+    // Raise the archetype skill by the archetype's rank bonus (+1), capped at the
+    // archetype rank cap. A fresh skill at rank 1 becomes rank 2; re-applying an
+    // archetype after a removal that reverted the bonus restores the +1. The stored
+    // (source) rank is read so any rank the player bought is preserved on top.
     const skillKey = String(createdArchetype?.system?.skill ?? '').trim();
-    const currentSkillRank = Number(this.actor.system?.skills?.[skillKey]?.rank) || 0;
-    if (skillKey && currentSkillRank < ARCHETYPE_BASELINE_RANK) {
+    if (skillKey && this.actor.system?.skills?.[skillKey]) {
+      const storedRank = Number(this.actor._source?.system?.skills?.[skillKey]?.rank);
+      const baseRank = Number.isFinite(storedRank)
+        ? storedRank
+        : Number(this.actor.system.skills[skillKey].rank) || MIN_SKILL_RANK;
+      const boostedRank = normalizeSkillRank(
+        baseRank + ARCHETYPE_RANK_BONUS,
+        this.actor.system.currentRank,
+        getSkillRankBonus(this.actor, skillKey)
+      );
       await this.actor.update(
-        { [`system.skills.${skillKey}.rank`]: ARCHETYPE_BASELINE_RANK },
+        { [`system.skills.${skillKey}.rank`]: boostedRank },
         { render: false }
       );
     }

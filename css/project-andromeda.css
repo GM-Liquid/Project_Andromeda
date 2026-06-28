@@ -1625,6 +1625,13 @@ textarea[disabled] {
   text-overflow: ellipsis;
 }
 
+.project-andromeda .skill-name__archetype-star {
+  flex: 0 0 auto;
+  color: var(--andromeda-color-accent, #d9a441);
+  font-size: 0.85em;
+  line-height: 1;
+}
+
 .project-andromeda .andromeda-skill-row .skill-value {
   display: inline-flex;
   width: auto;

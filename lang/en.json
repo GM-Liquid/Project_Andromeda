@@ -253,7 +253,8 @@
       "WeakDefense": "Weak defense",
       "DefensesLocked": "Defenses are set by the archetype and scale with rank.",
       "PlayerOnly": "Archetypes can only be applied to player characters.",
-      "AbilityMissing": "The archetype's signature ability was not found in the gear-library compendium."
+      "AbilityMissing": "The archetype's signature ability was not found in the gear-library compendium.",
+      "SkillStar": "Archetype skill (+1 rank from the archetype)."
     },
     "CombatCheatSheet": {
       "CombatActionsTitle": "Combat Actions",
