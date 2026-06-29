@@ -201,7 +201,7 @@ test('actor sheet uses fixed chrome with a separate content viewport', () => {
   assert.match(template, /<div class='andromeda-sheet-pane-scroll sheet-scrollable'>/);
   assert.match(
     actorSheet,
-    /static get defaultOptions\(\) \{[\s\S]*width:\s*860,[\s\S]*height:\s*780,[\s\S]*minWidth:\s*ACTOR_SHEET_MIN_WIDTH,/
+    /static get defaultOptions\(\) \{[\s\S]*width:\s*860,[\s\S]*height:\s*800,[\s\S]*minWidth:\s*ACTOR_SHEET_MIN_WIDTH,/
   );
   assert.match(actorSheet, /const ACTOR_SHEET_MIN_WIDTH = 730;/);
   assert.match(

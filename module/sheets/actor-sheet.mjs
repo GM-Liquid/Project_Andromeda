@@ -511,7 +511,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ['project-andromeda', 'sheet', 'actor'],
       width: 860,
-      height: 780,
+      height: 800,
       minWidth: ACTOR_SHEET_MIN_WIDTH,
       resizable: true,
       tabs: [

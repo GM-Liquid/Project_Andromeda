@@ -1393,7 +1393,7 @@ textarea[disabled] {
   gap: 0;
   height: 100%;
   min-width: 0;
-  padding: 10px 12px;
+  padding: 12px 12px;
   overflow: hidden;
   border-right: 0;
   background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
@@ -1402,6 +1402,7 @@ textarea[disabled] {
 .project-andromeda .andromeda-rail-skills-scroll {
   flex: 1 1 auto;
   min-height: 0;
+  padding-right: 4px;
   overflow-x: hidden;
   overflow-y: auto;
   scrollbar-width: thin;
@@ -1429,11 +1430,16 @@ textarea[disabled] {
 
 .project-andromeda .andromeda-rail-header {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: flex-start;
-  margin-bottom: 3px;
-  padding: 0 4px 2px;
-  border-bottom: 1px solid var(--andromeda-color-line, var(--andromeda-fallback-line));
+  margin: 0;
+  padding: 0.5rem 0.6rem;
+  border-bottom: 2px solid var(--andromeda-color-text, var(--andromeda-fallback-text));
+  background: var(--andromeda-color-panel, var(--andromeda-fallback-panel));
+}
+
+.project-andromeda .andromeda-rail-header h2 {
+  font-weight: 700;
 }
 
 .project-andromeda .andromeda-rail-header h2,
@@ -1444,18 +1450,24 @@ textarea[disabled] {
   color: var(--andromeda-color-text, var(--andromeda-fallback-text));
   font-family: var(--andromeda-font-heading, var(--andromeda-fallback-font-heading));
   font-size: var(--andromeda-font-size-label, var(--andromeda-fallback-font-size-label));
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   text-decoration: none;
 }
 
-.project-andromeda .andromeda-defense-block {
-  margin-bottom: 8px;
+/* Frame the rail's defenses and skills as bordered cards, matching the item
+   groups on the right-hand pane (2px border + header bar + row separators). */
+.project-andromeda .andromeda-defense-block,
+.project-andromeda .andromeda-skills-block {
+  overflow: hidden;
+  border: 2px solid var(--andromeda-color-text, var(--andromeda-fallback-text));
+  border-radius: var(--andromeda-radius-lg, var(--andromeda-fallback-radius-lg));
+  background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
 }
 
-.project-andromeda .andromeda-skills-block {
-  margin-top: 0;
+.project-andromeda .andromeda-defense-block {
+  margin-bottom: 10px;
 }
 
 .project-andromeda .andromeda-defense-list {
@@ -1472,10 +1484,14 @@ textarea[disabled] {
   justify-content: space-between;
   gap: 8px;
   min-height: 26px;
-  padding: 0 4px;
-  border-radius: 4px;
+  padding: 0 0.6rem;
   background: transparent;
   transition: background-color 0.18s ease;
+}
+
+.project-andromeda .andromeda-defense-row + .andromeda-defense-row,
+.project-andromeda .andromeda-rail-skills .andromeda-skill-row + .andromeda-skill-row {
+  border-top: 1px solid var(--andromeda-color-line-soft);
 }
 
 .project-andromeda .andromeda-defense-row:hover {
@@ -1521,7 +1537,9 @@ textarea[disabled] {
   display: flex;
   align-items: center;
   gap: 5px;
-  margin: 4px 4px 0;
+  margin: 0;
+  padding: 0.4rem 0.6rem;
+  border-top: 1px solid var(--andromeda-color-line-soft);
   color: var(--andromeda-color-muted);
   font-size: var(--andromeda-font-size-label);
   line-height: 1.25;
@@ -1683,8 +1701,7 @@ textarea[disabled] {
   min-height: 26px;
   gap: 8px;
   margin: 0;
-  padding: 0 4px;
-  border-radius: 4px;
+  padding: 0 0.6rem;
   background: transparent;
   transition: background-color 0.18s ease;
 }
@@ -2780,9 +2797,9 @@ textarea[disabled] {
   color: var(--andromeda-color-muted);
 }
 
-.project-andromeda
-  [data-item-group='abilities']
-  .item-activate--trackable:not(.item-activate--used) {
+/* Abilities that are ready to use glow orange: limited-use ones until their
+   charge is spent, and unlimited-use ones (no cooldown) always. */
+.project-andromeda [data-item-group='abilities'] .item-activate:not(.item-activate--used) {
   border-color: var(--andromeda-color-accent);
   background: var(--andromeda-color-panel);
   color: var(--andromeda-color-accent);
