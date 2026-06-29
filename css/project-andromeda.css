@@ -777,7 +777,7 @@ textarea[disabled] {
 }
 
 .project-andromeda .andromeda-hud--gm {
-  grid-template-columns: 137px minmax(0, 1fr) 11rem 92px;
+  grid-template-columns: 137px 13rem minmax(10rem, 1fr) 9.75rem;
 }
 
 .project-andromeda .andromeda-hud__portrait {
@@ -1092,7 +1092,48 @@ textarea[disabled] {
 }
 
 .project-andromeda .andromeda-hud--gm .andromeda-hud__stats-row {
-  grid-template-columns: 3.5rem 4.75rem 14.5rem;
+  grid-template-areas:
+    'stress'
+    'speed';
+  grid-template-columns: 4.75rem;
+  justify-content: flex-start;
+  justify-items: start;
+}
+
+/* Bosses also carry the shared GM Highlight Points pool beside their stats. */
+.project-andromeda.elite .andromeda-hud--gm .andromeda-hud__stats-row {
+  grid-template-areas:
+    'stress glory'
+    'speed glory';
+  grid-template-columns: 4.75rem 8rem;
+}
+
+.project-andromeda .andromeda-hud--gm .andromeda-status-card--speed {
+  grid-area: speed;
+  justify-self: start;
+  width: 4.75rem;
+  text-align: center;
+}
+
+.project-andromeda .andromeda-hud--gm .andromeda-status-card--stress {
+  grid-area: stress;
+  justify-self: start;
+  width: 4.75rem;
+  text-align: center;
+}
+
+.project-andromeda .andromeda-hud--gm .andromeda-status-card--aside {
+  grid-area: glory;
+  align-self: stretch;
+  justify-self: start;
+  width: 8rem;
+}
+
+/* The shared-pool caption is long, so let it wrap instead of overflowing. */
+.project-andromeda .andromeda-hud--gm .andromeda-status-card--aside > span {
+  white-space: normal;
+  text-align: center;
+  line-height: 1.15;
 }
 
 .project-andromeda .andromeda-hud--player .andromeda-status-card--speed {
@@ -1124,28 +1165,28 @@ textarea[disabled] {
   width: 8rem;
 }
 
-.project-andromeda .andromeda-hud--player .andromeda-status-card {
+.project-andromeda .andromeda-hud .andromeda-status-card {
   align-items: center;
   justify-content: center;
   padding-block: 3px;
   text-align: center;
 }
 
-.project-andromeda .andromeda-hud--player .andromeda-status-card header {
+.project-andromeda .andromeda-hud .andromeda-status-card header {
   justify-content: center;
   width: 100%;
   text-align: center;
 }
 
-.project-andromeda .andromeda-hud--player .andromeda-status-combo {
+.project-andromeda .andromeda-hud .andromeda-status-combo {
   justify-items: center;
 }
 
-.project-andromeda .andromeda-hud--player .andromeda-status-card--progress input,
-.project-andromeda .andromeda-hud--player .andromeda-status-card--progress strong,
-.project-andromeda .andromeda-hud--player .andromeda-status-card--stress input,
-.project-andromeda .andromeda-hud--player .andromeda-status-card--stress strong,
-.project-andromeda .andromeda-hud--player .andromeda-status-separator {
+.project-andromeda .andromeda-hud .andromeda-status-card--progress input,
+.project-andromeda .andromeda-hud .andromeda-status-card--progress strong,
+.project-andromeda .andromeda-hud .andromeda-status-card--stress input,
+.project-andromeda .andromeda-hud .andromeda-status-card--stress strong,
+.project-andromeda .andromeda-hud .andromeda-status-separator {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1154,33 +1195,30 @@ textarea[disabled] {
   line-height: 1;
 }
 
-.project-andromeda .andromeda-hud--player .andromeda-status-card--progress input {
+.project-andromeda .andromeda-hud .andromeda-status-card--progress input {
   appearance: textfield;
 }
 
+.project-andromeda .andromeda-hud .andromeda-status-card--progress input::-webkit-outer-spin-button,
 .project-andromeda
-  .andromeda-hud--player
-  .andromeda-status-card--progress
-  input::-webkit-outer-spin-button,
-.project-andromeda
-  .andromeda-hud--player
+  .andromeda-hud
   .andromeda-status-card--progress
   input::-webkit-inner-spin-button {
   margin: 0;
   -webkit-appearance: none;
 }
 
-.project-andromeda .andromeda-hud--player .andromeda-status-card input,
-.project-andromeda .andromeda-hud--player .andromeda-status-card strong {
+.project-andromeda .andromeda-hud .andromeda-status-card input,
+.project-andromeda .andromeda-hud .andromeda-status-card strong {
   text-align: center !important;
 }
 
 /* Slim the value fields by 6px and hand it back as 3px top/bottom card padding
-   (see .andromeda-hud--player .andromeda-status-card) so the box keeps its original
+   (see .andromeda-hud .andromeda-status-card) so the box keeps its original
    height while the label + value sit centered instead of pinned to the top edge. */
-.project-andromeda .andromeda-hud--player .andromeda-status-card input,
-.project-andromeda .andromeda-hud--player .andromeda-status-card strong,
-.project-andromeda .andromeda-hud--player .andromeda-status-card .andromeda-status-separator {
+.project-andromeda .andromeda-hud .andromeda-status-card input,
+.project-andromeda .andromeda-hud .andromeda-status-card strong,
+.project-andromeda .andromeda-hud .andromeda-status-card .andromeda-status-separator {
   height: 20px;
   min-height: 20px;
 }
@@ -1531,18 +1569,6 @@ textarea[disabled] {
 .project-andromeda .andromeda-edit-mode .andromeda-defense-row__input:not([readonly]) {
   background: var(--andromeda-color-surface) !important;
   box-shadow: inset 0 0 0 1px var(--andromeda-color-line-soft);
-}
-
-.project-andromeda .andromeda-defense-lock-hint {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin: 0;
-  padding: 0.4rem 0.6rem;
-  border-top: 1px solid var(--andromeda-color-line-soft);
-  color: var(--andromeda-color-muted);
-  font-size: var(--andromeda-font-size-label);
-  line-height: 1.25;
 }
 
 .project-andromeda .andromeda-rail-ability {
@@ -3093,7 +3119,7 @@ textarea[disabled] {
   }
 
   .project-andromeda .andromeda-hud--gm {
-    grid-template-columns: 150px minmax(0, 1fr) 10rem 84px;
+    grid-template-columns: 150px 13rem minmax(9rem, 1fr) 9.75rem;
     grid-template-areas: 'portrait main temps rank';
     gap: 10px;
     padding-inline: 12px;

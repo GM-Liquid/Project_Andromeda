@@ -137,8 +137,8 @@
     "description": "Снимает состояния и быстро возвращает союзников в строй.",
     "defenseProfile": { "strong": "will", "medium": "control", "weak": "fortitude" },
     "ability": {
-      "id": "stabilizatsiya",
-      "name": "Стабилизация",
+      "id": "peredyshka",
+      "name": "Передышка",
       "type": "ability",
       "rank": 1,
       "skill": "mistika",

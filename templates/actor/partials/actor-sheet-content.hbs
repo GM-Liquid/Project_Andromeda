@@ -78,7 +78,7 @@
               </label>
             {{/if}}
 
-            {{#if isGmCharacter}}
+            {{#if isElite}}
               <label class='andromeda-status-card andromeda-status-card--glory andromeda-status-card--aside'>
                 <span>{{localize 'MY_RPG.KeyInfo.SharedMomentOfGlory'}}</span>
                 <input
@@ -158,24 +158,22 @@
             />
           </label>
 
-          {{#if isPlayerCharacter}}
-            <label class='andromeda-status-card andromeda-status-card--progress andromeda-status-card--rank-progress'>
-              <span>{{localize 'MY_RPG.KeyInfo.ProgressPoints'}}</span>
-              <div class='andromeda-status-combo'>
-                <strong class='andromeda-status-value' data-field='system.advancement.totalSpent'>
-                  {{system.advancement.totalSpent}}
-                </strong>
-                <span class='andromeda-status-separator'>/</span>
-                <input
-                  type='number'
-                  name='system.progressPoints'
-                  value='{{system.progressPoints}}'
-                  step='1'
-                  inputmode='numeric'
-                />
-              </div>
-            </label>
-          {{/if}}
+          <label class='andromeda-status-card andromeda-status-card--progress andromeda-status-card--rank-progress'>
+            <span>{{localize 'MY_RPG.KeyInfo.ProgressPoints'}}</span>
+            <div class='andromeda-status-combo'>
+              <strong class='andromeda-status-value' data-field='system.advancement.totalSpent'>
+                {{system.advancement.totalSpent}}
+              </strong>
+              <span class='andromeda-status-separator'>/</span>
+              <input
+                type='number'
+                name='system.progressPoints'
+                value='{{system.progressPoints}}'
+                step='1'
+                inputmode='numeric'
+              />
+            </div>
+          </label>
         </div>
       </header>
 
@@ -225,12 +223,6 @@
                   </label>
                 {{/each}}
               </div>
-              {{#if defensesLocked}}
-                <p class='andromeda-defense-lock-hint'>
-                  <i class='fa-solid fa-lock'></i>
-                  <span>{{localize 'MY_RPG.Archetype.DefensesLocked'}}</span>
-                </p>
-              {{/if}}
             </section>
 
             <section class='andromeda-skills-block'>

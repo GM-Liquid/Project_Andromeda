@@ -52,6 +52,27 @@ test('player-character HUD uses the updated progression label and no-wrap stat c
   );
 });
 
+test('progression points show for every actor type and the shared GM pool is boss-only', () => {
+  const template = readFile('templates/actor/partials/actor-sheet-content.hbs');
+
+  // The progression-points card lives in the rank column and is no longer gated to
+  // player characters, so minions / standards / bosses display it too.
+  const rankColumn = template.match(
+    /<div class='andromeda-hud__rank-column'>[\s\S]*?<\/div>\s*<\/header>/
+  )?.[0];
+  assert.ok(rankColumn);
+  assert.match(rankColumn, /andromeda-status-card--rank-progress/);
+  assert.doesNotMatch(rankColumn, /\{\{#if isPlayerCharacter\}\}/);
+
+  // The shared GM Highlight Points pool is rendered only for bosses (isElite),
+  // not for every GM character.
+  assert.match(template, /\{\{#if isElite\}\}[\s\S]*MY_RPG\.KeyInfo\.SharedMomentOfGlory/);
+  assert.doesNotMatch(
+    template,
+    /\{\{#if isGmCharacter\}\}[\s\S]*MY_RPG\.KeyInfo\.SharedMomentOfGlory/
+  );
+});
+
 test('rank control uses a visible tile label instead of a hover tooltip', () => {
   const template = readFile('templates/actor/partials/actor-sheet-content.hbs');
   const stylesheet = readFile('css/project-andromeda.css');
@@ -75,7 +96,11 @@ test('HUD stat grid keeps stress and progression columns compact', () => {
   );
   assert.match(
     stylesheet,
-    /\.project-andromeda \.andromeda-hud--gm \.andromeda-hud__stats-row \{[\s\S]*grid-template-columns:\s*3\.5rem 4\.75rem 14\.5rem;/
+    /\.project-andromeda \.andromeda-hud--gm \.andromeda-hud__stats-row \{[\s\S]*grid-template-areas:\s*'stress'\s*'speed';[\s\S]*grid-template-columns:\s*4\.75rem;/
+  );
+  assert.match(
+    stylesheet,
+    /\.project-andromeda\.elite \.andromeda-hud--gm \.andromeda-hud__stats-row \{[\s\S]*grid-template-areas:\s*'stress glory'\s*'speed glory';[\s\S]*grid-template-columns:\s*4\.75rem 8rem;/
   );
   assert.match(
     stylesheet,
@@ -127,6 +152,7 @@ test('defenses live in a dedicated rail block and lock when the archetype sets t
   assert.match(defenseInput, /name='\{\{defense\.path\}\}'/);
   // Defenses become read-only only when the archetype-derived profile is active.
   assert.match(defenseInput, /\{\{#if defense\.locked\}\}[\s\S]*readonly[\s\S]*\{\{\/if\}\}/);
+  assert.doesNotMatch(template, /andromeda-defense-lock-hint/);
 });
 
 test('rank is shown as a Roman numeral in view mode and a number input in edit mode', () => {

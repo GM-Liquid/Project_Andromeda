@@ -17,7 +17,6 @@
           <input
             type="text"
             class="step-effects__text"
-            name="system.stepEffects.{{effect.index}}.text"
             value="{{effect.text}}"
             data-step-effect-text
             placeholder="{{localize 'MY_RPG.StepEffects.TextPlaceholder'}}"
@@ -25,7 +24,6 @@
           />
           <select
             class="step-effects__threshold"
-            name="system.stepEffects.{{effect.index}}.minOutcome"
             data-step-effect-threshold
             aria-label="{{localize 'MY_RPG.StepEffects.ThresholdLabel'}}"
             {{#unless ../editable}}disabled{{/unless}}

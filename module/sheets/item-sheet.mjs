@@ -16,13 +16,19 @@ import { STEP_EFFECT_THRESHOLDS } from '../helpers/step-effects.mjs';
 
 export const FoundryItemSheet = getFoundryItemSheetClass();
 
-// Item types that carry a damage profile and therefore support step effects.
+// Item types that carry a damage profile / roll outcome and therefore support step
+// effects. Besides the equipment-like types this also covers ability content:
+// sheet-authored abilities (`trait`), catalog/signature abilities
+// (`trait-source-ability`), and genomes (`trait-genome`).
 const STEP_EFFECT_ITEM_TYPES = new Set([
   'weapon',
   'equipment',
   'equipment-consumable',
   'implant',
-  'cartridge'
+  'cartridge',
+  'trait',
+  'trait-source-ability',
+  'trait-genome'
 ]);
 
 const DEFAULT_STEP_EFFECT_THRESHOLD = 'Success';
@@ -302,6 +308,29 @@ export class ProjectAndromedaItemSheet extends FoundryItemSheet {
         void this._removeStepEffect(root, Number(button.dataset.stepEffectIndex));
       });
     }
+
+    // The step-effect inputs are intentionally unnamed (see step-effects.hbs): Foundry's
+    // form serialization expands indexed names like `system.stepEffects.0.text` into a
+    // numeric-keyed object that overwrites the stored array and makes the rows vanish.
+    // Instead we persist them ourselves as a proper array, and stop the change event so
+    // the framework's submit-on-change does not also fire a redundant full re-render.
+    for (const input of root.querySelectorAll(
+      '[data-step-effect-text], [data-step-effect-threshold]'
+    )) {
+      if (input.dataset.stepEffectBound) continue;
+      input.dataset.stepEffectBound = '1';
+      input.addEventListener('change', (event) => {
+        event.stopPropagation();
+        void this._persistStepEffects(root);
+      });
+    }
+  }
+
+  async _persistStepEffects(root) {
+    await this.item.update(
+      { 'system.stepEffects': this._collectStepEffects(root) },
+      { render: false }
+    );
   }
 
   _collectStepEffects(root) {
@@ -331,7 +360,10 @@ export class ProjectAndromedaItemSheet extends FoundryItemSheet {
     sheetData.system = sheetData.system ?? itemData?.system ?? {};
     sheetData.config = CONFIG.ProjectAndromeda ?? {};
     sheetData.itemConfig = getItemTypeConfig(this.item?.type);
-    sheetData.showStepEffects = STEP_EFFECT_ITEM_TYPES.has(this.item?.type);
+    // Personality complications are `trait` items too, but they are narrative and
+    // never rolled, so they must not surface the step-effects authoring section.
+    sheetData.showStepEffects =
+      STEP_EFFECT_ITEM_TYPES.has(this.item?.type) && !isPersonalityValueItem(this.item);
     sheetData.stepEffects = sheetData.showStepEffects
       ? buildStepEffectRows(sheetData.system.stepEffects)
       : [];
