@@ -50,7 +50,17 @@
               </span>
             </div>
             {{#unless ../group.isSimple}}
-              <div class='item-row__check'>{{item.checkSummary}}</div>
+              <div class='item-row__check'>
+                {{#if item.checkSummary.hasCheck}}
+                  <span class='item-row__check-skill'>{{item.checkSummary.skillLabel}}</span>
+                  <span
+                    class='item-row__check-rank {{item.checkSummary.rankClass}}'
+                  >{{item.checkSummary.rankRoman}}</span>
+                  <span class='item-row__check-bonus'>+{{item.checkSummary.bonus}}</span>
+                {{else}}
+                  <span class='item-row__check-empty'>—</span>
+                {{/if}}
+              </div>
               <div class='item-row__activation'>
                 <span class='item-row__activation-cost' title='{{item.activationSummary}}'>
                   {{item.activationShortSummary}}

@@ -53,6 +53,7 @@ import {
   getSkillRankBonus
 } from '../helpers/archetype.mjs';
 import { formatDamageProfile, hasDamageProfileValue } from '../helpers/damage-profile.mjs';
+import { toRoman } from '../helpers/roman.mjs';
 import { hasStepEffects, normalizeStepEffects } from '../helpers/step-effects.mjs';
 import { buildSkillCheckRollFlavor } from '../helpers/roll-card.mjs';
 
@@ -569,6 +570,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     }
 
     context.system.currentRankClass = getHudRankClass(Number(context.system?.currentRank) || 0);
+    context.system.currentRankRoman = toRoman(Number(context.system?.currentRank) || 0);
 
     this._preparePersonalityData(context);
 
@@ -620,16 +622,14 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     context.system.tempcontrol ??= 0;
     context.system.tempwill ??= 0;
     context.system.tempspeed ??= 0;
-    const effectiveDefenses = context.system?.effectiveDefenses ?? context.system?.defenses ?? {};
     const archetypeSkillKey = getArchetypeSkillKey(this.actor);
     context.defensesLocked = Boolean(this.actor.system?.defensesLocked);
 
     const sortedSkills = {};
-    const skillColumns = [];
-    for (const [categoryKey, category] of Object.entries(
-      CONFIG.ProjectAndromeda.skillCategories ?? {}
-    )) {
-      const columnSkills = [];
+    const skillList = [];
+    const defenseRows = [];
+    const seenDefenseKeys = new Set();
+    for (const [, category] of Object.entries(CONFIG.ProjectAndromeda.skillCategories ?? {})) {
       for (const key of category.skills ?? []) {
         const skill = context.system.skills[key];
         if (!skill) continue;
@@ -643,24 +643,27 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
         skill.isArchetypeSkill = key === archetypeSkillKey;
         skill.label = game.i18n.localize(CONFIG.ProjectAndromeda.skills[key]) ?? key;
         skill.rankClass = `rank${skill.rank}`;
+        skill.rankRoman = toRoman(skill.rank);
         skill.key = key;
         skill.advancement = this._buildSkillAdvancementDisplay(context.system, key);
         sortedSkills[key] = skill;
-        columnSkills.push(skill);
+        skillList.push(skill);
       }
-      skillColumns.push({
-        key: categoryKey,
-        label: game.i18n.localize(category.label),
-        defenseLabel: game.i18n.localize(category.defenseLabel),
-        defensePath: `system.defenses.${category.defenseKey}`,
-        defenseKey: category.defenseKey,
-        defenseValue: context.system?.defenses?.[category.defenseKey] ?? 1,
-        defenseEffectiveValue: effectiveDefenses[category.defenseKey] ?? 1,
-        skills: columnSkills
-      });
+      const defenseKey = category.defenseKey;
+      if (defenseKey && !seenDefenseKeys.has(defenseKey)) {
+        seenDefenseKeys.add(defenseKey);
+        defenseRows.push({
+          key: defenseKey,
+          label: game.i18n.localize(category.defenseLabel),
+          path: `system.defenses.${defenseKey}`,
+          value: context.system?.defenses?.[defenseKey] ?? 1,
+          locked: context.defensesLocked
+        });
+      }
     }
     context.system.skills = sortedSkills;
-    context.skillColumns = skillColumns;
+    context.skillList = skillList;
+    context.defenseRows = defenseRows;
 
     const stress = context.system.stress ?? { value: 0, max: 0 };
     const stressMax = Math.max(Number(stress.max) || 0, 0);
@@ -1041,6 +1044,11 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
         .find('.skill-rank-input')
         .removeClass(rankClasses.join(' '))
         .addClass(`rank${skill.rank}`);
+      $row
+        .find('.skill-rank-roman')
+        .text(toRoman(skill.rank))
+        .removeClass(rankClasses.join(' '))
+        .addClass(`rank${skill.rank}`);
     }
   }
 
@@ -1100,6 +1108,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
         .find('.andromeda-hud__rank')
         .removeClass(rankBadgeClasses.join(' '))
         .addClass(`andromeda-hud__rank--${rankClass}`);
+      $root.find('.andromeda-hud__rank-value').text(toRoman(Number(rank) || 0));
     };
     const setText = (field, val) => {
       $root.find(`[data-field="${field}"]`).text(val ?? 0);
@@ -1349,9 +1358,22 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
 
   _getItemCheckSummary(item, displayConfig = null) {
     const skillKey = String(item?.system?.skill ?? '').trim();
-    const rollSummary = this._getItemRollSummary(item, displayConfig);
-    if (!skillKey || rollSummary === '—') return '—';
-    return `${this._skillLabel(skillKey)} ${rollSummary}`;
+    const canRoll = Boolean(displayConfig?.canRoll ?? this._getItemDisplayConfig(item).canRoll);
+    if (!skillKey || !canRoll) return { hasCheck: false };
+
+    const skill = normalizeSkill(
+      this.actor.system?.skills?.[skillKey],
+      this.actor.system?.currentRank,
+      getSkillRankBonus(this.actor, skillKey)
+    );
+    return {
+      hasCheck: true,
+      skillLabel: this._skillLabel(skillKey),
+      rank: skill.rank,
+      rankRoman: toRoman(skill.rank),
+      rankClass: `rank${skill.rank}`,
+      bonus: skill.value
+    };
   }
 
   _getItemActivationSummary(item) {

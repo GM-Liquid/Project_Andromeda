@@ -103,56 +103,51 @@ test('HUD stat grid keeps stress and progression columns compact', () => {
   );
 });
 
-test('skill check formula is centered within each category header', () => {
+test('skill rail renders a flat skill list with no category headers or 2d8 formula', () => {
   const template = readFile('templates/actor/partials/actor-sheet-content.hbs');
-  const stylesheet = readFile('css/project-andromeda.css');
 
-  assert.match(template, /<span class='andromeda-skill-formula'>2d8<\/span>/);
-  assert.match(
-    stylesheet,
-    /\.project-andromeda \.andromeda-ability-summary \{[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s+auto\s+minmax\(0,\s*1fr\);/
-  );
-  assert.match(
-    stylesheet,
-    /\.project-andromeda \.andromeda-ability-title \{[\s\S]*grid-column:\s*1;/
-  );
-  assert.match(
-    stylesheet,
-    /\.project-andromeda \.andromeda-skill-formula \{[\s\S]*grid-column:\s*2;[\s\S]*justify-self:\s*center;/
-  );
-  assert.match(
-    stylesheet,
-    /\.project-andromeda \.andromeda-defense-pill \{[\s\S]*grid-column:\s*3;[\s\S]*justify-content:\s*flex-end;/
-  );
+  assert.match(template, /<section class='andromeda-skills-block'>/);
+  assert.match(template, /\{\{#each skillList as \|skill\|\}\}/);
+  // The Body / Mind / Spirit category headings and per-category roll formula are gone.
+  assert.doesNotMatch(template, /andromeda-skill-formula/);
+  assert.doesNotMatch(template, /\{\{#each skillColumns/);
 });
 
-test('defense fields are sheet inputs that lock when the archetype sets them', () => {
+test('defenses live in a dedicated rail block and lock when the archetype sets them', () => {
   const template = readFile('templates/actor/partials/actor-sheet-content.hbs');
-  const defenseInput = template.match(/<input\s+class='andromeda-defense-input'[\s\S]*?\/>/)?.[0];
 
-  assert.ok(defenseInput);
-  assert.match(defenseInput, /name='\{\{column\.defensePath\}\}'/);
-  // Defenses become read-only only when the archetype-derived profile is active.
-  assert.match(defenseInput, /\{\{#if @root\.defensesLocked\}\}[\s\S]*readonly[\s\S]*\{\{\/if\}\}/);
-});
+  assert.match(template, /<section class='andromeda-defense-block'>/);
+  assert.match(template, /<h2>\{\{localize 'MY_RPG\.SheetLabels\.Defenses'\}\}<\/h2>/);
+  assert.match(template, /\{\{#each defenseRows as \|defense\|\}\}/);
 
-test('effective defenses render outside named form inputs', () => {
-  const template = readFile('templates/actor/partials/actor-sheet-content.hbs');
-  const stylesheet = readFile('css/project-andromeda.css');
-  const effectiveDisplay = template.match(
-    /<strong\s+class='andromeda-defense-effective'[\s\S]*?<\/strong>/
+  const defenseInput = template.match(
+    /<input\s+class='andromeda-defense-row__input'[\s\S]*?\/>/
   )?.[0];
+  assert.ok(defenseInput);
+  assert.match(defenseInput, /name='\{\{defense\.path\}\}'/);
+  // Defenses become read-only only when the archetype-derived profile is active.
+  assert.match(defenseInput, /\{\{#if defense\.locked\}\}[\s\S]*readonly[\s\S]*\{\{\/if\}\}/);
+});
 
-  assert.ok(effectiveDisplay);
-  assert.match(effectiveDisplay, /data-defense-effective='\{\{column\.defenseKey\}\}'/);
-  assert.doesNotMatch(effectiveDisplay, /\sname=/);
+test('rank is shown as a Roman numeral in view mode and a number input in edit mode', () => {
+  const template = readFile('templates/actor/partials/actor-sheet-content.hbs');
+  const stylesheet = readFile('css/project-andromeda.css');
+
   assert.match(
-    stylesheet,
-    /\.project-andromeda\.andromeda-play-mode \.andromeda-defense-input,[\s\S]*display:\s*none;/
+    template,
+    /<span class='skill-rank-roman \{\{skill\.rankClass\}\}'[\s\S]*?\{\{skill\.rankRoman\}\}/
+  );
+  assert.match(
+    template,
+    /<span class='andromeda-hud__rank-value'[\s\S]*?\{\{system\.currentRankRoman\}\}/
   );
   assert.match(
     stylesheet,
-    /\.project-andromeda\.andromeda-edit-mode \.andromeda-defense-effective,[\s\S]*display:\s*none;/
+    /\.project-andromeda\.andromeda-play-mode \.andromeda-skill-row \.skill-rank-input,[\s\S]*display:\s*none;/
+  );
+  assert.match(
+    stylesheet,
+    /\.project-andromeda\.andromeda-edit-mode \.andromeda-skill-row \.skill-rank-roman,[\s\S]*display:\s*none;/
   );
 });
 

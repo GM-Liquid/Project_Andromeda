@@ -46,6 +46,7 @@
   --andromeda-color-rank2: var(--andromeda-raw-rank2-bg-modern);
   --andromeda-color-rank3: var(--andromeda-raw-rank3-bg-modern);
   --andromeda-color-rank4: var(--andromeda-raw-rank4-bg-modern);
+  --andromeda-color-rank5: var(--andromeda-raw-amber-500);
 
   --andromeda-item-sheet-border: var(--andromeda-raw-stone-200);
   --andromeda-item-sheet-shadow: var(--andromeda-raw-shadow-ink-12);

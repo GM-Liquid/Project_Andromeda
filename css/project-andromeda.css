@@ -1277,6 +1277,26 @@ textarea[disabled] {
   -webkit-appearance: none;
 }
 
+.project-andromeda .andromeda-hud__rank-value {
+  place-self: center;
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text));
+  font-family: var(--andromeda-font-heading, var(--andromeda-fallback-font-heading));
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.project-andromeda.andromeda-play-mode .andromeda-hud__rank input,
+.project-andromeda .andromeda-play-mode .andromeda-hud__rank input {
+  display: none;
+}
+
+.project-andromeda.andromeda-edit-mode .andromeda-hud__rank-value,
+.project-andromeda .andromeda-edit-mode .andromeda-hud__rank-value {
+  display: none;
+}
+
 .project-andromeda .andromeda-hud__rank--rank0 {
   background: #fff;
 }
@@ -1409,9 +1429,11 @@ textarea[disabled] {
 
 .project-andromeda .andromeda-rail-header {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-bottom: 8px;
+  align-items: baseline;
+  justify-content: flex-start;
+  margin-bottom: 3px;
+  padding: 0 4px 2px;
+  border-bottom: 1px solid var(--andromeda-color-line, var(--andromeda-fallback-line));
 }
 
 .project-andromeda .andromeda-rail-header h2,
@@ -1426,6 +1448,83 @@ textarea[disabled] {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   text-decoration: none;
+}
+
+.project-andromeda .andromeda-defense-block {
+  margin-bottom: 8px;
+}
+
+.project-andromeda .andromeda-skills-block {
+  margin-top: 0;
+}
+
+.project-andromeda .andromeda-defense-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Defenses share the same compact row rhythm as the skill rows below them so the
+   rail reads as a single table with two labelled sections. */
+.project-andromeda .andromeda-defense-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 26px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: transparent;
+  transition: background-color 0.18s ease;
+}
+
+.project-andromeda .andromeda-defense-row:hover {
+  background: var(--andromeda-color-panel);
+}
+
+.project-andromeda .andromeda-defense-row__label {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text));
+  font-size: var(--andromeda-font-size-ui, var(--andromeda-fallback-font-size-ui));
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-andromeda .andromeda-defense-row__input {
+  width: 30px;
+  height: 24px;
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent !important;
+  color: var(--andromeda-color-text) !important;
+  font-family: var(--andromeda-font-data);
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center !important;
+}
+
+.project-andromeda .andromeda-defense-row__input[readonly] {
+  cursor: default;
+}
+
+.project-andromeda.andromeda-edit-mode .andromeda-defense-row__input:not([readonly]),
+.project-andromeda .andromeda-edit-mode .andromeda-defense-row__input:not([readonly]) {
+  background: var(--andromeda-color-surface) !important;
+  box-shadow: inset 0 0 0 1px var(--andromeda-color-line-soft);
+}
+
+.project-andromeda .andromeda-defense-lock-hint {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 4px 4px 0;
+  color: var(--andromeda-color-muted);
+  font-size: var(--andromeda-font-size-label);
+  line-height: 1.25;
 }
 
 .project-andromeda .andromeda-rail-ability {
@@ -2063,6 +2162,56 @@ textarea[disabled] {
   border-color: transparent;
 }
 
+.project-andromeda .andromeda-skill-row .skill-value input.rank5 {
+  background: var(--andromeda-color-rank5);
+  border-color: transparent;
+}
+
+.project-andromeda .andromeda-skill-row .skill-rank-roman {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 24px;
+  border-radius: 4px;
+  color: var(--andromeda-raw-charcoal-800);
+  font-family: var(--andromeda-font-heading);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.project-andromeda .andromeda-skill-row .skill-rank-roman.rank1 {
+  background: var(--andromeda-color-rank1);
+}
+
+.project-andromeda .andromeda-skill-row .skill-rank-roman.rank2 {
+  background: var(--andromeda-color-rank2);
+}
+
+.project-andromeda .andromeda-skill-row .skill-rank-roman.rank3 {
+  background: var(--andromeda-color-rank3);
+}
+
+.project-andromeda .andromeda-skill-row .skill-rank-roman.rank4 {
+  background: var(--andromeda-color-rank4);
+}
+
+.project-andromeda .andromeda-skill-row .skill-rank-roman.rank5 {
+  background: var(--andromeda-color-rank5);
+}
+
+.project-andromeda.andromeda-play-mode .andromeda-skill-row .skill-rank-input,
+.project-andromeda .andromeda-play-mode .andromeda-skill-row .skill-rank-input {
+  display: none;
+}
+
+.project-andromeda.andromeda-edit-mode .andromeda-skill-row .skill-rank-roman,
+.project-andromeda .andromeda-edit-mode .andromeda-skill-row .skill-rank-roman {
+  display: none;
+}
+
 .project-andromeda .andromeda-skill-legend {
   display: flex;
   flex-wrap: wrap;
@@ -2490,8 +2639,61 @@ textarea[disabled] {
 }
 
 .project-andromeda .item-row__check {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+.project-andromeda .item-row__check-skill {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text));
+  text-overflow: ellipsis;
+}
+
+.project-andromeda .item-row__check-rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-width: 1.5rem;
+  height: 1.15rem;
+  padding: 0 0.3rem;
+  border-radius: 4px;
+  color: var(--andromeda-raw-charcoal-800);
+  font-family: var(--andromeda-font-heading);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.project-andromeda .item-row__check-rank.rank1 {
+  background: var(--andromeda-color-rank1);
+}
+
+.project-andromeda .item-row__check-rank.rank2 {
+  background: var(--andromeda-color-rank2);
+}
+
+.project-andromeda .item-row__check-rank.rank3 {
+  background: var(--andromeda-color-rank3);
+}
+
+.project-andromeda .item-row__check-rank.rank4 {
+  background: var(--andromeda-color-rank4);
+}
+
+.project-andromeda .item-row__check-rank.rank5 {
+  background: var(--andromeda-color-rank5);
+}
+
+.project-andromeda .item-row__check-bonus {
+  flex: 0 0 auto;
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text));
+  font-weight: 700;
 }
 
 .project-andromeda .item-row__activation {
@@ -2584,6 +2786,12 @@ textarea[disabled] {
   border-color: var(--andromeda-color-accent);
   background: var(--andromeda-color-panel);
   color: var(--andromeda-color-accent);
+}
+
+/* Keep every activation control the same width as the trackable variant so the
+   action icons stay aligned whether or not the ability has a limited-use box. */
+.project-andromeda .item-activate {
+  width: 2rem;
 }
 
 .project-andromeda .item-activate--trackable {

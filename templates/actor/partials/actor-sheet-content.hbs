@@ -147,6 +147,7 @@
         <div class='andromeda-hud__rank-column'>
           <label class='andromeda-hud__rank andromeda-hud__rank--{{system.currentRankClass}}'>
             <span class='andromeda-hud__rank-title'>{{localize 'MY_RPG.RankNumeric.Title'}}</span>
+            <span class='andromeda-hud__rank-value' aria-hidden='true'>{{system.currentRankRoman}}</span>
             <input
               type='number'
               name='system.currentRank'
@@ -198,113 +199,115 @@
     <div class='andromeda-sheet-viewport'>
       <section class='andromeda-sheet-workspace'>
         <aside class='andromeda-sheet-rail'>
-          <header class='andromeda-rail-header'>
-            <h2>{{localize 'MY_RPG.SheetLabels.Skills'}}</h2>
-          </header>
-
           <div class='andromeda-rail-skills-scroll'>
-            {{#each skillColumns as |column|}}
-              <article
-                class='andromeda-ability-card andromeda-rail-ability'
-                data-category-key='{{column.key}}'
-              >
-                <div class='andromeda-ability-summary'>
-                  <span class='andromeda-ability-title'>{{column.label}}</span>
-                  <span class='andromeda-skill-formula'>2d8</span>
-
-                  <label class='andromeda-defense-pill'>
-                    <span>{{column.defenseLabel}}</span>
+            <section class='andromeda-defense-block'>
+              <header class='andromeda-rail-header'>
+                <h2>{{localize 'MY_RPG.SheetLabels.Defenses'}}</h2>
+              </header>
+              <div class='andromeda-defense-list'>
+                {{#each defenseRows as |defense|}}
+                  <label class='andromeda-defense-row' data-defense-key='{{defense.key}}'>
+                    <span class='andromeda-defense-row__label'>{{defense.label}}</span>
                     <input
-                      class='andromeda-defense-input'
+                      class='andromeda-defense-row__input'
                       type='number'
-                      name='{{column.defensePath}}'
-                      value='{{column.defenseValue}}'
+                      name='{{defense.path}}'
+                      value='{{defense.value}}'
                       step='1'
                       min='0'
                       inputmode='numeric'
-                      {{#if @root.defensesLocked}}
+                      {{#if defense.locked}}
                         readonly
+                        tabindex='-1'
                         title='{{localize "MY_RPG.Archetype.DefensesLocked"}}'
                       {{/if}}
                     />
-                    <strong
-                      class='andromeda-defense-effective'
-                      data-defense-effective='{{column.defenseKey}}'
-                    >{{column.defenseEffectiveValue}}</strong>
                   </label>
-                </div>
+                {{/each}}
+              </div>
+              {{#if defensesLocked}}
+                <p class='andromeda-defense-lock-hint'>
+                  <i class='fa-solid fa-lock'></i>
+                  <span>{{localize 'MY_RPG.Archetype.DefensesLocked'}}</span>
+                </p>
+              {{/if}}
+            </section>
 
-                <div class='andromeda-rail-skills'>
-                  {{#each column.skills as |skill|}}
-                    <div
-                      class='skill skill-row andromeda-skill-row {{#if @root.isPlayerCharacter}}andromeda-skill-row--advancement{{/if}}'
-                      data-skill-key='{{skill.key}}'
+            <section class='andromeda-skills-block'>
+              <header class='andromeda-rail-header'>
+                <h2>{{localize 'MY_RPG.SheetLabels.Skills'}}</h2>
+              </header>
+              <div class='andromeda-rail-skills'>
+                {{#each skillList as |skill|}}
+                  <div
+                    class='skill skill-row andromeda-skill-row {{#if @root.isPlayerCharacter}}andromeda-skill-row--advancement{{/if}}'
+                    data-skill-key='{{skill.key}}'
+                  >
+                    <button
+                      type='button'
+                      class='skill-col skill-name rollable'
+                      data-skill='{{skill.key}}'
+                      data-label='{{skill.label}}'
                     >
+                      <span class='skill-name__label'>{{skill.label}}</span>
+                      {{#if skill.isArchetypeSkill}}
+                        <span
+                          class='skill-name__archetype-star'
+                          title='{{localize "MY_RPG.Archetype.SkillStar"}}'
+                          aria-label='{{localize "MY_RPG.Archetype.SkillStar"}}'
+                        >★</span>
+                      {{/if}}
+                    </button>
+                    {{#if @root.isPlayerCharacter}}
                       <button
                         type='button'
-                        class='skill-col skill-name rollable'
-                        data-skill='{{skill.key}}'
-                        data-label='{{skill.label}}'
-                      >
-                        <span class='skill-name__label'>{{skill.label}}</span>
-                        {{#if skill.isArchetypeSkill}}
-                          <span
-                            class='skill-name__archetype-star'
-                            title='{{localize "MY_RPG.Archetype.SkillStar"}}'
-                            aria-label='{{localize "MY_RPG.Archetype.SkillStar"}}'
-                          >★</span>
-                        {{/if}}
-                      </button>
-                      {{#if @root.isPlayerCharacter}}
-                        <button
-                          type='button'
-                          class='skill-advance andromeda-advancement-cost andromeda-advancement--{{skill.advancement.state}}'
-                          data-advancement-kind='skill'
-                          data-advancement-key='{{skill.key}}'
-                          title='{{skill.advancement.title}}'
-                          aria-label='{{skill.advancement.title}}'
-                        >{{skill.advancement.costLabel}}</button>
-                      {{/if}}
-                      <div class='skill-col skill-value'>
-                        <input
-                          class='skill-rank-input {{skill.rankClass}}'
-                          type='number'
-                          name='system.skills.{{skill.key}}.rank'
-                          value='{{skill.rank}}'
-                          step='1'
-                          inputmode='numeric'
-                          min='1'
-                          max='4'
-                          title='{{localize "MY_RPG.SkillCheck.RankField"}}'
-                          aria-label='{{localize "MY_RPG.SkillCheck.RankField"}}'
-                        />
-                        <span class='skill-value-separator'>·</span>
-                        <input
-                          class='skill-value-input'
-                          type='number'
-                          name='system.skills.{{skill.key}}.value'
-                          value='{{skill.value}}'
-                          step='1'
-                          inputmode='numeric'
-                          pattern='\d+'
-                          min='0'
-                          max='4'
-                          title='{{localize "MY_RPG.SkillCheck.ValueField"}}'
-                          aria-label='{{localize "MY_RPG.SkillCheck.ValueField"}}'
-                        />
-                      </div>
+                        class='skill-advance andromeda-advancement-cost andromeda-advancement--{{skill.advancement.state}}'
+                        data-advancement-kind='skill'
+                        data-advancement-key='{{skill.key}}'
+                        title='{{skill.advancement.title}}'
+                        aria-label='{{skill.advancement.title}}'
+                      >{{skill.advancement.costLabel}}</button>
+                    {{/if}}
+                    <div class='skill-col skill-value'>
+                      <span class='skill-rank-roman {{skill.rankClass}}' aria-hidden='true'>{{skill.rankRoman}}</span>
+                      <input
+                        class='skill-rank-input {{skill.rankClass}}'
+                        type='number'
+                        name='system.skills.{{skill.key}}.rank'
+                        value='{{skill.rank}}'
+                        step='1'
+                        inputmode='numeric'
+                        min='1'
+                        max='4'
+                        title='{{localize "MY_RPG.SkillCheck.RankField"}}'
+                        aria-label='{{localize "MY_RPG.SkillCheck.RankField"}}'
+                      />
+                      <span class='skill-value-separator'>·</span>
+                      <input
+                        class='skill-value-input'
+                        type='number'
+                        name='system.skills.{{skill.key}}.value'
+                        value='{{skill.value}}'
+                        step='1'
+                        inputmode='numeric'
+                        pattern='\d+'
+                        min='0'
+                        max='4'
+                        title='{{localize "MY_RPG.SkillCheck.ValueField"}}'
+                        aria-label='{{localize "MY_RPG.SkillCheck.ValueField"}}'
+                      />
                     </div>
-                  {{/each}}
-                </div>
-              </article>
-            {{/each}}
+                  </div>
+                {{/each}}
+              </div>
+            </section>
           </div>
 
           <footer class='andromeda-skill-legend' aria-label='{{localize "MY_RPG.RankNumeric.Title"}}'>
-            <span class='rank1'>{{localize 'MY_RPG.RankNumeric.Rank1'}}</span>
-            <span class='rank2'>{{localize 'MY_RPG.RankNumeric.Rank2'}}</span>
-            <span class='rank3'>{{localize 'MY_RPG.RankNumeric.Rank3'}}</span>
-            <span class='rank4'>{{localize 'MY_RPG.RankNumeric.Rank4'}}</span>
+            <span class='rank1'>{{localize 'MY_RPG.RankNumeric.Title'}}&nbsp;I</span>
+            <span class='rank2'>{{localize 'MY_RPG.RankNumeric.Title'}}&nbsp;II</span>
+            <span class='rank3'>{{localize 'MY_RPG.RankNumeric.Title'}}&nbsp;III</span>
+            <span class='rank4'>{{localize 'MY_RPG.RankNumeric.Title'}}&nbsp;IV</span>
           </footer>
         </aside>
 
