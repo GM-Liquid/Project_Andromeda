@@ -61,7 +61,10 @@ test('moved chapters keep the legacy public URLs as aliases', () => {
   assert.deepEqual(equipmentChapter?.aliases, ['03-sposobnosti-i-snaryazhenie']);
   assert.deepEqual(coreRulesChapter?.aliases, ['01-osnovnye-pravila']);
   assert.deepEqual(combatChapter?.aliases, ['04-boy']);
-  assert.deepEqual(negotiationsChapter?.aliases, ['05-peregovory']);
+  // ВРЕМЕННО: глава «Переговоры» снята с публикации Quartz, поэтому её нет в манифесте.
+  // Когда вернёшь запись в rulebook.manifest.mjs, восстанови проверку её alias:
+  // assert.deepEqual(negotiationsChapter?.aliases, ['05-peregovory']);
+  assert.equal(negotiationsChapter, undefined);
 });
 
 test('equipment chapter keeps the temporary notice mechanism disabled by default', () => {

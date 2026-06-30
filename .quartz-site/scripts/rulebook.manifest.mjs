@@ -121,24 +121,27 @@ export const rulebookManifest = [
     showInHeaderNav: true,
     parent: null
   },
-  {
-    id: 'rulebook-negotiations',
-    type: 'generated',
-    slug: 'rulebook/07-peregovory',
-    source: 'Глава 7. Переговоры.md',
-    title: 'Переговоры',
-    navTitle: 'Переговоры',
-    order: 80,
-    pageType: 'chapter',
-    summary:
-      'Социальные сцены, давление, убеждение и правила, которые поддерживают переговоры как полноценную механику.',
-    aliases: ['05-peregovory'],
-    heroImage: null,
-    heroAlt: null,
-    showHero: true,
-    showToc: true,
-    parent: null
-  }
+  // ВРЕМЕННО СКРЫТО: глава «Переговоры» убрана из публикации Quartz, но остаётся
+  // в `Книга правил v0.4/Глава 7. Переговоры.md` и в приватных доках. Чтобы вернуть
+  // её на сайт, раскомментируй запись ниже.
+  // {
+  //   id: 'rulebook-negotiations',
+  //   type: 'generated',
+  //   slug: 'rulebook/07-peregovory',
+  //   source: 'Глава 7. Переговоры.md',
+  //   title: 'Переговоры',
+  //   navTitle: 'Переговоры',
+  //   order: 80,
+  //   pageType: 'chapter',
+  //   summary:
+  //     'Социальные сцены, давление, убеждение и правила, которые поддерживают переговоры как полноценную механику.',
+  //   aliases: ['05-peregovory'],
+  //   heroImage: null,
+  //   heroAlt: null,
+  //   showHero: true,
+  //   showToc: true,
+  //   parent: null
+  // }
 ];
 
 export function getRulebookManifest() {
