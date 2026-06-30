@@ -77,7 +77,7 @@
       "BonusFortitudeLabel": "Бонус к Стойкости",
       "BonusControlLabel": "Бонус к Контролю",
       "BonusWillLabel": "Бонус к Воле",
-      "ShieldLabel": "Силовой щит",
+      "ShieldLabel": "Силовой щит (стресс за ранг)",
       "BonusSpeedLabel": "Бонус к скорости"
     },
     "ArmorTable": {

@@ -160,7 +160,7 @@
       "BonusWillLabel": "Bonus to Will",
       "ArmorSectionTitle": "Armor",
       "DescriptionLabel": "Description",
-      "ShieldLabel": "Power Shield",
+      "ShieldLabel": "Power Shield (stress per rank)",
       "BonusSpeedLabel": "Speed Bonus"
     },
     "ArmorTable": {
