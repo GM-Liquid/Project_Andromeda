@@ -11,8 +11,8 @@
 | ----------------------------- | --------------------------------------------------------------- |
 | **System name**               | **Project Andromeda**                                           |
 | **Foundry VTT compatibility** | v12 (minimum 12, verified 13)                                   |
-| **Current version**           | `0.4.00.1`                                                      |
-| **Current release line**      | `0.4.00.x`                                                      |
+| **Current version**           | `0.4.04.0`                                                      |
+| **Current release line**      | `0.4.04.x`                                                      |
 | **Languages**                 | English, Русский (full parity required)                         |
 | **Main tech**                 | ES-module JavaScript (`*.mjs`), Handlebars (`*.hbs`), JSON, CSS |
 | **Licence**                   | CC BY-NC-SA 4.0                                                 |
@@ -28,7 +28,7 @@ project-andromeda/
 | package.json
 | data/
 | '- gear/
-|    '- catalog/ <- public fallback mirror of the canonical armor / equipment / abilities JSON catalogs plus the temporary concept-abilities source catalog kept available when the private repo is unavailable
+|    '- catalog/ <- public fallback mirror of the canonical armor / equipment / abilities / traits / archetypes JSON catalogs plus the temporary concept-abilities source catalog kept available when the private repo is unavailable
 | tools/
 | '- build-pack.mjs <- compiles data/gear/catalog/*.json into the gear-library compendium pack
 | packs/ <- built compendium packs (build artifact, gitignored); gear-library ships the gear catalog
@@ -95,7 +95,7 @@ project-andromeda/
 - `Книга правил v0.4/` in this repository is a **public mirror**, not the canonical rules source. Canonical mechanics still live in the private source repo `Docs_Project_Andromeda`.
 - `.quartz-site/scripts/sync-book.mjs` auto-detects a sibling `../Docs_Project_Andromeda/Книга правил v0.4/` (or `PROJECT_ANDROMEDA_DOCS_REPO`) and mirrors it into this repository before generating Quartz chapter pages.
 - `.quartz-site/scripts/dev.mjs`, `.quartz-site/scripts/sync-book.mjs`, and `.quartz-site/package.json` build scripts all rely on the same source-resolution helper so local Quartz work reads from the canonical private-docs repo when it is available.
-- `.quartz-site/scripts/gear-catalog-source.mjs` auto-detects a sibling `../Docs_Project_Andromeda/data/gear/catalog/` (or `PROJECT_ANDROMEDA_DOCS_REPO`) and mirrors the canonical armor, equipment, abilities, and temporary `concept-abilities` JSON catalogs into this repository before chapter generation.
+- `.quartz-site/scripts/gear-catalog-source.mjs` auto-detects a sibling `../Docs_Project_Andromeda/data/gear/catalog/` (or `PROJECT_ANDROMEDA_DOCS_REPO`) and mirrors the canonical armor, equipment, abilities, traits, archetypes, and temporary `concept-abilities` JSON catalogs into this repository before chapter generation.
 - The sibling private repo may also install a local `post-commit` hook that runs `node scripts/publish-public.mjs --build` after commits in `Docs_Project_Andromeda`, updating this public mirror plus `.quartz-site/content/rulebook` and `.quartz-site/public` automatically on the local machine.
 - `data/gear/catalog/` in this repository is a **public fallback mirror** for those canonical JSON catalogs so CI and GitHub Pages builds can still generate the chapter 04 catalogs without the private repo.
 - If the private docs repo is unavailable, Quartz falls back to the mirrored `Книга правил v0.4/` inside this public repository so CI and GitHub Pages builds still work.
@@ -127,7 +127,7 @@ project-andromeda/
 - `.quartz-site/scripts/gear-catalog-source.test.mjs` when the gear-catalog mirror or fallback behaviour changes and needs regression coverage.
 - `.quartz-site/scripts/sync-book.test.mjs` when generated chapter output for JSON-backed rulebook catalogs changes and needs regression coverage.
 - `Docs_Project_Andromeda/Книга правил v0.4/Глава 3. Навыки.md` when the published skills chapter text changes.
-- `Docs_Project_Andromeda/data/gear/catalog/armor.json`, `Docs_Project_Andromeda/data/gear/catalog/equipment.json`, and `Docs_Project_Andromeda/data/gear/catalog/abilities.json` when the published chapter 04 catalog data changes.
+- `Docs_Project_Andromeda/data/gear/catalog/armor.json`, `Docs_Project_Andromeda/data/gear/catalog/equipment.json`, `Docs_Project_Andromeda/data/gear/catalog/abilities.json`, and `Docs_Project_Andromeda/data/gear/catalog/traits.json` when the published or shipped catalog data changes.
 - `Docs_Project_Andromeda/data/gear/catalog/concept-abilities.json` when the temporary source catalog itself changes, even though it is not currently published on the public Quartz site.
 - `Docs_Project_Andromeda/Книга правил v0.4/Глава 4. Способности и снаряжение.md` when the surrounding prose, section framing, or explanatory text changes around those generated catalogs.
 - `.quartz-site/quartz.layout.ts` when rulebook layout, sidebars, TOC placement, or conditional page composition change.
@@ -178,7 +178,8 @@ project-andromeda/
 ### 3.3 Skills
 
 - Skill checks roll **2d8 + skill value**. Item-triggered checks use the same formula.
-- The unshifted outcome table is: **8 or less = failure; 9-12 = success with a cost; 13-16 = success; 17+ = critical success**.
+- The unshifted outcome table is: **7 or less = failure; 8-11 = success with a cost; 12-15 = success; 16+ = critical success**.
+- Traits cost **2 × rank** progression points and abilities cost **3 × rank**. Their cost is included in `system.advancement.totalSpent`; an archetype's granted signature ability and personality complications are free.
 - **Failure with consequence** is the step below failure and is available only by shifting an outcome.
 - Chat output immediately shows the unshifted outcome and the used skill rank. Players and GMs apply rank-versus-task shifts manually after the roll.
 - Damage from weapons, abilities, and other damaging effects is stored and shown as four slash-separated values: **failure / success with a cost / success / critical success**. For example, `0/1/2/4` means 0 damage on failure, 1 on success with a cost, 2 on success, and 4 on critical success.
@@ -269,7 +270,7 @@ project-andromeda/
 - **Sheets:** built with plain HTML + Handlebars; keep markup semantic for accessibility.
 - **No full re-render on edits:** Any change made through the character sheet (PC or NPC) should update the UI and derived values without triggering a full sheet re-render, unless a structural reflow is required. Prefer in-place DOM updates tied to `actor.update(..., { render: false })`, and refresh only the affected inputs, labels, and computed fields (speed, defenses, health, and similar values).
 - **Item library sync:** Character-sheet items that represent abilities, genomes, traits, or equipment stay linked to a corresponding library source via `flags.project-andromeda.libraryItemUuid`. The source is the shipped **`gear-library` compendium pack** for catalog content (read-only canon — see §6.2) or a **world-level Foundry item** for homebrew created on a sheet. A single library item may be linked to multiple actor items at once. Shared library data propagates to every linked actor item, while actor-local state such as `quantity` and `equipped` remains local. When the library-sync first creates the world item that backs a sheet-authored homebrew, it is filed into an **Items folder named after the owning actor** (flagged `flags.project-andromeda.actorItemFolder`), creating that folder on demand. Beyond that on-create filing, the system must not move already-foldered library items between folders, and must not create a duplicate world item when an actor item already links to a valid source. Deleting an actor item resyncs the world source's structure while other actor items still link to it; deleting the **last** linked actor item deletes the now-orphaned world source so no unused library item lingers. When that delete (or a manual delete from the Items directory) leaves one of those flagged per-character folders empty, the folder is removed too. Only system-created (flagged) folders are auto-removed — user-authored folders are never deleted. Compendium-linked actor items resolve to no world source, so none of this delete/cleanup logic touches the shipped pack.
-- **Sheet item creation flow:** for item groups backed by the shipped catalog (weapons, armor, equipment/items, abilities), the sheet's `+` button first offers two choices — **Browse Compendium** (opens the `gear-library` pack expanded to that group's catalog folder, e.g. `Оружие` / `Броня` / `Предметы` / `Способности`) or **Create Item** (authors a new homebrew item). Groups without a catalog section (e.g. personality complications) skip the prompt and author directly. The group → catalog-folder mapping lives on `compendiumFolder` in `module/helpers/item-config.mjs` and must match the folder names emitted by `module/helpers/gear-catalog.mjs`.
+- **Sheet item creation flow:** for item groups backed by the shipped catalog (weapons, armor, equipment/items, abilities, traits), the sheet's `+` button first offers two choices — **Browse Compendium** (opens the `gear-library` pack expanded to that group's catalog folder, e.g. `Оружие` / `Броня` / `Предметы` / `Способности` / `Черты`) or **Create Item** (authors a new homebrew item). Groups without a catalog section (e.g. personality complications) skip the prompt and author directly. The group → catalog-folder mapping lives on `compendiumFolder` in `module/helpers/item-config.mjs` and must match the folder names emitted by `module/helpers/gear-catalog.mjs`.
 - **Unified equipment type:** `equipment`, `equipment-consumable`, `implant`, and `cartridge` are treated as a unified equipment model. New content should use the `equipment` item type with `system.requiresRoll` and optional `system.skill`; legacy types are migration-only compatibility paths and are normalized during migration.
 - **Unified trait type:** all non-genome, non-source-ability traits use the `trait` item type. Legacy `trait-*` subtypes remain migration-only compatibility paths and should not be used for new content.
 
@@ -290,10 +291,10 @@ Balance simulations and data-prep tooling live in the **private companion source
 
 The shipped gear catalog lives in the **`gear-library` compendium pack**, built from JSON. Canon is edited in JSON between releases; the pack is regenerated at release and applied to campaigns only on a system update.
 
-- **Source of truth:** `data/gear/catalog/armor.json`, `equipment.json`, `abilities.json`, and `archetypes.json` (mirrored from `Docs_Project_Andromeda/data/gear/catalog/` when the private repo is available). `concept-abilities.json` is never shipped. Each `archetypes.json` entry embeds its signature `ability`, which the build also emits into the «Способности» folder so the archetype's drop flow can link it as a compendium item.
+- **Source of truth:** `data/gear/catalog/armor.json`, `equipment.json`, `abilities.json`, `traits.json`, and `archetypes.json` (mirrored from `Docs_Project_Andromeda/data/gear/catalog/` when the private repo is available). `concept-abilities.json` is never shipped. Each `archetypes.json` entry embeds its signature `ability`, which the build also emits into the «Способности» folder so the archetype's drop flow can link it as a compendium item.
 - **Build step:** `tools/build-pack.mjs` (`npm run build:pack`, uses `classic-level`) compiles those JSON files into `packs/gear-library`, reusing the runtime `buildGearCatalogRemoteDataFromCatalogs` transform so the pack never drifts from the catalog. The pack is a **build artifact**: gitignored, built locally and in CI (`release.yml`), and copied into the release zip. The pack is registered in `system.json` `packs[]`.
 - **Stable identity:** each pack item carries `flags.project-andromeda.sheetSyncId` (`gear:<catalog>:<id>`) and a `_id` derived deterministically from that sync id, so rebuilds keep the same compendium UUIDs and existing actor links survive.
-- **Folder layout:** pack folders group items by type and rank (`Броня/Ранг N`, `Оружие/Ранг N`, `Предметы/Ранг N`, `Способности/Ранг N`; no valid rank → `Без ранга`). Archetypes live flat under `Архетипы` (no rank subfolder). The `equipment.json` catalog is split exactly like the public rulebook's two tables: weapon-skilled entries (`blizhniy_boy`/`strelba`) build real `weapon` items under `Оружие`, everything else stays `equipment` items (shown as **Предметы / Items**) under `Предметы`.
+- **Folder layout:** pack folders group items by type and rank (`Броня/Ранг N`, `Оружие/Ранг N`, `Предметы/Ранг N`, `Способности/Ранг N`, `Черты/Ранг N`; no valid rank → `Без ранга`). Archetypes live flat under `Архетипы` (no rank subfolder). The `equipment.json` catalog is split exactly like the public rulebook's two tables: weapon-skilled entries (`blizhniy_boy`/`strelba`) build real `weapon` items under `Оружие`, everything else stays `equipment` items (shown as **Предметы / Items**) under `Предметы`.
 - **Actor links:** a character-sheet item links to its pack source via `flags.project-andromeda.libraryItemUuid` set to the `Compendium.…` UUID. Dropping a pack (or world) item onto an actor stamps this link in the sheet's `_onDropItem`, so it reuses the source instead of creating a folderless world duplicate.
 - **Read-only canon:** compendium-linked items are canonical and read-only. A local edit on a character sheet stays local (it is never written back to the pack). On a system **version change**, `refreshCompendiumLinkedActorItems` pulls shared fields (name/img/system) down to every linked actor item while preserving local `quantity`/`equipped`/`cooldown`. Re-entering the world on an unchanged version touches nothing.
 - **One-time migration:** `migrateActorLinksToCompendium` (gated by `packLinkMigrationVersion`) repoints actor items that still link to a legacy world catalog item — or carry a gear-catalog key — at the matching pack item. It is non-destructive. The opt-in `game.projectAndromeda.removeOrphanCatalogWorldItems({ dryRun })` cleans up leftover `gear:*` world items afterwards.
@@ -319,4 +320,4 @@ The shipped gear catalog lives in the **`gear-library` compendium pack**, built 
 
 ---
 
-_Last updated: 2026-06-28_
+_Last updated: 2026-07-12_

@@ -1,0 +1,499 @@
+[
+  {
+    "id": "dvuzhilnyy",
+    "name": "Двужильный",
+    "type": "trait",
+    "rank": 1,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "frequency": "passive",
+            "targets": "self"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Ваш максимум ячеек стресса увеличивается на 2.",
+    "shortDescription": "+2 ячейки стресса",
+    "price": 2,
+    "tags": [
+      "живучесть"
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "shestoe-chuvstvo",
+    "name": "Шестое чувство",
+    "type": "trait",
+    "rank": 1,
+    "skill": "nablyudatelnost",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "frequency": "passive",
+            "targets": "self"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    "description": "У вас чутьё на неприятности. Вы получаете преимущество на проверки Наблюдательности, когда пытаетесь заметить засаду, слежку или скрытую угрозу, в том числе на встречные проверки против Сокрытия.",
+    "shortDescription": "Преимущество на обнаружение скрытых угроз",
+    "price": 2,
+    "tags": [
+      "ситуативное преимущество"
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "ustrashayushchaya-reputatsiya",
+    "name": "Устрашающая репутация",
+    "type": "trait",
+    "rank": 1,
+    "skill": "dominirovanie",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "frequency": "passive",
+            "targets": "single"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    "description": "О ваших методах ходят истории. Вы получаете преимущество на проверки Доминирования против целей, которые видели вас в деле или наслышаны о вас.",
+    "shortDescription": "Преимущество на Доминирование против знающих вас",
+    "price": 2,
+    "tags": [
+      "ситуативное преимущество"
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "poleznye-svyazi",
+    "name": "Полезные связи",
+    "type": "trait",
+    "rank": 1,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "frequency": "oncePerSession",
+            "targets": "self"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    "description": "У вас везде знакомые. 1 раз за сессию объявите, что в текущей локации у вас есть контакт. Ведущий определяет, кто это и чем он готов помочь; серьёзная помощь может потребовать ответной услуги.",
+    "shortDescription": "1/сессию — знакомый в текущей локации",
+    "price": 2,
+    "tags": [
+      "новые опции"
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "zapaslivyy",
+    "name": "Запасливый",
+    "type": "trait",
+    "rank": 1,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "frequency": "oncePerSession",
+            "targets": "self"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    "description": "1 раз за сессию вы можете добавить деталь сцены, как при трате Очка Свершения, не тратя его — но только в виде полезной мелочи, которая «как раз оказалась с собой»: инструмент, немного боеприпасов, расходник, нужная безделушка. Ограничения на детали сцены действуют как обычно.",
+    "shortDescription": "1/сессию — нужный предмет «оказался с собой»",
+    "price": 2,
+    "tags": [
+      "новые опции"
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "stalnye-nervy",
+    "name": "Стальные нервы",
+    "type": "trait",
+    "rank": 2,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "frequency": "passive",
+            "targets": "self"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 2
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Вы остаётесь в строю, невзирая на боль и хаос. Вы получаете преимущество на спасброски, которые совершаете манёвром, чтобы снять с себя состояние.",
+    "shortDescription": "Преимущество на спасброски от состояний",
+    "price": 4,
+    "tags": [
+      "живучесть"
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "khladnokrovie",
+    "name": "Хладнокровие",
+    "type": "trait",
+    "rank": 2,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "targets": "self",
+            "trigger": "вы получаете состояние Уязвим или Ослаблен"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 2
+            }
+          ]
+        }
+      ]
+    },
+    "description": "1 раз за сцену, когда вы получаете состояние Уязвим или Ослаблен, вы можете немедленно сбросить его. Это не тратит действие, манёвр или реакцию. Если источник состояния продолжает действовать, он может наложить состояние снова по обычным правилам.",
+    "shortDescription": "1/сцену — сбросить Уязвим или Ослаблен",
+    "price": 4,
+    "tags": [
+      "живучесть"
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "neulovimyy",
+    "name": "Неуловимый",
+    "type": "trait",
+    "rank": 2,
+    "skill": "lovkost",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "frequency": "passive",
+            "targets": "self"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 2
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Вы умеете грамотно маневрировать под обстрелом. Если в свой последний ход вы использовали манёвр «Перемещение», атаки дальнего боя по вам совершаются с помехой.",
+    "shortDescription": "Двигался в свой ход — дальние атаки по тебе с помехой",
+    "price": 4,
+    "tags": [
+      "ситуативное преимущество"
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "neuderzhimyy",
+    "name": "Неудержимый",
+    "type": "trait",
+    "rank": 2,
+    "skill": "lovkost",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "frequency": "passive",
+            "targets": "self"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 2
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Требование: навык Ловкость ранга 2. Вы не провоцируете атаки, когда покидаете досягаемость противника, ведущего ближний бой.",
+    "shortDescription": "Не провоцируешь атаки при выходе из ближнего боя",
+    "price": 4,
+    "tags": [
+      "новые опции"
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "my-komanda",
+    "name": "Мы — команда!",
+    "type": "trait",
+    "rank": 2,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "frequency": "unlimited",
+            "targets": "single"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 2
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Ваша величайшая сила — союзники. Вы можете тратить свои Очки Свершений, чтобы улучшить исход проверки видимого вами союзника, как если бы это была ваша проверка. Правило «не больше 1 Очка Свершения на одну проверку» действует как обычно.",
+    "shortDescription": "Трать свои ОС на проверки союзников",
+    "price": 4,
+    "tags": [
+      "новые опции"
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "vezuchiy",
+    "name": "Везучий",
+    "type": "trait",
+    "rank": 3,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "frequency": "passive",
+            "targets": "self"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 3
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Сама судьба благословила вас. В начале каждой игровой встречи вы получаете 2 Очка Свершений вместо 1.",
+    "shortDescription": "2 ОС в начале встречи вместо 1",
+    "price": 6,
+    "tags": [
+      "новые опции"
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "glubokiy-rezerv",
+    "name": "Глубокий резерв",
+    "type": "trait",
+    "rank": 3,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "frequency": "passive",
+            "targets": "self"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 3
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Вы умеете копить героическое усилие. Вы можете хранить до 4 Очков Свершений одновременно вместо 3.",
+    "shortDescription": "Кап ОС = 4",
+    "price": 6,
+    "tags": [
+      "новые опции"
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "nesgibaemyy",
+    "name": "Несгибаемый",
+    "type": "trait",
+    "rank": 3,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "frequency": "oncePerScene",
+            "targets": "self",
+            "trigger": "урон должен заполнить все ваши ячейки стресса"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 3
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Вы остаётесь в строю до последнего. 1 раз за сцену, когда урон должен заполнить все ваши ячейки стресса, одна ячейка остаётся пустой, а лишний урон сгорает.",
+    "shortDescription": "1/сцену — останься на 1 стрессе",
+    "price": 6,
+    "tags": [
+      "живучесть"
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "stremitelnyy",
+    "name": "Стремительный",
+    "type": "trait",
+    "rank": 3,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "frequency": "passive",
+            "targets": "self"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 3
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Вы двигаетесь быстрее большинства. Ваша скорость передвижения увеличивается на 30 метров.",
+    "shortDescription": "Скорость +30 м",
+    "price": 6,
+    "tags": [
+      "новые опции"
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "vernyy-sputnik",
+    "name": "Верный спутник",
+    "type": "trait",
+    "rank": 3,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "frequency": "passive",
+            "targets": "self"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 3
+            }
+          ]
+        }
+      ]
+    },
+    "description": "У вас есть спутник — дрон или зверёк размером не больше кошки, с каналом связи с вами (камера, датчики или выучка). Без приказа он следует за вами. В свой ход вы можете манёвром отдать ему один приказ: переместиться на расстояние до 50 метров; поднести или забрать предмет не тяжелее 2 кг; закрепиться на месте и наблюдать — пока он наблюдает, вы видите и слышите то, что рядом с ним, и совершаете проверки Наблюдательности через него как обычно. Спутник не атакует, не даёт преимуществ и помех и не совершает собственных проверок. Любое попадание с уроном 1 и больше выводит его из строя до начала следующей сессии.",
+    "shortDescription": "Дрон или зверёк: приказ манёвром — принести, следить, переместиться",
+    "price": 6,
+    "tags": [
+      "новые опции"
+    ],
+    "status": "approved"
+  }
+]

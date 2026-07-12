@@ -305,3 +305,27 @@ test('gear catalog transform defaults step effects to an empty list', () => {
 
   assert.deepEqual(getSystemData(remoteData.sheets.weapons[0]).stepEffects, []);
 });
+
+test('gear catalog transform emits passive traits into their own compendium folder', () => {
+  const remoteData = buildGearCatalogRemoteDataFromCatalogs({
+    traits: [
+      {
+        id: 'sixth-sense',
+        name: 'Sixth Sense',
+        type: 'trait',
+        rank: 2,
+        skill: 'nablyudatelnost',
+        description: 'Notice hidden threats before they strike.'
+      }
+    ]
+  });
+
+  assert.equal(remoteData.sheets.traits.length, 1);
+  const traitRow = remoteData.sheets.traits[0];
+  assert.equal(traitRow.type, 'trait');
+  assert.equal(traitRow.folderPath, 'Черты/Ранг 2');
+  const traitData = getSystemData(traitRow);
+  assert.equal(traitData.rank, '2');
+  assert.equal(traitData.skill, 'nablyudatelnost');
+  assert.equal(traitData.requiresRoll, false);
+});

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { getTotalAdvancementSpent } from './advancement-points.mjs';
+import { getItemsAdvancementSpent, getTotalAdvancementSpent } from './advancement-points.mjs';
 
 test('advancement total uses skill ranks and values and ignores obsolete skill keys', () => {
   const system = {
@@ -35,4 +35,32 @@ test('archetype skill is measured from its free rank-2 baseline', () => {
 
   assert.equal(getTotalAdvancementSpent(system), 4);
   assert.equal(getTotalAdvancementSpent(system, { archetypeSkillKey: 'strelba' }), 0);
+});
+
+test('owned traits and abilities spend progression points based on rank', () => {
+  const items = [
+    { type: 'trait', system: { rank: 2 } },
+    { type: 'trait-source-ability', system: { rank: 3 } }
+  ];
+
+  assert.equal(getItemsAdvancementSpent(items), 13);
+  assert.equal(getTotalAdvancementSpent({}, { items }), 13);
+});
+
+test('free and non-purchasable items do not spend progression points', () => {
+  const items = [
+    {
+      type: 'trait',
+      system: { rank: 4, details: { personalityRole: 'value' } }
+    },
+    {
+      type: 'trait-source-ability',
+      system: { rank: 4 },
+      flags: { 'project-andromeda': { grantedByArchetype: true } }
+    },
+    { type: 'trait-genome', system: { rank: 4 } },
+    { type: 'weapon', system: { rank: 4 } }
+  ];
+
+  assert.equal(getItemsAdvancementSpent(items), 0);
 });

@@ -64,7 +64,7 @@ test('skill check roll card omits the damage block when no damage profile is pre
       rank: 1,
       parts: [{ label: 'Skill (Stealth)', value: 2 }]
     },
-    12
+    10
   );
 
   assert.match(html, /myrpg-roll-card--successwithcost/);

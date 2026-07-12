@@ -1,3 +1,5 @@
+import { MODULE_ID } from '../config.mjs';
+import { ARCHETYPE_GRANT_FLAG } from './archetype.mjs';
 import { formatDamageProfile } from './damage-profile.mjs';
 
 export const ITEM_BASE_DEFAULTS = {
@@ -102,6 +104,39 @@ export function isPersonalityValueItem(source) {
 
 function isStandardTraitItem(source) {
   return !isPersonalityValueItem(source);
+}
+
+// Черты и способности покупаются из того же пула очков развития, что и навыки
+// (книга правил, глава 4): черта ранга X стоит `2 × X`, способность ранга X — `3 × X`.
+export const TRAIT_ADVANCEMENT_MULTIPLIER = 2;
+export const ABILITY_ADVANCEMENT_MULTIPLIER = 3;
+
+function isArchetypeGrantedItem(source) {
+  if (typeof source?.getFlag === 'function') {
+    return Boolean(source.getFlag(MODULE_ID, ARCHETYPE_GRANT_FLAG));
+  }
+  return Boolean(source?.flags?.[MODULE_ID]?.[ARCHETYPE_GRANT_FLAG]);
+}
+
+// Cost in progression points for a single owned trait / ability item. Returns 0 for
+// anything that is not a purchasable entry: personality complications, the free
+// archetype signature ability, unranked entries, genomes and legacy migration types.
+export function getItemAdvancementCost(source) {
+  const type = String(source?.type ?? '').trim();
+  const rank = Math.max(0, Math.floor(Number(source?.system?.rank) || 0));
+  if (!rank) return 0;
+
+  if (type === 'trait') {
+    if (isPersonalityValueItem(source)) return 0;
+    return TRAIT_ADVANCEMENT_MULTIPLIER * rank;
+  }
+
+  if (type === 'trait-source-ability') {
+    if (isArchetypeGrantedItem(source)) return 0;
+    return ABILITY_ADVANCEMENT_MULTIPLIER * rank;
+  }
+
+  return 0;
 }
 
 function buildUsageFrequencyField() {
@@ -675,13 +710,15 @@ export const ITEM_GROUP_CONFIGS = [
     canRoll: false,
     showKindBadge: false
   },
+  // Активные способности (тип `trait-source-ability`). Пассивные черты живут в
+  // отдельной группе `traits` ниже. Legacy `trait-*` подтипы остаются здесь, чтобы
+  // старые предметы продолжали отображаться без миграции.
   {
     key: 'abilities',
     compendiumFolder: 'Способности',
     types: [
       'trait-source-ability',
       'trait-genome',
-      'trait',
       'trait-flaw',
       'trait-general',
       'trait-backstory',
@@ -691,7 +728,7 @@ export const ITEM_GROUP_CONFIGS = [
       'trait-professional',
       'trait-technological'
     ],
-    createTypes: ['trait'],
+    createTypes: ['trait-source-ability'],
     filter: isStandardTraitItem,
     tab: 'abilities',
     icon: 'fas fa-bolt',
@@ -699,6 +736,26 @@ export const ITEM_GROUP_CONFIGS = [
     emptyKey: 'MY_RPG.ItemGroups.EmptyAbilities',
     createKey: 'MY_RPG.ItemGroups.CreateAbility',
     newNameKey: 'MY_RPG.ItemGroups.NewAbility',
+    showQuantity: false,
+    allowEquip: false,
+    exclusive: false,
+    canRoll: false,
+    showKindBadge: false
+  },
+  // Пассивные черты (тип `trait`, кроме осложнений личности). Собственная вкладка
+  // и раздел компендиума «Черты». Badge-группа `traits` даёт стандартные бейджи.
+  {
+    key: 'traits',
+    compendiumFolder: 'Черты',
+    types: ['trait'],
+    createTypes: ['trait'],
+    filter: isStandardTraitItem,
+    tab: 'traits',
+    icon: 'fas fa-star',
+    labelKey: 'MY_RPG.ItemGroups.Traits',
+    emptyKey: 'MY_RPG.ItemGroups.EmptyTraits',
+    createKey: 'MY_RPG.ItemGroups.CreateTrait',
+    newNameKey: 'MY_RPG.ItemGroups.NewTrait',
     showQuantity: false,
     allowEquip: false,
     exclusive: false,
@@ -792,6 +849,10 @@ export const ITEM_TABS = [
     labelKey: 'MY_RPG.SheetLabels.AbilitiesAndMods'
   },
   {
+    key: 'traits',
+    labelKey: 'MY_RPG.SheetLabels.Traits'
+  },
+  {
     key: 'inventory',
     labelKey: 'MY_RPG.SheetLabels.Inventory'
   }
@@ -845,6 +906,17 @@ function buildTraitBadges(item, helpers) {
   const system = item.system ?? {};
   const t = helpers.t;
   const badges = [];
+
+  const rank = Number(system.rank) || 0;
+  if (rank && typeof helpers.getRankLabel === 'function') {
+    badges.push(`${t.localize('MY_RPG.ItemFields.Rank')}: ${helpers.getRankLabel(rank)}`);
+  }
+
+  const advancementCost = getItemAdvancementCost(item);
+  if (advancementCost > 0) {
+    badges.push(`${t.localize('MY_RPG.ItemFields.AdvancementCost')}: ${advancementCost}`);
+  }
+
   const activationCost = String(system.activationCost ?? system.activationType ?? '').trim();
   const activationLabelKey = ITEM_ACTIVATION_TYPE_LABEL_KEYS[activationCost];
   if (activationLabelKey) {

@@ -13,12 +13,14 @@ D:\Моя_НРИ\Docs_Project_Andromeda\data\gear\catalog
 - `data/gear/catalog/armor.json`
 - `data/gear/catalog/equipment.json`
 - `data/gear/catalog/abilities.json`
+- `data/gear/catalog/traits.json`
+- `data/gear/catalog/archetypes.json`
 
 `concept-abilities.json` is intentionally excluded.
 
 ## Build
 
-`npm run build:pack` (`tools/build-pack.mjs`, uses `classic-level`) compiles those JSON files into `packs/gear-library`, reusing the runtime transform in `module/helpers/gear-catalog.mjs` so the pack never drifts from the catalog. Each item carries `flags.project-andromeda.sheetSyncId` (`gear:<catalog>:<id>`) and a deterministic `_id` derived from it, so rebuilds keep stable compendium UUIDs. Items are grouped into pack folders by type and rank (`Броня/Ранг N`, `Оружие/Ранг N`, `Предметы/Ранг N`, `Способности/Ранг N`; no valid rank → `Без ранга`). The `equipment.json` catalog is split the same way the public rulebook renders two tables: weapon-skilled entries (`blizhniy_boy`/`strelba`) become `weapon` items under `Оружие`, the rest stay `equipment` items under `Предметы`.
+`npm run build:pack` (`tools/build-pack.mjs`, uses `classic-level`) compiles those JSON files into `packs/gear-library`, reusing the runtime transform in `module/helpers/gear-catalog.mjs` so the pack never drifts from the catalog. Each item carries `flags.project-andromeda.sheetSyncId` (`gear:<catalog>:<id>`) and a deterministic `_id` derived from it, so rebuilds keep stable compendium UUIDs. Items are grouped into pack folders by type and rank (`Броня/Ранг N`, `Оружие/Ранг N`, `Предметы/Ранг N`, `Способности/Ранг N`, `Черты/Ранг N`; no valid rank → `Без ранга`). Archetypes live directly under `Архетипы`. The `equipment.json` catalog is split the same way the public rulebook renders two tables: weapon-skilled entries (`blizhniy_boy`/`strelba`) become `weapon` items under `Оружие`, the rest stay `equipment` items under `Предметы`.
 
 Run `npm run format:catalogs` after editing catalog JSON to normalize `data/gear/catalog/*.json` to the canonical two-space formatting checked by `npm test`.
 

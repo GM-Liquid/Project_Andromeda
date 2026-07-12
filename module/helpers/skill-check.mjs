@@ -77,9 +77,9 @@ export function getNextSkillAdvancement(skill = {}, characterRank = MAX_SKILL_RA
 
 export function getSkillCheckOutcomeKey(total) {
   const numeric = Number(total) || 0;
-  if (numeric >= 17) return 'CriticalSuccess';
-  if (numeric >= 13) return 'Success';
-  if (numeric >= 9) return 'SuccessWithCost';
+  if (numeric >= 16) return 'CriticalSuccess';
+  if (numeric >= 12) return 'Success';
+  if (numeric >= 8) return 'SuccessWithCost';
   return 'Failure';
 }
 

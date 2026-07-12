@@ -51,6 +51,13 @@ const GEAR_ABILITY_CONFIG = {
   folderName: 'Способности'
 };
 
+const GEAR_TRAIT_CONFIG = {
+  catalogKey: 'traits',
+  sheetKey: 'traits',
+  itemType: 'trait',
+  folderName: 'Черты'
+};
+
 const GEAR_ARCHETYPE_CONFIG = {
   catalogKey: 'archetypes',
   sheetKey: 'archetypes',
@@ -72,10 +79,18 @@ const GEAR_CATALOG_SOURCES = [
     catalogKey: 'equipment',
     resolveConfig: (entry) => (isWeaponCatalogEntry(entry) ? GEAR_WEAPON_CONFIG : GEAR_ITEM_CONFIG)
   },
-  { catalogKey: 'abilities', resolveConfig: () => GEAR_ABILITY_CONFIG }
+  { catalogKey: 'abilities', resolveConfig: () => GEAR_ABILITY_CONFIG },
+  { catalogKey: 'traits', resolveConfig: () => GEAR_TRAIT_CONFIG }
 ];
 
-const GEAR_CATALOG_SHEET_KEYS = ['armor', 'weapons', 'equipment', 'abilities', 'archetypes'];
+const GEAR_CATALOG_SHEET_KEYS = [
+  'armor',
+  'weapons',
+  'equipment',
+  'abilities',
+  'traits',
+  'archetypes'
+];
 
 function deepClone(value) {
   if (typeof foundry !== 'undefined' && foundry.utils?.deepClone) {
@@ -307,6 +322,18 @@ function buildGearCatalogSystemData(entry, config) {
       ...systemData,
       requiresRoll: getGearCatalogRequiresRoll(entry, { fallbackToSkill: false }),
       skill,
+      skillBonus: getFirstOutcomeDamageProfile(entry),
+      stepEffects: getGearCatalogStepEffects(entry)
+    };
+  }
+
+  // Черты — пассивные улучшения: держим ссылку на профильный навык, но никогда не
+  // помечаем их как требующие броска (в отличие от активных способностей).
+  if (config.itemType === 'trait') {
+    return {
+      ...systemData,
+      requiresRoll: false,
+      skill: getGearCatalogSkill(entry),
       skillBonus: getFirstOutcomeDamageProfile(entry),
       stepEffects: getGearCatalogStepEffects(entry)
     };

@@ -9,10 +9,12 @@ const repoRoot = resolve(testDir, "..", "..", "..")
 const catalogRoot = resolve(repoRoot, "data", "gear", "catalog")
 const catalogNames = [
   "abilities",
+  "archetypes",
   "armor",
   "catalog-manifest",
   "concept-abilities",
   "equipment",
+  "traits",
 ]
 
 test("gear catalogs use canonical two-space JSON formatting", async () => {

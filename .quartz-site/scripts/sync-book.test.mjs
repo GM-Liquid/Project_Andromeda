@@ -108,10 +108,16 @@ test(
       generated,
       /^\| Название \| Ранг \| Урон \| Эффекты \| Краткое описание \| Полное описание \| Частота использования \| Навык \| Цена в действиях \| Дальность \| Цели \| Зона \| Защита \| Длительность \| Цена в кредитах \|$/m
     );
+    assert.match(
+      generated,
+      /^\| Название \| Ранг \| Навык \| Краткое описание \| Полное описание \| Цена в очках развития \|$/m
+    );
     assert.match(generated, /^\|.*КД-2.*\|$/m);
     assert.match(generated, /^## Оружие$/m);
+    assert.match(generated, /^## Броня$/m);
     assert.match(generated, /^## Снаряжение$/m);
     assert.match(generated, /^## Способности$/m);
+    assert.match(generated, /^## Черты$/m);
   }
 );
 
@@ -119,7 +125,7 @@ test(
   'syncBook renders chapter 04 from the mechanics-based catalog schema',
   { concurrency: false },
   async () => {
-    const catalogNames = ['armor', 'equipment', 'abilities'];
+    const catalogNames = ['armor', 'equipment', 'abilities', 'traits'];
     const backups = [];
     const previousDocsRepoEnv = process.env.PROJECT_ANDROMEDA_DOCS_REPO;
 
@@ -231,6 +237,19 @@ test(
           shortDescription: 'Краткое описание тестовой способности.',
           price: 120
         }
+      ],
+      traits: [
+        {
+          id: 'test-trait',
+          name: 'Тестовая черта',
+          type: 'trait',
+          rank: 2,
+          skill: 'nablyudatelnost',
+          description: 'Полное описание тестовой черты.',
+          shortDescription: 'Краткое описание тестовой черты.',
+          price: 4,
+          status: 'approved'
+        }
       ]
     };
 
@@ -254,11 +273,13 @@ test(
       assert.match(generated, /Тестовая броня/u);
       assert.match(generated, /Тестовая винтовка/u);
       assert.match(generated, /Тестовая способность/u);
+      assert.match(generated, /Тестовая черта/u);
       assert.match(generated, /Стрельба/u);
       assert.match(generated, /Мистика/u);
       assert.match(generated, /\|.*410.*\|/u);
       assert.match(generated, /\|.*360.*\|/u);
       assert.match(generated, /\|.*120.*\|/u);
+      assert.match(generated, /\|.*Тестовая черта.*4.*\|/u);
       assert.match(generated, /Пробивание брони \(с «Успех»\)/u);
     } finally {
       if (previousDocsRepoEnv === undefined) {

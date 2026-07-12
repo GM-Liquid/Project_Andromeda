@@ -22,7 +22,8 @@ const generatedStatePath = resolve(contentDir, '.generated-rulebook.json');
 const gearCatalogFiles = {
   armor: 'armor.json',
   equipment: 'equipment.json',
-  abilities: 'abilities.json'
+  abilities: 'abilities.json',
+  traits: 'traits.json'
 };
 
 const skillLabels = {
@@ -873,6 +874,29 @@ function buildArmorCatalogTable(catalog) {
   );
 }
 
+function buildTraitCatalogTable(catalog) {
+  const rows = getRenderableGearCatalogItems(catalog).map((item) => [
+    item.name,
+    item.rank,
+    getGearSkillValue(item),
+    getGearShortDescription(item),
+    getGearDescription(item),
+    getGearCatalogPrice(item)
+  ]);
+
+  return renderMarkdownTable(
+    [
+      'Название',
+      'Ранг',
+      'Навык',
+      'Краткое описание',
+      'Полное описание',
+      'Цена в очках развития'
+    ],
+    rows
+  );
+}
+
 function buildEquipmentCatalogTable(catalog) {
   const rows = getRenderableGearCatalogItems(catalog)
     .filter((item) => !isWeaponCatalogItem(item))
@@ -1049,6 +1073,7 @@ function transformAbilitiesEquipmentSource(source, gearCatalogs) {
     ['Способности', buildAbilityCatalogTable(gearCatalogs.abilities)]
   ]);
   const weaponCatalogTable = buildWeaponCatalogTable(gearCatalogs.equipment);
+  const traitCatalogTable = buildTraitCatalogTable(gearCatalogs.traits);
   const lines = source.split('\n');
   const nextLines = [];
   let sectionHeading = null;
@@ -1066,11 +1091,21 @@ function transformAbilitiesEquipmentSource(source, gearCatalogs) {
     if (sectionTitle === 'Снаряжение' && weaponCatalogTable) {
       nextLines.push('## Оружие', '', weaponCatalogTable, '');
     }
+    if (sectionTitle === 'Снаряжение') {
+      const armorCatalogTable = sectionTableMap.get('Броня');
+      if (armorCatalogTable) {
+        nextLines.push('## Броня', '', armorCatalogTable, '');
+      }
+    }
 
     nextLines.push(sectionHeading);
 
     if (cleanedBody.length > 0) {
       nextLines.push('', ...cleanedBody);
+    }
+
+    if (sectionTitle === 'Черты и способности' && traitCatalogTable) {
+      nextLines.push('', '## Черты', '', traitCatalogTable, '');
     }
 
     const injectedTable = sectionTableMap.get(sectionTitle);
@@ -1114,7 +1149,8 @@ async function readGearCatalogs(catalogDir) {
   return {
     armor: await readGearCatalog(catalogDir, gearCatalogFiles.armor),
     equipment: await readGearCatalog(catalogDir, gearCatalogFiles.equipment),
-    abilities: await readGearCatalog(catalogDir, gearCatalogFiles.abilities)
+    abilities: await readGearCatalog(catalogDir, gearCatalogFiles.abilities),
+    traits: await readGearCatalog(catalogDir, gearCatalogFiles.traits)
   };
 }
 

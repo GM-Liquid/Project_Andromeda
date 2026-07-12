@@ -1,7 +1,7 @@
 /**
  * Compile the shipped gear catalog JSON into the `gear-library` compendium pack.
  *
- * Source of truth stays in `data/gear/catalog/{armor,equipment,abilities}.json`
+ * Source of truth stays in `data/gear/catalog/{armor,equipment,abilities,traits,archetypes}.json`
  * (mirrored from the private docs repo). This reuses the same JSON -> Item-system
  * transform the runtime uses (`buildGearCatalogRemoteDataFromCatalogs`) so the pack
  * never drifts from the catalog. The pack itself is a build artifact: it is rebuilt
@@ -28,6 +28,7 @@ const CATALOG_FILES = {
   armor: 'armor.json',
   equipment: 'equipment.json',
   abilities: 'abilities.json',
+  traits: 'traits.json',
   archetypes: 'archetypes.json'
 };
 

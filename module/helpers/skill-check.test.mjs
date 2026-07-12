@@ -67,10 +67,10 @@ test('skill data is clamped to character rank and value range', () => {
 });
 
 test('2d8 totals map to the unshifted outcome table', () => {
-  assert.equal(getSkillCheckOutcomeKey(8), 'Failure');
-  assert.equal(getSkillCheckOutcomeKey(9), 'SuccessWithCost');
-  assert.equal(getSkillCheckOutcomeKey(12), 'SuccessWithCost');
-  assert.equal(getSkillCheckOutcomeKey(13), 'Success');
-  assert.equal(getSkillCheckOutcomeKey(16), 'Success');
-  assert.equal(getSkillCheckOutcomeKey(17), 'CriticalSuccess');
+  assert.equal(getSkillCheckOutcomeKey(7), 'Failure');
+  assert.equal(getSkillCheckOutcomeKey(8), 'SuccessWithCost');
+  assert.equal(getSkillCheckOutcomeKey(11), 'SuccessWithCost');
+  assert.equal(getSkillCheckOutcomeKey(12), 'Success');
+  assert.equal(getSkillCheckOutcomeKey(15), 'Success');
+  assert.equal(getSkillCheckOutcomeKey(16), 'CriticalSuccess');
 });
