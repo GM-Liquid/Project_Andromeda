@@ -818,6 +818,11 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     const $header = this.element.find('.window-header').first();
     if (!$header.length) return;
 
+    if (!this.actor?.isOwner) {
+      $header.find('.andromeda-edit-mode-toggle').remove();
+      return;
+    }
+
     let $button = $header.find('.andromeda-edit-mode-toggle').first();
     if (!$button.length) {
       $button = $(`
@@ -854,6 +859,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     event.preventDefault();
     event.stopPropagation();
     event.currentTarget?.blur?.();
+    if (!this.actor?.isOwner) return;
     this._editMode = !this._editMode;
     this._applySheetEditMode(this.element);
   }
