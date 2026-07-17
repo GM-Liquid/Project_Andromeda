@@ -475,6 +475,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     $html.on('click', '.item-edit', this._onItemEdit.bind(this));
     $html.on('click', '.item-delete', this._onItemDelete.bind(this));
     $html.on('click', '.item-activate', this._onItemActivate.bind(this));
+    $html.on('click', '.item-chat', this._onItemChat.bind(this));
     $html.on('click', '.item-roll', this._onItemRoll.bind(this));
     $html.on('click', '.item-quantity-step', this._onItemQuantityStep.bind(this));
     $html.on('change', '.item-equip-checkbox', this._onItemEquipChange.bind(this));
@@ -1084,7 +1085,14 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       rollMode: game.settings.get('core', 'rollMode'),
       flags: {
         [MODULE_ID]: {
-          skillCheck: { skill, rank: skillData.rank, outcome: outcomeKey, label, parts }
+          skillCheck: {
+            skill,
+            skillLabel: this._skillLabel(skill),
+            rank: skillData.rank,
+            outcome: outcomeKey,
+            label,
+            parts
+          }
         }
       }
     });
@@ -1346,6 +1354,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       hasDetails: detailRows.length > 0 || Boolean(detailEffect),
       canRoll: Boolean(displayConfig.canRoll),
       hasActivationControl: this._hasItemActivationControl(item, displayConfig),
+      hasChatControl: this._hasItemChatControl(item, displayConfig),
       activationControlTitle: this._getItemActivationControlTitle(item, displayConfig),
       activationControlDefaultTitle: this._getItemActivationControlDefaultTitle(
         item,
@@ -1403,6 +1412,11 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
         this._hasItemCooldown(item, displayConfig) ||
         this._hasItemActivationCost(item, displayConfig))
     );
+  }
+
+  _hasItemChatControl(item, displayConfig = null) {
+    if (!item || !['abilities', 'equipment'].includes(displayConfig?.key)) return false;
+    return !this._hasItemActivationControl(item, displayConfig);
   }
 
   _getItemActivationControlTitle(item, displayConfig = null) {
@@ -1985,6 +1999,20 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     }
   }
 
+  async _onItemChat(event) {
+    event.preventDefault();
+    event.currentTarget?.blur?.();
+    const { item, displayConfig, itemId } = this._getItemContextFromEvent(event);
+    if (!item) {
+      debugLog('Actor sheet item chat failed - missing item', {
+        actor: this.actor.uuid,
+        itemId: itemId ?? null
+      });
+      return;
+    }
+    await this._sendItemActivationChat(item, displayConfig);
+  }
+
   async _rollItem(item, _itemId = null, { includeItemContent = false, displayConfig = null } = {}) {
     if (!item) return false;
     const typeConfig = getItemTypeConfig(item.type);
@@ -2043,6 +2071,8 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
         [MODULE_ID]: {
           skillCheck: {
             skill: skillKey,
+            skillLabel: this._skillLabel(skillKey),
+            sourceName: item.name || game.i18n.localize(`TYPES.Item.${item.type}`),
             rank: skillData.rank,
             outcome: outcomeKey,
             shift: 0,

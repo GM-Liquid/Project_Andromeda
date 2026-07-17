@@ -31,9 +31,10 @@ test('item group rows render a collapsible table summary with detail sections', 
   assert.match(actorSheet, /_onItemRowToggle/);
   assert.match(actorSheet, /_getItemRollSummary/);
   assert.match(actorSheet, /_onItemActivate/);
+  assert.match(actorSheet, /_onItemChat/);
   assert.match(actorSheet, /closest\('\.item-row\[data-item-id\]'\)/);
   assert.match(template, /item-activate/);
-  assert.doesNotMatch(template, /item-chat/);
+  assert.match(template, /item-chat/);
   assert.match(stylesheet, /\.project-andromeda \.item-group__columns \{/);
   assert.match(
     stylesheet,

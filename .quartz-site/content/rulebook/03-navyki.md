@@ -10,8 +10,8 @@ heroAlt: "Абстрактный арт для главы о навыках."
 showHero: true
 showToc: true
 parent: null
-created: "2026-07-11"
-modified: "2026-07-11"
+created: "2026-07-17"
+modified: "2026-07-17"
 ---
 
 :::summary

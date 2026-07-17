@@ -78,6 +78,7 @@ import {
   syncLibraryItemToActors,
   unlinkLibraryItemFromActors
 } from './helpers/item-library-sync.mjs';
+import { getSceneActorTokens, getTokenIsolationPlan } from './helpers/token-isolation.mjs';
 import './helpers/handlebars-helpers.mjs';
 
 const ITEM_SUPERTYPE_ORDER = ['equipment', 'environment', 'traits', 'other'];
@@ -280,8 +281,12 @@ function getPlayerCharacterActors() {
 
 // Grants +1 Highlight Point (capped at HERO_POINT_MAX) to every player character when a
 // session starts. Runs once on the primary active GM to avoid duplicate world writes.
-async function grantSessionStartHeroPoints() {
+async function grantSessionStartHeroPoints(session) {
   if (!isPrimaryActiveGM()) return;
+  const sessionStats = getSessionStatsService();
+  const grantClaimed = await sessionStats?.claimSessionStartHeroPointGrant(session?.id);
+  if (!grantClaimed) return;
+
   for (const actor of getPlayerCharacterActors()) {
     const current = getActorHeroPoints(actor);
     if (current >= HERO_POINT_MAX) continue;
@@ -816,6 +821,84 @@ async function resolveDroppedItem(data) {
   }
 }
 
+function isEnvironmentTokenProxyActor(actor) {
+  return Boolean(
+    actor?.getFlag?.(MODULE_ID, ENVIRONMENT_PROXY_ACTOR_FLAG) ??
+      actor?.flags?.[MODULE_ID]?.[ENVIRONMENT_PROXY_ACTOR_FLAG]
+  );
+}
+
+const TOKEN_ISOLATION_FLAG = 'tokenIsolated';
+
+function isTokenIsolated(token) {
+  return Boolean(
+    token?.getFlag?.(MODULE_ID, TOKEN_ISOLATION_FLAG) ??
+      token?.flags?.[MODULE_ID]?.[TOKEN_ISOLATION_FLAG]
+  );
+}
+
+async function applyTokenIsolationPlan(plan) {
+  for (const { token, update } of plan) {
+    const changes = { ...update };
+    if (!update.actorLink) changes[`flags.${MODULE_ID}.${TOKEN_ISOLATION_FLAG}`] = true;
+    await token.update(changes);
+  }
+}
+async function isolateActorTokensOnScene(createdToken) {
+  if (!isPrimaryActiveGM()) return;
+
+  const actor = createdToken?.baseActor ?? game.actors?.get(createdToken?.actorId);
+  if (!actor || isEnvironmentTokenProxyActor(actor)) return;
+
+  const plan = getTokenIsolationPlan({
+    scene: createdToken.parent,
+    actor,
+    createdToken
+  });
+  if (!plan.length) return;
+
+  await applyTokenIsolationPlan(plan);
+
+  debugLog('Scene token isolation updated', {
+    actor: actor.uuid ?? actor.id,
+    scene: createdToken.parent?.id ?? null,
+    tokenCount: plan.length,
+    isolated: plan.some(({ update }) => !update.actorLink)
+  });
+}
+
+async function initializeSceneTokenIsolation() {
+  if (!isPrimaryActiveGM()) return;
+
+  for (const scene of game.scenes?.contents ?? []) {
+    const actorIds = new Set(
+      (scene.tokens?.contents ?? []).map((token) => String(token.actorId ?? '').trim()).filter(Boolean)
+    );
+
+    for (const actorId of actorIds) {
+      const actor = game.actors?.get(actorId);
+      if (!actor || isEnvironmentTokenProxyActor(actor)) continue;
+
+      const tokens = getSceneActorTokens(scene, actorId);
+      if (tokens.length === 1 && isTokenIsolated(tokens[0])) continue;
+
+      const plan = getTokenIsolationPlan({
+        scene,
+        actor,
+        createdToken: tokens.length === 1 ? tokens[0] : null
+      });
+      await applyTokenIsolationPlan(plan);
+
+      if (tokens.length > 1) {
+        for (const token of tokens) {
+          if (!isTokenIsolated(token)) {
+            await token.update({ [`flags.${MODULE_ID}.${TOKEN_ISOLATION_FLAG}`]: true });
+          }
+        }
+      }
+    }
+  }
+}
 function getEnvironmentItemSourceUuid(item) {
   const uuid = String(item?.uuid ?? '').trim();
   if (uuid) return uuid;
@@ -1628,8 +1711,10 @@ Hooks.on('createChatMessage', (message) => {
 Hooks.on('updateChatMessage', (message, changes) => {
   const sessionStats = getSessionStatsService();
   if (!sessionStats) return;
-  if (!foundry.utils.hasProperty(changes, `flags.${MODULE_ID}.momentOfGlory`)) return;
-  void sessionStats.recordMomentOfGloryUsage(message);
+  const momentOfGlory = foundry.utils.hasProperty(changes, `flags.${MODULE_ID}.momentOfGlory`);
+  const skillCheck = foundry.utils.hasProperty(changes, `flags.${MODULE_ID}.skillCheck`);
+  if (!momentOfGlory && !skillCheck) return;
+  void sessionStats.recordMessageUpdate(message, { skillCheck, momentOfGlory });
 });
 
 // Foundry v13 renders chat messages through renderChatMessageHTML; v12 uses renderChatMessage.
@@ -1661,8 +1746,8 @@ Hooks.on('updateActor', (actor, changes) => {
 
 // Highlight Point economy: each player character gains 1 at the start of a session
 // (capped at HERO_POINT_MAX) and loses any unspent points when the session ends.
-Hooks.on(SESSION_HOOK_STARTED, () => {
-  void grantSessionStartHeroPoints();
+Hooks.on(SESSION_HOOK_STARTED, (session) => {
+  void grantSessionStartHeroPoints(session);
 });
 
 Hooks.on(SESSION_HOOK_ENDED, () => {
@@ -1808,6 +1893,14 @@ Hooks.on('deleteItem', (item, options, userId) => {
     });
 });
 
+Hooks.on('createToken', (token) => {
+  void isolateActorTokensOnScene(token).catch((error) => {
+    debugLog('Scene token isolation failed', {
+      token: token?.uuid ?? token?.id ?? null,
+      error
+    });
+  });
+});
 Hooks.on('dropCanvasData', async (droppedCanvas, data) => {
   if (!game.user?.isGM) return;
   if (data?.type !== 'Item') return;
@@ -1871,6 +1964,8 @@ Hooks.once('ready', async function () {
       await sessionStats.recoverStateOnReady();
     }
   }
+
+  await initializeSceneTokenIsolation();
 
   if (isPrimaryActiveGM()) {
     await runLegacyEquipmentTypeMigrationIfNeeded();

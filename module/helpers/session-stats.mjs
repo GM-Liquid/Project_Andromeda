@@ -1,4 +1,5 @@
 import { MODULE_ID, debugLog } from '../config.mjs';
+import { getSkillCheckOutcomeKey, shiftOutcomeKey } from './skill-check.mjs';
 
 const SETTING_KEYS = Object.freeze({
   current: 'sessionTrackerCurrent',
@@ -16,6 +17,7 @@ const SESSION_HOOKS = Object.freeze({
 });
 const UNKNOWN_ACTOR_KEY = 'unknown';
 const UNKNOWN_FORMULA_KEY = 'unknown';
+const UNKNOWN_SKILL_CHECK_KEY = 'unknown';
 const MINUTES_TO_MS = 60_000;
 const PARTICIPANT_TIMEOUT_MINUTES = 15;
 const PARTICIPANT_TIMEOUT_MS = PARTICIPANT_TIMEOUT_MINUTES * MINUTES_TO_MS;
@@ -96,6 +98,9 @@ function hasWritePermission() {
 export class SessionStatsService {
   constructor() {
     this._presenceEvaluationTimer = null;
+    this._presenceEvaluationPromise = null;
+    this._startSessionPromise = null;
+    this._heroPointGrantClaimTail = Promise.resolve();
   }
 
   initialize() {
@@ -132,7 +137,22 @@ export class SessionStatsService {
     }, delay);
   }
 
-  async startSession({ startedBy, requiredPlayerIds = null } = {}) {
+  async startSession(options = {}) {
+    // Connection and ready hooks can request a start in the same event loop turn.
+    // Keep them behind one promise so only one session is created (and only one
+    // session-start hook is emitted).
+    if (this._startSessionPromise) return this._startSessionPromise;
+
+    const pending = this._startSession(options);
+    this._startSessionPromise = pending;
+    try {
+      return await pending;
+    } finally {
+      if (this._startSessionPromise === pending) this._startSessionPromise = null;
+    }
+  }
+
+  async _startSession({ startedBy, requiredPlayerIds = null } = {}) {
     if (!hasWritePermission()) {
       ui.notifications.warn(game.i18n.localize('MY_RPG.SessionTracker.Notifications.RequireGM'));
       return null;
@@ -222,6 +242,21 @@ export class SessionStatsService {
   }
 
   async evaluatePresence() {
+    // Foundry can fire ready, userConnected and updateUser almost together on
+    // reconnect. Serialize their work so they cannot each observe "no session"
+    // before the first setting write finishes.
+    if (this._presenceEvaluationPromise) return this._presenceEvaluationPromise;
+
+    const pending = this._evaluatePresence();
+    this._presenceEvaluationPromise = pending;
+    try {
+      return await pending;
+    } finally {
+      if (this._presenceEvaluationPromise === pending) this._presenceEvaluationPromise = null;
+    }
+  }
+
+  async _evaluatePresence() {
     if (!hasWritePermission()) return;
     if (!this._isTrackingAuthority()) {
       this._clearPresenceEvaluationTimer();
@@ -260,6 +295,32 @@ export class SessionStatsService {
     return nextState.session;
   }
 
+  // A session-start hook is intentionally asynchronous. Persist the claim before
+  // granting points so duplicate hook delivery, a reconnect, or a world reload
+  // cannot grant another starting point for this session ID.
+  async claimSessionStartHeroPointGrant(sessionId) {
+    const claim = this._heroPointGrantClaimTail.then(() =>
+      this._claimSessionStartHeroPointGrant(sessionId)
+    );
+    // Keep the queue live after a failed settings write so a later session is not
+    // permanently blocked from claiming its own start grant.
+    this._heroPointGrantClaimTail = claim.catch(() => {});
+    return claim;
+  }
+
+  async _claimSessionStartHeroPointGrant(sessionId) {
+    if (!this._isTrackingAuthority()) return false;
+    const id = String(sessionId || '').trim();
+    if (!id) return false;
+
+    const active = this.getActiveSession();
+    if (!active || active.id !== id || active.heroPointsGranted) return false;
+
+    active.heroPointsGranted = true;
+    await this._setCurrentSession(active);
+    return true;
+  }
+
   async recordRoll(message) {
     if (!this._isTrackingAuthority()) return;
     if (!this._isRollMessage(message)) return;
@@ -279,6 +340,7 @@ export class SessionStatsService {
       rolls.byFormula[formula] = (Number(rolls.byFormula[formula]) || 0) + 1;
     }
 
+    this._upsertSkillCheck(active, message);
     this._recordMomentOfGloryUsageFromMessage(active, message);
 
     await this._setCurrentSession(active);
@@ -294,6 +356,26 @@ export class SessionStatsService {
 
     await this._setCurrentSession(active);
     this._emitStatsUpdated(active, 'momentOfGlory');
+  }
+
+  // A single chat-message update can both shift a skill check and spend a Highlight
+  // Point. Persist both changes together so concurrent setting writes cannot lose
+  // either part of the session record.
+  async recordMessageUpdate(message, { skillCheck = false, momentOfGlory = false } = {}) {
+    if (!this._isTrackingAuthority()) return;
+    const active = this.getActiveSession();
+    if (!active) return;
+
+    let changed = false;
+    if (skillCheck) changed = this._upsertSkillCheck(active, message) || changed;
+    if (momentOfGlory) {
+      this._recordMomentOfGloryUsageFromMessage(active, message);
+      changed = true;
+    }
+    if (!changed) return;
+
+    await this._setCurrentSession(active);
+    this._emitStatsUpdated(active, 'chatMessage');
   }
 
   async recordCombatEvent(eventName) {
@@ -332,6 +414,7 @@ export class SessionStatsService {
       startedBy: startedBy ?? null,
       endedBy: null,
       endReason: null,
+      heroPointsGranted: false,
       pendingAutoCloseAt: null,
       presence: this._createPresenceState(requiredPlayerIds),
       stats: this._createEmptyStats()
@@ -351,6 +434,7 @@ export class SessionStatsService {
 
   _normalizeSession(session) {
     const normalized = duplicateData(session ?? {});
+    normalized.heroPointsGranted = Boolean(normalized.heroPointsGranted);
     normalized.presence ??= this._createPresenceState();
     normalized.presence.requiredPlayerIds = normalizeIdArray(normalized.presence.requiredPlayerIds);
     normalized.presence.offlineSinceByParticipant = normalizeTimestampMap(
@@ -360,6 +444,7 @@ export class SessionStatsService {
     normalized.stats.rolls ??= this._createEmptyStats().rolls;
     normalized.stats.combat ??= this._createEmptyStats().combat;
     normalized.stats.momentOfGlory ??= this._createEmptyStats().momentOfGlory;
+    normalized.stats.skillChecks = this._normalizeSkillCheckStats(normalized.stats.skillChecks);
     normalized.stats.rolls.total = Math.max(Number(normalized.stats.rolls.total) || 0, 0);
     normalized.stats.rolls.byActor = normalizeCounterMap(normalized.stats.rolls.byActor);
     normalized.stats.rolls.byFormula = normalizeCounterMap(normalized.stats.rolls.byFormula);
@@ -415,8 +500,46 @@ export class SessionStatsService {
       momentOfGlory: {
         totalUses: 0,
         byActor: {}
+      },
+      skillChecks: {
+        total: 0,
+        bySkill: {},
+        bySource: {},
+        byOutcome: {},
+        byCheckOutcome: {},
+        byMessage: {}
       }
     };
+  }
+
+  _normalizeSkillCheckStats(value) {
+    const source = value && typeof value === 'object' ? value : {};
+    const normalized = {
+      total: Math.max(Number(source.total) || 0, 0),
+      bySkill: normalizeCounterMap(source.bySkill),
+      bySource: normalizeCounterMap(source.bySource),
+      byOutcome: normalizeCounterMap(source.byOutcome),
+      byCheckOutcome: {},
+      byMessage: {}
+    };
+
+    for (const [check, outcomes] of Object.entries(source.byCheckOutcome ?? {})) {
+      const key = String(check || '').trim();
+      if (!key) continue;
+      normalized.byCheckOutcome[key] = normalizeCounterMap(outcomes);
+    }
+
+    for (const [messageId, entry] of Object.entries(source.byMessage ?? {})) {
+      const id = String(messageId || '').trim();
+      if (!id || !entry || typeof entry !== 'object') continue;
+      const skill = String(entry.skill || '').trim() || UNKNOWN_SKILL_CHECK_KEY;
+      const sourceName = String(entry.source || '').trim();
+      const check = String(entry.check || '').trim() || skill;
+      const outcome = String(entry.outcome || '').trim() || 'Failure';
+      normalized.byMessage[id] = { skill, source: sourceName, check, outcome };
+    }
+
+    return normalized;
   }
 
   _getCurrentSessionSetting() {
@@ -540,6 +663,74 @@ export class SessionStatsService {
     return Boolean(message.isRoll);
   }
 
+  _upsertSkillCheck(session, message) {
+    const messageId = String(message?.id || '').trim();
+    const entry = this._extractSkillCheckEntry(message);
+    if (!messageId || !entry) return false;
+
+    const stats = session.stats.skillChecks;
+    const previous = stats.byMessage[messageId] ?? null;
+    if (previous) this._applySkillCheckEntry(stats, previous, -1);
+    this._applySkillCheckEntry(stats, entry, 1);
+    stats.byMessage[messageId] = entry;
+    return true;
+  }
+
+  _extractSkillCheckEntry(message) {
+    const skillCheck =
+      message?.getFlag?.(MODULE_ID, 'skillCheck') ?? message?.flags?.[MODULE_ID]?.skillCheck;
+    if (!skillCheck || typeof skillCheck !== 'object') return null;
+
+    const skillKey = String(skillCheck.skill || '').trim();
+    const skill = String(skillCheck.skillLabel || '').trim() || this._resolveSkillLabel(skillKey);
+    const source = String(skillCheck.sourceName || '').trim();
+    const check = source ? `${source} (${skill})` : skill;
+    const total = Number(this._getFirstRollTotal(message));
+    const rolledOutcome = Number.isFinite(total)
+      ? getSkillCheckOutcomeKey(total)
+      : String(skillCheck.outcome || '').trim() || 'Failure';
+    const outcome = shiftOutcomeKey(rolledOutcome, skillCheck.shift);
+
+    return { skill, source, check, outcome };
+  }
+
+  _getFirstRollTotal(message) {
+    const rolls = Array.isArray(message?.rolls)
+      ? message.rolls
+      : message?.roll
+        ? [message.roll]
+        : [];
+    return rolls[0]?.total;
+  }
+
+  _resolveSkillLabel(skillKey) {
+    if (!skillKey) return UNKNOWN_SKILL_CHECK_KEY;
+    const localizationKey = CONFIG.ProjectAndromeda?.skills?.[skillKey];
+    return localizationKey ? game.i18n.localize(localizationKey) : skillKey;
+  }
+
+  _applySkillCheckEntry(stats, entry, direction) {
+    const delta = Number(direction) || 0;
+    if (!delta) return;
+    stats.total = Math.max((Number(stats.total) || 0) + delta, 0);
+    this._adjustCounter(stats.bySkill, entry.skill, delta);
+    if (entry.source) this._adjustCounter(stats.bySource, entry.source, delta);
+    this._adjustCounter(stats.byOutcome, entry.outcome, delta);
+    stats.byCheckOutcome[entry.check] ??= {};
+    this._adjustCounter(stats.byCheckOutcome[entry.check], entry.outcome, delta);
+    if (!Object.keys(stats.byCheckOutcome[entry.check]).length) {
+      delete stats.byCheckOutcome[entry.check];
+    }
+  }
+
+  _adjustCounter(map, key, delta) {
+    const name = String(key || '').trim();
+    if (!name) return;
+    const next = Math.max((Number(map[name]) || 0) + delta, 0);
+    if (next) map[name] = next;
+    else delete map[name];
+  }
+
   _recordMomentOfGloryUsageFromMessage(session, message) {
     const flag =
       message?.getFlag?.(MODULE_ID, 'momentOfGlory') ?? message?.flags?.[MODULE_ID]?.momentOfGlory;
@@ -581,6 +772,7 @@ export class SessionStatsService {
     const rolls = session?.stats?.rolls ?? this._createEmptyStats().rolls;
     const combat = session?.stats?.combat ?? this._createEmptyStats().combat;
     const momentOfGlory = session?.stats?.momentOfGlory ?? this._createEmptyStats().momentOfGlory;
+    const skillChecks = this._normalizeSkillCheckStats(session?.stats?.skillChecks);
     const startedAt = this._formatDateTime(session.startedAt);
     const endedAt = this._formatDateTime(session.endedAt);
     const duration = this._formatDuration(session.startedAt, session.endedAt);
@@ -594,6 +786,12 @@ export class SessionStatsService {
     const momentRows = this._buildCounterListItems(momentOfGlory.byActor, (key) =>
       this._resolveActorLabel(key)
     );
+    const skillRows = this._buildCounterListItems(skillChecks.bySkill, (key) => key);
+    const sourceRows = this._buildCounterListItems(skillChecks.bySource, (key) => key);
+    const outcomeRows = this._buildCounterListItems(skillChecks.byOutcome, (key) =>
+      game.i18n.localize(`MY_RPG.SkillCheck.Outcomes.${key}`)
+    );
+    const checkOutcomeRows = this._buildCheckOutcomeListItems(skillChecks.byCheckOutcome);
 
     const content = `
       <section class="project-andromeda-session-summary">
@@ -604,6 +802,7 @@ export class SessionStatsService {
         <p><strong>${this._escape(game.i18n.localize('MY_RPG.SessionTracker.Summary.EndReason'))}:</strong> ${this._escape(reason)}</p>
         <hr>
         <p><strong>${this._escape(game.i18n.localize('MY_RPG.SessionTracker.Summary.RollsTotal'))}:</strong> ${rolls.total}</p>
+        <p><strong>${this._escape(game.i18n.localize('MY_RPG.SessionTracker.Summary.SkillChecksTotal'))}:</strong> ${skillChecks.total}</p>
         <p><strong>${this._escape(game.i18n.localize('MY_RPG.SessionTracker.Summary.EncountersStarted'))}:</strong> ${combat.encountersStarted}</p>
         <p><strong>${this._escape(game.i18n.localize('MY_RPG.SessionTracker.Summary.EncountersEnded'))}:</strong> ${combat.encountersEnded}</p>
         <p><strong>${this._escape(game.i18n.localize('MY_RPG.SessionTracker.Summary.RoundAdvances'))}:</strong> ${combat.roundAdvances}</p>
@@ -613,6 +812,14 @@ export class SessionStatsService {
         <ul>${actorRows}</ul>
         <h3>${this._escape(game.i18n.localize('MY_RPG.SessionTracker.Summary.RollsByFormula'))}</h3>
         <ul>${formulaRows}</ul>
+        <h3>${this._escape(game.i18n.localize('MY_RPG.SessionTracker.Summary.SkillChecksBySkill'))}</h3>
+        <ul>${skillRows}</ul>
+        <h3>${this._escape(game.i18n.localize('MY_RPG.SessionTracker.Summary.SkillChecksBySource'))}</h3>
+        <ul>${sourceRows}</ul>
+        <h3>${this._escape(game.i18n.localize('MY_RPG.SessionTracker.Summary.SkillCheckOutcomes'))}</h3>
+        <ul>${outcomeRows}</ul>
+        <h3>${this._escape(game.i18n.localize('MY_RPG.SessionTracker.Summary.SkillCheckOutcomesByCheck'))}</h3>
+        <ul>${checkOutcomeRows}</ul>
         <h3>${this._escape(game.i18n.localize('MY_RPG.SessionTracker.Summary.MomentOfGloryByActor'))}</h3>
         <ul>${momentRows}</ul>
       </section>
@@ -636,6 +843,29 @@ export class SessionStatsService {
       .map(([key, count]) => {
         const label = formatKey ? formatKey(key) : key;
         return `<li>${this._escape(label)}: ${Number(count) || 0}</li>`;
+      })
+      .join('');
+  }
+
+  _buildCheckOutcomeListItems(map) {
+    const entries = Object.entries(map ?? {}).sort((left, right) =>
+      String(left[0]).localeCompare(String(right[0]))
+    );
+    if (!entries.length) {
+      return `<li>${this._escape(game.i18n.localize('MY_RPG.SessionTracker.Summary.None'))}</li>`;
+    }
+
+    return entries
+      .map(([check, outcomes]) => {
+        const outcomeText = Object.entries(outcomes ?? {})
+          .filter(([, count]) => Number(count) > 0)
+          .sort(([left], [right]) => String(left).localeCompare(String(right)))
+          .map(([outcome, count]) => {
+            const label = game.i18n.localize(`MY_RPG.SkillCheck.Outcomes.${outcome}`);
+            return `${this._escape(label)}: ${Number(count) || 0}`;
+          })
+          .join(', ');
+        return `<li>${this._escape(check)}: ${outcomeText || this._escape(game.i18n.localize('MY_RPG.SessionTracker.Summary.None'))}</li>`;
       })
       .join('');
   }

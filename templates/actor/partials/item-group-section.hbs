@@ -116,6 +116,18 @@
                   <span class='sr-only'>{{item.activationControlTitle}}</span>
                 </button>
               {{/if}}
+              {{#if item.hasChatControl}}
+                <button
+                  type='button'
+                  class='item-chat item-control'
+                  data-item-id='{{item.id}}'
+                  data-group-key='{{item.groupKey}}'
+                  title='{{@root.itemControls.chat}}'
+                >
+                  <i class='fa-solid fa-message'></i>
+                  <span class='sr-only'>{{@root.itemControls.chat}}</span>
+                </button>
+              {{/if}}
               <button
                 type='button'
                 class='item-edit item-control'
