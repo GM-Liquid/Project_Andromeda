@@ -221,6 +221,34 @@ function getFilteredItemFields(data, excludedPaths = []) {
   return (data.itemConfig?.fields ?? []).filter((field) => !hidden.has(field.path));
 }
 
+// Select-option lists shared by every item sheet (rank, skill, usage frequency,
+// activation cost, defense, duration, targets). Per-field `selected` for the types
+// in PER_FIELD_SELECTED_TYPES is recomputed in buildRenderableItemFields.
+function attachCommonSelectOptions(data) {
+  data.rankOptions = buildRankOptions(data.system.rank);
+  data.skillOptions = buildSkillOptions(data.system.skill);
+  data.usageFrequencyOptions = buildUsageFrequencyOptions(data.system.usageFrequency);
+  data.activationCostOptions = buildActivationTypeOptions(
+    data.system.activationCost ?? data.system.activationType
+  );
+  data.defenseOptions = buildSelectOptions(
+    data.system.defense,
+    ITEM_DEFENSE_LABEL_KEYS,
+    'MY_RPG.ItemFields.None'
+  );
+  data.durationOptions = buildSelectOptions(
+    data.system.duration,
+    ITEM_DURATION_LABEL_KEYS,
+    'MY_RPG.ItemFields.None'
+  );
+  data.targetOptions = buildSelectOptions(
+    data.system.targets,
+    ITEM_TARGET_LABEL_KEYS,
+    'MY_RPG.ItemFields.None'
+  );
+  return data;
+}
+
 export class ProjectAndromedaItemSheet extends FoundryItemSheet {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
@@ -377,74 +405,17 @@ export class ProjectAndromedaItemSheet extends FoundryItemSheet {
       this.item.logDebugState('Item sheet snapshot');
     }
 
-    return sheetData;
+    return attachCommonSelectOptions(sheetData);
   }
 }
 
-export class ProjectAndromedaCartridgeSheet extends ProjectAndromedaItemSheet {
+export class ProjectAndromedaWeaponSheet extends ProjectAndromedaItemSheet {
   get template() {
-    return 'systems/project-andromeda/templates/item/cartridge-sheet.hbs';
+    return 'systems/project-andromeda/templates/item/weapon-sheet.hbs';
   }
 
   async getData(options) {
     const data = await super.getData(options);
-    data.rankOptions = buildRankOptions(data.system.rank);
-    data.skillOptions = buildSkillOptions(data.system.skill);
-    data.usageFrequencyOptions = buildUsageFrequencyOptions(data.system.usageFrequency);
-    data.activationCostOptions = buildActivationTypeOptions(
-      data.system.activationCost ?? data.system.activationType
-    );
-    data.defenseOptions = buildSelectOptions(
-      data.system.defense,
-      ITEM_DEFENSE_LABEL_KEYS,
-      'MY_RPG.ItemFields.None'
-    );
-    data.durationOptions = buildSelectOptions(
-      data.system.duration,
-      ITEM_DURATION_LABEL_KEYS,
-      'MY_RPG.ItemFields.None'
-    );
-    data.targetOptions = buildSelectOptions(
-      data.system.targets,
-      ITEM_TARGET_LABEL_KEYS,
-      'MY_RPG.ItemFields.None'
-    );
-    data.metadataFields = buildRenderableItemFields(
-      data,
-      getFilteredItemFields(data, ['rank', 'skill'])
-    );
-    return data;
-  }
-}
-
-export class ProjectAndromedaImplantSheet extends ProjectAndromedaItemSheet {
-  get template() {
-    return 'systems/project-andromeda/templates/item/implant-sheet.hbs';
-  }
-
-  async getData(options) {
-    const data = await super.getData(options);
-    data.rankOptions = buildRankOptions(data.system.rank);
-    data.skillOptions = buildSkillOptions(data.system.skill);
-    data.usageFrequencyOptions = buildUsageFrequencyOptions(data.system.usageFrequency);
-    data.activationCostOptions = buildActivationTypeOptions(
-      data.system.activationCost ?? data.system.activationType
-    );
-    data.defenseOptions = buildSelectOptions(
-      data.system.defense,
-      ITEM_DEFENSE_LABEL_KEYS,
-      'MY_RPG.ItemFields.None'
-    );
-    data.durationOptions = buildSelectOptions(
-      data.system.duration,
-      ITEM_DURATION_LABEL_KEYS,
-      'MY_RPG.ItemFields.None'
-    );
-    data.targetOptions = buildSelectOptions(
-      data.system.targets,
-      ITEM_TARGET_LABEL_KEYS,
-      'MY_RPG.ItemFields.None'
-    );
     data.metadataFields = buildRenderableItemFields(
       data,
       getFilteredItemFields(data, ['rank', 'skill'])
@@ -460,64 +431,7 @@ export class ProjectAndromedaArmorSheet extends ProjectAndromedaItemSheet {
 
   async getData(options) {
     const data = await super.getData(options);
-    data.rankOptions = buildRankOptions(data.system.rank);
-    data.skillOptions = buildSkillOptions(data.system.skill);
-    data.usageFrequencyOptions = buildUsageFrequencyOptions(data.system.usageFrequency);
-    data.activationCostOptions = buildActivationTypeOptions(
-      data.system.activationCost ?? data.system.activationType
-    );
-    data.defenseOptions = buildSelectOptions(
-      data.system.defense,
-      ITEM_DEFENSE_LABEL_KEYS,
-      'MY_RPG.ItemFields.None'
-    );
-    data.durationOptions = buildSelectOptions(
-      data.system.duration,
-      ITEM_DURATION_LABEL_KEYS,
-      'MY_RPG.ItemFields.None'
-    );
-    data.targetOptions = buildSelectOptions(
-      data.system.targets,
-      ITEM_TARGET_LABEL_KEYS,
-      'MY_RPG.ItemFields.None'
-    );
     data.metadataFields = buildRenderableItemFields(data, getFilteredItemFields(data, ['rank']));
-    return data;
-  }
-}
-
-export class ProjectAndromedaWeaponSheet extends ProjectAndromedaItemSheet {
-  get template() {
-    return 'systems/project-andromeda/templates/item/weapon-sheet.hbs';
-  }
-
-  async getData(options) {
-    const data = await super.getData(options);
-    data.skillOptions = buildSkillOptions(data.system.skill);
-    data.rankOptions = buildRankOptions(data.system.rank);
-    data.usageFrequencyOptions = buildUsageFrequencyOptions(data.system.usageFrequency);
-    data.activationCostOptions = buildActivationTypeOptions(
-      data.system.activationCost ?? data.system.activationType
-    );
-    data.defenseOptions = buildSelectOptions(
-      data.system.defense,
-      ITEM_DEFENSE_LABEL_KEYS,
-      'MY_RPG.ItemFields.None'
-    );
-    data.durationOptions = buildSelectOptions(
-      data.system.duration,
-      ITEM_DURATION_LABEL_KEYS,
-      'MY_RPG.ItemFields.None'
-    );
-    data.targetOptions = buildSelectOptions(
-      data.system.targets,
-      ITEM_TARGET_LABEL_KEYS,
-      'MY_RPG.ItemFields.None'
-    );
-    data.metadataFields = buildRenderableItemFields(
-      data,
-      getFilteredItemFields(data, ['rank', 'skill'])
-    );
     return data;
   }
 }
@@ -529,32 +443,11 @@ export class ProjectAndromedaGenericItemSheet extends ProjectAndromedaItemSheet 
 
   async getData(options) {
     const data = await super.getData(options);
-    data.rankOptions = buildRankOptions(data.system.rank);
-    data.skillOptions = buildSkillOptions(data.system.skill);
-    data.usageFrequencyOptions = buildUsageFrequencyOptions(data.system.usageFrequency);
-    data.activationCostOptions = buildActivationTypeOptions(
-      data.system.activationCost ?? data.system.activationType
-    );
-    data.defenseOptions = buildSelectOptions(
-      data.system.defense,
-      ITEM_DEFENSE_LABEL_KEYS,
-      'MY_RPG.ItemFields.None'
-    );
     // Per-field `selected` is recomputed in buildRenderableItemFields, so the base
     // list just needs the option values (the strong/medium/weak fields share it).
     data.archetypeDefenseOptions = buildSelectOptions(
       '',
       ARCHETYPE_DEFENSE_LABEL_KEYS,
-      'MY_RPG.ItemFields.None'
-    );
-    data.durationOptions = buildSelectOptions(
-      data.system.duration,
-      ITEM_DURATION_LABEL_KEYS,
-      'MY_RPG.ItemFields.None'
-    );
-    data.targetOptions = buildSelectOptions(
-      data.system.targets,
-      ITEM_TARGET_LABEL_KEYS,
       'MY_RPG.ItemFields.None'
     );
     const fields = isPersonalityValueItem(this.item)
@@ -568,8 +461,6 @@ export class ProjectAndromedaGenericItemSheet extends ProjectAndromedaItemSheet 
 }
 
 export const ITEM_SHEET_CLASSES = {
-  cartridge: ProjectAndromedaCartridgeSheet,
-  implant: ProjectAndromedaImplantSheet,
   armor: ProjectAndromedaArmorSheet,
   weapon: ProjectAndromedaWeaponSheet,
   generic: ProjectAndromedaGenericItemSheet

@@ -66,12 +66,6 @@ export function getArchetypeDefenseProfile(actor) {
   return isCompleteDefenseProfile(profile) ? profile : null;
 }
 
-// Defenses are locked (derived from rank + archetype) only when a player character
-// has an archetype with a complete defense profile.
-export function actorHasLockedDefenses(actor) {
-  return getArchetypeDefenseProfile(actor) !== null;
-}
-
 export function getSkillRankBonus(actor, skillKey) {
   const archetypeSkill = getArchetypeSkillKey(actor);
   return archetypeSkill && archetypeSkill === skillKey ? ARCHETYPE_RANK_BONUS : 0;

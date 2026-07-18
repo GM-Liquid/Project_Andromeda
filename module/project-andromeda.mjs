@@ -37,6 +37,8 @@ import {
   DEFAULT_ITEM_USAGE_FREQUENCY,
   ITEM_SUPERTYPE_LABELS,
   ITEM_TYPE_CONFIGS,
+  LEGACY_EQUIPMENT_TYPES as LEGACY_EQUIPMENT_TYPE_LIST,
+  LEGACY_TRAIT_TYPES as LEGACY_TRAIT_TYPE_LIST,
   isEquipmentLikeType,
   normalizeUsageFrequency
 } from './helpers/item-config.mjs';
@@ -79,7 +81,6 @@ import {
   unlinkLibraryItemFromActors
 } from './helpers/item-library-sync.mjs';
 import { getSceneActorTokens, getTokenIsolationPlan } from './helpers/token-isolation.mjs';
-import './helpers/handlebars-helpers.mjs';
 
 const ITEM_SUPERTYPE_ORDER = ['equipment', 'environment', 'traits', 'other'];
 const ITEM_LIBRARY_SYNC_OPTION_KEY = getLibrarySyncOptionKey();
@@ -100,17 +101,8 @@ const HERO_POINT_SESSION_GRANT = 1;
 const SESSION_HOOK_STARTED = 'projectAndromeda.sessionStarted';
 const SESSION_HOOK_ENDED = 'projectAndromeda.sessionEnded';
 const OBSOLETE_CARTRIDGE_ITEM_FIELDS = ['runeType'];
-const LEGACY_EQUIPMENT_TYPES = new Set(['cartridge', 'implant', 'equipment-consumable']);
-const LEGACY_TRAIT_TYPES = new Set([
-  'trait-flaw',
-  'trait-general',
-  'trait-backstory',
-  'trait-social',
-  'trait-combat',
-  'trait-magical',
-  'trait-professional',
-  'trait-technological'
-]);
+const LEGACY_EQUIPMENT_TYPES = new Set(LEGACY_EQUIPMENT_TYPE_LIST);
+const LEGACY_TRAIT_TYPES = new Set(LEGACY_TRAIT_TYPE_LIST);
 const LIBRARY_ITEM_UUID_FLAG = 'libraryItemUuid';
 const LIBRARY_ACTOR_ID_FLAG = 'libraryActorId';
 const LIBRARY_ACTOR_ITEM_ID_FLAG = 'libraryActorItemId';
@@ -1099,15 +1091,23 @@ function getLibraryActorItemId(item) {
   return String(item?.getFlag?.(MODULE_ID, LIBRARY_ACTOR_ITEM_ID_FLAG) ?? '').trim();
 }
 
-async function migrateLegacyEquipmentTypes() {
+// Shared engine for the one-time legacy item-type migrations. Legacy items (world
+// and actor-owned) are recreated under the unified type, links to migrated world
+// sources are repointed, library metadata follows recreated actor items, and the
+// remaining items of the current type get their system data normalized in place.
+async function migrateLegacyItemTypes({
+  source,
+  debugLabel,
+  isLegacyItem,
+  needsNormalization,
+  buildNormalizationUpdate,
+  buildCreateData
+}) {
   if (!game.user?.isGM) return null;
 
-  const migrationContext = {
-    source: 'legacy-equipment-type-migration'
-  };
   const createDeleteOptions = {
     render: false,
-    [ITEM_LIBRARY_SYNC_OPTION_KEY]: migrationContext
+    [ITEM_LIBRARY_SYNC_OPTION_KEY]: { source }
   };
   const updateOptions = {
     diff: false,
@@ -1115,19 +1115,16 @@ async function migrateLegacyEquipmentTypes() {
   };
 
   const worldItemsSnapshot = Array.from(game.items ?? []);
-  const legacyWorldItems = worldItemsSnapshot.filter((item) => isLegacyEquipmentType(item.type));
+  const legacyWorldItems = worldItemsSnapshot.filter((item) => isLegacyItem(item));
   const normalizedWorldUpdates = worldItemsSnapshot
-    .filter((item) => item.type === 'equipment' && needsEquipmentSystemNormalization(item))
-    .map((item) => buildEquipmentSystemNormalizationUpdate(item));
+    .filter((item) => needsNormalization(item))
+    .map((item) => buildNormalizationUpdate(item));
 
   const worldUuidMap = new Map();
   const migratedLegacyWorldItemIds = [];
   let worldItemsRecreated = 0;
   for (const item of legacyWorldItems) {
-    const createdItem = await Item.create(
-      buildLegacyEquipmentCreateData(item),
-      createDeleteOptions
-    );
+    const createdItem = await Item.create(buildCreateData(item), createDeleteOptions);
     if (!createdItem) continue;
     worldUuidMap.set(getWorldItemMigrationMapKey(item), createdItem.uuid);
     migratedLegacyWorldItemIds.push(item.id);
@@ -1145,16 +1142,16 @@ async function migrateLegacyEquipmentTypes() {
 
   for (const actor of game.actors ?? []) {
     const actorItemsSnapshot = Array.from(actor.items ?? []);
-    const legacyActorItems = actorItemsSnapshot.filter((item) => isLegacyEquipmentType(item.type));
+    const legacyActorItems = actorItemsSnapshot.filter((item) => isLegacyItem(item));
     const normalizedActorUpdates = actorItemsSnapshot
-      .filter((item) => item.type === 'equipment' && needsEquipmentSystemNormalization(item))
-      .map((item) => buildEquipmentSystemNormalizationUpdate(item));
+      .filter((item) => needsNormalization(item))
+      .map((item) => buildNormalizationUpdate(item));
 
     if (legacyActorItems.length) {
       const createdItems = await actor.createEmbeddedDocuments(
         'Item',
         legacyActorItems.map((item) =>
-          buildLegacyEquipmentCreateData(item, {
+          buildCreateData(item, {
             mappedLibraryUuid: getMappedLibraryUuid(item, worldUuidMap)
           })
         ),
@@ -1257,10 +1254,22 @@ async function migrateLegacyEquipmentTypes() {
   };
 
   if (totalUpdates > 0) {
-    debugLog('Migrating legacy equipment item types', summary);
+    debugLog(debugLabel, summary);
   }
 
   return summary;
+}
+
+function migrateLegacyEquipmentTypes() {
+  return migrateLegacyItemTypes({
+    source: 'legacy-equipment-type-migration',
+    debugLabel: 'Migrating legacy equipment item types',
+    isLegacyItem: (item) => isLegacyEquipmentType(item.type),
+    needsNormalization: (item) =>
+      item.type === 'equipment' && needsEquipmentSystemNormalization(item),
+    buildNormalizationUpdate: buildEquipmentSystemNormalizationUpdate,
+    buildCreateData: buildLegacyEquipmentCreateData
+  });
 }
 
 async function runLegacyEquipmentTypeMigrationIfNeeded() {
@@ -1277,165 +1286,16 @@ async function runLegacyEquipmentTypeMigrationIfNeeded() {
   return summary;
 }
 
-async function migrateLegacyTraitTypes() {
-  if (!game.user?.isGM) return null;
-
-  const migrationContext = {
-    source: 'legacy-trait-type-migration'
-  };
-  const createDeleteOptions = {
-    render: false,
-    [ITEM_LIBRARY_SYNC_OPTION_KEY]: migrationContext
-  };
-  const updateOptions = {
-    diff: false,
-    ...createDeleteOptions
-  };
-
-  const worldItemsSnapshot = Array.from(game.items ?? []);
-  const legacyWorldItems = worldItemsSnapshot.filter((item) => isLegacyTraitType(item.type));
-  const normalizedWorldUpdates = worldItemsSnapshot
-    .filter((item) => isCurrentTraitType(item.type) && needsTraitSystemNormalization(item))
-    .map((item) => buildTraitSystemNormalizationUpdate(item));
-  const worldUuidMap = new Map();
-  const migratedLegacyWorldItemIds = [];
-  let worldItemsRecreated = 0;
-
-  for (const item of legacyWorldItems) {
-    const createdItem = await Item.create(buildLegacyTraitCreateData(item), createDeleteOptions);
-    if (!createdItem) continue;
-    worldUuidMap.set(getWorldItemMigrationMapKey(item), createdItem.uuid);
-    migratedLegacyWorldItemIds.push(item.id);
-    worldItemsRecreated += 1;
-  }
-
-  if (normalizedWorldUpdates.length) {
-    await Item.updateDocuments(normalizedWorldUpdates, updateOptions);
-  }
-
-  const actorItemIdMap = new Map();
-  let actorItemsRecreated = 0;
-  let actorItemsDeleted = 0;
-  let actorItemsNormalized = 0;
-
-  for (const actor of game.actors ?? []) {
-    const actorItemsSnapshot = Array.from(actor.items ?? []);
-    const legacyActorItems = actorItemsSnapshot.filter((item) => isLegacyTraitType(item.type));
-    const normalizedActorUpdates = actorItemsSnapshot
-      .filter((item) => isCurrentTraitType(item.type) && needsTraitSystemNormalization(item))
-      .map((item) => buildTraitSystemNormalizationUpdate(item));
-
-    if (legacyActorItems.length) {
-      const createdItems = await actor.createEmbeddedDocuments(
-        'Item',
-        legacyActorItems.map((item) =>
-          buildLegacyTraitCreateData(item, {
-            mappedLibraryUuid: getMappedLibraryUuid(item, worldUuidMap)
-          })
-        ),
-        createDeleteOptions
-      );
-
-      createdItems.forEach((createdItem, index) => {
-        const sourceItem = legacyActorItems[index];
-        if (!createdItem || !sourceItem) return;
-        actorItemIdMap.set(
-          buildActorItemMigrationMapKey(actor.id, sourceItem.id),
-          String(createdItem.id ?? '').trim()
-        );
-      });
-
-      actorItemsRecreated += createdItems.length;
-      const migratedLegacyActorItemIds = legacyActorItems
-        .slice(0, createdItems.length)
-        .map((item) => item.id);
-      actorItemsDeleted += migratedLegacyActorItemIds.length;
-
-      await actor.deleteEmbeddedDocuments('Item', migratedLegacyActorItemIds, createDeleteOptions);
-    }
-
-    if (normalizedActorUpdates.length) {
-      await actor.updateEmbeddedDocuments('Item', normalizedActorUpdates, updateOptions);
-      actorItemsNormalized += normalizedActorUpdates.length;
-    }
-  }
-
-  let actorLibraryLinksUpdated = 0;
-  if (worldUuidMap.size) {
-    for (const actor of game.actors ?? []) {
-      const linkUpdates = [];
-      for (const item of actor.items ?? []) {
-        const currentLibraryUuid = getLibraryItemUuid(item);
-        if (!currentLibraryUuid) continue;
-
-        const mappedLibraryUuid = worldUuidMap.get(currentLibraryUuid);
-        if (!mappedLibraryUuid || mappedLibraryUuid === currentLibraryUuid) continue;
-
-        linkUpdates.push({
-          _id: item.id,
-          [`flags.${MODULE_ID}.${LIBRARY_ITEM_UUID_FLAG}`]: mappedLibraryUuid
-        });
-      }
-
-      if (!linkUpdates.length) continue;
-      await actor.updateEmbeddedDocuments('Item', linkUpdates, createDeleteOptions);
-      actorLibraryLinksUpdated += linkUpdates.length;
-    }
-  }
-
-  const libraryMetadataUpdates = [];
-  if (actorItemIdMap.size) {
-    for (const item of game.items ?? []) {
-      const actorId = getLibraryActorId(item);
-      const actorItemId = getLibraryActorItemId(item);
-      if (!actorId || !actorItemId) continue;
-
-      const migratedActorItemId = actorItemIdMap.get(
-        buildActorItemMigrationMapKey(actorId, actorItemId)
-      );
-      if (!migratedActorItemId || migratedActorItemId === actorItemId) continue;
-
-      libraryMetadataUpdates.push({
-        _id: item.id,
-        [`flags.${MODULE_ID}.${LIBRARY_ACTOR_ID_FLAG}`]: actorId,
-        [`flags.${MODULE_ID}.${LIBRARY_ACTOR_ITEM_ID_FLAG}`]: migratedActorItemId
-      });
-    }
-  }
-
-  if (libraryMetadataUpdates.length) {
-    await Item.updateDocuments(libraryMetadataUpdates, createDeleteOptions);
-  }
-
-  if (migratedLegacyWorldItemIds.length) {
-    await Item.deleteDocuments(migratedLegacyWorldItemIds, createDeleteOptions);
-  }
-
-  const totalUpdates =
-    worldItemsRecreated +
-    normalizedWorldUpdates.length +
-    actorItemsRecreated +
-    actorItemsNormalized +
-    actorLibraryLinksUpdated +
-    libraryMetadataUpdates.length;
-
-  const summary = {
-    worldItemsRecreated,
-    worldItemsDeleted: migratedLegacyWorldItemIds.length,
-    worldItemsNormalized: normalizedWorldUpdates.length,
-    actorItemsRecreated,
-    actorItemsDeleted,
-    actorItemsNormalized,
-    actorLibraryLinksUpdated,
-    libraryMetadataUpdated: libraryMetadataUpdates.length,
-    totalUpdates
-  };
-
-  if (totalUpdates > 0) {
-    debugLog('Migrating legacy trait item types', summary);
-  }
-
-  return summary;
+function migrateLegacyTraitTypes() {
+  return migrateLegacyItemTypes({
+    source: 'legacy-trait-type-migration',
+    debugLabel: 'Migrating legacy trait item types',
+    isLegacyItem: (item) => isLegacyTraitType(item.type),
+    needsNormalization: (item) =>
+      isCurrentTraitType(item.type) && needsTraitSystemNormalization(item),
+    buildNormalizationUpdate: buildTraitSystemNormalizationUpdate,
+    buildCreateData: buildLegacyTraitCreateData
+  });
 }
 
 async function runLegacyTraitTypeMigrationIfNeeded() {
@@ -1632,8 +1492,6 @@ Hooks.once('init', function () {
   });
   itemSheets.unregisterSheet('core', FoundryItemSheet);
   const sheetLabels = {
-    cartridge: 'MY_RPG.SheetLabels.ItemAbility',
-    implant: 'MY_RPG.SheetLabels.ItemMod',
     armor: 'MY_RPG.SheetLabels.ItemArmor',
     weapon: 'MY_RPG.SheetLabels.ItemWeapon',
     generic: 'MY_RPG.SheetLabels.ItemGeneric'
@@ -1967,6 +1825,8 @@ Hooks.once('ready', async function () {
 
   await initializeSceneTokenIsolation();
 
+  // World migrations and cleanups run once, on the primary active GM only, so two
+  // connected GMs never execute the same document writes concurrently.
   if (isPrimaryActiveGM()) {
     await runLegacyEquipmentTypeMigrationIfNeeded();
     await runLegacyTraitTypeMigrationIfNeeded();
@@ -1975,7 +1835,5 @@ Hooks.once('ready', async function () {
     await runPackLinkMigrationIfNeeded();
     await runWeaponTypeMigrationIfNeeded();
     await runCompendiumPackRefreshIfNeeded();
-  } else {
-    await purgeObsoleteCartridgeData();
   }
 });

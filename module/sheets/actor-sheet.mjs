@@ -74,7 +74,9 @@ async function openGearLibraryCatalogSection(folderName) {
 
   if (folder) {
     // Use a self-removing listener rather than Hooks.once: a different compendium
-    // rendering first must not consume the one-shot before our pack opens.
+    // rendering first must not consume the one-shot before our pack opens. If the
+    // pack render never fires (layout differences), drop the listener after a grace
+    // period so it does not linger for the rest of the session.
     const hookId = Hooks.on('renderCompendium', (app, html) => {
       if (app?.collection?.metadata?.id !== pack.metadata?.id) return;
       Hooks.off('renderCompendium', hookId);
@@ -84,6 +86,7 @@ async function openGearLibraryCatalogSection(folderName) {
       folderEl.classList.remove('collapsed');
       (folderEl.querySelector('.folder-header') ?? folderEl).scrollIntoView?.({ block: 'start' });
     });
+    setTimeout(() => Hooks.off('renderCompendium', hookId), 10_000);
   }
 
   pack.render(true);
@@ -1017,6 +1020,8 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
 
   async _onSharedHeroPoolChange(event) {
     if (!isGmCharacterActorType(this.actor.type)) return;
+    // The shared pool lives in a world-scoped setting; only a GM can write it.
+    if (!game.user?.isGM) return;
     const input = event.currentTarget;
     const nextValue = this._coerceNonNegativeIntegerInput(input);
     await game.settings.set(MODULE_ID, GM_HERO_POOL_SETTING, nextValue);
@@ -1721,8 +1726,54 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       .trim();
     if (!rawText) return '';
     const hasHtmlMarkup = /<\/?[a-z][^>]*>/i.test(rawText);
-    if (hasHtmlMarkup) return rawText;
+    if (hasHtmlMarkup) return this._sanitizeItemDescriptionHtml(rawText);
     return this._escapeHTML(rawText).replace(/\n/g, '<br>');
+  }
+
+  // Descriptions are user-authored and end up in chat cards and sheet detail rows as
+  // HTML, so only plain formatting tags survive; every attribute and any other
+  // element (script, img, event handlers, </textarea> breakouts) is stripped while
+  // its text content is kept.
+  static ALLOWED_DESCRIPTION_TAGS = new Set([
+    'p',
+    'br',
+    'strong',
+    'b',
+    'em',
+    'i',
+    's',
+    'strike',
+    'u',
+    'ul',
+    'ol',
+    'li'
+  ]);
+
+  _sanitizeItemDescriptionHtml(html) {
+    const template = document.createElement('template');
+    template.innerHTML = html;
+    const allowed = this.constructor.ALLOWED_DESCRIPTION_TAGS;
+    const ELEMENT_NODE = 1;
+    const TEXT_NODE = 3;
+    const sanitizeNode = (node) => {
+      for (const child of Array.from(node.childNodes)) {
+        if (child.nodeType === ELEMENT_NODE) {
+          if (!allowed.has(child.tagName.toLowerCase())) {
+            sanitizeNode(child);
+            child.replaceWith(...Array.from(child.childNodes));
+            continue;
+          }
+          for (const attribute of Array.from(child.attributes)) {
+            child.removeAttribute(attribute.name);
+          }
+          sanitizeNode(child);
+        } else if (child.nodeType !== TEXT_NODE) {
+          child.remove();
+        }
+      }
+    };
+    sanitizeNode(template.content);
+    return template.innerHTML.trim();
   }
 
   _escapeHTML(value) {

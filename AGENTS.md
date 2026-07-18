@@ -11,7 +11,7 @@
 | ----------------------------- | --------------------------------------------------------------- |
 | **System name**               | **Project Andromeda**                                           |
 | **Foundry VTT compatibility** | v12 (minimum 12, verified 13)                                   |
-| **Current version**           | `0.4.04.0`                                                      |
+| **Current version**           | `0.4.04.2`                                                      |
 | **Current release line**      | `0.4.04.x`                                                      |
 | **Languages**                 | English, Русский (full parity required)                         |
 | **Main tech**                 | ES-module JavaScript (`*.mjs`), Handlebars (`*.hbs`), JSON, CSS |

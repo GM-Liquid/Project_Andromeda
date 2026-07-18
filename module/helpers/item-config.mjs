@@ -292,6 +292,42 @@ const ARMOR_ITEM_FIELDS = [
   buildSkillField({ showWhenPath: 'requiresRoll' })
 ];
 
+const TRAIT_ITEM_DEFAULTS = Object.freeze({
+  activationCost: 'passive',
+  activationType: 'passive',
+  range: '',
+  duration: '',
+  area: '',
+  defense: '',
+  targets: '',
+  requiresRoll: false,
+  skill: '',
+  skillBonus: '0/0/0/0'
+});
+
+// Migration-only compatibility subtypes of the unified `trait` type (see AGENTS.md
+// §6). They share one config shape and must never be offered for new content.
+export const LEGACY_TRAIT_TYPES = Object.freeze([
+  'trait-flaw',
+  'trait-general',
+  'trait-backstory',
+  'trait-social',
+  'trait-combat',
+  'trait-magical',
+  'trait-professional',
+  'trait-technological'
+]);
+
+const LEGACY_TRAIT_TYPE_CONFIGS = LEGACY_TRAIT_TYPES.map((type) => ({
+  type,
+  supertype: 'traits',
+  groupKey: 'traits',
+  sheet: 'generic',
+  legacy: true,
+  defaults: TRAIT_ITEM_DEFAULTS,
+  fields: TRAIT_ITEM_FIELDS
+}));
+
 export const ITEM_TYPE_CONFIGS = [
   {
     type: 'cartridge',
@@ -457,197 +493,16 @@ export const ITEM_TYPE_CONFIGS = [
     supertype: 'traits',
     groupKey: 'traits',
     sheet: 'generic',
-    defaults: {
-      activationCost: 'passive',
-      activationType: 'passive',
-      range: '',
-      duration: '',
-      area: '',
-      defense: '',
-      targets: '',
-      requiresRoll: false,
-      skill: '',
-      skillBonus: '0/0/0/0'
-    },
+    defaults: TRAIT_ITEM_DEFAULTS,
     fields: TRAIT_ITEM_FIELDS
   },
-  {
-    type: 'trait-flaw',
-    supertype: 'traits',
-    groupKey: 'traits',
-    sheet: 'generic',
-    legacy: true,
-    defaults: {
-      activationCost: 'passive',
-      activationType: 'passive',
-      range: '',
-      duration: '',
-      area: '',
-      defense: '',
-      targets: '',
-      requiresRoll: false,
-      skill: '',
-      skillBonus: '0/0/0/0'
-    },
-    fields: TRAIT_ITEM_FIELDS
-  },
-  {
-    type: 'trait-general',
-    supertype: 'traits',
-    groupKey: 'traits',
-    sheet: 'generic',
-    legacy: true,
-    defaults: {
-      activationCost: 'passive',
-      activationType: 'passive',
-      range: '',
-      duration: '',
-      area: '',
-      defense: '',
-      targets: '',
-      requiresRoll: false,
-      skill: '',
-      skillBonus: '0/0/0/0'
-    },
-    fields: TRAIT_ITEM_FIELDS
-  },
-  {
-    type: 'trait-backstory',
-    supertype: 'traits',
-    groupKey: 'traits',
-    sheet: 'generic',
-    legacy: true,
-    defaults: {
-      activationCost: 'passive',
-      activationType: 'passive',
-      range: '',
-      duration: '',
-      area: '',
-      defense: '',
-      targets: '',
-      requiresRoll: false,
-      skill: '',
-      skillBonus: '0/0/0/0'
-    },
-    fields: TRAIT_ITEM_FIELDS
-  },
-  {
-    type: 'trait-social',
-    supertype: 'traits',
-    groupKey: 'traits',
-    sheet: 'generic',
-    legacy: true,
-    defaults: {
-      activationCost: 'passive',
-      activationType: 'passive',
-      range: '',
-      duration: '',
-      area: '',
-      defense: '',
-      targets: '',
-      requiresRoll: false,
-      skill: '',
-      skillBonus: '0/0/0/0'
-    },
-    fields: TRAIT_ITEM_FIELDS
-  },
-  {
-    type: 'trait-combat',
-    supertype: 'traits',
-    groupKey: 'traits',
-    sheet: 'generic',
-    legacy: true,
-    defaults: {
-      activationCost: 'passive',
-      activationType: 'passive',
-      range: '',
-      duration: '',
-      area: '',
-      defense: '',
-      targets: '',
-      requiresRoll: false,
-      skill: '',
-      skillBonus: '0/0/0/0'
-    },
-    fields: TRAIT_ITEM_FIELDS
-  },
-  {
-    type: 'trait-magical',
-    supertype: 'traits',
-    groupKey: 'traits',
-    sheet: 'generic',
-    legacy: true,
-    defaults: {
-      activationCost: 'passive',
-      activationType: 'passive',
-      range: '',
-      duration: '',
-      area: '',
-      defense: '',
-      targets: '',
-      requiresRoll: false,
-      skill: '',
-      skillBonus: '0/0/0/0'
-    },
-    fields: TRAIT_ITEM_FIELDS
-  },
-  {
-    type: 'trait-professional',
-    supertype: 'traits',
-    groupKey: 'traits',
-    sheet: 'generic',
-    legacy: true,
-    defaults: {
-      activationCost: 'passive',
-      activationType: 'passive',
-      range: '',
-      duration: '',
-      area: '',
-      defense: '',
-      targets: '',
-      requiresRoll: false,
-      skill: '',
-      skillBonus: '0/0/0/0'
-    },
-    fields: TRAIT_ITEM_FIELDS
-  },
-  {
-    type: 'trait-technological',
-    supertype: 'traits',
-    groupKey: 'traits',
-    sheet: 'generic',
-    legacy: true,
-    defaults: {
-      activationCost: 'passive',
-      activationType: 'passive',
-      range: '',
-      duration: '',
-      area: '',
-      defense: '',
-      targets: '',
-      requiresRoll: false,
-      skill: '',
-      skillBonus: '0/0/0/0'
-    },
-    fields: TRAIT_ITEM_FIELDS
-  },
+  ...LEGACY_TRAIT_TYPE_CONFIGS,
   {
     type: 'trait-genome',
     supertype: 'traits',
     groupKey: 'genomes',
     sheet: 'generic',
-    defaults: {
-      activationCost: 'passive',
-      activationType: 'passive',
-      range: '',
-      duration: '',
-      area: '',
-      defense: '',
-      targets: '',
-      requiresRoll: false,
-      skill: '',
-      skillBonus: '0/0/0/0'
-    },
+    defaults: TRAIT_ITEM_DEFAULTS,
     fields: TRAIT_ITEM_FIELDS
   },
   {
@@ -868,10 +723,16 @@ export function getItemTypeDefaults(type) {
   return config?.defaults ?? null;
 }
 
+// Migration-only compatibility types of the unified `equipment` model (AGENTS.md §6).
+export const LEGACY_EQUIPMENT_TYPES = Object.freeze([
+  'cartridge',
+  'implant',
+  'equipment-consumable'
+]);
+
 export function isEquipmentLikeType(type) {
-  return ['equipment', 'equipment-consumable', 'cartridge', 'implant'].includes(
-    String(type ?? '').trim()
-  );
+  const normalized = String(type ?? '').trim();
+  return normalized === 'equipment' || LEGACY_EQUIPMENT_TYPES.includes(normalized);
 }
 
 export function getItemGroupConfigByKey(key) {
@@ -881,10 +742,6 @@ export function getItemGroupConfigByKey(key) {
 
 export function getItemGroupConfigs() {
   return ITEM_GROUP_CONFIGS;
-}
-
-export function getItemGroupConfigsByType(type) {
-  return ITEM_GROUP_CONFIGS.filter((config) => config.types.includes(type));
 }
 
 export function getItemTabLabel(tabKey) {

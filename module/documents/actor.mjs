@@ -80,8 +80,6 @@ export class ProjectAndromedaActor extends Actor {
           .filter((value) => Number.isInteger(value) && value >= 0 && value < stress.max)
       : [];
 
-    s.flux ??= {};
-    s.flux.value = this._calcFlux(s);
     // DEBUG-LOG
     debugLog('prepareDerivedData', {
       uuid: this.uuid,
@@ -122,10 +120,6 @@ export class ProjectAndromedaActor extends Actor {
       control: Math.max(0, (Number(baseDefenses.control) || 0) + (Number(s?.tempcontrol) || 0)),
       will: Math.max(0, (Number(baseDefenses.will) || 0) + (Number(s?.tempwill) || 0))
     };
-  }
-
-  _calcFlux(s) {
-    return (Number(s.currentRank) || 0) * 5 + (Number(s.tempflux) || 0);
   }
 
   _calcSpeed(s, itemTotals = {}) {

@@ -441,7 +441,7 @@
     "name": "Техник",
     "type": "archetype",
     "skill": "khakerstvo",
-    "description": "Быстро понимает, как взломать, обойти или починить технику.",
+    "description": "Взламывает любые системы и глушит чужую технику.",
     "defenseProfile": {
       "strong": "control",
       "medium": "fortitude",
@@ -633,7 +633,7 @@
     "name": "Дипломат",
     "type": "archetype",
     "skill": "obayanie",
-    "description": "Легко выкручивается, если разговор зашёл не туда.",
+    "description": "Словом добивается того, чего другие берут силой.",
     "defenseProfile": {
       "strong": "will",
       "medium": "control",

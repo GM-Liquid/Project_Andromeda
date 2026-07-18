@@ -16,8 +16,6 @@ export const preloadHandlebarsTemplates = async function () {
     'systems/project-andromeda/templates/actor/actor-rank-and-file-sheet.hbs',
     'systems/project-andromeda/templates/actor/actor-elite-sheet.hbs',
     'systems/project-andromeda/templates/item/partials/step-effects.hbs',
-    'systems/project-andromeda/templates/item/cartridge-sheet.hbs',
-    'systems/project-andromeda/templates/item/implant-sheet.hbs',
     'systems/project-andromeda/templates/item/armor-sheet.hbs',
     'systems/project-andromeda/templates/item/weapon-sheet.hbs',
     'systems/project-andromeda/templates/item/generic-sheet.hbs',

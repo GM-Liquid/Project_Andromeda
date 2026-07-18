@@ -1,9 +1,5 @@
 import { debugLog } from '../config.mjs';
-import {
-  ITEM_BASE_DEFAULTS,
-  getItemTypeConfig,
-  getItemTypeDefaults
-} from '../helpers/item-config.mjs';
+import { ITEM_BASE_DEFAULTS, getItemTypeDefaults } from '../helpers/item-config.mjs';
 
 function cloneDefaults(data) {
   return foundry.utils.deepClone(data);
@@ -38,50 +34,6 @@ export class ProjectAndromedaItem extends Item {
 
   get isCartridge() {
     return this.type === 'cartridge';
-  }
-
-  get isImplant() {
-    return this.type === 'implant';
-  }
-
-  get isArmor() {
-    return this.type === 'armor';
-  }
-
-  get isWeapon() {
-    return this.type === 'weapon';
-  }
-
-  get supertype() {
-    return getItemTypeConfig(this.type)?.supertype ?? 'equipment';
-  }
-
-  get description() {
-    return String(this.system.description ?? '');
-  }
-
-  get quantity() {
-    return Number(this.system.quantity ?? 1);
-  }
-
-  get cartridgeData() {
-    if (!this.isCartridge) return undefined;
-    const { rank = '', skill = '', skillBonus = 0 } = this.system;
-    return {
-      rank: String(rank ?? ''),
-      skill: String(skill ?? ''),
-      skillBonus: Number(skillBonus ?? 0) || 0
-    };
-  }
-
-  get implantData() {
-    if (!this.isImplant) return undefined;
-    const { rank = '', skill = '', skillBonus = 0 } = this.system;
-    return {
-      rank: String(rank ?? ''),
-      skill: String(skill ?? ''),
-      skillBonus: Number(skillBonus ?? 0) || 0
-    };
   }
 
   logDebugState(context = 'ProjectAndromedaItem state') {

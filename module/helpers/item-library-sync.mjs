@@ -220,14 +220,13 @@ function getLinkedActors(libraryUuid) {
 }
 
 function chooseCanonicalLibraryItem(items) {
+  // Precompute link counts once: getLinkedActorItems walks every actor's items, so
+  // calling it inside the sort comparator would rescan the world per comparison.
+  const linkCounts = new Map(items.map((item) => [item, getLinkedActorItems(item.uuid).length]));
   return [...items].sort((left, right) => {
-    const leftCount = getLinkedActorItems(left.uuid).length;
-    const rightCount = getLinkedActorItems(right.uuid).length;
-    if (leftCount !== rightCount) return rightCount - leftCount;
-
-    const leftId = String(left?.id ?? '');
-    const rightId = String(right?.id ?? '');
-    return leftId.localeCompare(rightId);
+    const countDifference = linkCounts.get(right) - linkCounts.get(left);
+    if (countDifference) return countDifference;
+    return String(left?.id ?? '').localeCompare(String(right?.id ?? ''));
   })[0];
 }
 
@@ -589,15 +588,6 @@ export async function syncLibraryItemToActors(libraryItem) {
   }
 
   return updatedCount;
-}
-
-export async function syncLinkedLibraryItemStructure(item, options = {}) {
-  const libraryItem = getLinkedWorldItem(item);
-  if (!libraryItem) {
-    return { updated: false };
-  }
-
-  return syncLibraryItemStructure(libraryItem, options);
 }
 
 // Run on deletion of an actor item. While other actor items still link to the world
