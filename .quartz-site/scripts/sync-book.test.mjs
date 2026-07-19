@@ -11,7 +11,11 @@ import { syncBook } from './sync-book.mjs';
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const siteRoot = resolve(scriptDir, '..');
 const repoRoot = resolve(siteRoot, '..');
-const docsRepoRoot = resolve(repoRoot, '..', 'Docs_Project_Andromeda');
+const catalogFixtureRepoRoot = repoRoot;
+
+// Keep this test suite hermetic: syncBook must exercise the checked-in fallback
+// mirrors rather than importing a maintainer's sibling private repository.
+process.env.PROJECT_ANDROMEDA_DOCS_REPO = resolve(siteRoot, '.test-missing-docs-repo');
 
 async function pathExists(path) {
   try {
@@ -51,6 +55,19 @@ function isWeaponCatalogItem(item) {
     tags.has('metatelnoe')
   );
 }
+
+test(
+  'syncBook is idempotent when the fallback source is unchanged',
+  { concurrency: false },
+  async () => {
+    const targetPath = resolve(siteRoot, 'content', 'rulebook', '02-sozdanie-personazha.md');
+    const before = await readFile(targetPath, 'utf8');
+
+    await syncBook();
+
+    assert.equal(await readFile(targetPath, 'utf8'), before);
+  }
+);
 
 test(
   'syncBook preserves line breaks in character sheet examples',
@@ -513,14 +530,14 @@ test(
       'concept-abilities.json.codex-backup'
     );
     const docsConceptPath = resolve(
-      docsRepoRoot,
+      catalogFixtureRepoRoot,
       'data',
       'gear',
       'catalog',
       'concept-abilities.json'
     );
     const docsConceptBackupPath = resolve(
-      docsRepoRoot,
+      catalogFixtureRepoRoot,
       'data',
       'gear',
       'catalog',

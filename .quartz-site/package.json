@@ -16,7 +16,7 @@
     "build": "node ./scripts/sync-book.mjs && node ./quartz/bootstrap-cli.mjs build",
     "dev": "node ./scripts/dev.mjs",
     "sync-book": "node ./scripts/sync-book.mjs",
-    "test": "node --import tsx --test \"scripts/**/*.test.mjs\" \"quartz/**/*.test.ts\" \"quartz/**/*.test.mjs\"",
+    "test": "node --import tsx --test --test-concurrency=1 \"scripts/**/*.test.mjs\" \"quartz/**/*.test.ts\" \"quartz/**/*.test.mjs\"",
     "test:rulebook-blocks": "node --import tsx --test ./quartz/plugins/transformers/rulebookBlocks.test.ts",
     "test:rulebook-source": "node --test ./scripts/rulebook-source.test.mjs",
     "check": "tsc --noEmit",

@@ -1,5 +1,8 @@
 {
   "MY_RPG": {
+    "Startup": {
+      "Failed": "Project Andromeda could not finish startup. See the console for details."
+    },
     "Rank": {
       "Unspecified": "n/a"
     },

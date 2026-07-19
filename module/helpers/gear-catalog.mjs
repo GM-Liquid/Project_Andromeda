@@ -5,6 +5,7 @@ import {
   normalizeUsageFrequency
 } from './item-config.mjs';
 import { formatDamageProfile } from './damage-profile.mjs';
+import { deepClone, stableStringify } from './object-utils.mjs';
 import { normalizeStepEffects } from './step-effects.mjs';
 
 // Pure JSON -> Item-system transform for the shipped gear catalog. This is the
@@ -91,34 +92,6 @@ const GEAR_CATALOG_SHEET_KEYS = [
   'traits',
   'archetypes'
 ];
-
-function deepClone(value) {
-  if (typeof foundry !== 'undefined' && foundry.utils?.deepClone) {
-    return foundry.utils.deepClone(value);
-  }
-  return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
-}
-
-function sortValue(value) {
-  if (Array.isArray(value)) {
-    return value.map((entry) => sortValue(entry));
-  }
-
-  if (value && typeof value === 'object' && value.constructor === Object) {
-    return Object.keys(value)
-      .sort((left, right) => left.localeCompare(right))
-      .reduce((accumulator, key) => {
-        accumulator[key] = sortValue(value[key]);
-        return accumulator;
-      }, {});
-  }
-
-  return value;
-}
-
-function stableStringify(value) {
-  return JSON.stringify(sortValue(value ?? {}), null, 2);
-}
 
 function normalizeString(value) {
   return String(value ?? '');
@@ -369,7 +342,7 @@ function buildGearCatalogImportRow(entry, config) {
     name: normalizeString(entry?.name),
     ownerName: '',
     folderPath: getGearCatalogFolderPath(entry, config),
-    [GEAR_CATALOG_SYNC_SYSTEM_JSON_COLUMN]: stableStringify(systemData),
+    [GEAR_CATALOG_SYNC_SYSTEM_JSON_COLUMN]: stableStringify(systemData, 2),
     'system.rank': systemData.rank ?? '',
     'system.description': systemData.description ?? ''
   };
@@ -436,7 +409,7 @@ function buildArchetypeImportRow(entry, config) {
     name: normalizeString(entry?.name),
     ownerName: '',
     folderPath: config.folderName,
-    [GEAR_CATALOG_SYNC_SYSTEM_JSON_COLUMN]: stableStringify(systemData),
+    [GEAR_CATALOG_SYNC_SYSTEM_JSON_COLUMN]: stableStringify(systemData, 2),
     'system.description': systemData.description ?? '',
     'system.skill': systemData.skill ?? '',
     'system.abilitySyncId': abilitySyncId

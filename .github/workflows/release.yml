@@ -10,7 +10,9 @@ on:
       - 'lang/**'
       - 'assets/**'
       - 'data/gear/catalog/**'
-      - 'tools/**'
+      - 'tools/build-pack.mjs'
+      - 'package.json'
+      - 'package-lock.json'
       - 'system.json'
       - 'template.json'
 

@@ -830,7 +830,8 @@ function getGearStepEffectsValue(item) {
       const text = String(effect?.text ?? '').trim();
       if (!text) return '';
       const label =
-        STEP_EFFECT_THRESHOLD_LABELS_RU[effect?.minOutcome] ?? STEP_EFFECT_THRESHOLD_LABELS_RU.Success;
+        STEP_EFFECT_THRESHOLD_LABELS_RU[effect?.minOutcome] ??
+        STEP_EFFECT_THRESHOLD_LABELS_RU.Success;
       return `${text} (с «${label}»)`;
     })
     .filter(Boolean)
@@ -885,14 +886,7 @@ function buildTraitCatalogTable(catalog) {
   ]);
 
   return renderMarkdownTable(
-    [
-      'Название',
-      'Ранг',
-      'Навык',
-      'Краткое описание',
-      'Полное описание',
-      'Цена в очках развития'
-    ],
+    ['Название', 'Ранг', 'Навык', 'Краткое описание', 'Полное описание', 'Цена в очках развития'],
     rows
   );
 }
@@ -1196,6 +1190,34 @@ async function writeGeneratedState(generatedFiles) {
   await writeFile(generatedStatePath, `${JSON.stringify(generatedFiles, null, 2)}\n`, 'utf8');
 }
 
+function readFrontmatterDate(document, key) {
+  const match = new RegExp(`^${key}: ["']?(\\d{4}-\\d{2}-\\d{2})["']?$`, 'mu').exec(document);
+  return match?.[1] ?? '';
+}
+
+function withoutGeneratedDates(document) {
+  return String(document ?? '')
+    .replace(/^created:.*$/mu, 'created:')
+    .replace(/^modified:.*$/mu, 'modified:')
+    .replace(/\r\n?/g, '\n');
+}
+
+async function resolveGeneratedDates(targetPath, candidate, sourceModified) {
+  try {
+    const existing = await readFile(targetPath, 'utf8');
+    const existingCreated = readFrontmatterDate(existing, 'created') || sourceModified;
+    if (withoutGeneratedDates(existing) === withoutGeneratedDates(candidate)) {
+      return {
+        created: existingCreated,
+        modified: readFrontmatterDate(existing, 'modified') || sourceModified
+      };
+    }
+    return { created: existingCreated, modified: sourceModified };
+  } catch {
+    return { created: sourceModified, modified: sourceModified };
+  }
+}
+
 export async function syncBook() {
   const source = await prepareRulebookSource({ repoRoot });
   const gearCatalogSource = await prepareGearCatalogSource({ repoRoot });
@@ -1218,27 +1240,26 @@ export async function syncBook() {
     const sourceStats = await stat(sourcePath);
     const modified = formatDate(sourceStats.mtime);
 
-    const generated = withFrontmatter(
-      {
-        title: chapter.title,
-        navTitle: chapter.navTitle,
-        order: chapter.order,
-        pageType: chapter.pageType,
-        summary: chapter.summary,
-        ...(chapter.aliases?.length ? { aliases: chapter.aliases } : {}),
-        heroImage: chapter.heroImage,
-        heroAlt: chapter.heroAlt,
-        showHero: chapter.showHero,
-        showToc: chapter.showToc,
-        ...(chapter.temporaryNotice ? { temporaryNotice: chapter.temporaryNotice } : {}),
-        parent: chapter.parent,
-        created: modified,
-        modified
-      },
-      normalizeBody(sourceBody, chapter, generatedEntries, {
-        gearCatalogs
-      })
-    );
+    const frontmatter = {
+      title: chapter.title,
+      navTitle: chapter.navTitle,
+      order: chapter.order,
+      pageType: chapter.pageType,
+      summary: chapter.summary,
+      ...(chapter.aliases?.length ? { aliases: chapter.aliases } : {}),
+      heroImage: chapter.heroImage,
+      heroAlt: chapter.heroAlt,
+      showHero: chapter.showHero,
+      showToc: chapter.showToc,
+      ...(chapter.temporaryNotice ? { temporaryNotice: chapter.temporaryNotice } : {}),
+      parent: chapter.parent
+    };
+    const body = normalizeBody(sourceBody, chapter, generatedEntries, {
+      gearCatalogs
+    });
+    const candidate = withFrontmatter({ ...frontmatter, created: modified, modified }, body);
+    const dates = await resolveGeneratedDates(targetPath, candidate, modified);
+    const generated = withFrontmatter({ ...frontmatter, ...dates }, body);
 
     await mkdir(dirname(targetPath), { recursive: true });
     await writeFile(targetPath, generated, 'utf8');

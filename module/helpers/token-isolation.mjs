@@ -1,3 +1,5 @@
+import { deepClone } from './object-utils.mjs';
+
 /**
  * Build a complete ActorDelta source from a world Actor. A full snapshot is
  * intentional: once a second token enters a scene, later edits to the world
@@ -65,9 +67,4 @@ function getCollectionContents(collection) {
   if (Array.isArray(collection?.contents)) return collection.contents;
   if (collection?.values) return Array.from(collection.values());
   return [];
-}
-
-function deepClone(value) {
-  if (globalThis.foundry?.utils?.deepClone) return globalThis.foundry.utils.deepClone(value);
-  return structuredClone(value);
 }

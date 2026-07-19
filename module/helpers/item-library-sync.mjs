@@ -5,6 +5,7 @@ import {
   debugLog
 } from '../config.mjs';
 import { getItemGroupConfigs } from './item-config.mjs';
+import { areJsonValuesEqual, deepClone, stableStringify } from './object-utils.mjs';
 
 const LIBRARY_SYNC_OPTION_KEY = 'projectAndromedaLibrarySync';
 const LIBRARY_ITEM_UUID_FLAG = 'libraryItemUuid';
@@ -19,29 +20,8 @@ function renderItemDirectory() {
   ui.sidebar?.tabs?.items?.render?.(true);
 }
 
-function deepClone(value) {
-  return foundry.utils.deepClone(value);
-}
-
-function sortValue(value) {
-  if (Array.isArray(value)) {
-    return value.map((entry) => sortValue(entry));
-  }
-
-  if (value && typeof value === 'object' && value.constructor === Object) {
-    return Object.keys(value)
-      .sort((left, right) => left.localeCompare(right))
-      .reduce((accumulator, key) => {
-        accumulator[key] = sortValue(value[key]);
-        return accumulator;
-      }, {});
-  }
-
-  return value;
-}
-
 function sameValue(left, right) {
-  return JSON.stringify(sortValue(left ?? {})) === JSON.stringify(sortValue(right ?? {}));
+  return areJsonValuesEqual(left, right);
 }
 
 function getActors() {
@@ -97,7 +77,7 @@ function buildSharedItemPayload(item) {
 }
 
 function buildSharedPayloadKey(item) {
-  return JSON.stringify(sortValue(buildSharedItemPayload(item)));
+  return stableStringify(buildSharedItemPayload(item));
 }
 
 function getWorldItemFromUuid(uuid) {

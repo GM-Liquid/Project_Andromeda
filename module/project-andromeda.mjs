@@ -81,6 +81,7 @@ import {
   unlinkLibraryItemFromActors
 } from './helpers/item-library-sync.mjs';
 import { getSceneActorTokens, getTokenIsolationPlan } from './helpers/token-isolation.mjs';
+import { runStartupTasks } from './helpers/startup-tasks.mjs';
 
 const ITEM_SUPERTYPE_ORDER = ['equipment', 'environment', 'traits', 'other'];
 const ITEM_LIBRARY_SYNC_OPTION_KEY = getLibrarySyncOptionKey();
@@ -1815,25 +1816,48 @@ Hooks.once('ready', async function () {
     isGM: game.user?.isGM ?? false
   });
 
-  const sessionStats = getSessionStatsService();
-  if (sessionStats) {
-    sessionStats.initialize();
+  const reportStartupError = ({ name, error }) => {
+    console.error(`[Project Andromeda] Startup task failed: ${name}`, error);
     if (game.user?.isGM) {
-      await sessionStats.recoverStateOnReady();
+      ui.notifications?.error?.(game.i18n.localize('MY_RPG.Startup.Failed'));
     }
-  }
+  };
 
-  await initializeSceneTokenIsolation();
+  await runStartupTasks(
+    [
+      {
+        name: 'session stats recovery',
+        continueOnError: true,
+        run: async () => {
+          const sessionStats = getSessionStatsService();
+          if (!sessionStats) return;
+          sessionStats.initialize();
+          if (game.user?.isGM) await sessionStats.recoverStateOnReady();
+        }
+      },
+      {
+        name: 'scene token isolation',
+        continueOnError: true,
+        run: initializeSceneTokenIsolation
+      }
+    ],
+    { onError: reportStartupError }
+  );
 
   // World migrations and cleanups run once, on the primary active GM only, so two
   // connected GMs never execute the same document writes concurrently.
   if (isPrimaryActiveGM()) {
-    await runLegacyEquipmentTypeMigrationIfNeeded();
-    await runLegacyTraitTypeMigrationIfNeeded();
-    await purgeObsoleteCartridgeData();
-    await runItemLibraryMigrationIfNeeded();
-    await runPackLinkMigrationIfNeeded();
-    await runWeaponTypeMigrationIfNeeded();
-    await runCompendiumPackRefreshIfNeeded();
+    await runStartupTasks(
+      [
+        { name: 'legacy equipment migration', run: runLegacyEquipmentTypeMigrationIfNeeded },
+        { name: 'legacy trait migration', run: runLegacyTraitTypeMigrationIfNeeded },
+        { name: 'obsolete cartridge cleanup', run: purgeObsoleteCartridgeData },
+        { name: 'item library migration', run: runItemLibraryMigrationIfNeeded },
+        { name: 'pack link migration', run: runPackLinkMigrationIfNeeded },
+        { name: 'weapon type migration', run: runWeaponTypeMigrationIfNeeded },
+        { name: 'compendium pack refresh', run: runCompendiumPackRefreshIfNeeded }
+      ],
+      { onError: reportStartupError }
+    );
   }
 });

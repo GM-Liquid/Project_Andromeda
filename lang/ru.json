@@ -1,5 +1,8 @@
 {
   "MY_RPG": {
+    "Startup": {
+      "Failed": "Project Andromeda не завершила запуск. Подробности доступны в консоли."
+    },
     "Rank": {
       "Unspecified": "не указан"
     },
