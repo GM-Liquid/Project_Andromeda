@@ -23,7 +23,8 @@ const gearCatalogFiles = {
   armor: 'armor.json',
   equipment: 'equipment.json',
   abilities: 'abilities.json',
-  traits: 'traits.json'
+  traits: 'traits.json',
+  archetypes: 'archetypes.json'
 };
 
 const skillLabels = {
@@ -1022,6 +1023,102 @@ function buildAbilityCatalogTable(catalog) {
   );
 }
 
+function getArchetypeDefenseLabel(defenseKey) {
+  if (!defenseKey) {
+    return '';
+  }
+
+  return usageValueLabels.defense[defenseKey] || String(defenseKey).trim();
+}
+
+function buildArchetypeVersionCell(version) {
+  const damage = formatDamageProfile(version?.damage);
+  const name = String(version?.name ?? '').trim();
+  const description = String(version?.description ?? '').trim();
+  return `**${name}** — урон \`${damage}\`. ${description}`.trim();
+}
+
+function buildArchetypeAbilityTable(ability) {
+  const versions = Array.isArray(ability?.versions) ? [...ability.versions] : [];
+  versions.sort((left, right) => Number(left?.rank ?? 0) - Number(right?.rank ?? 0));
+
+  const rows = versions.map((version) => [
+    `\`${version?.rank ?? ''}\``,
+    buildArchetypeVersionCell(version)
+  ]);
+
+  return renderMarkdownTable(['Ранг', 'Версия'], rows);
+}
+
+function buildArchetypeDescriptionBlock(archetype, index) {
+  const ability = archetype?.ability ?? {};
+  const abilityName = String(ability?.name ?? '').trim();
+  const skillLabel = skillLabels[archetype?.skill] || archetype?.skill || '';
+  const defenseProfile = archetype?.defenseProfile ?? {};
+  const strong = getArchetypeDefenseLabel(defenseProfile.strong);
+  const medium = getArchetypeDefenseLabel(defenseProfile.medium);
+  const weak = getArchetypeDefenseLabel(defenseProfile.weak);
+
+  return [
+    `#### ${index + 1}. ${archetype.name}`,
+    '',
+    `**Сигнатурная способность — ${abilityName}.**`,
+    '',
+    buildArchetypeAbilityTable(ability),
+    '',
+    `**Мастерство в навыке:** ${skillLabel}.  `,
+    `**Защиты:** сильная — ${strong}, средняя — ${medium}, слабая — ${weak}.`
+  ].join('\n');
+}
+
+function buildArchetypeDescriptionSection(archetypesCatalog) {
+  const items = getRenderableGearCatalogItems(archetypesCatalog);
+  return items
+    .map((archetype, index) => buildArchetypeDescriptionBlock(archetype, index))
+    .join('\n\n');
+}
+
+const ARCHETYPE_DESCRIPTIONS_HEADING = '### Полные описания архетипов';
+
+// Chapter 2 no longer authors per-archetype entries by hand: the source keeps
+// only the intro prose plus a callout pointing at archetypes.json. This splices
+// the generated blocks (signature ability versions, mastery skill, defense
+// profile) in place of that callout, the same way chapter 04 injects catalog
+// tables in transformAbilitiesEquipmentSource.
+function transformCharacterCreationSource(source, archetypesCatalog) {
+  const lines = source.split('\n');
+  const headingIndex = lines.findIndex((line) => line.trim() === ARCHETYPE_DESCRIPTIONS_HEADING);
+
+  if (headingIndex === -1) {
+    return source;
+  }
+
+  let calloutStart = -1;
+  for (let index = headingIndex + 1; index < lines.length; index += 1) {
+    if (lines[index].trim().startsWith('>')) {
+      calloutStart = index;
+      break;
+    }
+  }
+
+  const introEnd = calloutStart === -1 ? lines.length : calloutStart;
+  let calloutEnd = introEnd;
+  while (calloutEnd < lines.length && lines[calloutEnd].trim().startsWith('>')) {
+    calloutEnd += 1;
+  }
+
+  const before = trimSectionLines(lines.slice(0, introEnd));
+  const after = trimSectionLines(lines.slice(calloutEnd));
+  const archetypeSection = buildArchetypeDescriptionSection(archetypesCatalog);
+
+  const combined = [...before, '', archetypeSection];
+  if (after.length > 0) {
+    combined.push('', ...after);
+  }
+
+  return combined.join('\n').trim();
+}
+
 function stripMarkdownTableBlocks(lines) {
   const output = [];
 
@@ -1144,7 +1241,8 @@ async function readGearCatalogs(catalogDir) {
     armor: await readGearCatalog(catalogDir, gearCatalogFiles.armor),
     equipment: await readGearCatalog(catalogDir, gearCatalogFiles.equipment),
     abilities: await readGearCatalog(catalogDir, gearCatalogFiles.abilities),
-    traits: await readGearCatalog(catalogDir, gearCatalogFiles.traits)
+    traits: await readGearCatalog(catalogDir, gearCatalogFiles.traits),
+    archetypes: await readGearCatalog(catalogDir, gearCatalogFiles.archetypes)
   };
 }
 
@@ -1164,6 +1262,10 @@ function normalizeBody(body, chapter, chapters, options = {}) {
 
   if (chapter.id === 'rulebook-abilities-equipment') {
     normalized = transformAbilitiesEquipmentSource(normalized, options.gearCatalogs);
+  }
+
+  if (chapter.id === 'rulebook-character-creation') {
+    normalized = transformCharacterCreationSource(normalized, options.gearCatalogs?.archetypes);
   }
 
   if (chapter.title === 'Бой') {
