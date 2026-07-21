@@ -94,6 +94,145 @@ test(
 );
 
 test(
+  'syncBook injects chapter 02 archetype descriptions from archetypes.json instead of an authored callout',
+  { concurrency: false },
+  async () => {
+    const sourceChapter = await readFile(
+      resolve(repoRoot, 'Книга правил v0.4', 'Глава 2. Создание персонажа.md'),
+      'utf8'
+    );
+
+    assert.match(sourceChapter, /подтягиваются сюда оттуда при сборке книги/u);
+    assert.doesNotMatch(sourceChapter, /^#### 1\. /m);
+
+    const archetypesCatalog = JSON.parse(
+      await readFile(resolve(repoRoot, 'data', 'gear', 'catalog', 'archetypes.json'), 'utf8')
+    );
+
+    const { generatedFiles } = await syncBook();
+    const chapterPath = generatedFiles.find((filePath) =>
+      filePath.endsWith('02-sozdanie-personazha.md')
+    );
+
+    assert.ok(chapterPath, 'expected the character creation chapter to be generated');
+
+    const generated = await readFile(resolve(chapterPath), 'utf8');
+
+    assert.doesNotMatch(generated, /подтягиваются сюда оттуда при сборке книги/u);
+    assert.match(generated, /^\| Ранг \| Версия \|$/m);
+
+    archetypesCatalog.forEach((archetype, index) => {
+      assert.match(
+        generated,
+        new RegExp(`^#### ${index + 1}\\. ${escapeRegExp(archetype.name)}$`, 'mu')
+      );
+      assert.match(
+        generated,
+        new RegExp(
+          `\\*\\*Сигнатурная способность — ${escapeRegExp(archetype.ability.name)}\\.\\*\\*`,
+          'u'
+        )
+      );
+
+      for (const version of archetype.ability.versions) {
+        assert.match(generated, new RegExp(`\\| \`${version.rank}\` \\|`, 'u'));
+        assert.match(generated, new RegExp(escapeRegExp(version.name), 'u'));
+        assert.match(generated, new RegExp(escapeRegExp(version.damage), 'u'));
+      }
+    });
+
+    assert.match(generated, /\*\*Мастерство в навыке:\*\* Ближний бой\. {2}\n\*\*Защиты:\*\*/u);
+  }
+);
+
+test(
+  'syncBook renders chapter 02 archetype descriptions from a custom archetypes.json fixture',
+  { concurrency: false },
+  async () => {
+    const path = resolve(repoRoot, 'data', 'gear', 'catalog', 'archetypes.json');
+    const backupPath = `${path}.codex-backup`;
+    await rename(path, backupPath);
+
+    const archetypesFixture = [
+      {
+        id: 'test-archetype',
+        name: 'Тестовый архетип',
+        type: 'archetype',
+        skill: 'mistika',
+        description: 'Описание тестового архетипа.',
+        defenseProfile: {
+          strong: 'will',
+          medium: 'fortitude',
+          weak: 'control'
+        },
+        ability: {
+          id: 'test-signature',
+          name: 'Тестовая сигнатурка',
+          type: 'ability',
+          skill: 'mistika',
+          defense: 'will',
+          activation: 'action',
+          frequency: 'unlimited',
+          check: 'required',
+          versions: [
+            {
+              rank: 1,
+              name: 'Искра',
+              range: { type: 'meters', value: 30 },
+              damage: '1/2/3/5',
+              description: 'Атака Мистикой против Воли цели в пределах 30 м.'
+            },
+            {
+              rank: 2,
+              name: 'Вспышка',
+              range: { type: 'meters', value: 100 },
+              damage: '2/4/6/9',
+              description: 'Атака Мистикой против Воли цели в пределах 100 м.'
+            },
+            {
+              rank: 3,
+              name: 'Пожар',
+              range: { type: 'meters', value: 300 },
+              damage: '4/6/9/14',
+              description: 'Атака Мистикой против Воли цели в пределах 300 м.'
+            },
+            {
+              rank: 4,
+              name: 'Инферно',
+              range: { type: 'meters', value: 1000 },
+              damage: '5/8/12/18',
+              description: 'Атака Мистикой против Воли цели в пределах 1000 м.'
+            }
+          ]
+        }
+      }
+    ];
+
+    try {
+      await writeFile(path, `${JSON.stringify(archetypesFixture, null, 2)}\n`, 'utf8');
+
+      const { generatedFiles } = await syncBook();
+      const chapterPath = generatedFiles.find((filePath) =>
+        filePath.endsWith('02-sozdanie-personazha.md')
+      );
+
+      assert.ok(chapterPath, 'expected the character creation chapter to be generated');
+
+      const generated = await readFile(resolve(chapterPath), 'utf8');
+
+      assert.match(generated, /^#### 1\. Тестовый архетип$/m);
+      assert.match(generated, /\*\*Сигнатурная способность — Тестовая сигнатурка\.\*\*/u);
+      assert.match(generated, /\| `1` \| \*\*Искра\*\* — урон `1\/2\/3\/5`\./u);
+      assert.match(generated, /\| `4` \| \*\*Инферно\*\* — урон `5\/8\/12\/18`\./u);
+      assert.match(generated, /\*\*Мастерство в навыке:\*\* Мистика\. {2}\n\*\*Защиты:\*\* сильная — Воля, средняя — Стойкость, слабая — Контроль\./u);
+    } finally {
+      await rm(path, { force: true });
+      await rename(backupPath, path);
+    }
+  }
+);
+
+test(
   'syncBook injects chapter 04 gear catalogs from JSON sources instead of authored markdown tables',
   { concurrency: false },
   async () => {
