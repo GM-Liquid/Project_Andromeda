@@ -1,8 +1,231 @@
 [
   {
+    "id": "blackout",
+    "name": "Контур «Блэкаут»",
+    "type": "artifact",
+    "rank": 1,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "area": {
+              "type": "circle",
+              "value": 15
+            },
+            "duration": "untilEndOfScene",
+            "trigger": "whileActive"
+          },
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "hidden"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Действием погасите свет в круге диаметром 15 м вокруг точки в пределах 30 м. До конца сцены все цели в зоне считаются скрытыми.",
+    "shortDescription": "Действием погасите свет в круге диаметром 15 м вокруг точки в пределах 30 м. До конца сцены все цели в зоне считаются скрытыми.",
+    "price": null,
+    "mode": "forced"
+  },
+  {
+    "id": "rychag",
+    "name": "Бустер «Рычаг»",
+    "type": "artifact",
+    "rank": 2,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "targets": "self"
+          },
+          "outcomes": [
+            {
+              "key": "specialRule"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Свободным действием включите перегрузку: до конца хода ваши проверки получают преимущество, а до конца следующего хода — помеху.",
+    "shortDescription": "Свободным действием включите перегрузку: до конца хода ваши проверки получают преимущество, а до конца следующего хода — помеху.",
+    "price": null,
+    "mode": "forced"
+  },
+  {
+    "id": "ekstrennyy-teleport",
+    "name": "Аварийный телепортер",
+    "type": "artifact",
+    "rank": 2,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 15
+            }
+          },
+          "outcomes": [
+            {
+              "key": "specialRule"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Реакцией телепортируйтесь на расстояние до 15 м в видимую свободную точку.",
+    "shortDescription": "Реакцией телепортируйтесь на расстояние до 15 м в видимую свободную точку.",
+    "price": null,
+    "mode": "forced"
+  },
+  {
+    "id": "zashchita",
+    "name": "Проектор «Защита»",
+    "type": "artifact",
+    "rank": 2,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "targets": "self",
+            "duration": "untilStartOfYourNextTurn"
+          },
+          "outcomes": [
+            {
+              "key": "imposeDisadvantage"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Реакцией выберите Стойкость, Контроль или Волю. До начала вашего следующего хода атаки против выбранной защиты получают помеху.",
+    "shortDescription": "Реакцией выберите Стойкость, Контроль или Волю. До начала вашего следующего хода атаки против выбранной защиты получают помеху.",
+    "price": null,
+    "mode": "forced"
+  },
+  {
+    "id": "vrata",
+    "name": "Генератор врат",
+    "type": "artifact",
+    "rank": 2,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 50
+            }
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 2
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Свободным действием создайте малый портал между собой и видимой точкой в пределах 50 м. Первое перемещение через портал не требует движения; затем он исчезает.",
+    "shortDescription": "Свободным действием создайте малый портал между собой и видимой точкой в пределах 50 м. Первое перемещение через портал не требует движения; затем он исчезает.",
+    "price": null,
+    "mode": "forced"
+  },
+  {
+    "id": "spasitel",
+    "name": "Модуль «Спаситель»",
+    "type": "artifact",
+    "rank": 1,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 15
+            }
+          },
+          "outcomes": [
+            {
+              "key": "moveSelf",
+              "distance": 15
+            },
+            {
+              "key": "cancelAttackIfOutOfReach"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Когда вас атакуют, реакцией переместитесь на расстояние до 15 м. Если новая позиция выводит вас из области или дистанции атаки, она проваливается.",
+    "shortDescription": "Когда вас атакуют, реакцией переместитесь на расстояние до 15 м. Если новая позиция выводит вас из области или дистанции атаки, она проваливается.",
+    "price": null,
+    "mode": "forced"
+  },
+  {
+    "id": "tsss",
+    "name": "Глушитель «Тсс-с»",
+    "type": "artifact",
+    "rank": 1,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 15
+            },
+            "targets": "allInArea",
+            "area": {
+              "type": "circle",
+              "value": 15
+            },
+            "duration": "untilStartOfYourNextTurn"
+          },
+          "outcomes": [
+            {
+              "key": "specialRule"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Свободным действием выберите точку в пределах 15 м. До начала вашего следующего хода существа в круге диаметром 15 м не могут применять способности 1-го ранга.",
+    "shortDescription": "Свободным действием выберите точку в пределах 15 м. До начала вашего следующего хода существа в круге диаметром 15 м не могут применять способности 1-го ранга.",
+    "price": null,
+    "mode": "forced"
+  },
+  {
     "id": "okhotnichiy-drobovik",
     "name": "Охотничий дробовик",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": "strelba",
     "mechanics": {
@@ -12,25 +235,32 @@
             "type": "action"
           },
           "conditions": {
-            "targets": "upTo2"
+            "targets": "upTo2",
+            "range": {
+              "type": "meters",
+              "value": 15
+            },
+            "defense": "fortitude",
+            "check": "required"
           },
           "outcomes": [
             {
               "key": "damage",
-              "value": "2/3/4/6"
+              "value": "2/4/6/9"
             }
           ]
         }
       ]
     },
-    "description": "Одним действием вы можете атаковать до двух целей в соседних клетках. Обе атаки получают помеху",
+    "description": "????????? ???????? ?? ???? ????? ? ???????? 15 ?, ??????????? ????? ???? ? ??????, ? ????????? ?? ????? ????? ???????? ?????? ????????? ? ???????. ???? ?????? ?????: 2/4/6/9.",
     "shortDescription": "Дробовик для удара по двум целям сразу",
-    "price": 3
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "reyderskaya-snayperskaya-vintovka",
     "name": "Рейдерская снайперская винтовка",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 1,
     "skill": "strelba",
     "mechanics": {
@@ -39,7 +269,15 @@
           "activation": {
             "type": "action"
           },
-          "conditions": {},
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "single",
+            "defense": "control",
+            "check": "required"
+          },
           "outcomes": [
             {
               "key": "stabilization",
@@ -57,14 +295,15 @@
         }
       ]
     },
-    "description": "REQ. CHECK: перевести урон на формат провал/успех с ценой/успех/крит. Урон: 1/2/3/5. Перезарядка 2. Стабилизация 1.",
+    "description": "????????? ???????? ???? ? ???????? 30 ?: ???????? ?????? ????????. ????: 1/2/3/5. ??????????? 2. ???????????? 1.",
     "shortDescription": "Легкая снайперская винтовка",
-    "price": 1
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "razvedochnaya-vintovka-blik",
     "name": "Разведочная винтовка «Блик»",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 1,
     "skill": "strelba",
     "mechanics": {
@@ -73,7 +312,15 @@
           "activation": {
             "type": "action"
           },
-          "conditions": {},
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "single",
+            "defense": "control",
+            "check": "required"
+          },
           "outcomes": [
             {
               "key": "courage",
@@ -91,14 +338,15 @@
         }
       ]
     },
-    "description": "REQ. CHECK: перевести урон на формат провал/успех с ценой/успех/крит. Урон: 1/2/3/5. Перезарядка 2. Кураж 1.",
+    "description": "????????? ???????? ???? ? ???????? 30 ?: ???????? ?????? ????????. ????: 1/2/3/5. ??????????? 2. ????? 1.",
     "shortDescription": "Легкая винтовка для стрельбы после смены позиции.",
-    "price": 1
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "vintovka-shturmovaya-ares",
     "name": "Винтовка штурмовая \"Арес\"",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": "strelba",
     "mechanics": {
@@ -107,7 +355,15 @@
           "activation": {
             "type": "action"
           },
-          "conditions": {},
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 100
+            },
+            "targets": "single",
+            "defense": "fortitude",
+            "check": "required"
+          },
           "outcomes": [
             {
               "key": "damage",
@@ -145,14 +401,15 @@
         }
       ]
     },
-    "description": "REQ. CHECK: сверить с новой системой проверок, рангов навыков и защит. Урон: 2/4/6/9. Бронебойность 1. Это оружие не получает штрафов за стрельбу в ближнем бою. Если вы видите цель, по которой в последний раз стреляли из этого оружия, и она совершает действие, вы можете потратить реакцию, чтобы атаковать ее этим оружием.",
+    "description": "????????? ???????? ???? ? ???????? 100 ?: ???????? ?????? ?????????. ????: 2/4/6/9. ????????????? 1. ???????? ?? ???????? ??????? ?? ???????? ? ??????? ???. ???? ??????? ???? ????? ????????? ????? ????????? ????????, ?? ?????? ???????? ????? ????????? ??.",
     "shortDescription": "Штурмовая винтовка",
-    "price": 3
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "snayperskaya-vintovka-igla",
     "name": "Снайперская винтовка \"Игла\"",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": "strelba",
     "mechanics": {
@@ -161,7 +418,15 @@
           "activation": {
             "type": "action"
           },
-          "conditions": {},
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 100
+            },
+            "targets": "single",
+            "defense": "control",
+            "check": "required"
+          },
           "outcomes": [
             {
               "key": "escalation",
@@ -177,20 +442,21 @@
             },
             {
               "key": "damage",
-              "value": "1/2/7/10"
+              "value": "2/4/6/9"
             }
           ]
         }
       ]
     },
-    "description": "Эскалация 1. Скрытное. Стабилизация 1.",
+    "description": "????????? ???????? ???? ? ???????? 100 ?: ???????? ?????? ????????. ????: 2/4/6/9. ????????? 1. ????????. ???????????? 1.",
     "shortDescription": "Скрытная снайперская винтовка",
-    "price": 3
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "snayperskaya-vintovka-mirazh",
     "name": "Снайперская винтовка «Мираж»",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": "strelba",
     "mechanics": {
@@ -199,7 +465,15 @@
           "activation": {
             "type": "action"
           },
-          "conditions": {},
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 100
+            },
+            "targets": "single",
+            "defense": "control",
+            "check": "required"
+          },
           "outcomes": [
             {
               "key": "courage",
@@ -215,20 +489,21 @@
             },
             {
               "key": "damage",
-              "value": "3/5/7/10"
+              "value": "2/4/6/9"
             }
           ]
         }
       ]
     },
-    "description": "Скрытное. Перезарядка 2. Кураж 1.",
+    "description": "????????? ???????? ???? ? ???????? 100 ?: ???????? ?????? ????????. ????: 2/4/6/9. ????????. ??????????? 2. ????? 1.",
     "shortDescription": "Скрытная снайперская винтовка для смены позиции.",
-    "price": 3
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "skladnoy-karabin-rys",
     "name": "Складной карабин «Рысь»",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": "strelba",
     "mechanics": {
@@ -237,7 +512,15 @@
           "activation": {
             "type": "action"
           },
-          "conditions": {},
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 100
+            },
+            "targets": "single",
+            "defense": "control",
+            "check": "required"
+          },
           "outcomes": [
             {
               "key": "courage",
@@ -255,14 +538,15 @@
         }
       ]
     },
-    "description": "REQ. CHECK: перевести урон на формат провал/успех с ценой/успех/крит. Урон: 2/4/6/9. Скрытное. Кураж 1.",
+    "description": "????????? ???????? ???? ? ???????? 100 ?: ???????? ?????? ????????. ????: 2/4/6/9. ????????. ????? 1.",
     "shortDescription": "Скрытный карабин для мобильной перестрелки.",
-    "price": 3
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "vibroklinok",
     "name": "Виброклинок",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": "blizhniy_boy",
     "mechanics": {
@@ -275,7 +559,9 @@
             "range": {
               "type": "melee"
             },
-            "targets": "single"
+            "targets": "single",
+            "defense": "fortitude",
+            "check": "required"
           },
           "outcomes": [
             {
@@ -284,20 +570,21 @@
             },
             {
               "key": "damage",
-              "value": "2/4/6/11"
+              "value": "2/4/6/9"
             }
           ]
         }
       ]
     },
-    "description": "Скрытное.",
+    "description": "????????? ???????? ???????? ????: ??????? ??? ?????? ?????????. ????: 2/4/6/9. ????????.",
     "shortDescription": "Скрытый клинок для ближнего боя и незаметного ношения.",
-    "price": 3
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "raketnitsa-ptr-3",
     "name": "Ракетница ПТР-3",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": "strelba",
     "mechanics": {
@@ -307,11 +594,17 @@
             "type": "action"
           },
           "conditions": {
-            "targets": "single",
+            "targets": "allInArea",
             "area": {
               "type": "blast",
               "value": 15
-            }
+            },
+            "range": {
+              "type": "meters",
+              "value": 100
+            },
+            "defense": "fortitude",
+            "check": "required"
           },
           "outcomes": [
             {
@@ -324,20 +617,21 @@
             },
             {
               "key": "damage",
-              "value": "2/3/4/6"
+              "value": "2/4/6/9"
             }
           ]
         }
       ]
     },
-    "description": "REQ. CHECK: перевести урон на формат провал/успех с ценой/успех/крит. Урон: 2/3/4/6. Взрыв 10м. Перезарядка 2. Эскалация 3.",
+    "description": "????????? ???????? ????? ? ???????? 100 ? ? ???????? ????????? ?????? ????????? ?????? ???? ?? ?????? ???????? 15 ?. ????: 2/4/6/9. ??????????? 2. ????????? 3.",
     "shortDescription": "Ракетница для взрывного урона по группе целей с редкой перезарядкой.",
-    "price": 3
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "ognemet-ifrit",
     "name": "Огнемет Ифрит",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": "strelba",
     "mechanics": {
@@ -351,25 +645,32 @@
             "area": {
               "type": "ray",
               "value": 15
-            }
+            },
+            "range": {
+              "type": "meters",
+              "value": 15
+            },
+            "defense": "fortitude",
+            "check": "required"
           },
           "outcomes": [
             {
               "key": "damage",
-              "value": "2/3/4/6"
+              "value": "2/4/6/9"
             }
           ]
         }
       ]
     },
-    "description": "Поражает всех на линии длиной до 10 м.",
+    "description": "????????? ???????? ????????? ?????? ????????? ?????? ???? ?? ????? ?????? 15 ?. ????: 2/4/6/9.",
     "shortDescription": "Огнемет, который выжигает прямую линию перед вами.",
-    "price": 3
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "karabin-s-impulsnym-modulem",
     "name": "Двустволка с импульсным модулем",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": "strelba",
     "mechanics": {
@@ -379,12 +680,18 @@
             "type": "action"
           },
           "conditions": {
-            "targets": "single"
+            "targets": "single",
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "defense": "fortitude",
+            "check": "required"
           },
           "outcomes": [
             {
               "key": "damage",
-              "value": "3/6/8/12"
+              "value": "2/4/6/9"
             }
           ]
         },
@@ -420,14 +727,15 @@
         }
       ]
     },
-    "description": "REQ. CHECK: сверить с новой системой проверок, рангов навыков и защит. Урон: 3/6/8/12. Действием вы совершаете 2 атаки, а не одну. Каждое попадание отталкивает цель на 10м.",
+    "description": "????????? ????????? ??? ????? ?? ???? ? ???????? 30 ?: ???????? ?????? ?????????. ???? ?????? ?????: 2/4/6/9. ?????? ????????? ??????????? ???? ?? 10 ?.",
     "shortDescription": "Карабин, который отбрасывает цель мощным попаданием.",
-    "price": 3
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "plazmennaya-rapira-spektralis",
     "name": "Плазменная рапира \"Спектралис\"",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 3,
     "skill": "blizhniy_boy",
     "mechanics": {
@@ -440,7 +748,9 @@
             "range": {
               "type": "melee"
             },
-            "targets": "single"
+            "targets": "single",
+            "defense": "fortitude",
+            "check": "required"
           },
           "outcomes": [
             {
@@ -449,20 +759,36 @@
             },
             {
               "key": "damage",
-              "value": "4/8/11/16"
+              "value": "4/6/9/14"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "trigger": "whenAttackedAgainstFortitude",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "shiftIncomingOutcomeDown",
+              "value": 1
             }
           ]
         }
       ]
     },
-    "description": "REQ. CHECK: сверить с новой системой проверок, рангов навыков и защит. Урон: 4/8/11/16. Бронебойность 2. Когда по вашей Стойкости совершают атаку, вы можете реакцией совершить проверку Ближнего боя. Если ваш результат выше броска атаки, вы получаете +2 к защите.",
-    "shortDescription": "Бронебойная рапира с защитной опцией",
-    "price": 9
+    "description": "????????? ???????? ???????? ????: ??????? ??? ?????? ?????????. ????: 4/6/9/14. ????????????? 2. ????? ??? ??????? ?? ?????????, ???????? ????????? ????????? ???????? ???????? ??? ?????? ?????? ?????. ??? ?????? ???????? ????? ????? ?? ???? ??????? ????.",
+    "shortDescription": "Бронебойная рапира, которой можно отвести удар.",
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "snayperskaya-vintovka-kope",
     "name": "Снайперская винтовка \"Копье\"",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 3,
     "skill": "strelba",
     "mechanics": {
@@ -472,7 +798,13 @@
             "type": "action"
           },
           "conditions": {
-            "targets": "single"
+            "targets": "single",
+            "range": {
+              "type": "meters",
+              "value": 300
+            },
+            "defense": "control",
+            "check": "required"
           },
           "outcomes": [
             {
@@ -499,14 +831,15 @@
         }
       ]
     },
-    "description": "REQ. CHECK: перевести урон на формат провал/успех с ценой/успех/крит. Урон: 4/6/9/14. Бронебойность 2. Эскалация 1. Перезарядка 2. Стабилизация 1.",
+    "description": "????????? ???????? ???? ? ???????? 300 ?: ???????? ?????? ????????. ????: 4/6/9/14. ????????????? 2. ????????? 1. ??????????? 2. ???????????? 1.",
     "shortDescription": "Тяжелая снайперская винтовка, требующая перезарядки",
-    "price": 9
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "dvuruchnyy-vibromech",
     "name": "Двуручный вибромеч",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 3,
     "skill": "blizhniy_boy",
     "mechanics": {
@@ -519,7 +852,9 @@
             "range": {
               "type": "melee"
             },
-            "targets": "single"
+            "targets": "single",
+            "defense": "fortitude",
+            "check": "required"
           },
           "outcomes": [
             {
@@ -528,20 +863,36 @@
             },
             {
               "key": "damage",
-              "value": "5/9/13/19"
+              "value": "4/6/9/14"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "trigger": "onCriticalSuccess",
+            "targets": "single"
+          },
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "weakened"
             }
           ]
         }
       ]
     },
-    "description": "REQ. CHECK: сверить с новой системой проверок, рангов навыков и защит. Урон: 5/9/13/19. Бронебойность 2. Если вы попадаете этим оружием и на кубе выпало 10, противник получает состояние «Отрубленная конечность». До получения медпомощи 3 ранга или выше он либо получает -2 ко всем проверкам, либо его скорость становится равной 4 м.",
-    "shortDescription": "Тяжелый меч с шансом нанести калечащее ранение.",
-    "price": 9
+    "description": "????????? ???????? ???????? ????: ??????? ??? ?????? ?????????. ????: 4/6/9/14. ????????????? 2. ??? ??????????? ?????? ???? ?????????? ???????????, ???? ?? ??????? ??????????? ?????? 3-?? ????? ??? ????.",
+    "shortDescription": "Тяжёлый бронебойный меч, способный нанести длительное ранение.",
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "kompaktnyy-plazmorez",
     "name": "Компактный плазморез",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 3,
     "skill": "blizhniy_boy",
     "mechanics": {
@@ -554,7 +905,9 @@
             "range": {
               "type": "melee"
             },
-            "targets": "single"
+            "targets": "single",
+            "defense": "fortitude",
+            "check": "required"
           },
           "outcomes": [
             {
@@ -573,14 +926,15 @@
         }
       ]
     },
-    "description": "REQ. CHECK: сверить с новой системой проверок, рангов навыков и защит. Урон: 4/6/9/14. Бронебойность 4. Перезарядка 1. Позволяет атаковать в ближнем бою и резать прочные материалы. Материал 1 ранга режется за действие, 2 ранга - за 10 минут, 3 ранга - за час.",
+    "description": "????????? ???????? ???????? ????: ??????? ??? ?????? ?????????. ????: 4/6/9/14. ????????????? 4. ??????????? 1. ????????? ????? ????? ??????? ?????????: ???????? 1-?? ????? ? ?? ????????, 2-?? ? ?? 10 ?????, 3-?? ? ?? ???.",
     "shortDescription": "Плазморез для ближнего боя и вскрытия прочных материалов.",
-    "price": 9
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "kineticheskiy-molot",
     "name": "Кинетический молот \"Раскол\"",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": "blizhniy_boy",
     "mechanics": {
@@ -593,7 +947,9 @@
             "range": {
               "type": "melee"
             },
-            "targets": "single"
+            "targets": "allInArea",
+            "defense": "fortitude",
+            "check": "required"
           },
           "outcomes": [
             {
@@ -602,20 +958,21 @@
             },
             {
               "key": "damage",
-              "value": "2/3/4/6"
+              "value": "2/4/6/9"
             }
           ]
         }
       ]
     },
-    "description": "REQ. CHECK: сверить с новой системой проверок, рангов навыков и защит. Урон: 2/3/4/6. Бронебойность 2. Этот молот атакует сразу каждую цель, находящуюся рядом с вами.",
+    "description": "????????? ???????? ??????? ???? ?????? ????????? ?????? ???????? ????. ????: 2/4/6/9. ????????????? 2.",
     "shortDescription": "Молот, наносящий урон всем вокруг.",
-    "price": 3
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "vintovka-spets-naznacheniya-loza",
     "name": "Винтовка спец. назначения \"Лоза\"",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 3,
     "skill": "strelba",
     "mechanics": {
@@ -625,7 +982,13 @@
             "type": "action"
           },
           "conditions": {
-            "targets": "single"
+            "targets": "single",
+            "range": {
+              "type": "meters",
+              "value": 300
+            },
+            "defense": "control",
+            "check": "required"
           },
           "outcomes": [
             {
@@ -634,20 +997,36 @@
             },
             {
               "key": "damage",
-              "value": "4/8/11/16"
+              "value": "4/6/9/14"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "trigger": "onSuccess",
+            "targets": "single"
+          },
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "immobilized"
             }
           ]
         }
       ]
     },
-    "description": "REQ. CHECK: сверить с новой системой проверок, рангов навыков и защит. Урон: 4/8/11/16. Скрытное. При попадании цель оказывается опутана металлическими канатами. Чтобы освободиться, нужна проверка Мощи со сложностью 10. Пока цель опутана, она получает -1 ко всем проверкам, а ее скорость становится равной 0.",
-    "shortDescription": "Скрытная винтовка, которая спутывает цель металлическими тросами.",
-    "price": 9
+    "description": "????????? ???????? ???? ? ???????? 300 ?: ???????? ?????? ????????. ????: 4/6/9/14. ????????. ??? ?????? ???? ?????????? ?????????????, ???? ?? ??????????? ????????? ? ????????? ???? ?????? ????? ?????????.",
+    "shortDescription": "Скрытная винтовка, которая обездвиживает цель тросами.",
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "tyazhelyy-raketomet-vulkan",
     "name": "Тяжелый ракетомет \"Вулкан\"",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 3,
     "skill": "strelba",
     "mechanics": {
@@ -660,7 +1039,14 @@
             "area": {
               "type": "circle",
               "value": 30
-            }
+            },
+            "range": {
+              "type": "meters",
+              "value": 300
+            },
+            "targets": "allInArea",
+            "defense": "fortitude",
+            "check": "required"
           },
           "outcomes": [
             {
@@ -675,14 +1061,15 @@
         }
       ]
     },
-    "description": "REQ. CHECK: перевести урон на формат провал/успех с ценой/успех/крит. Урон: 4/6/9/14. Перезарядка 1. Снаряд взрывается в зоне 30 м и наносит урон каждой цели внутри.",
+    "description": "????????? ???????? ????? ? ???????? 300 ? ? ???????? ????????? ?????? ????????? ?????? ???? ? ???? ???????? 30 ?. ????: 4/6/9/14. ??????????? 1.",
     "shortDescription": "Тяжелый ракетомет для удара по большой зоне. Требует частую перезарядку.",
-    "price": 9
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "fazovyy-klinok",
     "name": "Фазовый клинок",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 3,
     "skill": "blizhniy_boy",
     "mechanics": {
@@ -696,25 +1083,28 @@
               "type": "meters",
               "value": 15
             },
-            "targets": "single"
+            "targets": "single",
+            "defense": "control",
+            "check": "required"
           },
           "outcomes": [
             {
               "key": "damage",
-              "value": "6/10/14/22"
+              "value": "4/6/9/14"
             }
           ]
         }
       ]
     },
-    "description": "REQ. CHECK: сверить с новой системой проверок, рангов навыков и защит. Урон: 6/10/14/22. Дальность атаки этим клинком до 20м.",
+    "description": "????????? ???????? ???? ? ???????? 15 ?: ??????? ??? ?????? ????????. ????: 4/6/9/14.",
     "shortDescription": "Удлинняющийся клинок.",
-    "price": 9
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "kereznikov",
     "name": "Керезников",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 1,
     "skill": null,
     "mechanics": {
@@ -728,20 +1118,20 @@
           },
           "outcomes": [
             {
-              "key": "specialRule"
+              "key": "grantAdvantageAtCombatStart"
             }
           ]
         }
       ]
     },
-    "description": "TODO — переработать после отмены броска инициативы. Постоянный ускоритель реакции; прежний бонус +2 к инициативе больше не действует. Кандидат: преимущество на встречную проверку начала боя, если владелец представляет сторону. Одновременно может быть установлен только один ускоритель.",
-    "shortDescription": "Ускоритель реакции; эффект начала боя требует переработки",
-    "price": 1
+    "description": "Постоянный ускоритель реакции. Если в начале боя стороны совершают встречную проверку за первый ход и вы представляете героев, ваша проверка получает преимущество. Одновременно можно использовать только один ускоритель.",
+    "shortDescription": "Даёт преимущество в споре за первый ход.",
+    "price": null
   },
   {
     "id": "sandevistan",
     "name": "Сандевистан",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": null,
     "mechanics": {
@@ -751,26 +1141,26 @@
             "type": "freeAction"
           },
           "conditions": {
-            "frequency": "oncePerSession",
             "targets": "self",
             "duration": "untilEndOfScene"
           },
           "outcomes": [
             {
-              "key": "specialRule"
+              "key": "contestAmbushStartWithAdvantage"
             }
           ]
         }
       ]
     },
-    "description": "TODO — переработать после отмены броска инициативы. Кратковременный ускоритель; прежнее максимальное значение на кубе инициативы больше не действует. Кандидаты: превратить засаду в спорный старт или дать владельцу разовое свойство темпа. Одновременно может быть установлен только один ускоритель.",
-    "shortDescription": "Разовый боевой разгон; эффект начала боя требует переработки",
-    "price": 3
+    "description": "Когда герои попали в засаду, свободным действием превратите её начало в спорное: стороны совершают встречную проверку за первый ход, а представляющий героев персонаж получает преимущество. Одновременно можно использовать только один ускоритель.",
+    "shortDescription": "Позволяет оспорить первый ход при засаде.",
+    "price": null,
+    "mode": "forced"
   },
   {
     "id": "gasitel-inertsii",
     "name": "Гаситель инерции",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": null,
     "mechanics": {
@@ -790,14 +1180,14 @@
         }
       ]
     },
-    "description": "REQ. CHECK: сверить с новой системой проверок, рангов навыков и защит. Вы наносите дополнительный урон в зависимости от пройденного перед этим расстояния. После передвижения ваша следующая атака дополнительно наносит 1 урон за каждые полные 10 м, которые вы прошли перед ней.",
+    "description": "Вы наносите дополнительный урон в зависимости от пройденного перед этим расстояния. После передвижения ваша следующая атака дополнительно наносит 1 урон за каждые полные 10 м, которые вы прошли перед ней.",
     "shortDescription": "После передвижения вы усиливаете следующую атаку в зависимости от пройденного расстояния.",
-    "price": 3
+    "price": null
   },
   {
     "id": "maglev-botinki",
     "name": "Маглев ботинки",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": null,
     "mechanics": {
@@ -831,14 +1221,14 @@
         }
       ]
     },
-    "description": "REQ. CHECK: сверить с новой системой проверок, рангов навыков и защит. Позволяют перемещаться по отвесным стенам и потолку, тратя на это вашу обычную скорость передвижения. Вы также игнорируете штраф к скорости от пересеченной местности. Другие эффекты этой местности остаются в силе.",
+    "description": "Позволяют перемещаться по отвесным стенам и потолку, тратя на это вашу обычную скорость передвижения. Вы также игнорируете штраф к скорости от пересеченной местности. Другие эффекты этой местности остаются в силе.",
     "shortDescription": "Позволяют ходить по стенам и потолку и игнорировать штраф к скорости от пересеченной местности.",
-    "price": 3
+    "price": null
   },
   {
     "id": "khimicheskiy-analizator",
     "name": "Химический анализатор",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 3,
     "skill": null,
     "mechanics": {
@@ -862,14 +1252,15 @@
         }
       ]
     },
-    "description": "REQ. CHECK: сверить с новой системой проверок, рангов навыков и защит. Свободным действием опознайте химическое вещество из обширной базы образцов. Проверка не требуется.",
+    "description": "Свободным действием опознайте химическое вещество из обширной базы образцов. Проверка не требуется.",
     "shortDescription": "Опознает химические вещества без проверки.",
-    "price": 9
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "redaktor-boli",
     "name": "Редактор боли",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": null,
     "mechanics": {
@@ -891,12 +1282,12 @@
     },
     "description": "Отключает восприятие боли и усталости. Дает 4 временные ячейки стресса, которые очищаются в начале каждой сцены.",
     "shortDescription": "Отключает восприятие боли и усталости, увеличивая запас стресса",
-    "price": 3
+    "price": null
   },
   {
     "id": "dartgan",
     "name": "Дартган",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": "strelba",
     "mechanics": {
@@ -906,7 +1297,13 @@
             "type": "action"
           },
           "conditions": {
-            "targets": "single"
+            "targets": "single",
+            "range": {
+              "type": "meters",
+              "value": 100
+            },
+            "defense": "control",
+            "check": "required"
           },
           "outcomes": [
             {
@@ -923,20 +1320,21 @@
             },
             {
               "key": "damage",
-              "value": "5/8/12/18"
+              "value": "2/4/6/9"
             }
           ]
         }
       ]
     },
-    "description": "REQ. CHECK: перевести урон на формат провал/успех с ценой/успех/крит. Скрытое однозарядное оружие, устанавливаемое в глазницу. Урон: 5/8/12/18. Бронебойность 2. Перезарядка 1.",
+    "description": "????????? ???????? ???? ? ???????? 100 ?: ???????? ?????? ????????. ????: 2/4/6/9. ????????. ????????????? 2. ??????????? 1.",
     "shortDescription": "Скрытый однозарядный имплант-выстрел.",
-    "price": 3
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "mikro-optika",
     "name": "Микро-оптика",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": null,
     "mechanics": {
@@ -954,14 +1352,14 @@
         }
       ]
     },
-    "description": "REQ. CHECK: маневр «Прицеливание» удалён из экономики действий; переработать эффект через свойство «Стабилизация» или в архив. Позволяет увеличивать изображение до 10x.",
+    "description": "Позволяет увеличивать изображение до 10x.",
     "shortDescription": "Мечта любого снайпера",
-    "price": 3
+    "price": null
   },
   {
     "id": "takticheskiy-pritsel",
     "name": "Тактический прицел",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 1,
     "skill": null,
     "mechanics": {
@@ -979,14 +1377,14 @@
         }
       ]
     },
-    "description": "REQ. CHECK: маневр «Прицеливание» удалён из экономики действий; переработать эффект через свойство «Стабилизация» или в архив. Усиливает ваш прицел.",
+    "description": "Усиливает ваш прицел.",
     "shortDescription": "Усиливает ваш прицел.",
-    "price": 1
+    "price": null
   },
   {
     "id": "radio-skaner",
     "name": "Сканер \"Светоч\"",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": null,
     "mechanics": {
@@ -1013,12 +1411,13 @@
     },
     "description": "Распознает все технические устройства в радиусе 100 м.",
     "shortDescription": "Распознает все технические устройства в радиусе 100 м.",
-    "price": 3
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "analizator-golosa",
     "name": "Анализатор голоса",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": null,
     "mechanics": {
@@ -1041,12 +1440,13 @@
     },
     "description": "На 1 минуту активирует функцию «Детектор лжи». В это время вам невозможно соврать.",
     "shortDescription": "Детектор лжи",
-    "price": 3
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "radar-sonar",
     "name": "Сонар ближнего радиуса",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": null,
     "mechanics": {
@@ -1072,12 +1472,12 @@
     },
     "description": "Постоянно сканирует местность в радиусе 50 м. Раз в минуту или при входе объекта в зону ведущий сообщает обо всех движущихся целях. Стены не считаются помехой.",
     "shortDescription": "Детектор движения, даже сквозь стены",
-    "price": 3
+    "price": null
   },
   {
     "id": "kiber-zmeya",
     "name": "Кибер-змея",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 3,
     "skill": "blizhniy_boy",
     "mechanics": {
@@ -1090,7 +1490,9 @@
             "range": {
               "type": "melee"
             },
-            "targets": "single"
+            "targets": "single",
+            "defense": "fortitude",
+            "check": "required"
           },
           "outcomes": [
             {
@@ -1099,20 +1501,40 @@
             },
             {
               "key": "damage",
-              "value": "4/8/11/16"
+              "value": "4/6/9/14"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "trigger": "onSuccess",
+            "targets": "single",
+            "duration": "untilStartOfYourNextTurn"
+          },
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "grabbed"
+            },
+            {
+              "key": "imposeDisadvantage"
             }
           ]
         }
       ]
     },
-    "description": "REQ. CHECK: сверить с новой системой проверок, рангов навыков и защит. Жутковатое щупальце-имплант, скрытое в пищеводе. Урон: 4/8/11/16. При попадании цель оказывается схваченной и получает -2 к следующей проверке до начала вашего следующего хода. Перезарядка 1.",
-    "shortDescription": "Жутковатое щупальце-имплант, скрытое в пищеводе.",
-    "price": 9
+    "description": "????????? ???????? ???????? ????: ??????? ??? ?????? ?????????. ????: 4/6/9/14. ??? ?????? ???? ?????????? ??????????, ? ?? ????????? ???????? ?? ?????? ?????? ?????????? ???? ???????? ??????. ??????????? 1.",
+    "shortDescription": "Скрытое щупальце хватает цель и мешает её следующему действию.",
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "avtoinektor",
     "name": "Автоинъектор",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 1,
     "skill": null,
     "mechanics": {
@@ -1121,9 +1543,7 @@
           "activation": {
             "type": "freeAction"
           },
-          "conditions": {
-            "frequency": "oncePerSession"
-          },
+          "conditions": {},
           "outcomes": [
             {
               "key": "specialRule"
@@ -1134,12 +1554,13 @@
     },
     "description": "Поставляется в двух версиях: лечебной и адреналиновой. Выбор делается при покупке, взять обе сразу нельзя. Адреналиновая версия дает преимущество на следующую проверку. Лечебная восполняет 4 стресса.",
     "shortDescription": "Автоматически вводит адреналин или лечебный препарат.",
-    "price": 1
+    "price": null,
+    "mode": "forced"
   },
   {
     "id": "rukokhvat",
     "name": "Рукохват",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": null,
     "mechanics": {
@@ -1166,12 +1587,13 @@
     },
     "description": "Запускает крюк в объект на расстоянии до 50 м. По тросу можно двигаться с половиной скорости или подтянуть к себе объект на один размер меньше вас.",
     "shortDescription": "Крюк-кошка для быстрого зацепа, подъема и подтягивания объектов.",
-    "price": 3
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "vykidnoe-oruzhie-blizhnego-boya",
     "name": "Выкидное Оружие Ближнего Боя",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": "blizhniy_boy",
     "mechanics": {
@@ -1192,12 +1614,13 @@
     },
     "description": "Одноручное оружие ближнего боя можно спрятать внутри руки и мгновенно раскрыть при необходимости.",
     "shortDescription": "Прячет одноручное оружие ближнего боя в руке и раскрывает его мгновенно.",
-    "price": 1
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "proektsionnyy-modul-iskra-30",
     "name": "Модуль «Искра-30»",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": "rezonans",
     "mechanics": {
@@ -1232,14 +1655,15 @@
         }
       ]
     },
-    "description": "REQ. CHECK: сверить с новой системой проверок, рангов навыков и защит. Выпускает струю пламени по линии. Атака Резонанса против Стойкости всех противников на линии. Урон: 4/7/10/15. Перезарядка 2.",
+    "description": "Выпускает струю пламени по линии. Атака Резонанса против Стойкости всех противников на линии. Урон: 4/7/10/15. Перезарядка 2.",
     "shortDescription": "Модуль Резонанса, выжигающий линию огнем.",
-    "price": 3
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "manipulyator-kulak-keplera",
     "name": "Манипулятор «Кулак Кеплера»",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": "moshch",
     "mechanics": {
@@ -1270,14 +1694,15 @@
         }
       ]
     },
-    "description": "REQ. CHECK: сверить с новой системой проверок, рангов навыков и защит. Вырвите кусок материи не выше 2 ранга размером с кулак и выстрелите им по цели. Атака Мощи против Стойкости. Урон: 3/6/8/12. Бронебойность 1. Дополнительно вы можете свободно левитировать такие куски в радиусе 30 м и взаимодействовать ими с окружением, но не менять их форму или структуру.",
+    "description": "Вырвите кусок материи не выше 2 ранга размером с кулак и выстрелите им по цели. Атака Мощи против Стойкости. Урон: 3/6/8/12. Бронебойность 1. Дополнительно вы можете свободно левитировать такие куски в радиусе 30 м и взаимодействовать ими с окружением, но не менять их форму или структуру.",
     "shortDescription": "Модуль Мощи, вырывающий куски материи из объектов и выстреливающий ими во врагов.",
-    "price": 3
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "amplifikator-shepot",
     "name": "Амплификатор «Шёпот»",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": "dominirovanie",
     "mechanics": {
@@ -1312,14 +1737,15 @@
         }
       ]
     },
-    "description": "REQ. CHECK: сверить с новой системой проверок, рангов навыков и защит. Нанесите удар пси-полем по живому существу. Атака Доминирования против Воли. Урон: 3/6/8/12. Скрытное. Эскалация 1.",
+    "description": "Нанесите удар пси-полем по живому существу. Атака Доминирования против Воли. Урон: 3/6/8/12. Скрытное. Эскалация 1.",
     "shortDescription": "Модуль Доминирования, дающий скрытные удары пси-полем.",
-    "price": 3
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "bioinvertor-zimniy-son",
     "name": "Биоинвертор «Зимний Сон»",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": "mistika",
     "mechanics": {
@@ -1346,14 +1772,15 @@
         }
       ]
     },
-    "description": "REQ. CHECK: сверить с новой системой проверок, рангов навыков и защит. Нарушает обмен веществ цели. Атака Мистики против Воли. Урон: 2/4/6/9. Если итоговый урон 5 или выше, цель получает состояние «Уязвим».",
+    "description": "Нарушает обмен веществ цели. Атака Мистики против Воли. Урон: 2/4/6/9. Если итоговый урон 5 или выше, цель получает состояние «Уязвим».",
     "shortDescription": "Модуль Мистики, ломающий обмен веществ цели и может сделать ее уязвимой.",
-    "price": 3
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "prognosticheskiy-uzel-orakul",
     "name": "Прогностический узел «Оракул»",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": "analiz",
     "mechanics": {
@@ -1370,20 +1797,21 @@
           },
           "outcomes": [
             {
-              "key": "specialRule"
+              "key": "grantAdvantageAgainstTarget"
             }
           ]
         }
       ]
     },
-    "description": "REQ. CHECK: сверить с новой системой проверок, рангов навыков и защит. Проверка Анализа против Контроля. При успехе следующая проверка или атака против этой цели до начала вашего следующего хода получает +3.",
-    "shortDescription": "Модуль Анализа, подсвечивающий окно для следующего точного удара по цели.",
-    "price": 3
+    "description": "Совершите проверку Анализа против Контроля цели. При успехе следующая проверка или атака против неё до начала вашего следующего хода получает преимущество.",
+    "shortDescription": "Откройте союзнику выгодное окно для действия против цели.",
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "vykidnoy-shchit",
     "name": "Выкидной щит",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": null,
     "mechanics": {
@@ -1397,19 +1825,23 @@
             {
               "key": "concealable",
               "value": true
+            },
+            {
+              "key": "imposeDisadvantageAgainstFortitude"
             }
           ]
         }
       ]
     },
-    "description": "REQ. CHECK: сверить с новой системой проверок, рангов навыков и защит. Пуленепробиваемый складной щит скрыт внутри руки. После выдвижения рука считается занятой, и другие действия этой рукой невозможны. В раскрытом состоянии щит дает +2 к Стойкости.",
-    "shortDescription": "Складной щит в руке, который быстро раскрывается под огнем.",
-    "price": 3
+    "description": "Свободным действием раскройте или сложите скрытый в руке щит. Пока он раскрыт, рука занята, а атаки против вашей Стойкости получают помеху.",
+    "shortDescription": "Займите руку щитом, чтобы атаки против Стойкости получали помеху.",
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "vykidnoe-oruzhie-dalnego-boya",
     "name": "Выкидное Оружие Дальнего Боя",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": "strelba",
     "mechanics": {
@@ -1430,12 +1862,13 @@
     },
     "description": "Одноручное дальнобойное оружие можно спрятать внутри руки и мгновенно раскрыть при необходимости.",
     "shortDescription": "Прячет одноручное дальнобойное оружие в руке и раскрывает его мгновенно.",
-    "price": 1
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "povodok-drona-pastukh",
     "name": "Поводок «Пастух»",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": "khakerstvo",
     "mechanics": {
@@ -1461,14 +1894,15 @@
         }
       ]
     },
-    "description": "REQ. CHECK: сверить с новой системой проверок, рангов навыков и защит. Перехватывает управление над техникой, отдавая приказы. Проверка Хакерства против Контроля. При успехе вы определяете, какое следующее действие она совершит. Два раунда подряд воздействовать на одну и ту же цель нельзя.",
+    "description": "Перехватывает управление над техникой, отдавая приказы. Проверка Хакерства против Контроля. При успехе вы определяете, какое следующее действие она совершит. Два раунда подряд воздействовать на одну и ту же цель нельзя.",
     "shortDescription": "Перехватывает управление над техникой, отдавая приказы.",
-    "price": 3
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "kontur-tishiny-glush",
     "name": "Контур тишины «Глушь»",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": "sokrytie",
     "mechanics": {
@@ -1490,14 +1924,15 @@
         }
       ]
     },
-    "description": "REQ. CHECK: сверить с новой системой проверок, рангов навыков и защит. Пока контур работает, вы и стоящие вплотную союзники получаете преимущество к проверкам Сокрытия, связанным с передвижением и короткими взаимодействиями. Эффект заканчивается, если кто-то из вас атакует или поднимает явный шум.",
+    "description": "Пока контур работает, вы и стоящие вплотную союзники получаете преимущество к проверкам Сокрытия, связанным с передвижением и короткими взаимодействиями. Эффект заканчивается, если кто-то из вас атакует или поднимает явный шум.",
     "shortDescription": "Заглушает звуки издаваемые вами и окружающими",
-    "price": 3
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "servisnyy-roy-stezhok",
     "name": "Рой нанороботов «Стежок»",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": null,
     "mechanics": {
@@ -1523,12 +1958,13 @@
     },
     "description": "Свободным действием почините выбранную техсистему. Если применить рой к техсистеме с разряженным запасом временных ячеек стресса, он восстановит его до максимума.",
     "shortDescription": "Чинит техсистемы и восстанавливает их запас временных ячеек стресса.",
-    "price": 3
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "proektor-ukrytiya-rigel",
     "name": "Проектор укрытия «Ригель»",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 3,
     "skill": "inzheneriya",
     "mechanics": {
@@ -1551,14 +1987,15 @@
         }
       ]
     },
-    "description": "REQ. CHECK: сверить с новой системой проверок, рангов навыков и защит. Перед вами разворачивается защитная точка диаметром 15 м. Она дает Укрытие и запас временных ячеек стресса, равный вашей Инженерии, умноженной на 3.",
+    "description": "Перед вами разворачивается защитная точка диаметром 15 м. Она дает Укрытие и запас временных ячеек стресса, равный вашей Инженерии, умноженной на 3.",
     "shortDescription": "Разворачивает укрытие с запасом временных ячеек стресса для удержания позиции.",
-    "price": 9
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "sotsialnaya-lichina-maska",
     "name": "Социальная личина «Маска»",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": null,
     "mechanics": {
@@ -1579,14 +2016,15 @@
         }
       ]
     },
-    "description": "REQ. CHECK: сверить с новой системой проверок, рангов навыков и защит. Подстраивает ваш голос, мимику и мелкие черты под выбранный образ. Пока у вас есть правдоподобная легенда и доступ к роли, вы получаете преимущество к проверкам Обаяния, связанным с этим образом. Личина срывается после жесткого досмотра, открытого конфликта или грубой ошибки.",
+    "description": "Подстраивает ваш голос, мимику и мелкие черты под выбранный образ. Пока у вас есть правдоподобная легенда и доступ к роли, вы получаете преимущество к проверкам Обаяния, связанным с этим образом. Личина срывается после жесткого досмотра, открытого конфликта или грубой ошибки.",
     "shortDescription": "Подстраивает ваш голос, мимику и мелкие черты под выбранный образ.",
-    "price": 3
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "ekzozakhvat-taran",
     "name": "Экзозахват «Таран»",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": "moshch",
     "mechanics": {
@@ -1597,25 +2035,31 @@
           },
           "conditions": {
             "targets": "single",
-            "duration": "untilEndOfScene"
+            "duration": "untilEndOfScene",
+            "range": {
+              "type": "melee"
+            },
+            "defense": "fortitude",
+            "check": "required"
           },
           "outcomes": [
             {
               "key": "damage",
-              "value": "1/1/2/3"
+              "value": "2/4/6/9"
             }
           ]
         }
       ]
     },
-    "description": "REQ. CHECK: сверить с новой системой проверок, рангов навыков и защит. При попытке сломать или выбить что-либо вы совершаете проверку Мощи с преимуществом. В бою успешный удар таким тараном ломает кости противнику, уменьшая скорость передвижения в два раза до конца сцены. Урон: 1/1/2/3.",
+    "description": "??? ??????? ??????? ??? ?????? ???-???? ?????????? ???????? ???? ? ?????????????. ? ??? ????????? ???????? ???????? ????: ???? ?????? ?????????. ????: 2/4/6/9. ??? ?????? ???????? ???? ??????????? ????? ?? ????? ?????.",
     "shortDescription": "Ломает преграды и кости врагов.",
-    "price": 3
+    "price": null,
+    "mode": "standard"
   },
   {
     "id": "uragan",
     "name": "Ураган",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": null,
     "mechanics": {
@@ -1636,14 +2080,14 @@
         }
       ]
     },
-    "description": "REQ. CHECK: сверить с новой системой проверок, рангов навыков и защит. Каждая ваша следующая атака против одной и той же цели в рамках сцены получает суммирующуюся бронебойность 1. Бонус сбрасывается при атаке другой цели.",
+    "description": "Каждая ваша следующая атака против одной и той же цели в рамках сцены получает суммирующуюся бронебойность 1. Бонус сбрасывается при атаке другой цели.",
     "shortDescription": "Наращивает бронебойность по одной цели.",
-    "price": 3
+    "price": null
   },
   {
     "id": "protokol-parirovaniya",
     "name": "Протокол парирования",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 1,
     "skill": "blizhniy_boy",
     "mechanics": {
@@ -1653,7 +2097,6 @@
             "type": "passive"
           },
           "conditions": {
-            "frequency": "oncePerScene",
             "trigger": "firstMeleeAttackAgainstYou"
           },
           "outcomes": [
@@ -1666,12 +2109,13 @@
     },
     "description": "Выпавшее на кубе значение для первой атаки ближнего боя против вас за сцену автоматически считается успехом с ценой",
     "shortDescription": "Первая атака ближнего боя по вам — минимальный результат.",
-    "price": 1
+    "price": null,
+    "mode": "forced"
   },
   {
     "id": "protokol-ubiytsa",
     "name": "Протокол «Убийца»",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": null,
     "mechanics": {
@@ -1697,25 +2141,25 @@
             "type": "passive"
           },
           "conditions": {
-            "trigger": "onAttackAfterHidden"
+            "trigger": "onSuccessfulAttackAfterHidden"
           },
           "outcomes": [
             {
-              "key": "bonusDamage",
-              "value": 1
+              "key": "applyStatus",
+              "status": "vulnerable"
             }
           ]
         }
       ]
     },
-    "description": "Когда вы наносите цели смертельный удар, вы становитесь невидимым до начала вашего следующего хода. После выхода из невидимости ваша первая атака наносит +1 урон.",
-    "shortDescription": "Скрытность после убийства и бонус урона.",
-    "price": 3
+    "description": "Когда вы выводите цель из строя, становитесь Невидимым до начала своего следующего хода. При успехе первой атаки после этой Невидимости цель также становится Уязвимой до начала своего следующего хода.",
+    "shortDescription": "Станьте Невидимым после добивания и откройте следующую цель.",
+    "price": null
   },
   {
     "id": "protokol-ten",
     "name": "Протокол «Тень»",
-    "type": "equipment",
+    "type": "artifact",
     "rank": 2,
     "skill": "mistika",
     "mechanics": {
@@ -1725,7 +2169,6 @@
             "type": "action"
           },
           "conditions": {
-            "frequency": "atWill",
             "targets": "self",
             "duration": "untilCanceled"
           },
@@ -1756,8 +2199,9 @@
         }
       ]
     },
-    "description": "REQ. CHECK: сверить с новой системой проверок, рангов навыков и защит. Действием вы можете растворить тело, становясь тенью. В этой форме вы можете манёвром перемещаться между неосвещёнными пространствами, если дистанция между ними не больше 30 м. В форме тени вы не можете атаковать или активировать технические устройства. Воплотиться обратно также занимает действие.",
+    "description": "Действием вы можете растворить тело, становясь тенью. В этой форме вы можете манёвром перемещаться между неосвещёнными пространствами, если дистанция между ними не больше 30 м. В форме тени вы не можете атаковать или активировать технические устройства. Воплотиться обратно также занимает действие.",
     "shortDescription": "Форма тени для перемещения между тёмными участками.",
-    "price": 3
+    "price": null,
+    "mode": "standard"
   }
 ]

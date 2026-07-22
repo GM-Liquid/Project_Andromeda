@@ -1,5 +1,6 @@
 // Import document classes.
 import { ProjectAndromedaActor } from './documents/actor.mjs';
+import { ProjectAndromedaCombat } from './documents/combat.mjs';
 import { ProjectAndromedaItem } from './documents/item.mjs';
 // Import sheet classes.
 import {
@@ -17,6 +18,7 @@ import {
   getFoundryActorSheetsCollection,
   getFoundryItemSheetsCollection
 } from './helpers/foundry-compat.mjs';
+import { renderAndromedaCombatTracker } from './helpers/combat-tracker.mjs';
 import {
   GEAR_CATALOG_AUTO_SYNC_STATE_SETTING,
   GM_HERO_POOL_SETTING,
@@ -1475,12 +1477,12 @@ Hooks.once('init', function () {
 
   // Define custom Document classes
   CONFIG.Actor.documentClass = ProjectAndromedaActor;
+  CONFIG.Combat.documentClass = ProjectAndromedaCombat;
   CONFIG.Item.documentClass = ProjectAndromedaItem;
 
-  // systems/project-andromeda/project-andromeda.mjs — в хуке init
   CONFIG.Combat.initiative = {
-    formula: '2d8',
-    decimals: 2
+    formula: null,
+    decimals: 0
   };
 
   // Register sheet application classes
@@ -1533,9 +1535,14 @@ Hooks.on('renderDialog', (dialog, html) => {
 });
 
 Hooks.on('renderApplicationV2', (application, element) => {
+  renderAndromedaCombatTracker(application, element);
   const selectElement = isDomElement(element) ? element.querySelector('select[name="type"]') : null;
   if (!selectElement) return;
   updateDocumentTypeSelectOptions(application, selectElement);
+});
+
+Hooks.on('renderCombatTracker', (application, html) => {
+  renderAndromedaCombatTracker(application, html);
 });
 
 Hooks.on('getSceneControlButtons', (controls) => {

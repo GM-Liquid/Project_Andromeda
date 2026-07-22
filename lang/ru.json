@@ -190,6 +190,19 @@
       "AlreadyEditing": "Диалог редактирования уже открыт. Сначала закройте его."
     },
     "Initiative": "Инициатива",
+    "InitiativeTracker": {
+      "Heroes": "Герои",
+      "Opponents": "Противники",
+      "StartingSide": "Первой ходит сторона: {side}",
+      "CurrentSide": "Сейчас ходит сторона: {side}",
+      "ToggleStartingSide": "Сменить первую сторону",
+      "Choose": "Выбрать этого участника",
+      "ChangeSide": "Перевести на другую сторону",
+      "AddExtraTurn": "Добавить ещё один ход за раунд",
+      "RemoveExtraTurn": "Убрать дополнительный ход",
+      "ExtraTurn": "Доп. ход",
+      "NoRolls": "В Project Andromeda инициатива не бросается: стороны чередуются."
+    },
     "Stress": {
       "Label": "Стресс",
       "CellAria": "Клетка стресса {index}"

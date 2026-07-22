@@ -193,6 +193,19 @@
       "MoneyLabel": "Money"
     },
     "Initiative": "Initiative",
+    "InitiativeTracker": {
+      "Heroes": "Heroes",
+      "Opponents": "Opponents",
+      "StartingSide": "Starting side: {side}",
+      "CurrentSide": "Current side: {side}",
+      "ToggleStartingSide": "Toggle the starting side",
+      "Choose": "Choose this participant",
+      "ChangeSide": "Move to the other side",
+      "AddExtraTurn": "Add another turn per round",
+      "RemoveExtraTurn": "Remove the extra turn",
+      "ExtraTurn": "Extra turn",
+      "NoRolls": "Project Andromeda does not roll initiative: the two sides alternate."
+    },
     "Speed": {
       "Label": "Speed"
     },

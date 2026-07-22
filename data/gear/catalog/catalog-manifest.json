@@ -1,44 +1,37 @@
 [
   {
     "file": "abilities.json",
-    "schemaVersion": 4,
+    "schemaVersion": 5,
     "category": "abilities",
     "sourceOfTruth": "data/gear",
-    "notes": "Каталог способностей, импортированный из переходной главы 'Способности и снаряжение'. Частота и цена в действиях сохранены в тексте записи; legacy-статус отмечен на уровне записей."
+    "notes": "Канонический каталог покупных способностей версии 0.5. Каждая запись привязана к навыку, имеет режим standard/forced и не хранит текущую стоимость Накала."
   },
   {
     "file": "archetypes.json",
-    "schemaVersion": 4,
+    "schemaVersion": 5,
     "category": "archetypes",
     "sourceOfTruth": "data/gear",
-    "notes": "Каталог архетипов: профиль защит и сигнатурная способность. Записи не являются gear-предметами и не проверяются gear-catalog.schema.json."
+    "notes": "Каталог архетипов: профиль защит, встроенная защита через stressBonusPerRank и сигнатурная способность — базовая атака персонажа."
   },
   {
-    "file": "armor.json",
-    "schemaVersion": 4,
-    "category": "armor",
+    "file": "artifacts.json",
+    "schemaVersion": 5,
+    "category": "artifacts",
     "sourceOfTruth": "data/gear",
-    "notes": "Канонический каталог брони. Перенесен из синхронизированного раздела главы 'Способности и снаряжение' и нормализован по общему словарю свойств."
+    "notes": "Канонический каталог артефактов. Включает бывшие способности без навыка и механически значимое снаряжение; артефакты приобретаются сюжетно и не имеют цены."
   },
   {
     "file": "concept-abilities.json",
     "schemaVersion": 4,
     "category": "concept-abilities",
     "sourceOfTruth": "data/gear",
-    "notes": "Временный четвертый каталог concept-способностей для Quartz-главы 03. Удаляется вместе с отдельной вставкой concept-abilities в публичном sync-book по инструкции из data/gear/README.md."
-  },
-  {
-    "file": "equipment.json",
-    "schemaVersion": 4,
-    "category": "equipment",
-    "sourceOfTruth": "data/gear",
-    "notes": "Единый каталог снаряжения. Включает оружие, гаджеты и переходные записи из устаревшей части главы 'Способности и снаряжение'; статус legacy сохранен на уровне записей."
+    "notes": "Черновой пул концептов, не мигрированный в 0.5 и не являющийся действующим каталогом способностей."
   },
   {
     "file": "traits.json",
-    "schemaVersion": 4,
+    "schemaVersion": 5,
     "category": "traits",
     "sourceOfTruth": "data/gear",
-    "notes": "Канонический каталог черт. Стартовый набор из 15 утверждённых черт (по 5 на ранги 1–3), отобран из архива концептов старой версии системы и адаптирован под правила дизайна черт. Черты 4 ранга отложены."
+    "notes": "Канонический каталог черт."
   }
 ]

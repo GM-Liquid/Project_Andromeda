@@ -3264,3 +3264,90 @@ textarea[disabled] {
   border-radius: var(--andromeda-radius-md, 7px);
   cursor: pointer;
 }
+/* Alternating, side-based combat initiative. */
+.andromeda-initiative-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0.35rem 0.5rem;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--pa-border, rgba(255, 255, 255, 0.2));
+  border-radius: 4px;
+  background: var(--pa-surface, rgba(0, 0, 0, 0.2));
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.andromeda-initiative-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-inline-start: auto;
+  padding-inline-end: 0.3rem;
+}
+
+.andromeda-initiative-side,
+.andromeda-initiative-extra-turn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.25rem;
+  padding: 0.05rem 0.3rem;
+  border: 1px solid currentcolor;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.andromeda-initiative-side-heroes {
+  color: #72c7ff;
+}
+
+.andromeda-initiative-side-opponents {
+  color: #ff8b8b;
+}
+
+.andromeda-initiative-extra-turn {
+  color: #e5bf63;
+}
+
+.andromeda-initiative-button {
+  display: inline-grid;
+  place-items: center;
+  width: 1.55rem;
+  min-width: 1.55rem;
+  height: 1.55rem;
+  min-height: 1.55rem;
+  padding: 0;
+  border: 1px solid currentcolor;
+  border-radius: 4px;
+  color: inherit;
+  background: transparent;
+  line-height: 1;
+}
+
+.andromeda-initiative-button:hover:not(:disabled),
+.andromeda-initiative-button:focus-visible:not(:disabled) {
+  color: var(--pa-accent, #67d7ff);
+  box-shadow: 0 0 0 1px currentcolor;
+}
+
+.andromeda-initiative-button:disabled {
+  cursor: default;
+  opacity: 0.75;
+}
+
+.combatant.andromeda-initiative-eligible {
+  box-shadow: inset 3px 0 0 var(--pa-accent, #67d7ff);
+}
+
+.combatant.andromeda-initiative-selected {
+  background: color-mix(in srgb, var(--pa-accent, #67d7ff) 14%, transparent);
+}
+
+@media (max-width: 520px) {
+  .andromeda-initiative-side {
+    display: none;
+  }
+}

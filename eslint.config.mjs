@@ -32,6 +32,7 @@ export default [
         Actors: 'readonly',
         ActorSheet: 'readonly',
         ChatMessage: 'readonly',
+        Combat: 'readonly',
         CONFIG: 'readonly',
         CONST: 'readonly',
         structuredClone: 'readonly',
