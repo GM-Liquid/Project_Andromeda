@@ -58,7 +58,34 @@
       ],
       "mode": "standard"
     },
-    "stressBonusPerRank": 3
+    "stressBonusPerRank": 3,
+    "trait": {
+      "id": "ostriyo-ataki",
+      "name": "Остриё атаки",
+      "type": "trait",
+      "mechanics": {
+        "effects": [
+          {
+            "activation": {
+              "type": "passive"
+            },
+            "conditions": {
+              "frequency": "oncePerScene",
+              "targets": "self",
+              "trigger": "вы начинаете свой ход в досягаемости ближнего боя двух и более противников"
+            },
+            "outcomes": [
+              {
+                "key": "utility",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "description": "В гуще боя вам самое место. Первый раз за бой, когда вы начинаете свой ход в досягаемости ближнего боя двух и более противников, вы получаете 1 Накал.",
+      "shortDescription": "1/бой — +1 Накал за начало хода в гуще врагов"
+    }
   },
   {
     "id": "koloss",
@@ -122,7 +149,34 @@
       ],
       "mode": "standard"
     },
-    "stressBonusPerRank": 3
+    "stressBonusPerRank": 3,
+    "trait": {
+      "id": "zhivoy-bastion",
+      "name": "Живой бастион",
+      "type": "trait",
+      "mechanics": {
+        "effects": [
+          {
+            "activation": {
+              "type": "passive"
+            },
+            "conditions": {
+              "frequency": "oncePerScene",
+              "targets": "self",
+              "trigger": "атака противника наносит урон вашему союзнику в пределах 5 м от вас"
+            },
+            "outcomes": [
+              {
+                "key": "utility",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "description": "Удар по тем, кого вы прикрываете, только злит вас. Первый раз за бой, когда атака противника наносит урон вашему союзнику в пределах 5 м от вас, вы получаете 1 Накал.",
+      "shortDescription": "1/бой — +1 Накал, когда бьют союзника рядом с вами"
+    }
   },
   {
     "id": "duelyant",
@@ -183,7 +237,34 @@
       ],
       "mode": "standard"
     },
-    "stressBonusPerRank": 2
+    "stressBonusPerRank": 2,
+    "trait": {
+      "id": "azart-dueli",
+      "name": "Азарт дуэли",
+      "type": "trait",
+      "mechanics": {
+        "effects": [
+          {
+            "activation": {
+              "type": "passive"
+            },
+            "conditions": {
+              "frequency": "oncePerScene",
+              "targets": "self",
+              "trigger": "атака ближнего боя по вам завершается провалом"
+            },
+            "outcomes": [
+              {
+                "key": "utility",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "description": "Промах противника — ваш выигранный темп. Первый раз за бой, когда атака ближнего боя по вам завершается провалом, вы получаете 1 Накал.",
+      "shortDescription": "1/бой — +1 Накал за промах ближней атаки по вам"
+    }
   },
   {
     "id": "strelok",
@@ -248,7 +329,34 @@
       ],
       "mode": "standard"
     },
-    "stressBonusPerRank": 2
+    "stressBonusPerRank": 2,
+    "trait": {
+      "id": "uprezhdenie",
+      "name": "Упреждение",
+      "type": "trait",
+      "mechanics": {
+        "effects": [
+          {
+            "activation": {
+              "type": "passive"
+            },
+            "conditions": {
+              "frequency": "oncePerScene",
+              "targets": "self",
+              "trigger": "вы наносите урон противнику, который перемещался в этом раунде"
+            },
+            "outcomes": [
+              {
+                "key": "utility",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "description": "Движущаяся цель для вас удобнее неподвижной. Первый раз за бой, когда вы наносите урон противнику, который перемещался в этом раунде, вы получаете 1 Накал.",
+      "shortDescription": "1/бой — +1 Накал за урон по цели в движении"
+    }
   },
   {
     "id": "ten",
@@ -311,7 +419,34 @@
       ],
       "mode": "standard"
     },
-    "stressBonusPerRank": 2
+    "stressBonusPerRank": 2,
+    "trait": {
+      "id": "rastvorenie",
+      "name": "Растворение",
+      "type": "trait",
+      "mechanics": {
+        "effects": [
+          {
+            "activation": {
+              "type": "passive"
+            },
+            "conditions": {
+              "frequency": "oncePerScene",
+              "targets": "self",
+              "trigger": "вы во время боя становитесь Скрытым или Невидимым"
+            },
+            "outcomes": [
+              {
+                "key": "utility",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "description": "Исчезнуть посреди схватки — ваш фирменный приём. Первый раз за бой, когда вы во время боя становитесь Скрытым или Невидимым, вы получаете 1 Накал.",
+      "shortDescription": "1/бой — +1 Накал за уход в скрытность посреди боя"
+    }
   },
   {
     "id": "sledopyt",
@@ -376,7 +511,34 @@
       ],
       "mode": "standard"
     },
-    "stressBonusPerRank": 2
+    "stressBonusPerRank": 2,
+    "trait": {
+      "id": "vedenie-tseli",
+      "name": "Ведение цели",
+      "type": "trait",
+      "mechanics": {
+        "effects": [
+          {
+            "activation": {
+              "type": "passive"
+            },
+            "conditions": {
+              "frequency": "oncePerScene",
+              "targets": "self",
+              "trigger": "вы наносите урон противнику, которому наносили урон в предыдущем раунде"
+            },
+            "outcomes": [
+              {
+                "key": "utility",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "description": "Взятую цель вы уже не отпускаете. Первый раз за бой, когда вы наносите урон противнику, которому наносили урон в предыдущем раунде, вы получаете 1 Накал.",
+      "shortDescription": "1/бой — +1 Накал за удержание цели два раунда подряд"
+    }
   },
   {
     "id": "taktik",
@@ -441,7 +603,34 @@
       ],
       "mode": "standard"
     },
-    "stressBonusPerRank": 2
+    "stressBonusPerRank": 2,
+    "trait": {
+      "id": "sinkhronnyy-udar",
+      "name": "Синхронный удар",
+      "type": "trait",
+      "mechanics": {
+        "effects": [
+          {
+            "activation": {
+              "type": "passive"
+            },
+            "conditions": {
+              "frequency": "oncePerScene",
+              "targets": "self",
+              "trigger": "союзник наносит урон атакой с преимуществом, полученным от вашей способности"
+            },
+            "outcomes": [
+              {
+                "key": "utility",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "description": "План сработал — группа бьёт туда, куда вы указали. Первый раз за бой, когда союзник наносит урон атакой с преимуществом, полученным от вашей способности, вы получаете 1 Накал.",
+      "shortDescription": "1/бой — +1 Накал, когда союзник реализует ваше преимущество"
+    }
   },
   {
     "id": "tehnik",
@@ -506,7 +695,34 @@
       ],
       "mode": "standard"
     },
-    "stressBonusPerRank": 2
+    "stressBonusPerRank": 2,
+    "trait": {
+      "id": "otkaz-sistem",
+      "name": "Отказ систем",
+      "type": "trait",
+      "mechanics": {
+        "effects": [
+          {
+            "activation": {
+              "type": "passive"
+            },
+            "conditions": {
+              "frequency": "oncePerScene",
+              "targets": "self",
+              "trigger": "проверка противника, совершённая с помехой от вашего эффекта, завершается провалом"
+            },
+            "outcomes": [
+              {
+                "key": "utility",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "description": "Чужая техника отказывает в самый неудобный момент. Первый раз за бой, когда проверка противника, совершённая с помехой от вашего эффекта, завершается провалом, вы получаете 1 Накал.",
+      "shortDescription": "1/бой — +1 Накал, когда ваша помеха доводит врага до провала"
+    }
   },
   {
     "id": "oruzheynik",
@@ -571,7 +787,34 @@
       ],
       "mode": "standard"
     },
-    "stressBonusPerRank": 2
+    "stressBonusPerRank": 2,
+    "trait": {
+      "id": "polevaya-masterskaya",
+      "name": "Полевая мастерская",
+      "type": "trait",
+      "mechanics": {
+        "effects": [
+          {
+            "activation": {
+              "type": "passive"
+            },
+            "conditions": {
+              "frequency": "oncePerScene",
+              "targets": "self",
+              "trigger": "противник получает урон или помеху от устройства, ловушки или элемента обстановки, которые вы создали или изменили в этом бою"
+            },
+            "outcomes": [
+              {
+                "key": "utility",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "description": "Поле боя — ваша мастерская, и она работает на вас. Первый раз за бой, когда противник получает урон или помеху от устройства, ловушки или элемента обстановки, которые вы создали или изменили в этом бою, вы получаете 1 Накал.",
+      "shortDescription": "1/бой — +1 Накал, когда срабатывает ваша конструкция"
+    }
   },
   {
     "id": "lider",
@@ -636,7 +879,34 @@
       ],
       "mode": "standard"
     },
-    "stressBonusPerRank": 2
+    "stressBonusPerRank": 2,
+    "trait": {
+      "id": "komandirskaya-vyderzhka",
+      "name": "Командирская выдержка",
+      "type": "trait",
+      "mechanics": {
+        "effects": [
+          {
+            "activation": {
+              "type": "passive"
+            },
+            "conditions": {
+              "frequency": "oncePerScene",
+              "targets": "self",
+              "trigger": "союзник в пределах 15 м от вас проваливает проверку"
+            },
+            "outcomes": [
+              {
+                "key": "utility",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "description": "Когда команда даёт слабину, вы собираетесь первым. Первый раз за бой, когда союзник в пределах 15 м от вас проваливает проверку, вы получаете 1 Накал.",
+      "shortDescription": "1/бой — +1 Накал, когда союзник рядом проваливает проверку"
+    }
   },
   {
     "id": "diplomat",
@@ -701,7 +971,34 @@
       ],
       "mode": "standard"
     },
-    "stressBonusPerRank": 2
+    "stressBonusPerRank": 2,
+    "trait": {
+      "id": "dozhim",
+      "name": "Дожим",
+      "type": "trait",
+      "mechanics": {
+        "effects": [
+          {
+            "activation": {
+              "type": "passive"
+            },
+            "conditions": {
+              "frequency": "oncePerScene",
+              "targets": "self",
+              "trigger": "противник в пределах 30 м, который вас слышит, проваливает проверку"
+            },
+            "outcomes": [
+              {
+                "key": "utility",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "description": "Дрогнувшего противника вы дожимаете словом. Первый раз за бой, когда противник в пределах 30 м, который вас слышит, проваливает проверку, вы получаете 1 Накал.",
+      "shortDescription": "1/бой — +1 Накал, когда слышащий вас враг проваливает проверку"
+    }
   },
   {
     "id": "mistik",
@@ -766,7 +1063,34 @@
       ],
       "mode": "standard"
     },
-    "stressBonusPerRank": 2
+    "stressBonusPerRank": 2,
+    "trait": {
+      "id": "otklik",
+      "name": "Отклик",
+      "type": "trait",
+      "mechanics": {
+        "effects": [
+          {
+            "activation": {
+              "type": "passive"
+            },
+            "conditions": {
+              "frequency": "oncePerScene",
+              "targets": "self",
+              "trigger": "вы восстанавливаете себе или союзнику ячейки стресса либо снимаете состояние"
+            },
+            "outcomes": [
+              {
+                "key": "utility",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "description": "Возвращая силы другим, вы черпаете их сами. Первый раз за бой, когда вы восстанавливаете себе или союзнику ячейки стресса либо снимаете с себя или союзника состояние, вы получаете 1 Накал.",
+      "shortDescription": "1/бой — +1 Накал за восстановление союзника"
+    }
   },
   {
     "id": "zaklinatel",
@@ -831,6 +1155,33 @@
       ],
       "mode": "standard"
     },
-    "stressBonusPerRank": 2
+    "stressBonusPerRank": 2,
+    "trait": {
+      "id": "otvetnyy-vsplesk",
+      "name": "Ответный всплеск",
+      "type": "trait",
+      "mechanics": {
+        "effects": [
+          {
+            "activation": {
+              "type": "passive"
+            },
+            "conditions": {
+              "frequency": "oncePerScene",
+              "targets": "self",
+              "trigger": "вы наносите урон противнику, находящемуся в досягаемости ближнего боя от вас"
+            },
+            "outcomes": [
+              {
+                "key": "utility",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "description": "Вблизи ваша магия только опаснее. Первый раз за бой, когда вы наносите урон противнику, находящемуся в досягаемости ближнего боя от вас, вы получаете 1 Накал.",
+      "shortDescription": "1/бой — +1 Накал за урон по врагу вплотную"
+    }
   }
 ]

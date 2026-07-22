@@ -45,6 +45,21 @@ test('canonical gear catalogs use the 0.5 types and stable unique ids', async ()
       assert.ok(entry.id.length > 0, catalogName + ' has an empty id');
       assert.ok(!ids.has(entry.id), `duplicate stable catalog id: ${entry.id}`);
       ids.add(entry.id);
+
+      if (catalogName === 'archetypes') {
+        assert.equal(entry.trait?.type, 'trait', `${entry.id} must embed an archetype trait`);
+        assert.equal(typeof entry.trait?.id, 'string', `${entry.id} has no stable trait id`);
+        assert.ok(entry.trait.id.length > 0, `${entry.id} has an empty trait id`);
+        assert.ok(!ids.has(entry.trait.id), `duplicate stable catalog id: ${entry.trait.id}`);
+        ids.add(entry.trait.id);
+        assert.equal(entry.trait.rank, undefined, `${entry.id} trait must not have a rank`);
+        assert.equal(entry.trait.skill, undefined, `${entry.id} trait must not have a skill`);
+        assert.equal(entry.trait.price, undefined, `${entry.id} trait must not have a price`);
+        assert.ok(
+          Array.isArray(entry.trait.mechanics?.effects),
+          `${entry.id} trait must define mechanics.effects`
+        );
+      }
     }
   }
 });

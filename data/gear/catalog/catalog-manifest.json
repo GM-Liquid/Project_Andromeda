@@ -11,7 +11,7 @@
     "schemaVersion": 5,
     "category": "archetypes",
     "sourceOfTruth": "data/gear",
-    "notes": "Каталог архетипов: профиль защит, встроенная защита через stressBonusPerRank и сигнатурная способность — базовая атака персонажа."
+    "notes": "Каталог архетипов: профиль защит, встроенная защита через stressBonusPerRank, бесплатная архетипная черта-триггер Накала и сигнатурная способность — базовая атака персонажа."
   },
   {
     "file": "artifacts.json",
@@ -32,6 +32,6 @@
     "schemaVersion": 5,
     "category": "traits",
     "sourceOfTruth": "data/gear",
-    "notes": "Канонический каталог черт."
+    "notes": "Канонический каталог покупных черт; бесплатные встроенные черты архетипов хранятся в archetypes.json."
   }
 ]

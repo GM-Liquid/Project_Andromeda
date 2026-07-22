@@ -107,6 +107,8 @@ test(
     );
     assert.match(generated, new RegExp(`^:::accordion "${escapeRegExp(firstArchetype.name)}"$`, 'mu'));
     assert.match(generated, new RegExp(escapeRegExp(firstArchetype.description), 'u'));
+    assert.match(generated, new RegExp(escapeRegExp(firstArchetype.trait.name), 'u'));
+    assert.match(generated, new RegExp(escapeRegExp(firstArchetype.trait.description), 'u'));
     assert.match(generated, new RegExp(escapeRegExp(firstArchetype.ability.versions[0].description), 'u'));
     assert.match(generated, /\*\*Мастерство:\*\* Ближний бой\./u);
     assert.match(generated, /\*\*Профиль защит:\*\* сильная — Стойкость/u);
@@ -134,6 +136,9 @@ test(
     );
     const traitsCatalog = JSON.parse(
       await readFile(resolve(repoRoot, 'data', 'gear', 'catalog', 'traits.json'), 'utf8')
+    );
+    const archetypesCatalog = JSON.parse(
+      await readFile(resolve(repoRoot, 'data', 'gear', 'catalog', 'archetypes.json'), 'utf8')
     );
     const firstVisible = (items) =>
       items.find((item) => item.status !== 'draft' && item.status !== 'deprecated') ??
@@ -170,6 +175,12 @@ test(
     assert.match(getSectionBody(generated, 'Способности'), new RegExp(escapeRegExp(ability.name), 'u'));
     assert.match(getSectionBody(generated, 'Артефакты'), new RegExp(escapeRegExp(artifact.name), 'u'));
     assert.match(getSectionBody(generated, 'Черты'), new RegExp(escapeRegExp(trait.name), 'u'));
+    for (const archetype of archetypesCatalog) {
+      assert.doesNotMatch(
+        getSectionBody(generated, 'Черты'),
+        new RegExp(escapeRegExp(archetype.trait.name), 'u')
+      );
+    }
   }
 );
 

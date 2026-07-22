@@ -808,6 +808,7 @@ function getArchetypeLabel(labels, key) {
 function buildArchetypeCatalogAppendix(catalog) {
   return getRenderableGearCatalogItems(catalog)
     .map((item) => {
+      const trait = item?.trait ?? {};
       const ability = item?.ability ?? {};
       const skill = getArchetypeLabel(skillLabels, item?.skill);
       const defenseProfile = item?.defenseProfile ?? {};
@@ -831,12 +832,24 @@ function buildArchetypeCatalogAppendix(catalog) {
           '.',
         '- **Встроенная защита:** ' +
           item.stressBonusPerRank +
-          ' временные ячейки стресса за ранг.',
+          ' временные ячейки стресса за ранг.'
+      ];
+
+      if (trait.name || trait.description) {
+        lines.push(
+          '',
+          '**Архетипная черта: ' + trait.name + '**',
+          '',
+          String(trait.description ?? '').trim()
+        );
+      }
+
+      lines.push(
         '',
         '**Сигнатурная способность: ' + ability.name + '**',
         '',
         'Действием совершите проверку навыка ' + skill + ' против ' + abilityDefense + '.'
-      ];
+      );
 
       for (const version of versions) {
         lines.push(
