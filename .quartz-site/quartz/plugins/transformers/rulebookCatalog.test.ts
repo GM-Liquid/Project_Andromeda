@@ -38,6 +38,14 @@ const artifactHeaders = [
   'Защита',
   'Длительность'
 ];
+const traitHeaders = [
+  'Название',
+  'Ранг',
+  'Навык',
+  'Краткое описание',
+  'Полное описание',
+  'Цена в очках развития'
+];
 const equipmentHeaders = [
   'Тип',
   'Название',
@@ -159,23 +167,52 @@ test('artifact catalogs have a dedicated presentation and filters', () => {
     ]
   ]);
   const [entry] = extractSerializedEntries(html);
+  const summaryRow = getSummaryRow(html);
 
   assert.match(html, /data-catalog-kind="artifacts"/u);
-  assert.match(html, /Получение/u);
-  assert.match(html, /Сюжетная награда/u);
-  assert.doesNotMatch(html, /Сюжетная награда кр/u);
+  assert.doesNotMatch(html, /Получение/u);
+  assert.doesNotMatch(html, /Сюжетная награда/u);
+  assert.doesNotMatch(html, /data-column="price"/u);
+  assert.doesNotMatch(summaryRow, /data-column="price"/u);
   assert.match(html, /Частота использования/u);
   assert.match(html, /Цена в действиях/u);
   assert.match(html, /Против Защиты/u);
   assert.match(html, />Урон</u);
-  assert.equal(entry.price, 'Сюжетная награда');
-  assert.equal(entry.priceUnit, '');
+  assert.equal(entry.price, '');
+  assert.equal(entry.priceUnit, undefined);
   assert.equal(entry.filters.rank, '1');
   assert.equal(entry.filters.frequency, '1/сцену');
   assert.equal(entry.filters.actions, 'Основное');
   assert.equal(entry.filters.defense, 'Контроль');
   assert.equal(entry.filters.damage, '2');
 });
+
+test('trait catalogs use the same interactive presentation as abilities', () => {
+  assert.equal(detectRulebookCatalogKind(traitHeaders, { heading: 'Черты' }), 'traits');
+
+  const html = buildRulebookCatalogHtml('traits', traitHeaders, [
+    [
+      'Шестое чувство',
+      '1',
+      'Наблюдательность',
+      'Преимущество на обнаружение скрытых угроз.',
+      'Вы получаете преимущество, когда пытаетесь заметить засаду или скрытую угрозу.',
+      '2'
+    ]
+  ]);
+  const [entry] = extractSerializedEntries(html);
+
+  assert.match(html, /data-catalog-kind="traits"/u);
+  assert.match(html, /Цена в ОР/u);
+  assert.match(html, /data-catalog-search/u);
+  assert.match(html, /data-catalog-filters-panel/u);
+  assert.match(html, /value="Наблюдательность"/u);
+  assert.equal(entry.price, '2');
+  assert.equal(entry.priceUnit, 'ОР');
+  assert.equal(entry.filters.rank, '1');
+  assert.equal(entry.filters.skill, 'Наблюдательность');
+});
+
 test('buildAbilityCatalogHtml keeps an empty preview when the split description columns are present', () => {
   const html = buildAbilityCatalogHtml(abilityHeaders, [
     [

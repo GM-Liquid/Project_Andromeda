@@ -21,6 +21,7 @@ const rulebookDir = resolve(contentDir, 'rulebook');
 const generatedStatePath = resolve(contentDir, '.generated-rulebook.json');
 const gearCatalogFiles = {
   abilities: 'abilities.json',
+  archetypes: 'archetypes.json',
   artifacts: 'artifacts.json',
   traits: 'traits.json'
 };
@@ -800,6 +801,67 @@ function buildTraitCatalogTable(catalog) {
   );
 }
 
+function getArchetypeLabel(labels, key) {
+  return labels[key] ?? String(key ?? '');
+}
+
+function buildArchetypeCatalogAppendix(catalog) {
+  return getRenderableGearCatalogItems(catalog)
+    .map((item) => {
+      const ability = item?.ability ?? {};
+      const skill = getArchetypeLabel(skillLabels, item?.skill);
+      const defenseProfile = item?.defenseProfile ?? {};
+      const strongDefense = getArchetypeLabel(usageValueLabels.defense, defenseProfile.strong);
+      const mediumDefense = getArchetypeLabel(usageValueLabels.defense, defenseProfile.medium);
+      const weakDefense = getArchetypeLabel(usageValueLabels.defense, defenseProfile.weak);
+      const abilityDefense = getArchetypeLabel(usageValueLabels.defense, ability.defense);
+      const versions = Array.isArray(ability.versions) ? ability.versions : [];
+      const title = String(item.name ?? '').replace(/"/g, '&quot;');
+      const lines = [
+        ':::accordion "' + title + '"',
+        String(item.description ?? '').trim(),
+        '',
+        '- **Мастерство:** ' + skill + '.',
+        '- **Профиль защит:** сильная — ' +
+          strongDefense +
+          '; средняя — ' +
+          mediumDefense +
+          '; слабая — ' +
+          weakDefense +
+          '.',
+        '- **Встроенная защита:** ' +
+          item.stressBonusPerRank +
+          ' временные ячейки стресса за ранг.',
+        '',
+        '**Сигнатурная способность: ' + ability.name + '**',
+        '',
+        'Действием совершите проверку навыка ' + skill + ' против ' + abilityDefense + '.'
+      ];
+
+      for (const version of versions) {
+        lines.push(
+          '',
+          '**Ранг ' + version.rank + ' — ' + version.name + '.** Урон: ' + version.damage + '.',
+          '',
+          String(version.description ?? '').trim()
+        );
+      }
+
+      lines.push('', ':::');
+      return lines.join('\n');
+    })
+    .join('\n\n');
+}
+
+function transformCharacterCreationSource(source, gearCatalogs) {
+  const appendix = buildArchetypeCatalogAppendix(gearCatalogs.archetypes);
+  if (!appendix) {
+    return source;
+  }
+
+  return source.replace(/^>\s*Полные описания архетипов[^\n]*$/mu, appendix);
+}
+
 function buildAbilityCatalogTable(catalog) {
   const rows = getRenderableGearCatalogItems(catalog).map((item) => [
     item.name,
@@ -1009,6 +1071,7 @@ async function readGearCatalog(catalogDir, filename) {
 async function readGearCatalogs(catalogDir) {
   return {
     abilities: await readGearCatalog(catalogDir, gearCatalogFiles.abilities),
+    archetypes: await readGearCatalog(catalogDir, gearCatalogFiles.archetypes),
     artifacts: await readGearCatalog(catalogDir, gearCatalogFiles.artifacts),
     traits: await readGearCatalog(catalogDir, gearCatalogFiles.traits)
   };
@@ -1027,6 +1090,10 @@ function normalizeBody(body, chapter, chapters, options = {}) {
 
   let normalized = rewriteRulebookInternalLinks(cleaned, chapters);
   normalized = normalizeCharacterSheetExamples(normalized);
+
+  if (chapter.id === 'rulebook-character-creation') {
+    normalized = transformCharacterCreationSource(normalized, options.gearCatalogs);
+  }
 
   if (chapter.id === 'rulebook-abilities-equipment') {
     normalized = transformAbilitiesEquipmentSource(normalized, options.gearCatalogs);

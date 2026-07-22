@@ -17,6 +17,10 @@
   gap: 1.25rem;
   margin: 1.5rem 0 2rem;
 
+  &[data-catalog-kind='artifacts'] {
+    --ability-catalog-columns: 2.5rem 12.75rem minmax(0, 1fr);
+  }
+
   input,
   button {
     font: inherit;

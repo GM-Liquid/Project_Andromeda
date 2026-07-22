@@ -152,7 +152,7 @@ function renderToggleIndicator() {
   `
 }
 
-function renderCard(entry: RulebookCatalogEntry, isExpanded: boolean) {
+function renderCard(entry: RulebookCatalogEntry, isExpanded: boolean, showPrice: boolean) {
   return `
         <div class="rulebook-ability-catalog__card${isExpanded ? " is-expanded" : ""}" role="presentation">
           <div
@@ -170,7 +170,7 @@ function renderCard(entry: RulebookCatalogEntry, isExpanded: boolean) {
                 ${renderMetaChips(entry)}
               </div>
             </div>
-            <div class="rulebook-ability-catalog__cell" data-column="price" role="cell">${renderPrice(entry.price, entry.priceUnit)}</div>
+            ${showPrice ? `<div class="rulebook-ability-catalog__cell" data-column="price" role="cell">${renderPrice(entry.price, entry.priceUnit)}</div>` : ""}
             <div class="rulebook-ability-catalog__cell" data-column="description" role="cell">
               <div class="rulebook-ability-catalog__description-cell">
                 <p class="rulebook-ability-catalog__description-preview">${renderValue(entry.previewDescription)}</p>
@@ -195,8 +195,8 @@ function renderCard(entry: RulebookCatalogEntry, isExpanded: boolean) {
       `
 }
 
-function renderRows(entries: RulebookCatalogEntry[], expanded: Set<string>) {
-  return entries.map((entry) => renderCard(entry, expanded.has(entry.id))).join("")
+function renderRows(entries: RulebookCatalogEntry[], expanded: Set<string>, showPrice: boolean) {
+  return entries.map((entry) => renderCard(entry, expanded.has(entry.id), showPrice)).join("")
 }
 
 function parseFilterNumber(value: string) {
@@ -302,6 +302,7 @@ function initAbilityCatalog(catalog: HTMLElement) {
   const searchInput = catalog.querySelector<HTMLInputElement>("[data-catalog-search]")
   const filtersToggle = catalog.querySelector<HTMLButtonElement>("[data-catalog-filters-toggle]")
   const filtersPanel = catalog.querySelector<HTMLElement>("[data-catalog-filters-panel]")
+  const showPrice = catalog.dataset.catalogKind !== "artifacts"
 
   if (!dataNode || !body || !countNode || !searchInput || !filtersToggle || !filtersPanel) {
     return
@@ -416,7 +417,7 @@ function initAbilityCatalog(catalog: HTMLElement) {
 
   function render() {
     const nextEntries = getFilteredEntries()
-    catalogBody.innerHTML = renderRows(nextEntries, expandedEntries)
+    catalogBody.innerHTML = renderRows(nextEntries, expandedEntries, showPrice)
     catalogCountNode.textContent = `Показано: ${nextEntries.length}`
     syncDropdownSummaries()
   }

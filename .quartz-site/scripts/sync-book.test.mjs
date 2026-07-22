@@ -83,6 +83,38 @@ test(
 );
 
 test(
+  'syncBook replaces the archetype placeholder with complete catalog accordions',
+  { concurrency: false },
+  async () => {
+    const { generatedFiles } = await syncBook();
+    const chapterPath = generatedFiles.find((filePath) =>
+      filePath.endsWith('02-sozdanie-personazha.md')
+    );
+
+    assert.ok(chapterPath, 'expected the character creation chapter to be generated');
+
+    const generated = await readFile(resolve(chapterPath), 'utf8');
+    const archetypes = JSON.parse(
+      await readFile(resolve(repoRoot, 'data', 'gear', 'catalog', 'archetypes.json'), 'utf8'),
+    );
+    const firstArchetype = archetypes[0];
+
+    assert.ok(firstArchetype, 'expected at least one archetype');
+    assert.equal(
+      [...generated.matchAll(/^:::accordion "/gmu)].length,
+      archetypes.length,
+      'expected one generated accordion per archetype',
+    );
+    assert.match(generated, new RegExp(`^:::accordion "${escapeRegExp(firstArchetype.name)}"$`, 'mu'));
+    assert.match(generated, new RegExp(escapeRegExp(firstArchetype.description), 'u'));
+    assert.match(generated, new RegExp(escapeRegExp(firstArchetype.ability.versions[0].description), 'u'));
+    assert.match(generated, /\*\*Мастерство:\*\* Ближний бой\./u);
+    assert.match(generated, /\*\*Профиль защит:\*\* сильная — Стойкость/u);
+    assert.doesNotMatch(generated, /^>\s*Полные описания архетипов/mu);
+  },
+);
+
+test(
   'syncBook publishes only the 0.5 chapter 04 catalogs',
   { concurrency: false },
   async () => {

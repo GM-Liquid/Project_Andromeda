@@ -15,3 +15,8 @@ test("ability catalog client supports multi-valued defense filters", () => {
   assert.match(scriptSource, /Array\.isArray\(entryFilterValue\)/)
   assert.match(scriptSource, /entryFilterValue\.some\(\(value\) => values\.has\(value\)\)/)
 })
+
+test("artifact catalog rerenders keep the price column hidden", () => {
+  assert.match(scriptSource, /catalog\.dataset\.catalogKind !== "artifacts"/)
+  assert.match(scriptSource, /renderRows\(nextEntries, expandedEntries, showPrice\)/)
+})

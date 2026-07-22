@@ -70,3 +70,10 @@ test("ability catalog styles the expanded fact block separately from the descrip
   assert.match(styleSource, /&__detail-fact-value\s*\{[\s\S]*color:\s*var\(--dark\);[\s\S]*font-weight:\s*400;/)
   assert.match(styleSource, /&__detail-copy\s*\{[\s\S]*color:\s*var\(--dark\);/)
 })
+
+test("artifact catalogs use a three-column summary grid", () => {
+  assert.match(
+    styleSource,
+    /&\[data-catalog-kind='artifacts'\]\s*\{[\s\S]*--ability-catalog-columns:\s*2\.5rem 12\.75rem minmax\(0, 1fr\);/,
+  )
+})
