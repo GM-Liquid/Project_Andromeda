@@ -6,7 +6,12 @@ import { extractSkillTitles } from '../../../scripts/skills-reference-source.mjs
 
 const abilityCatalogClass = 'rulebook-ability-catalog';
 
-export type RulebookCatalogKind = 'abilities' | 'weapons' | 'armor' | 'equipment';
+export type RulebookCatalogKind =
+  | 'abilities'
+  | 'artifacts'
+  | 'weapons'
+  | 'armor'
+  | 'equipment';
 
 type CatalogHeaderField =
   | 'name'
@@ -43,6 +48,19 @@ type AbilityCatalogColumns = DescriptionColumns & {
   skill: number;
   credits: number;
   actions: number;
+  range?: number;
+  targets?: number;
+  area?: number;
+  defense?: number;
+  duration?: number;
+};
+
+type ArtifactCatalogColumns = DescriptionColumns & {
+  name: number;
+  rank: number;
+  frequency: number;
+  actions: number;
+  damage?: number;
   range?: number;
   targets?: number;
   area?: number;
@@ -139,6 +157,7 @@ type RulebookCatalogEntry = {
   name: string;
   rank: string;
   price: string;
+  priceUnit?: string;
   previewDescription: string;
   fullDescription: string;
   tags: string[];
@@ -160,7 +179,7 @@ const catalogHeaderAliases: Record<CatalogHeaderField, string[]> = {
   fullDescription: ['полное описание'],
   frequency: ['частота использования', 'частота'],
   skill: ['навык', 'используемый навык'],
-  credits: ['цена', 'цена:', 'цена в кредитах'],
+  credits: ['цена', 'цена:', 'цена в кредитах', 'цена в очках развития'],
   actions: ['цена в действиях', 'действие для активации', 'действия'],
   range: ['дальность', 'дистанция'],
   targets: ['цели', 'цель'],
@@ -400,6 +419,37 @@ function resolveAbilityCatalogColumns(headers: string[]): AbilityCatalogColumns 
   return columns;
 }
 
+function resolveArtifactCatalogColumns(headers: string[]): ArtifactCatalogColumns | null {
+  const descriptionColumns = resolveDescriptionColumns(headers);
+  if (!descriptionColumns) {
+    return null;
+  }
+
+  const columns: ArtifactCatalogColumns = {
+    name: findColumn(headers, catalogHeaderAliases.name),
+    rank: findColumn(headers, catalogHeaderAliases.rank),
+    frequency: findColumn(headers, catalogHeaderAliases.frequency),
+    actions: findColumn(headers, catalogHeaderAliases.actions),
+    damage: findColumn(headers, catalogHeaderAliases.damage),
+    range: findColumn(headers, catalogHeaderAliases.range),
+    targets: findColumn(headers, catalogHeaderAliases.targets),
+    area: findColumn(headers, catalogHeaderAliases.area),
+    defense: findColumn(headers, catalogHeaderAliases.defense),
+    duration: findColumn(headers, catalogHeaderAliases.duration),
+    ...descriptionColumns
+  };
+
+  if (
+    columns.name === -1 ||
+    columns.rank === -1 ||
+    columns.frequency === -1 ||
+    columns.actions === -1
+  ) {
+    return null;
+  }
+
+  return columns;
+}
 function resolveWeaponCatalogColumns(headers: string[]): WeaponCatalogColumns | null {
   const descriptionColumns = resolveDescriptionColumns(headers);
   if (!descriptionColumns) {
@@ -498,6 +548,10 @@ export function isAbilityCatalogTable(headers: string[]) {
   return resolveAbilityCatalogColumns(headers) !== null;
 }
 
+export function isArtifactCatalogTable(headers: string[]) {
+  return resolveArtifactCatalogColumns(headers) !== null;
+}
+
 function isWeaponCatalogTable(headers: string[]) {
   return resolveWeaponCatalogColumns(headers) !== null;
 }
@@ -511,6 +565,10 @@ export function detectRulebookCatalogKind(
   context: RulebookCatalogContext = {}
 ): RulebookCatalogKind | null {
   const contextText = normalizeCatalogValue(`${context.heading ?? ''} ${context.label ?? ''}`);
+
+  if (contextText.includes('артефакт') && isArtifactCatalogTable(headers)) {
+    return 'artifacts';
+  }
 
   if (isAbilityCatalogTable(headers)) {
     return 'abilities';
@@ -894,6 +952,7 @@ function buildAbilityCatalogModel(headers: string[], rows: string[][]): Rulebook
       name,
       rank,
       price,
+      priceUnit: 'ОР',
       previewDescription: descriptions.previewDescription,
       fullDescription: descriptions.fullDescription,
       tags: [frequency, skill].filter(Boolean),
@@ -964,15 +1023,112 @@ function buildAbilityCatalogModel(headers: string[], rows: string[][]): Rulebook
       {
         kind: 'range',
         field: 'credits',
-        label: 'Цена в кредитах',
+        label: 'Цена в очках развития',
         minLabel: 'От',
         maxLabel: 'До',
-        unit: 'кр'
+        unit: 'ОР'
       }
     ]
   };
 }
 
+function buildArtifactCatalogModel(headers: string[], rows: string[][]): RulebookCatalogModel {
+  const columns = resolveArtifactCatalogColumns(headers);
+  if (!columns) {
+    return { entries: [], filters: [] };
+  }
+
+  const entries = rows.map((row, index) => {
+    const descriptions = buildDescriptions(row, columns);
+    const frequency =
+      normalizeFrequencyLabel((row[columns.frequency] ?? '').trim()) ||
+      deriveFrequencyLabel(descriptions.fullDescription);
+    const actions =
+      normalizeActionLabel((row[columns.actions] ?? '').trim()) ||
+      deriveActionLabel(descriptions.fullDescription);
+    const damage = readOptionalColumnValue(row, columns.damage);
+    const range = readOptionalColumnValue(row, columns.range);
+    const targets = readOptionalColumnValue(row, columns.targets);
+    const area = readOptionalColumnValue(row, columns.area);
+    const defense = normalizeDefenseLabel(readOptionalColumnValue(row, columns.defense));
+    const duration = readOptionalColumnValue(row, columns.duration);
+    const rank = (row[columns.rank] ?? '').trim();
+    const name = (row[columns.name] ?? '').trim();
+
+    return {
+      id: `artifact-${index + 1}`,
+      name,
+      rank,
+      price: 'Сюжетная награда',
+      priceUnit: '',
+      previewDescription: descriptions.previewDescription,
+      fullDescription: descriptions.fullDescription,
+      tags: [frequency].filter(Boolean),
+      detailTags: buildDetailTags([
+        createDetailTag('damage', damage),
+        createDetailTag('range', range),
+        createDetailTag('targets', targets),
+        createDetailTag('area', area),
+        createDetailTag('defense', defense),
+        createDetailTag('duration', duration),
+        createDetailTag('actions', actions),
+        createDetailTag('frequency', frequency)
+      ]),
+      filters: {
+        rank,
+        frequency,
+        actions,
+        defense,
+        damage
+      },
+      sortValues: {
+        rank: parseCatalogNumber(rank),
+        actions: getActionSortValue(actions),
+        frequency: getFrequencySortValue(frequency),
+        damage: parseCatalogNumber(damage, 0)
+      }
+    } satisfies RulebookCatalogEntry;
+  });
+
+  return {
+    entries,
+    filters: [
+      { kind: 'multi', field: 'rank', label: 'Ранг', values: rankOptions },
+      {
+        kind: 'multi',
+        field: 'frequency',
+        label: 'Частота использования',
+        values: sortFrequencyValues([
+          ...frequencyOptions,
+          ...entries.map((entry) => getSingleFilterValue(entry.filters.frequency))
+        ])
+      },
+      {
+        kind: 'multi',
+        field: 'actions',
+        label: 'Цена в действиях',
+        values: sortActionValues([
+          ...actionOptions,
+          ...entries.map((entry) => getSingleFilterValue(entry.filters.actions))
+        ])
+      },
+      {
+        kind: 'multi',
+        field: 'defense',
+        label: 'Против Защиты',
+        values: [...defenseFilterValues]
+      },
+      {
+        kind: 'multi',
+        field: 'damage',
+        label: 'Урон',
+        values: sortNumericValues(
+          entries.map((entry) => getSingleFilterValue(entry.filters.damage))
+        )
+      }
+    ]
+  };
+}
 function buildWeaponCatalogModel(headers: string[], rows: string[][]): RulebookCatalogModel {
   const columns = resolveWeaponCatalogColumns(headers);
   if (!columns) {
@@ -999,6 +1155,7 @@ function buildWeaponCatalogModel(headers: string[], rows: string[][]): RulebookC
       name,
       rank,
       price,
+      priceUnit: 'кр',
       previewDescription: descriptions.previewDescription,
       fullDescription: descriptions.fullDescription,
       tags: [skill].filter(Boolean),
@@ -1091,6 +1248,7 @@ function buildArmorCatalogModel(headers: string[], rows: string[][]): RulebookCa
       name,
       rank,
       price,
+      priceUnit: 'кр',
       previewDescription: descriptions.previewDescription,
       fullDescription: descriptions.fullDescription,
       tags: [
@@ -1172,6 +1330,7 @@ function buildEquipmentCatalogModel(headers: string[], rows: string[][]): Rulebo
       name,
       rank,
       price,
+      priceUnit: 'кр',
       previewDescription: descriptions.previewDescription,
       fullDescription: descriptions.fullDescription,
       tags: [skill].filter(Boolean),
@@ -1235,8 +1394,13 @@ function renderCatalogValue(value: string) {
   return value ? escapeHtml(value) : '—';
 }
 
-function renderCatalogPrice(value: string) {
-  return value ? `${escapeHtml(value)} кр` : '—';
+function renderCatalogPrice(entry: RulebookCatalogEntry) {
+  if (!entry.price) {
+    return '—';
+  }
+
+  const unit = entry.priceUnit === undefined ? 'кр' : entry.priceUnit;
+  return `${escapeHtml(entry.price)}${unit ? ` ${escapeHtml(unit)}` : ''}`;
 }
 
 function renderCatalogMetaChips(entry: RulebookCatalogEntry) {
@@ -1510,7 +1674,7 @@ function renderCatalogCard(entry: RulebookCatalogEntry, expanded: boolean) {
                 ${renderCatalogMetaChips(entry)}
               </div>
             </div>
-            <div class="${abilityCatalogClass}__cell" data-column="price" role="cell">${renderCatalogPrice(entry.price)}</div>
+            <div class="${abilityCatalogClass}__cell" data-column="price" role="cell">${renderCatalogPrice(entry)}</div>
             <div class="${abilityCatalogClass}__cell" data-column="description" role="cell">
               <div class="${abilityCatalogClass}__description-cell">
                 <p class="${abilityCatalogClass}__description-preview">${renderCatalogValue(entry.previewDescription)}</p>
@@ -1543,6 +1707,8 @@ function buildRulebookCatalogModel(kind: RulebookCatalogKind, headers: string[],
   switch (kind) {
     case 'abilities':
       return buildAbilityCatalogModel(headers, rows);
+    case 'artifacts':
+      return buildArtifactCatalogModel(headers, rows);
     case 'weapons':
       return buildWeaponCatalogModel(headers, rows);
     case 'armor':
@@ -1571,7 +1737,7 @@ export function buildRulebookCatalogHtml(
           <div class="${abilityCatalogClass}__head" role="row">
             <div class="${abilityCatalogClass}__col" data-column="rank" role="columnheader">Ранг</div>
             <div class="${abilityCatalogClass}__col" data-column="name" role="columnheader">Название</div>
-            <div class="${abilityCatalogClass}__col" data-column="price" role="columnheader">Цена</div>
+            <div class="${abilityCatalogClass}__col" data-column="price" role="columnheader">${kind === 'abilities' ? 'Цена в ОР' : kind === 'artifacts' ? 'Получение' : 'Цена'}</div>
             <div class="${abilityCatalogClass}__col" data-column="description" role="columnheader">Описание</div>
           </div>
           <div class="${abilityCatalogClass}__list" data-catalog-body role="rowgroup">

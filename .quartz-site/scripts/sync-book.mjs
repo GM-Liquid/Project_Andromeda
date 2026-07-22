@@ -20,9 +20,8 @@ const contentDir = resolve(siteRoot, 'content');
 const rulebookDir = resolve(contentDir, 'rulebook');
 const generatedStatePath = resolve(contentDir, '.generated-rulebook.json');
 const gearCatalogFiles = {
-  armor: 'armor.json',
-  equipment: 'equipment.json',
   abilities: 'abilities.json',
+  artifacts: 'artifacts.json',
   traits: 'traits.json'
 };
 
@@ -747,61 +746,8 @@ function getGearPropertyValue(item, propertyKey) {
     : String(property.value);
 }
 
-function getGearSpeedValue(item) {
-  const mechanicsSpeedBonus = item?.mechanics?.properties?.speedBonus;
-  if (
-    mechanicsSpeedBonus !== null &&
-    mechanicsSpeedBonus !== undefined &&
-    mechanicsSpeedBonus !== ''
-  ) {
-    const numericValue = Number(mechanicsSpeedBonus);
-    if (Number.isFinite(numericValue) && numericValue !== 0) {
-      const sign = numericValue > 0 ? '+' : '';
-      return `Скорость ${sign}${numericValue} м`;
-    }
-  }
-
-  return getGearQuartzValue(item, 'speed');
-}
-
 function getArmorDefenseValue(item, quartzKey, propertyKey) {
   return getGearQuartzValue(item, quartzKey) || getGearPropertyValue(item, propertyKey);
-}
-
-function getEquipmentTypeLabel(item) {
-  const skillKey = getGearSkillKey(item?.skill || getGearQuartzValue(item, 'skill'));
-  if (skillKey === 'blizhniy_boy') {
-    return 'Ближнее';
-  }
-
-  if (skillKey === 'strelba') {
-    return 'Стрелковое';
-  }
-
-  const tags = new Set(item.tags ?? []);
-  if (tags.has('blizhnee')) {
-    return 'Ближнее';
-  }
-
-  if (tags.has('strelkovoe')) {
-    return 'Стрелковое';
-  }
-
-  if (tags.has('metatelnoe')) {
-    return 'Метательное';
-  }
-
-  return 'Снаряжение';
-}
-
-function isWeaponCatalogItem(item) {
-  const skillKey = getGearSkillKey(item?.skill || getGearQuartzValue(item, 'skill'));
-  if (skillKey === 'blizhniy_boy' || skillKey === 'strelba') {
-    return true;
-  }
-
-  const tags = new Set(item.tags ?? []);
-  return tags.has('blizhnee') || tags.has('strelkovoe') || tags.has('metatelnoe');
 }
 
 function getEquipmentDamageValue(item) {
@@ -838,43 +784,6 @@ function getGearStepEffectsValue(item) {
     .join('; ');
 }
 
-function buildArmorCatalogTable(catalog) {
-  const rows = getRenderableGearCatalogItems(catalog).map((item) => [
-    item.name,
-    item.rank,
-    getArmorDefenseValue(item, 'physicalDefense', 'fortitude-bonus-x'),
-    getArmorDefenseValue(item, 'magicalDefense', 'control-bonus-x'),
-    getArmorDefenseValue(item, 'psychicDefense', 'will-bonus-x'),
-    getGearPropertyValue(item, 'shield') || getGearQuartzValue(item, 'shield'),
-    getGearSpeedValue(item),
-    getGearUsageOrQuartzValue(item, 'frequency'),
-    getGearUsageOrQuartzValue(item, 'actions'),
-    getGearUsageOrQuartzValue(item, 'duration'),
-    getGearShortDescription(item),
-    getGearDescription(item),
-    getGearCatalogPrice(item)
-  ]);
-
-  return renderMarkdownTable(
-    [
-      'Название',
-      'Ранг',
-      'Стойкость',
-      'Контроль',
-      'Воля',
-      'Силовой щит',
-      'Скорость',
-      'Частота использования',
-      'Цена в действиях',
-      'Длительность',
-      'Краткое описание',
-      'Полное описание',
-      'Цена'
-    ],
-    rows
-  );
-}
-
 function buildTraitCatalogTable(catalog) {
   const rows = getRenderableGearCatalogItems(catalog).map((item) => [
     item.name,
@@ -887,96 +796,6 @@ function buildTraitCatalogTable(catalog) {
 
   return renderMarkdownTable(
     ['Название', 'Ранг', 'Навык', 'Краткое описание', 'Полное описание', 'Цена в очках развития'],
-    rows
-  );
-}
-
-function buildEquipmentCatalogTable(catalog) {
-  const rows = getRenderableGearCatalogItems(catalog)
-    .filter((item) => !isWeaponCatalogItem(item))
-    .map((item) => [
-      getEquipmentTypeLabel(item),
-      item.name,
-      item.rank,
-      getGearSkillValue(item),
-      getGearQuartzValue(item, 'damage') || getEquipmentDamageValue(item),
-      getGearStepEffectsValue(item),
-      getGearUsageOrQuartzValue(item, 'frequency'),
-      getGearUsageOrQuartzValue(item, 'actions'),
-      getGearUsageOrQuartzValue(item, 'range'),
-      getGearUsageOrQuartzValue(item, 'targets'),
-      getGearUsageOrQuartzValue(item, 'area'),
-      getGearUsageOrQuartzValue(item, 'defense'),
-      getGearUsageOrQuartzValue(item, 'duration'),
-      getGearShortDescription(item),
-      getGearDescription(item),
-      getGearCatalogPrice(item)
-    ]);
-
-  return renderMarkdownTable(
-    [
-      'Тип',
-      'Название',
-      'Ранг',
-      'Навык',
-      'Урон',
-      'Эффекты',
-      'Частота использования',
-      'Цена в действиях',
-      'Дальность',
-      'Цели',
-      'Зона',
-      'Защита',
-      'Длительность',
-      'Краткое описание',
-      'Полное описание',
-      'Цена'
-    ],
-    rows
-  );
-}
-
-function buildWeaponCatalogTable(catalog) {
-  const rows = getRenderableGearCatalogItems(catalog)
-    .filter(isWeaponCatalogItem)
-    .map((item) => [
-      getEquipmentTypeLabel(item),
-      item.name,
-      item.rank,
-      getGearSkillValue(item),
-      getGearQuartzValue(item, 'damage') || getEquipmentDamageValue(item),
-      getGearStepEffectsValue(item),
-      getGearUsageOrQuartzValue(item, 'frequency'),
-      getGearUsageOrQuartzValue(item, 'actions'),
-      getGearUsageOrQuartzValue(item, 'range'),
-      getGearUsageOrQuartzValue(item, 'targets'),
-      getGearUsageOrQuartzValue(item, 'area'),
-      getGearUsageOrQuartzValue(item, 'defense'),
-      getGearUsageOrQuartzValue(item, 'duration'),
-      getGearShortDescription(item),
-      getGearDescription(item),
-      getGearCatalogPrice(item)
-    ]);
-
-  return renderMarkdownTable(
-    [
-      'Тип',
-      'Название',
-      'Ранг',
-      'Навык',
-      'Урон',
-      'Эффекты',
-      'Частота использования',
-      'Цена в действиях',
-      'Дальность',
-      'Цели',
-      'Зона',
-      'Защита',
-      'Длительность',
-      'Краткое описание',
-      'Полное описание',
-      'Цена'
-    ],
     rows
   );
 }
@@ -1016,17 +835,60 @@ function buildAbilityCatalogTable(catalog) {
       'Зона',
       'Защита',
       'Длительность',
-      'Цена в кредитах'
+      'Цена в очках развития'
     ],
     rows
   );
 }
 
-function stripMarkdownTableBlocks(lines) {
+function buildArtifactCatalogTable(catalog) {
+  const rows = getRenderableGearCatalogItems(catalog).map((item) => [
+    item.name,
+    item.rank,
+    getGearQuartzValue(item, 'damage') || getGearPropertyValue(item, 'damage'),
+    getGearStepEffectsValue(item),
+    getGearShortDescription(item),
+    getGearDescription(item),
+    getGearUsageOrQuartzValue(item, 'frequency'),
+    getGearUsageOrQuartzValue(item, 'actions'),
+    getGearUsageOrQuartzValue(item, 'range'),
+    getGearUsageOrQuartzValue(item, 'targets'),
+    getGearUsageOrQuartzValue(item, 'area'),
+    getGearUsageOrQuartzValue(item, 'defense'),
+    getGearUsageOrQuartzValue(item, 'duration')
+  ]);
+
+  return renderMarkdownTable(
+    [
+      'Название',
+      'Ранг',
+      'Урон',
+      'Эффекты',
+      'Краткое описание',
+      'Полное описание',
+      'Частота использования',
+      'Цена в действиях',
+      'Дальность',
+      'Цели',
+      'Зона',
+      'Защита',
+      'Длительность'
+    ],
+    rows
+  );
+}
+
+function stripGeneratedCatalogTableBlocks(lines) {
   const output = [];
 
   for (let index = 0; index < lines.length; index += 1) {
     if (!lines[index].trim().startsWith('|')) {
+      output.push(lines[index]);
+      continue;
+    }
+
+    const isGeneratedCatalog = /\|\s*Название\s*\|/u.test(lines[index]);
+    if (!isGeneratedCatalog) {
       output.push(lines[index]);
       continue;
     }
@@ -1061,13 +923,10 @@ function trimSectionLines(lines) {
 }
 
 function transformAbilitiesEquipmentSource(source, gearCatalogs) {
-  const sectionTableMap = new Map([
-    ['Броня', buildArmorCatalogTable(gearCatalogs.armor)],
-    ['Снаряжение', buildEquipmentCatalogTable(gearCatalogs.equipment)],
-    ['Способности', buildAbilityCatalogTable(gearCatalogs.abilities)]
-  ]);
-  const weaponCatalogTable = buildWeaponCatalogTable(gearCatalogs.equipment);
+  const abilityCatalogTable = buildAbilityCatalogTable(gearCatalogs.abilities);
+  const artifactCatalogTable = buildArtifactCatalogTable(gearCatalogs.artifacts);
   const traitCatalogTable = buildTraitCatalogTable(gearCatalogs.traits);
+  const legacySectionTitles = new Set(['Оружие', 'Броня', 'Снаряжение']);
   const lines = source.split('\n');
   const nextLines = [];
   let sectionHeading = null;
@@ -1080,16 +939,12 @@ function transformAbilitiesEquipmentSource(source, gearCatalogs) {
       return;
     }
 
-    const cleanedBody = trimSectionLines(stripMarkdownTableBlocks(sectionBody));
+    const cleanedBody = trimSectionLines(stripGeneratedCatalogTableBlocks(sectionBody));
     const sectionTitle = sectionHeading.replace(/^##\s+/u, '').trim();
-    if (sectionTitle === 'Снаряжение' && weaponCatalogTable) {
-      nextLines.push('## Оружие', '', weaponCatalogTable, '');
-    }
-    if (sectionTitle === 'Снаряжение') {
-      const armorCatalogTable = sectionTableMap.get('Броня');
-      if (armorCatalogTable) {
-        nextLines.push('## Броня', '', armorCatalogTable, '');
-      }
+    if (legacySectionTitles.has(sectionTitle)) {
+      sectionHeading = null;
+      sectionBody = [];
+      return;
     }
 
     nextLines.push(sectionHeading);
@@ -1098,11 +953,23 @@ function transformAbilitiesEquipmentSource(source, gearCatalogs) {
       nextLines.push('', ...cleanedBody);
     }
 
-    if (sectionTitle === 'Черты и способности' && traitCatalogTable) {
-      nextLines.push('', '## Черты', '', traitCatalogTable, '');
+    if (sectionTitle === 'Черты и способности') {
+      if (traitCatalogTable) {
+        nextLines.push('', '## Черты', '', traitCatalogTable, '');
+      }
+      if (abilityCatalogTable) {
+        nextLines.push('', '## Способности', '', abilityCatalogTable, '');
+      }
     }
 
-    const injectedTable = sectionTableMap.get(sectionTitle);
+    const injectedTable =
+      sectionTitle === 'Черты'
+        ? traitCatalogTable
+        : sectionTitle === 'Способности'
+          ? abilityCatalogTable
+          : sectionTitle === 'Артефакты'
+            ? artifactCatalogTable
+            : '';
     if (injectedTable) {
       nextLines.push('', injectedTable, '');
     } else if (cleanedBody.length > 0) {
@@ -1141,9 +1008,8 @@ async function readGearCatalog(catalogDir, filename) {
 
 async function readGearCatalogs(catalogDir) {
   return {
-    armor: await readGearCatalog(catalogDir, gearCatalogFiles.armor),
-    equipment: await readGearCatalog(catalogDir, gearCatalogFiles.equipment),
     abilities: await readGearCatalog(catalogDir, gearCatalogFiles.abilities),
+    artifacts: await readGearCatalog(catalogDir, gearCatalogFiles.artifacts),
     traits: await readGearCatalog(catalogDir, gearCatalogFiles.traits)
   };
 }

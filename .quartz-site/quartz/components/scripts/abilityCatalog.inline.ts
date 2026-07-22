@@ -3,6 +3,7 @@ type RulebookCatalogEntry = {
   name: string
   rank: string
   price: string
+  priceUnit?: string
   previewDescription: string
   fullDescription: string
   tags: string[]
@@ -32,8 +33,8 @@ function renderValue(value: string) {
   return value ? escapeHtml(value) : "—"
 }
 
-function renderPrice(value: string) {
-  return value ? `${escapeHtml(value)} кр` : "—"
+function renderPrice(value: string, unit = "кр") {
+  return value ? `${escapeHtml(value)}${unit ? ` ${escapeHtml(unit)}` : ""}` : "—"
 }
 
 function renderMetaChips(entry: RulebookCatalogEntry) {
@@ -169,7 +170,7 @@ function renderCard(entry: RulebookCatalogEntry, isExpanded: boolean) {
                 ${renderMetaChips(entry)}
               </div>
             </div>
-            <div class="rulebook-ability-catalog__cell" data-column="price" role="cell">${renderPrice(entry.price)}</div>
+            <div class="rulebook-ability-catalog__cell" data-column="price" role="cell">${renderPrice(entry.price, entry.priceUnit)}</div>
             <div class="rulebook-ability-catalog__cell" data-column="description" role="cell">
               <div class="rulebook-ability-catalog__description-cell">
                 <p class="rulebook-ability-catalog__description-preview">${renderValue(entry.previewDescription)}</p>

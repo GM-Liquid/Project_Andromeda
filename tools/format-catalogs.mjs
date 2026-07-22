@@ -4,10 +4,9 @@ import { resolve } from 'node:path';
 const catalogNames = [
   'abilities',
   'archetypes',
-  'armor',
+  'artifacts',
   'catalog-manifest',
   'concept-abilities',
-  'equipment',
   'traits'
 ];
 

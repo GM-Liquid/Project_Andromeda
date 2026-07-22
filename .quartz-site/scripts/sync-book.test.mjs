@@ -45,17 +45,6 @@ function getSectionBody(document, heading) {
   return document.slice(sectionStart, sectionEnd);
 }
 
-function isWeaponCatalogItem(item) {
-  const tags = new Set(item.tags ?? []);
-  return (
-    item.skill === 'strelba' ||
-    item.skill === 'blizhniy_boy' ||
-    tags.has('blizhnee') ||
-    tags.has('strelkovoe') ||
-    tags.has('metatelnoe')
-  );
-}
-
 test(
   'syncBook is idempotent when the fallback source is unchanged',
   { concurrency: false },
@@ -94,16 +83,9 @@ test(
 );
 
 test(
-  'syncBook injects chapter 04 gear catalogs from JSON sources instead of authored markdown tables',
+  'syncBook publishes only the 0.5 chapter 04 catalogs',
   { concurrency: false },
   async () => {
-    const sourceChapter = await readFile(
-      resolve(repoRoot, 'Книга правил v0.4', 'Глава 4. Способности и снаряжение.md'),
-      'utf8'
-    );
-
-    assert.doesNotMatch(sourceChapter, /^\|.*(?:Название|Тип|Краткое описание).*\|$/m);
-
     const { generatedFiles } = await syncBook();
     const chapterPath = generatedFiles.find((filePath) =>
       filePath.endsWith('04-sposobnosti-i-snaryazhenie.md')
@@ -112,352 +94,78 @@ test(
     assert.ok(chapterPath, 'expected the abilities and equipment chapter to be generated');
 
     const generated = await readFile(resolve(chapterPath), 'utf8');
+    const abilitiesCatalog = JSON.parse(
+      await readFile(resolve(repoRoot, 'data', 'gear', 'catalog', 'abilities.json'), 'utf8')
+    );
+    const artifactsCatalog = JSON.parse(
+      await readFile(resolve(repoRoot, 'data', 'gear', 'catalog', 'artifacts.json'), 'utf8')
+    );
+    const traitsCatalog = JSON.parse(
+      await readFile(resolve(repoRoot, 'data', 'gear', 'catalog', 'traits.json'), 'utf8')
+    );
+    const firstVisible = (items) =>
+      items.find((item) => item.status !== 'draft' && item.status !== 'deprecated') ??
+      items.find((item) => item.status !== 'deprecated');
+    const ability = firstVisible(abilitiesCatalog);
+    const artifact = firstVisible(artifactsCatalog);
+    const trait = firstVisible(traitsCatalog);
 
+    assert.ok(ability, 'expected a visible ability');
+    assert.ok(artifact, 'expected a visible artifact');
+    assert.ok(trait, 'expected a visible trait');
+
+    assert.match(generated, /^## Черты$/m);
+    assert.match(generated, /^## Способности$/m);
+    assert.match(generated, /^## Артефакты$/m);
+    assert.doesNotMatch(generated, /^## (?:Оружие|Броня|Снаряжение)$/m);
+    assert.doesNotMatch(generated, /Цена в кредитах/u);
+    assert.doesNotMatch(generated, /КД-2/u);
+
+    assert.match(generated, /^\| Покупка \| Цена в очках развития \|$/m);
     assert.match(
       generated,
-      /^\| Название \| Ранг \| Стойкость \| Контроль \| Воля \| Силовой щит \| Скорость \| Частота использования \| Цена в действиях \| Длительность \| Краткое описание \| Полное описание \| Цена \|$/m
+      /^\| Название \| Ранг \| Урон \| Эффекты \| Краткое описание \| Полное описание \| Частота использования \| Навык \| Цена в действиях \| Дальность \| Цели \| Зона \| Защита \| Длительность \| Цена в очках развития \|$/m
     );
     assert.match(
       generated,
-      /^\| Тип \| Название \| Ранг \| Навык \| Урон \| Эффекты \| Частота использования \| Цена в действиях \| Дальность \| Цели \| Зона \| Защита \| Длительность \| Краткое описание \| Полное описание \| Цена \|$/m
-    );
-    assert.match(
-      generated,
-      /^\| Название \| Ранг \| Урон \| Эффекты \| Краткое описание \| Полное описание \| Частота использования \| Навык \| Цена в действиях \| Дальность \| Цели \| Зона \| Защита \| Длительность \| Цена в кредитах \|$/m
+      /^\| Название \| Ранг \| Урон \| Эффекты \| Краткое описание \| Полное описание \| Частота использования \| Цена в действиях \| Дальность \| Цели \| Зона \| Защита \| Длительность \|$/m
     );
     assert.match(
       generated,
       /^\| Название \| Ранг \| Навык \| Краткое описание \| Полное описание \| Цена в очках развития \|$/m
     );
-    assert.match(generated, /^\|.*КД-2.*\|$/m);
-    assert.match(generated, /^## Оружие$/m);
-    assert.match(generated, /^## Броня$/m);
-    assert.match(generated, /^## Снаряжение$/m);
-    assert.match(generated, /^## Способности$/m);
-    assert.match(generated, /^## Черты$/m);
+
+    assert.match(getSectionBody(generated, 'Способности'), new RegExp(escapeRegExp(ability.name), 'u'));
+    assert.match(getSectionBody(generated, 'Артефакты'), new RegExp(escapeRegExp(artifact.name), 'u'));
+    assert.match(getSectionBody(generated, 'Черты'), new RegExp(escapeRegExp(trait.name), 'u'));
   }
 );
 
 test(
-  'syncBook renders chapter 04 from the mechanics-based catalog schema',
+  'syncBook renders artifact usage from effect-scoped mechanics',
   { concurrency: false },
   async () => {
-    const catalogNames = ['armor', 'equipment', 'abilities', 'traits'];
-    const backups = [];
-    const previousDocsRepoEnv = process.env.PROJECT_ANDROMEDA_DOCS_REPO;
+    const { generatedFiles } = await syncBook();
+    const chapterPath = generatedFiles.find((filePath) =>
+      filePath.endsWith('04-sposobnosti-i-snaryazhenie.md')
+    );
 
-    for (const catalogName of catalogNames) {
-      const path = resolve(repoRoot, 'data', 'gear', 'catalog', `${catalogName}.json`);
-      const backupPath = `${path}.codex-backup`;
-      await rename(path, backupPath);
-      backups.push({ path, backupPath });
-    }
+    assert.ok(chapterPath, 'expected the abilities and equipment chapter to be generated');
 
-    const mechanicsCatalogs = {
-      armor: [
-        {
-          id: 'test-armor',
-          name: 'Тестовая броня',
-          type: 'armor',
-          rank: 2,
-          skill: null,
-          mechanics: {
-            usage: {
-              activation: 'passive',
-              frequency: 'passive'
-            },
-            properties: {
-              fortitudeBonus: 3,
-              controlBonus: 1,
-              shield: 6
-            },
-            effects: [
-              {
-                key: 'grantTempStress',
-                trigger: 'battleStart',
-                amount: 6
-              }
-            ]
-          },
-          description: 'Полное описание тестовой брони.',
-          shortDescription: 'Краткое описание тестовой брони.',
-          price: 410
-        }
-      ],
-      equipment: [
-        {
-          id: 'test-rifle',
-          name: 'Тестовая винтовка',
-          type: 'equipment',
-          rank: 2,
-          skill: 'strelba',
-          mechanics: {
-            usage: {
-              activation: 'active',
-              frequency: 'unlimited',
-              actionCost: 'action',
-              range: {
-                type: 'meters',
-                value: 30
-              },
-              targets: {
-                type: 'single',
-                value: 1
-              }
-            },
-            properties: {
-              damage: 3,
-              armorPiercing: 1
-            },
-            effects: []
-          },
-          stepEffects: [{ text: 'Пробивание брони', minOutcome: 'Success' }],
-          description: 'Полное описание тестовой винтовки.',
-          shortDescription: 'Краткое описание тестовой винтовки.',
-          price: 360
-        }
-      ],
-      abilities: [
-        {
-          id: 'test-ability',
-          name: 'Тестовая способность',
-          type: 'ability',
-          rank: 1,
-          skill: 'mistika',
-          mechanics: {
-            usage: {
-              activation: 'active',
-              frequency: 'oncePerScene',
-              actionCost: 'freeAction',
-              range: {
-                type: 'touch'
-              },
-              targets: {
-                type: 'single',
-                value: 1
-              },
-              defense: 'fortitude'
-            },
-            properties: {},
-            effects: [
-              {
-                key: 'applyStatus',
-                trigger: 'onSuccess',
-                status: 'poisoned',
-                duration: {
-                  type: 'untilEndOfScene'
-                }
-              }
-            ]
-          },
-          description: 'Полное описание тестовой способности.',
-          shortDescription: 'Краткое описание тестовой способности.',
-          price: 120
-        }
-      ],
-      traits: [
-        {
-          id: 'test-trait',
-          name: 'Тестовая черта',
-          type: 'trait',
-          rank: 2,
-          skill: 'nablyudatelnost',
-          description: 'Полное описание тестовой черты.',
-          shortDescription: 'Краткое описание тестовой черты.',
-          price: 4,
-          status: 'approved'
-        }
-      ]
-    };
+    const generated = await readFile(resolve(chapterPath), 'utf8');
+    const artifactRow = generated
+      .split(/\r?\n/u)
+      .find((line) => line.includes('| Контур «Блэкаут» |'));
 
-    try {
-      process.env.PROJECT_ANDROMEDA_DOCS_REPO = resolve(repoRoot, '__missing_docs_repo__');
-
-      for (const [catalogName, items] of Object.entries(mechanicsCatalogs)) {
-        const path = resolve(repoRoot, 'data', 'gear', 'catalog', `${catalogName}.json`);
-        await writeFile(path, `${JSON.stringify(items, null, 2)}\n`, 'utf8');
-      }
-
-      const { generatedFiles } = await syncBook();
-      const chapterPath = generatedFiles.find((filePath) =>
-        filePath.endsWith('04-sposobnosti-i-snaryazhenie.md')
-      );
-
-      assert.ok(chapterPath, 'expected the abilities and equipment chapter to be generated');
-
-      const generated = await readFile(resolve(chapterPath), 'utf8');
-
-      assert.match(generated, /Тестовая броня/u);
-      assert.match(generated, /Тестовая винтовка/u);
-      assert.match(generated, /Тестовая способность/u);
-      assert.match(generated, /Тестовая черта/u);
-      assert.match(generated, /Стрельба/u);
-      assert.match(generated, /Мистика/u);
-      assert.match(generated, /\|.*410.*\|/u);
-      assert.match(generated, /\|.*360.*\|/u);
-      assert.match(generated, /\|.*120.*\|/u);
-      assert.match(generated, /\|.*Тестовая черта.*4.*\|/u);
-      assert.match(generated, /Пробивание брони \(с «Успех»\)/u);
-    } finally {
-      if (previousDocsRepoEnv === undefined) {
-        delete process.env.PROJECT_ANDROMEDA_DOCS_REPO;
-      } else {
-        process.env.PROJECT_ANDROMEDA_DOCS_REPO = previousDocsRepoEnv;
-      }
-
-      for (const { path, backupPath } of backups) {
-        await rm(path, { force: true });
-        await rename(backupPath, path);
-      }
-    }
+    assert.match(
+      artifactRow ?? '',
+      /^\| Контур «Блэкаут» \| 1 \|  \|  \| .* \| .* \|  \| Действие \| 30 м \|  \| Круг, диаметр 15 м \|  \| До конца сцены \|$/u
+    );
   }
 );
 
-test(
-  'syncBook renders chapter 04 usage columns from effect-scoped mechanics',
-  { concurrency: false },
-  async () => {
-    const catalogNames = ['armor', 'equipment', 'abilities'];
-    const backups = [];
-    const previousDocsRepoEnv = process.env.PROJECT_ANDROMEDA_DOCS_REPO;
-
-    for (const catalogName of catalogNames) {
-      const path = resolve(repoRoot, 'data', 'gear', 'catalog', `${catalogName}.json`);
-      const backupPath = `${path}.codex-backup`;
-      await rename(path, backupPath);
-      backups.push({ path, backupPath });
-    }
-
-    const effectScopedCatalogs = {
-      armor: [
-        {
-          id: 'effect-test-armor',
-          name: 'Броня эффектов',
-          type: 'armor',
-          rank: 1,
-          skill: null,
-          mechanics: {
-            effects: [
-              {
-                activation: { type: 'passive' },
-                conditions: { frequency: 'passive' },
-                outcomes: [{ key: 'fortitudeBonus', value: 2 }]
-              }
-            ]
-          },
-          description: 'Полное описание брони эффектов.',
-          shortDescription: 'Краткое описание брони эффектов.',
-          price: 100
-        }
-      ],
-      equipment: [
-        {
-          id: 'effect-test-equipment',
-          name: 'Снаряжение эффектов',
-          type: 'equipment',
-          rank: 1,
-          skill: 'strelba',
-          mechanics: {
-            effects: [
-              {
-                activation: { type: 'action' },
-                conditions: {
-                  frequency: 'unlimited',
-                  range: { type: 'meters', value: 30 },
-                  targets: 'single'
-                },
-                outcomes: [{ key: 'damage', value: 3 }]
-              }
-            ]
-          },
-          description: 'Полное описание снаряжения эффектов.',
-          shortDescription: 'Краткое описание снаряжения эффектов.',
-          price: 200
-        }
-      ],
-      abilities: [
-        {
-          id: 'effect-test-ability',
-          name: 'Способность эффектов',
-          type: 'ability',
-          rank: 2,
-          skill: 'mistika',
-          mechanics: {
-            effects: [
-              {
-                activation: { type: 'action' },
-                conditions: {
-                  frequency: 'oncePerScene',
-                  range: { type: 'meters', value: 30 },
-                  targets: 'allInArea',
-                  area: { type: 'circle', value: 15 },
-                  defense: 'fortitude',
-                  duration: 'untilEndOfScene'
-                },
-                outcomes: [{ key: 'damage', value: 2 }]
-              },
-              {
-                activation: { type: 'action' },
-                conditions: {
-                  frequency: 'oncePerScene',
-                  range: { type: 'meters', value: 30 },
-                  targets: 'allInArea',
-                  area: { type: 'circle', value: 15 },
-                  defense: 'fortitude',
-                  duration: 'untilEndOfScene'
-                },
-                outcomes: [{ key: 'applyStatus', status: 'immobilized' }]
-              }
-            ]
-          },
-          description: 'Полное описание способности эффектов.',
-          shortDescription: 'Краткое описание способности эффектов.',
-          price: 300
-        }
-      ]
-    };
-
-    try {
-      process.env.PROJECT_ANDROMEDA_DOCS_REPO = resolve(repoRoot, '__missing_docs_repo__');
-
-      for (const [catalogName, items] of Object.entries(effectScopedCatalogs)) {
-        const path = resolve(repoRoot, 'data', 'gear', 'catalog', `${catalogName}.json`);
-        await writeFile(path, `${JSON.stringify(items, null, 2)}\n`, 'utf8');
-      }
-
-      const { generatedFiles } = await syncBook();
-      const chapterPath = generatedFiles.find((filePath) =>
-        filePath.endsWith('04-sposobnosti-i-snaryazhenie.md')
-      );
-
-      assert.ok(chapterPath, 'expected the abilities and equipment chapter to be generated');
-
-      const generated = await readFile(resolve(chapterPath), 'utf8');
-      const abilityRow = generated
-        .split(/\r?\n/u)
-        .find((line) => line.includes('| Способность эффектов |'));
-
-      assert.match(
-        abilityRow ?? '',
-        /^\| Способность эффектов \| 2 \| 0\/2\/2\/2 \|  \| Краткое описание способности эффектов\. \| Полное описание способности эффектов\. \| 1\/сцену \| Мистика \| Действие \| 30 м \| Все цели в зоне \| Круг, диаметр 15 м \| Стойкость \| До конца сцены \| 300 \|$/u
-      );
-    } finally {
-      if (previousDocsRepoEnv === undefined) {
-        delete process.env.PROJECT_ANDROMEDA_DOCS_REPO;
-      } else {
-        process.env.PROJECT_ANDROMEDA_DOCS_REPO = previousDocsRepoEnv;
-      }
-
-      for (const { path, backupPath } of backups) {
-        await rm(path, { force: true });
-        await rename(backupPath, path);
-      }
-    }
-  }
-);
-
-test('public gear catalogs do not keep legacy rule text inside mechanics effects', async () => {
-  const catalogNames = ['armor', 'equipment', 'abilities', 'concept-abilities'];
+test('public 0.5 catalogs do not keep legacy rule text inside mechanics effects', async () => {
+  const catalogNames = ['abilities', 'artifacts', 'traits', 'concept-abilities'];
   const offenders = [];
 
   for (const catalogName of catalogNames) {
@@ -476,48 +184,6 @@ test('public gear catalogs do not keep legacy rule text inside mechanics effects
 
   assert.deepEqual(offenders, []);
 });
-
-test(
-  'syncBook keeps chapter 04 equipment and abilities sections populated when catalogs are draft-only',
-  { concurrency: false },
-  async () => {
-    const { generatedFiles } = await syncBook();
-    const chapterPath = generatedFiles.find((filePath) =>
-      filePath.endsWith('04-sposobnosti-i-snaryazhenie.md')
-    );
-
-    assert.ok(chapterPath, 'expected the abilities and equipment chapter to be generated');
-
-    const generated = await readFile(resolve(chapterPath), 'utf8');
-    const equipmentCatalog = JSON.parse(
-      await readFile(resolve(repoRoot, 'data', 'gear', 'catalog', 'equipment.json'), 'utf8')
-    );
-    const abilitiesCatalog = JSON.parse(
-      await readFile(resolve(repoRoot, 'data', 'gear', 'catalog', 'abilities.json'), 'utf8')
-    );
-    const weaponEntry = equipmentCatalog.find(
-      (item) => item.status !== 'deprecated' && isWeaponCatalogItem(item)
-    );
-    const equipmentEntry = equipmentCatalog.find(
-      (item) => item.status !== 'deprecated' && !isWeaponCatalogItem(item)
-    );
-    const abilityEntry = abilitiesCatalog.find((item) => item.status !== 'deprecated');
-
-    assert.ok(weaponEntry, 'expected at least one visible weapon entry');
-    assert.ok(equipmentEntry, 'expected at least one visible equipment entry');
-    assert.ok(abilityEntry, 'expected at least one visible ability entry');
-
-    const weaponSection = getSectionBody(generated, 'Оружие');
-    const equipmentSection = getSectionBody(generated, 'Снаряжение');
-    const abilitiesSection = getSectionBody(generated, 'Способности');
-
-    assert.match(weaponSection, new RegExp(escapeRegExp(weaponEntry.name), 'u'));
-    assert.doesNotMatch(equipmentSection, new RegExp(escapeRegExp(weaponEntry.name), 'u'));
-    assert.match(equipmentSection, new RegExp(escapeRegExp(equipmentEntry.name), 'u'));
-    assert.match(abilitiesSection, new RegExp(escapeRegExp(abilityEntry.name), 'u'));
-  }
-);
-
 test(
   'syncBook leaves concept abilities unpublished even when the shared gear catalog source provides them',
   { concurrency: false },

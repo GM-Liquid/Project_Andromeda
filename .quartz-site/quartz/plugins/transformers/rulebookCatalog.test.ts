@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { buildAbilityCatalogHtml, buildRulebookCatalogHtml } from './rulebookCatalog';
+import {
+  buildAbilityCatalogHtml,
+  buildRulebookCatalogHtml,
+  detectRulebookCatalogKind
+} from './rulebookCatalog';
 
 const abilityHeaders = [
   'Название',
@@ -16,9 +20,24 @@ const abilityHeaders = [
   'Зона',
   'Защита',
   'Длительность',
-  'Цена в кредитах'
+  'Цена в очках развития'
 ];
 
+const artifactHeaders = [
+  'Название',
+  'Ранг',
+  'Урон',
+  'Эффекты',
+  'Краткое описание',
+  'Полное описание',
+  'Частота использования',
+  'Цена в действиях',
+  'Дальность',
+  'Цели',
+  'Зона',
+  'Защита',
+  'Длительность'
+];
 const equipmentHeaders = [
   'Тип',
   'Название',
@@ -78,6 +97,8 @@ function extractSerializedEntries(html: string) {
   assert.ok(dataMatch, 'expected serialized catalog data');
 
   return JSON.parse(decodeURIComponent(dataMatch[1])) as Array<{
+    price: string;
+    priceUnit?: string;
     filters: Record<string, string | string[]>;
   }>;
 }
@@ -114,6 +135,47 @@ test('buildAbilityCatalogHtml renders a defense filter instead of sort controls'
   assert.equal(entry.filters.defense, 'Стойкость');
 });
 
+test('artifact catalogs have a dedicated presentation and filters', () => {
+  assert.equal(
+    detectRulebookCatalogKind(artifactHeaders, { heading: 'Артефакты' }),
+    'artifacts'
+  );
+
+  const html = buildRulebookCatalogHtml('artifacts', artifactHeaders, [
+    [
+      'Контур «Блэкаут»',
+      '1',
+      '2',
+      '',
+      'Гасит свет в выбранной зоне.',
+      'До конца сцены цели в зоне считаются скрытыми.',
+      '1/сцену',
+      'Основное',
+      '30 м',
+      'Все цели в зоне',
+      'Круг 15 м',
+      'Контроль',
+      'До конца сцены'
+    ]
+  ]);
+  const [entry] = extractSerializedEntries(html);
+
+  assert.match(html, /data-catalog-kind="artifacts"/u);
+  assert.match(html, /Получение/u);
+  assert.match(html, /Сюжетная награда/u);
+  assert.doesNotMatch(html, /Сюжетная награда кр/u);
+  assert.match(html, /Частота использования/u);
+  assert.match(html, /Цена в действиях/u);
+  assert.match(html, /Против Защиты/u);
+  assert.match(html, />Урон</u);
+  assert.equal(entry.price, 'Сюжетная награда');
+  assert.equal(entry.priceUnit, '');
+  assert.equal(entry.filters.rank, '1');
+  assert.equal(entry.filters.frequency, '1/сцену');
+  assert.equal(entry.filters.actions, 'Основное');
+  assert.equal(entry.filters.defense, 'Контроль');
+  assert.equal(entry.filters.damage, '2');
+});
 test('buildAbilityCatalogHtml keeps an empty preview when the split description columns are present', () => {
   const html = buildAbilityCatalogHtml(abilityHeaders, [
     [

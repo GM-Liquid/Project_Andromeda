@@ -16,9 +16,24 @@ const modernHeaders = [
   "\u0427\u0430\u0441\u0442\u043e\u0442\u0430 \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u043d\u0438\u044f",
   "\u041d\u0430\u0432\u044b\u043a",
   "\u0426\u0435\u043d\u0430 \u0432 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044f\u0445",
-  "\u0426\u0435\u043d\u0430 \u0432 \u043a\u0440\u0435\u0434\u0438\u0442\u0430\u0445",
+  "Цена в очках развития",
 ]
 
+const artifactHeaders = [
+  "Название",
+  "Ранг",
+  "Урон",
+  "Эффекты",
+  "Краткое описание",
+  "Полное описание",
+  "Частота использования",
+  "Цена в действиях",
+  "Дальность",
+  "Цели",
+  "Зона",
+  "Защита",
+  "Длительность",
+]
 const singleDescriptionHeaders = [
   "\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435",
   "\u0420\u0430\u043d\u0433",
@@ -26,7 +41,7 @@ const singleDescriptionHeaders = [
   "\u0427\u0430\u0441\u0442\u043e\u0442\u0430 \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u043d\u0438\u044f",
   "\u041d\u0430\u0432\u044b\u043a",
   "\u0426\u0435\u043d\u0430 \u0432 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044f\u0445",
-  "\u0426\u0435\u043d\u0430 \u0432 \u043a\u0440\u0435\u0434\u0438\u0442\u0430\u0445",
+  "Цена в очках развития",
 ]
 
 const legacyHeaders = [
@@ -96,6 +111,10 @@ test("detectRulebookCatalogKind resolves the table family from headers and surro
     "abilities",
   )
   assert.equal(
+    detectRulebookCatalogKind(artifactHeaders, { heading: "Артефакты" }),
+    "artifacts",
+  )
+  assert.equal(
     detectRulebookCatalogKind(weaponHeaders, { heading: "Оружие", label: "Таблица оружия" }),
     "weapons",
   )
@@ -158,7 +177,7 @@ test("buildAbilityCatalogHtml renders the compact toolbar, new frequency label, 
   assert.ok(html.includes("\u0427\u0430\u0441\u0442\u043e\u0442\u0430 \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u043d\u0438\u044f"))
   assert.ok(html.includes("\u041d\u0430\u0432\u044b\u043a"))
   assert.ok(html.includes("\u0426\u0435\u043d\u0430 \u0432 \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u044f\u0445"))
-  assert.ok(html.includes("\u0426\u0435\u043d\u0430 \u0432 \u043a\u0440\u0435\u0434\u0438\u0442\u0430\u0445"))
+  assert.ok(html.includes("Цена в очках развития"))
   assert.ok(html.includes("\u0413\u0440\u0430\u0432\u0438\u0442\u0430\u0446\u0438\u043e\u043d\u043d\u044b\u0439 \u043a\u043e\u043b\u043b\u0430\u043f\u0441"))
   assert.ok(html.includes("\u0418\u0441\u043a\u0440\u0430-30"))
   assert.ok(html.includes("data-catalog-count"))
@@ -187,7 +206,7 @@ test("buildAbilityCatalogHtml renders the compact toolbar, new frequency label, 
   assert.ok(firstSummaryRow.includes("rulebook-ability-catalog__meta-chips"))
   assert.ok(firstSummaryRow.includes("\u003e1/\u0441\u0446\u0435\u043d\u0443\u003c"))
   assert.ok(firstSummaryRow.includes("\u003e\u041a\u0438\u043d\u0435\u0442\u0438\u043a\u0430\u003c"))
-  assert.ok(firstSummaryRow.includes("\u003e400 \u043a\u0440\u003c"))
+  assert.ok(firstSummaryRow.includes(">400 ОР<"))
   assert.ok(firstSummaryRow.includes(preview))
   assert.ok(!firstSummaryRow.includes(full))
   assert.ok(firstSummaryRow.includes("rulebook-ability-catalog__toggle-indicator"))

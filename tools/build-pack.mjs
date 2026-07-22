@@ -1,7 +1,7 @@
 /**
  * Compile the shipped gear catalog JSON into the `gear-library` compendium pack.
  *
- * Source of truth stays in `data/gear/catalog/{armor,equipment,abilities,traits,archetypes}.json`
+ * Source of truth stays in `data/gear/catalog/{abilities,archetypes,artifacts,traits}.json`
  * (mirrored from the private docs repo). This reuses the same JSON -> Item-system
  * transform the runtime uses (`buildGearCatalogRemoteDataFromCatalogs`) so the pack
  * never drifts from the catalog. The pack itself is a build artifact: it is rebuilt
@@ -24,13 +24,24 @@ import { MODULE_ID } from '../module/config.mjs';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CATALOG_DIR = path.join(ROOT, 'data', 'gear', 'catalog');
 const PACK_PATH = path.join(ROOT, 'packs', 'gear-library');
-const CATALOG_FILES = {
-  armor: 'armor.json',
-  equipment: 'equipment.json',
+export const CATALOG_FILES = {
   abilities: 'abilities.json',
-  traits: 'traits.json',
-  archetypes: 'archetypes.json'
+  archetypes: 'archetypes.json',
+  artifacts: 'artifacts.json',
+  traits: 'traits.json'
 };
+
+// These entries moved from abilities.json to artifacts.json in 0.5. Keep their
+// existing sync-id namespace so actor links and deterministic compendium ids remain stable.
+const LEGACY_ABILITY_ARTIFACT_IDS = new Set([
+  'blackout',
+  'rychag',
+  'ekstrennyy-teleport',
+  'zashchita',
+  'vrata',
+  'spasitel',
+  'tsss'
+]);
 
 // Foundry document ids are 16-char [A-Za-z0-9]. Derive them deterministically from
 // the stable catalog sync id so that rebuilding the pack keeps the same ids — and
@@ -47,6 +58,26 @@ async function readJson(file) {
   return JSON.parse(await readFile(file, 'utf8'));
 }
 
+export function buildPackRemoteDataFromCatalogs(catalogs = {}) {
+  const artifacts = Array.isArray(catalogs.artifacts) ? catalogs.artifacts : [];
+  const abilityArtifacts = artifacts.filter((entry) =>
+    LEGACY_ABILITY_ARTIFACT_IDS.has(String(entry?.id ?? ''))
+  );
+  const equipmentArtifacts = artifacts.filter(
+    (entry) => !LEGACY_ABILITY_ARTIFACT_IDS.has(String(entry?.id ?? ''))
+  );
+
+  return buildGearCatalogRemoteDataFromCatalogs({
+    abilities: [
+      ...(Array.isArray(catalogs.abilities) ? catalogs.abilities : []),
+      ...abilityArtifacts
+    ],
+    archetypes: catalogs.archetypes,
+    equipment: equipmentArtifacts,
+    traits: catalogs.traits
+  });
+}
+
 async function main() {
   const systemJson = await readJson(path.join(ROOT, 'system.json'));
   const systemVersion = String(systemJson.version ?? '');
@@ -56,7 +87,7 @@ async function main() {
     catalogs[key] = await readJson(path.join(CATALOG_DIR, filename));
   }
 
-  const remote = buildGearCatalogRemoteDataFromCatalogs(catalogs);
+  const remote = buildPackRemoteDataFromCatalogs(catalogs);
 
   // Build the folder tree (e.g. "Броня/Ранг 1") from each row's folderPath.
   const folderDocs = new Map();
@@ -140,7 +171,9 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error('Pack build failed:', error);
-  process.exit(1);
-});
+if (path.resolve(process.argv[1] ?? '') === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error('Pack build failed:', error);
+    process.exit(1);
+  });
+}

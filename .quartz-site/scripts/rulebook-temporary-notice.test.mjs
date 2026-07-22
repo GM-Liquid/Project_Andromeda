@@ -5,7 +5,7 @@ import test from 'node:test';
 
 import { buildQuartzForTest } from './test-build-helper.mjs';
 
-test('equipment chapter renders the generated catalog content when the temporary notice is disabled', async () => {
+test('chapter 04 renders the generated 0.5 catalogs when the temporary notice is disabled', async () => {
   const cwd = fileURLToPath(new URL('..', import.meta.url));
   await buildQuartzForTest(cwd);
 
@@ -16,4 +16,6 @@ test('equipment chapter renders the generated catalog content when the temporary
 
   assert.doesNotMatch(html, /data-temporary-notice="true"/u);
   assert.match(html, /rulebook-ability-catalog__summary-row/u);
+  assert.match(html, /data-catalog-kind="artifacts"/u);
+  assert.match(html, /Контур «Блэкаут»/u);
 });

@@ -30,13 +30,13 @@ test("prepareGearCatalogSource mirrors the sibling docs repo catalog into the pu
   const { workspaceRoot, publicRepoRoot, docsRepoRoot } = await createTempRepos()
 
   try {
-    const publicFile = resolve(publicRepoRoot, GEAR_CATALOG_DIRNAME, "armor.json")
-    const docsFile = resolve(docsRepoRoot, GEAR_CATALOG_DIRNAME, "armor.json")
+    const publicFile = resolve(publicRepoRoot, GEAR_CATALOG_DIRNAME, "artifacts.json")
+    const docsFile = resolve(docsRepoRoot, GEAR_CATALOG_DIRNAME, "artifacts.json")
 
-    await writeFile(publicFile, '{"items":[],"_meta":{"category":"armor"}}', "utf8")
+    await writeFile(publicFile, '{"items":[],"_meta":{"category":"artifacts"}}', "utf8")
     await writeFile(
       docsFile,
-      '{"items":[{"id":"kd-2","name":"КД-2"}],"_meta":{"category":"armor"}}',
+      '{"items":[{"id":"blackout","name":"Контур Блэкаут"}],"_meta":{"category":"artifacts"}}',
       "utf8",
     )
 
@@ -49,7 +49,7 @@ test("prepareGearCatalogSource mirrors the sibling docs repo catalog into the pu
     assert.equal(result.canonicalSourceDir, resolve(docsRepoRoot, GEAR_CATALOG_DIRNAME))
     assert.equal(
       await readFile(publicFile, "utf8"),
-      '{"items":[{"id":"kd-2","name":"КД-2"}],"_meta":{"category":"armor"}}',
+      '{"items":[{"id":"blackout","name":"Контур Блэкаут"}],"_meta":{"category":"artifacts"}}',
     )
   } finally {
     await rm(workspaceRoot, { recursive: true, force: true })
@@ -64,8 +64,8 @@ test("prepareGearCatalogSource preserves a public catalog linked to the docs rep
     const docsCatalogDir = resolve(docsRepoRoot, GEAR_CATALOG_DIRNAME)
 
     await writeFile(
-      resolve(docsCatalogDir, "armor.json"),
-      '{"items":[{"id":"linked"}],"_meta":{"category":"armor"}}',
+      resolve(docsCatalogDir, "artifacts.json"),
+      '{"items":[{"id":"linked"}],"_meta":{"category":"artifacts"}}',
       "utf8",
     )
     await linkDirectory(docsCatalogDir, publicCatalogDir)
@@ -77,8 +77,8 @@ test("prepareGearCatalogSource preserves a public catalog linked to the docs rep
 
     assert.equal(result.externalAvailable, true)
     assert.equal(
-      await readFile(resolve(publicCatalogDir, "armor.json"), "utf8"),
-      '{"items":[{"id":"linked"}],"_meta":{"category":"armor"}}',
+      await readFile(resolve(publicCatalogDir, "artifacts.json"), "utf8"),
+      '{"items":[{"id":"linked"}],"_meta":{"category":"artifacts"}}',
     )
     assert.equal(
       (await realpath(publicCatalogDir)).toLowerCase(),
@@ -96,8 +96,8 @@ test("prepareGearCatalogSource falls back to the public catalog mirror when the 
 
   await mkdir(publicCatalogDir, { recursive: true })
 
-  const publicFile = resolve(publicCatalogDir, "armor.json")
-  await writeFile(publicFile, '{"items":[{"id":"ozk"}],"_meta":{"category":"armor"}}', "utf8")
+  const publicFile = resolve(publicCatalogDir, "artifacts.json")
+  await writeFile(publicFile, '{"items":[{"id":"blackout"}],"_meta":{"category":"artifacts"}}', "utf8")
 
   try {
     const result = await prepareGearCatalogSource({
@@ -109,7 +109,7 @@ test("prepareGearCatalogSource falls back to the public catalog mirror when the 
     assert.equal(result.canonicalSourceDir, publicCatalogDir)
     assert.equal(
       await readFile(publicFile, "utf8"),
-      '{"items":[{"id":"ozk"}],"_meta":{"category":"armor"}}',
+      '{"items":[{"id":"blackout"}],"_meta":{"category":"artifacts"}}',
     )
   } finally {
     await rm(workspaceRoot, { recursive: true, force: true })
