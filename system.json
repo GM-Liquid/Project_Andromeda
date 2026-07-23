@@ -16,7 +16,7 @@
       "thumbnail": "systems/project-andromeda/assets/Art_core_1.webp"
     }
   ],
-  "version": "0.4.04.4",
+  "version": "0.5.00.7",
   "compatibility": {
     "minimum": "12",
     "verified": "13"
@@ -68,7 +68,7 @@
     "max": "system.stress.max"
   },
   "secondaryTokenAttribute": {
-    "attribute": "system.flux.value"
+    "attribute": "system.heat.value"
   },
   "license": "CC BY-NC-SA 4.0",
   "bugs": "https://github.com/GM-Liquid/Project_Andromeda/issues",

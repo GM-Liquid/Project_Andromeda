@@ -209,7 +209,9 @@ function buildRenderableItemFields(data, itemFields = []) {
         hasMin: field.min !== undefined && field.min !== null,
         inputType: field.type === 'number' ? 'number' : 'text',
         isRank: field.type === 'rank',
+        isTextarea: field.type === 'textarea',
         isCheckbox: field.type === 'checkbox',
+        readonly: Boolean(field.readonly),
         hasOptions,
         options
       };

@@ -28,7 +28,11 @@ test('item group rows render a collapsible table summary with detail sections', 
   assert.match(template, /item-row__detail-grid/);
   assert.match(template, /item-row__detail-effect/);
   assert.match(template, /item-row__toggle/);
+  assert.match(template, /item-group--card-table/);
+  assert.match(template, /item-row__card-tags/);
+  assert.match(template, /item-row__detail-effect--card-table/);
   assert.match(actorSheet, /_onItemRowToggle/);
+  assert.match(actorSheet, /_getItemCardTags/);
   assert.match(actorSheet, /_getItemRollSummary/);
   assert.match(actorSheet, /_onItemActivate/);
   assert.match(actorSheet, /_onItemChat/);
@@ -50,10 +54,7 @@ test('item group rows render a collapsible table summary with detail sections', 
     stylesheet,
     /\.project-andromeda \.item-group__create \{[\s\S]*min-width:\s*var\(--andromeda-item-actions-width\);/
   );
-  assert.match(
-    stylesheet,
-    /\.project-andromeda \.item-row__toggle \{[\s\S]*display:\s*none;/
-  );
+  assert.match(stylesheet, /\.project-andromeda \.item-row__toggle \{[\s\S]*display:\s*none;/);
   assert.match(
     stylesheet,
     /\.project-andromeda \.item-row--expanded \.item-row__toggle \{[\s\S]*display:\s*inline-flex;/
@@ -61,6 +62,43 @@ test('item group rows render a collapsible table summary with detail sections', 
   assert.equal(english.MY_RPG.ItemTableColumns.Name, 'Name');
   assert.equal(english.MY_RPG.ItemTableColumns.Check, 'Check');
   assert.equal(english.MY_RPG.ItemTableColumns.Activation, 'Activation');
+  assert.equal(english.MY_RPG.ItemCards.NoRoll, 'No roll');
+  assert.equal(english.MY_RPG.ItemCards.HeatTag, 'Heat {cost}');
+});
+
+test('all item groups use a compact image-led card table with contextual tags', () => {
+  const stylesheet = readFile('css/project-andromeda.css');
+  const actorSheet = readFile('module/sheets/actor-sheet.mjs');
+  const cardTagMethodStart = actorSheet.indexOf('\n  _getItemCardTags(');
+  const cardTagMethod = actorSheet.slice(
+    cardTagMethodStart,
+    actorSheet.indexOf('\n  _hasItemActivationControl(', cardTagMethodStart)
+  );
+
+  assert.match(
+    stylesheet,
+    /\.project-andromeda \.item-group--card-table \.item-row__summary-grid \{[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s+minmax\(var\(--andromeda-item-actions-width\),\s*auto\);/
+  );
+  assert.match(
+    stylesheet,
+    /\.project-andromeda \.item-group--card-table \.item-row__name img \{[\s\S]*width:\s*40px;[\s\S]*height:\s*40px;/
+  );
+  assert.match(
+    stylesheet,
+    /\.item-group--card-table \{[\s\S]*border:\s*2px solid var\(--andromeda-color-text/
+  );
+  assert.match(stylesheet, /\.item-row__card-tag--heat/);
+  assert.match(stylesheet, /\.item-row__card-check-rank/);
+  assert.match(
+    stylesheet,
+    /\.item-group--card-table \.item-group__create--inline \{[\s\S]*display:\s*inline-flex;[\s\S]*justify-content:\s*center;[\s\S]*flex:\s*0 0 1\.2rem;[\s\S]*padding:\s*0;/
+  );
+  assert.match(actorSheet, /isCardTable:\s*true/);
+  assert.match(actorSheet, /const isCardTableItem = true/);
+  assert.match(cardTagMethod, /skillLabel:\s*check\?\.skillLabel/);
+  assert.match(cardTagMethod, /rankRoman:\s*check\?\.rankRoman/);
+  assert.match(cardTagMethod, /bonusLabel:\s*this\._formatSkillBonus/);
+  assert.doesNotMatch(cardTagMethod, /SKILL_CHECK_FORMULA/);
 });
 
 test('item tables use a tighter layout with no rail divider and no left gutter', () => {
@@ -100,4 +138,15 @@ test('item tables use a tighter layout with no rail divider and no left gutter',
   );
   assert.doesNotMatch(stylesheet, /\.project-andromeda \.item-control:focus,/);
   assert.match(stylesheet, /\.project-andromeda \.item-control:focus-visible,/);
+});
+
+test('generic item editor supports rank selects and long nested archetype fields', () => {
+  const template = readFile('templates/item/generic-sheet.hbs');
+
+  assert.match(template, /name="system\.rank"/);
+  assert.match(template, /\{\{#if field\.isTextarea\}\}/);
+  assert.match(template, /item-field--textarea/);
+  assert.match(template, /name="system\.\{\{field\.path\}\}"/);
+  assert.match(template, /\{\{#if field\.readonly\}\}readonly tabindex="-1"/);
+  assert.match(template, /data-description-editor/);
 });

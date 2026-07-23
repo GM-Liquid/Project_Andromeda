@@ -21,7 +21,7 @@
       {{#if itemFields.length}}
         <div class="item-meta-grid">
           {{#each itemFields as |field|}}
-            <div class="item-field{{#if field.isCheckbox}} item-field--checkbox{{/if}}">
+            <div class="item-field{{#if field.isCheckbox}} item-field--checkbox{{/if}}{{#if field.isTextarea}} item-field--textarea{{/if}}">
               {{#if field.isCheckbox}}
                 <label class="checkbox-label">
                   <input
@@ -35,7 +35,16 @@
                 </label>
               {{else}}
                 <label>{{localize field.labelKey}}</label>
-                {{#if field.isRank}}
+                {{#if field.isTextarea}}
+                  <textarea
+                    name="system.{{field.path}}"
+                    class="item-field-textarea"
+                    data-description-editor
+                    spellcheck="false"
+                    rows="3"
+                    {{#unless ../editable}}disabled{{/unless}}
+                  >{{field.value}}</textarea>
+                {{else if field.isRank}}
                   <select name="system.rank" {{#unless ../editable}}disabled{{/unless}}>
                     {{#each ../rankOptions}}
                       <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>
@@ -58,6 +67,7 @@
                       name="system.{{field.path}}"
                       value="{{field.value}}"
                       {{#if field.hasMin}}min="{{field.min}}"{{/if}}
+                      {{#if field.readonly}}readonly tabindex="-1"{{/if}}
                       {{#unless ../editable}}disabled{{/unless}}
                     />
                   {{/if}}

@@ -1,5 +1,5 @@
 <section
-  class='item-group {{#if group.isSimple}}item-group--simple{{/if}}'
+  class='item-group {{#if group.isSimple}}item-group--simple{{/if}} {{#if group.isCardTable}}item-group--card-table{{/if}}'
   data-item-group='{{group.key}}'
 >
   <div class='item-group__columns'>
@@ -9,11 +9,26 @@
       {{#if group.capacity}}
         <span class='item-group__capacity'>{{group.capacity.value}} / {{group.capacity.max}}</span>
       {{/if}}
+      {{#if group.isCardTable}}
+        <button
+          type='button'
+          class='item-create item-group__create item-group__create--inline'
+          data-type='{{group.type}}'
+          data-group-key='{{group.key}}'
+          title='{{group.createLabel}}'
+        >
+          <i class='fa-solid fa-plus'></i>
+          <span class='sr-only'>{{group.createLabel}}</span>
+        </button>
+      {{/if}}
     </span>
     {{#unless group.isSimple}}
+      {{#unless group.isCardTable}}
       <span>{{localize 'MY_RPG.ItemTableColumns.Check'}}</span>
       <span>{{localize 'MY_RPG.ItemTableColumns.Activation'}}</span>
+      {{/unless}}
     {{/unless}}
+    {{#unless group.isCardTable}}
     <span class='item-group__column-actions'>
       <button
         type='button'
@@ -26,6 +41,7 @@
         <span class='sr-only'>{{group.createLabel}}</span>
       </button>
     </span>
+    {{/unless}}
   </div>
   {{#if group.items.length}}
     <ol class='item-list'>
@@ -44,10 +60,39 @@
           >
             <div class='item-row__name'>
               <img src='{{item.img}}' alt='' />
-              <span class='item-row__label'>{{item.name}}</span>
-              <span class='item-row__toggle' aria-hidden='true'>
-                <i class='fa-solid fa-chevron-down item-row__toggle-icon'></i>
-              </span>
+              <div class='item-row__identity'>
+                <div class='item-row__title-line'>
+                  <span class='item-row__label'>{{item.name}}</span>
+                  <span class='item-row__toggle' aria-hidden='true'>
+                    <i class='fa-solid fa-chevron-down item-row__toggle-icon'></i>
+                  </span>
+                </div>
+                {{#if item.hasCardTags}}
+                  <ul class='item-row__card-tags' aria-label='{{item.cardTagsLabel}}'>
+                    {{#each item.cardTags as |tag|}}
+                      <li class='item-row__card-tag {{tag.className}}' title='{{tag.title}}'>
+                        {{#if tag.isCheck}}
+                          {{#if tag.hasSkill}}
+                            <span class='item-row__card-check-skill'>{{tag.skillLabel}}</span>
+                            {{#if tag.hasCheck}}
+                              <span
+                                class='item-row__card-check-rank {{tag.rankClass}}'
+                              >{{tag.rankRoman}}</span>
+                              <strong class='item-row__card-check-bonus'>{{tag.bonusLabel}}</strong>
+                            {{else}}
+                              <span class='item-row__card-check-empty'>{{tag.emptyLabel}}</span>
+                            {{/if}}
+                          {{else}}
+                            <span class='item-row__card-check-empty'>{{tag.emptyLabel}}</span>
+                          {{/if}}
+                        {{else}}
+                          {{tag.label}}
+                        {{/if}}
+                      </li>
+                    {{/each}}
+                  </ul>
+                {{/if}}
+              </div>
             </div>
             {{#unless ../group.isSimple}}
               <div class='item-row__check'>
@@ -152,6 +197,27 @@
           </div>
           {{#if item.hasDetails}}
             <div class='item-row__detail' {{#unless item.isExpanded}}hidden{{/unless}}>
+              {{#if item.isCardTableItem}}
+                {{#if item.detailEffect}}
+                  <div class='item-row__detail-effect item-row__detail-effect--card-table'>
+                    {{{item.detailEffect}}}
+                  </div>
+                {{/if}}
+                {{#if item.detailRows.length}}
+                  <div class='item-row__detail-grid item-row__detail-grid--card-table'>
+                    {{#each item.detailRows as |row|}}
+                      <div class='item-row__detail-line'>
+                        {{#each row as |entry|}}
+                          <span class='item-row__detail-entry'>
+                            <strong>{{entry.label}}</strong>
+                            {{entry.value}}
+                          </span>
+                        {{/each}}
+                      </div>
+                    {{/each}}
+                  </div>
+                {{/if}}
+              {{else}}
               {{#if item.detailRows.length}}
                 <div class='item-row__detail-grid'>
                   {{#each item.detailRows as |row|}}
@@ -170,6 +236,7 @@
                 <div class='item-row__detail-effect'>
                   {{{item.detailEffect}}}
                 </div>
+              {{/if}}
               {{/if}}
             </div>
           {{/if}}

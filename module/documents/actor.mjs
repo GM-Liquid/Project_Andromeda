@@ -11,7 +11,8 @@ import { ARCHETYPE_RANK_BONUS, normalizeSkill } from '../helpers/skill-check.mjs
 import {
   computeArchetypeDefenses,
   getArchetypeDefenseProfile,
-  getArchetypeSkillKey
+  getArchetypeSkillKey,
+  getArchetypeStressBonus
 } from '../helpers/archetype.mjs';
 
 /**
@@ -61,7 +62,7 @@ export class ProjectAndromedaActor extends Actor {
 
     const stress = s.stress ?? (s.stress = {});
     const forceShield = s.forceShield ?? (s.forceShield = {});
-    stress.max = this._calcStressMax(s, itemTotals);
+    stress.max = this._calcStressMax(s);
     forceShield.max = 0;
     const clamp = Math.clamp
       ? (value, min, max) => Math.clamp(value, min, max)
@@ -88,12 +89,12 @@ export class ProjectAndromedaActor extends Actor {
   }
 
   /* ------------------------ Формулы ------------------------------ */
-  _calcStressMax(s, itemTotals = {}) {
+  _calcStressMax(s) {
     const actorType = normalizeActorType(this.type);
     const rank = Math.max(Number(s.currentRank) || 0, 0);
     const tempStress = Number(s?.temphealth) || 0;
-    const shield = Math.max(Number(itemTotals?.armor?.shield) || 0, 0);
-    return Math.max(0, getBaseStressByRank(actorType, rank) + tempStress + shield);
+    const archetypeStress = getArchetypeStressBonus(this);
+    return Math.max(0, getBaseStressByRank(actorType, rank) + archetypeStress + tempStress);
   }
 
   // Base defenses come from the archetype profile (rank-scaled, locked) for player
@@ -136,18 +137,6 @@ export class ProjectAndromedaActor extends Actor {
         speed: 0
       }
     };
-
-    const armorItems = this.itemTypes?.armor ?? [];
-    for (const armor of armorItems) {
-      const system = armor.system ?? {};
-      if (!system.equipped) continue;
-      const quantity = Math.max(Number(system.quantity) || 1, 0);
-      totals.armor.fortitude += (Number(system.itemFortitude) || 0) * quantity;
-      totals.armor.control += (Number(system.itemControl) || 0) * quantity;
-      totals.armor.will += (Number(system.itemWill) || 0) * quantity;
-      totals.armor.shield += (Number(system.itemShield) || 0) * quantity;
-      totals.armor.speed += (Number(system.itemSpeed) || 0) * quantity;
-    }
 
     return totals;
   }

@@ -31,18 +31,6 @@ export const CATALOG_FILES = {
   traits: 'traits.json'
 };
 
-// These entries moved from abilities.json to artifacts.json in 0.5. Keep their
-// existing sync-id namespace so actor links and deterministic compendium ids remain stable.
-const LEGACY_ABILITY_ARTIFACT_IDS = new Set([
-  'blackout',
-  'rychag',
-  'ekstrennyy-teleport',
-  'zashchita',
-  'vrata',
-  'spasitel',
-  'tsss'
-]);
-
 // Foundry document ids are 16-char [A-Za-z0-9]. Derive them deterministically from
 // the stable catalog sync id so that rebuilding the pack keeps the same ids — and
 // therefore the same compendium UUIDs that actor items link to.
@@ -59,21 +47,10 @@ async function readJson(file) {
 }
 
 export function buildPackRemoteDataFromCatalogs(catalogs = {}) {
-  const artifacts = Array.isArray(catalogs.artifacts) ? catalogs.artifacts : [];
-  const abilityArtifacts = artifacts.filter((entry) =>
-    LEGACY_ABILITY_ARTIFACT_IDS.has(String(entry?.id ?? ''))
-  );
-  const equipmentArtifacts = artifacts.filter(
-    (entry) => !LEGACY_ABILITY_ARTIFACT_IDS.has(String(entry?.id ?? ''))
-  );
-
   return buildGearCatalogRemoteDataFromCatalogs({
-    abilities: [
-      ...(Array.isArray(catalogs.abilities) ? catalogs.abilities : []),
-      ...abilityArtifacts
-    ],
+    abilities: catalogs.abilities,
     archetypes: catalogs.archetypes,
-    equipment: equipmentArtifacts,
+    artifacts: catalogs.artifacts,
     traits: catalogs.traits
   });
 }

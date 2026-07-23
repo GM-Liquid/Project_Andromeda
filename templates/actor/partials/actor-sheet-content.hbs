@@ -67,13 +67,15 @@
                 />
               </label>
 
-              <label class='andromeda-status-card andromeda-status-card--archetype'>
-                <span>{{localize 'MY_RPG.Personality.Archetype'}}</span>
+              <label class='andromeda-status-card andromeda-status-card--heat'>
+                <span>{{localize 'MY_RPG.Heat.Label'}}</span>
                 <input
-                  type='text'
-                  class='andromeda-archetype-input'
-                  name='system.biography.archetype'
-                  value='{{system.biography.archetype}}'
+                  type='number'
+                  name='system.heat.value'
+                  value='{{system.heat.value}}'
+                  step='1'
+                  min='0'
+                  inputmode='numeric'
                 />
               </label>
             {{/if}}
@@ -427,6 +429,22 @@
                     aria-readonly='true'
                     tabindex='0'
                   >{{localize 'MY_RPG.CombatCheatSheet.HeroismText'}}</div>
+                </div>
+              </section>
+
+              <section class='andromeda-titled-card combat-cheat-sheet-box'>
+                <header class='andromeda-titled-card__header'>
+                  <span class='andromeda-titled-card__title'>
+                    {{localize 'MY_RPG.CombatCheatSheet.HeatTitle'}}
+                  </span>
+                </header>
+                <div class='andromeda-titled-card__body'>
+                  <div
+                    class='andromeda-titled-card__input combat-cheat-sheet__input'
+                    role='textbox'
+                    aria-readonly='true'
+                    tabindex='0'
+                  >{{localize 'MY_RPG.CombatCheatSheet.HeatText'}}</div>
                 </div>
               </section>
             </div>

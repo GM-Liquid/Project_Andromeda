@@ -88,11 +88,12 @@ test('rank control uses a visible tile label instead of a hover tooltip', () => 
 });
 
 test('HUD stat grid keeps stress and progression columns compact', () => {
+  const template = readFile('templates/actor/partials/actor-sheet-content.hbs');
   const stylesheet = readFile('css/project-andromeda.css');
 
   assert.match(
     stylesheet,
-    /\.project-andromeda \.andromeda-hud--player \.andromeda-hud__stats-row \{[\s\S]*grid-template-areas:\s*'stress glory'\s*'speed archetype';[\s\S]*grid-template-columns:\s*4\.75rem 8rem;/
+    /\.project-andromeda \.andromeda-hud--player \.andromeda-hud__stats-row \{[\s\S]*grid-template-areas:\s*'stress glory'\s*'speed heat';[\s\S]*grid-template-columns:\s*4\.75rem 8rem;/
   );
   assert.match(
     stylesheet,
@@ -114,6 +115,17 @@ test('HUD stat grid keeps stress and progression columns compact', () => {
     stylesheet,
     /\.project-andromeda \.andromeda-hud--player \.andromeda-status-card--aside \{[\s\S]*grid-area:\s*glory;[\s\S]*justify-self:\s*start;[\s\S]*width:\s*8rem;/
   );
+  assert.match(
+    stylesheet,
+    /\.project-andromeda \.andromeda-hud--player \.andromeda-status-card--heat \{[\s\S]*grid-area:\s*heat;[\s\S]*width:\s*8rem;/
+  );
+  assert.match(
+    stylesheet,
+    /\.project-andromeda \.andromeda-hud \.andromeda-status-card--heat input \{[\s\S]*height:\s*20px;[\s\S]*min-height:\s*20px;/
+  );
+  assert.match(template, /andromeda-status-card--heat[\s\S]*name='system\.heat\.value'/);
+  assert.doesNotMatch(template, /name='system\.biography\.archetype'/);
+  assert.equal(template.match(/name='system\.heat\.value'/g)?.length, 1);
   assert.match(
     stylesheet,
     /\.project-andromeda \.andromeda-hud__rank-column \.andromeda-status-card--rank-progress \{[\s\S]*width:\s*100%;/

@@ -32,6 +32,8 @@ import {
   PROJECT_ANDROMEDA,
   WEAPON_TYPE_MIGRATION_SETTING,
   WEAPON_TYPE_MIGRATION_VERSION,
+  V05_MIGRATION_SETTING,
+  V05_MIGRATION_VERSION,
   debugLog,
   registerSystemSettings
 } from './config.mjs';
@@ -52,8 +54,11 @@ import {
 } from './helpers/actor-types.mjs';
 import {
   ARCHETYPE_ITEM_TYPE,
+  ARCHETYPE_RANK_SYNC_OPTION,
   ARCHETYPE_SWAP_OPTION,
-  clearArchetypeEffects
+  clearArchetypeEffects,
+  syncArchetypeAbilityToRank,
+  syncArchetypeTraitGrant
 } from './helpers/archetype.mjs';
 import { SessionStatsService } from './helpers/session-stats.mjs';
 import { buildSkillCheckRollFlavorFromData } from './helpers/roll-card.mjs';
@@ -84,6 +89,7 @@ import {
 } from './helpers/item-library-sync.mjs';
 import { getSceneActorTokens, getTokenIsolationPlan } from './helpers/token-isolation.mjs';
 import { runStartupTasks } from './helpers/startup-tasks.mjs';
+import { migrateWorldV04ToV05 } from './helpers/v05-migration.mjs';
 
 const ITEM_SUPERTYPE_ORDER = ['equipment', 'environment', 'traits', 'other'];
 const ITEM_LIBRARY_SYNC_OPTION_KEY = getLibrarySyncOptionKey();
@@ -1443,6 +1449,18 @@ async function runCompendiumPackRefreshIfNeeded() {
   return result;
 }
 
+async function runV05MigrationIfNeeded() {
+  const currentVersion = Number(game.settings.get(MODULE_ID, V05_MIGRATION_SETTING)) || 0;
+  if (currentVersion >= V05_MIGRATION_VERSION) return null;
+  const summary = await migrateWorldV04ToV05();
+  if (!summary?.packAvailable) {
+    debugLog('0.4 to 0.5 migration deferred (gear-library pack unavailable or outdated)');
+    return summary;
+  }
+  await game.settings.set(MODULE_ID, V05_MIGRATION_SETTING, V05_MIGRATION_VERSION);
+  return summary;
+}
+
 /* -------------------------------------------- */
 /*  Init Hook                                   */
 /* -------------------------------------------- */
@@ -1610,6 +1628,19 @@ Hooks.on('updateActor', (actor, changes) => {
   syncHeroPointInputs(actor);
 });
 
+// Rank changes may come from macros, imports, or modules rather than the sheet.
+// Keep the embedded signature ability on the matching archetype version in every case.
+Hooks.on('updateActor', (actor, changes, options) => {
+  if (!foundry.utils.hasProperty(changes, 'system.currentRank')) return;
+  if (options?.[ARCHETYPE_RANK_SYNC_OPTION]) return;
+  void syncArchetypeAbilityToRank(actor, { render: false }).catch((error) => {
+    debugLog('Archetype signature ability rank sync failed', {
+      actor: actor?.uuid ?? null,
+      error
+    });
+  });
+});
+
 // Highlight Point economy: each player character gains 1 at the start of a session
 // (capped at HERO_POINT_MAX) and loses any unspent points when the session ends.
 Hooks.on(SESSION_HOOK_STARTED, (session) => {
@@ -1711,6 +1742,23 @@ Hooks.on('updateItem', (item, changed, options) => {
   });
 });
 
+// Editing the Heat trigger on an owned archetype updates the separate trait it
+// granted to that character. The stable association remains the grant flag.
+Hooks.on('updateItem', (item, changes, _options, userId) => {
+  if (game.userId !== userId) return;
+  if (item?.type !== ARCHETYPE_ITEM_TYPE) return;
+  if (item?.parent?.documentName !== 'Actor') return;
+  const changedPaths = Object.keys(foundry.utils.flattenObject(changes ?? {}));
+  if (!changedPaths.some((path) => path.startsWith('system.trait'))) return;
+  void syncArchetypeTraitGrant(item.parent, item, { render: false }).catch((error) => {
+    debugLog('Archetype signature trait sync failed', {
+      actor: item.parent?.uuid ?? null,
+      archetype: item.uuid ?? null,
+      error
+    });
+  });
+});
+
 Hooks.on('deleteItem', (item, options) => {
   if (!isPrimaryActiveGM()) return;
   if (item?.parent?.documentName === 'Actor') {
@@ -1734,7 +1782,7 @@ Hooks.on('deleteItem', (item, options) => {
 });
 
 // When a player character's archetype is removed, revert what it granted: delete its
-// signature ability, reset its skill rank, and reset defenses to the rank default.
+// signature ability and trait, reset its skill rank, and reset defenses to rank default.
 // Only the user performing the delete runs this, and drop-replace swaps suppress it.
 Hooks.on('deleteItem', (item, options, userId) => {
   if (game.userId !== userId) return;
@@ -1862,7 +1910,8 @@ Hooks.once('ready', async function () {
         { name: 'item library migration', run: runItemLibraryMigrationIfNeeded },
         { name: 'pack link migration', run: runPackLinkMigrationIfNeeded },
         { name: 'weapon type migration', run: runWeaponTypeMigrationIfNeeded },
-        { name: 'compendium pack refresh', run: runCompendiumPackRefreshIfNeeded }
+        { name: 'compendium pack refresh', run: runCompendiumPackRefreshIfNeeded },
+        { name: '0.4 to 0.5 migration', run: runV05MigrationIfNeeded }
       ],
       { onError: reportStartupError }
     );

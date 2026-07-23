@@ -74,8 +74,8 @@ test('character base defenses remain independent from skill ranks and temporary 
   assert.equal(actor.system.effectiveDefenses.fortitude, 7);
   assert.equal(actor.system.effectiveDefenses.control, 7);
   assert.equal(actor.system.effectiveDefenses.will, 8);
-  assert.equal(actor.system.speed.value, 46);
-  assert.equal(actor.system.stress.max, 19);
+  assert.equal(actor.system.speed.value, 39);
+  assert.equal(actor.system.stress.max, 15);
   assert.equal(actor.system.forceShield.max, 0);
 });
 
@@ -141,7 +141,7 @@ test('advancement progress displays spent points from zero and keeps remaining b
   assert.equal(actor.system.advancement.remaining, 7);
 });
 
-test('temporary stress and armor shield add to stress max', () => {
+test('temporary stress and the archetype bonus add to stress max', () => {
   const actor = new ProjectAndromedaActor({
     type: 'playerCharacter',
     system: {
@@ -155,12 +155,10 @@ test('temporary stress and armor shield add to stress max', () => {
       forceShield: { value: 0, max: 0 }
     },
     itemTypes: {
-      armor: [
+      archetype: [
         {
           system: {
-            equipped: true,
-            quantity: 1,
-            itemShield: 4
+            stressBonusPerRank: 2
           }
         }
       ]
@@ -269,5 +267,5 @@ test('movement speed uses rank defaults with additive bonuses', () => {
 
   actor.prepareDerivedData();
 
-  assert.equal(actor.system.speed.value, 42);
+  assert.equal(actor.system.speed.value, 35);
 });

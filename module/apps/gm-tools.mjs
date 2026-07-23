@@ -92,10 +92,9 @@ export class GmToolsApp extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Reset every player character to a fresh-scene state: free used abilities
-   * (cooldown.used -> 0), clear stress (value plus azure marks), and zero out
-   * the temporary bonuses (temp stress / defenses / speed). NPC characters are
-   * left untouched.
+   * Reset every player character to a fresh-scene state: clear Heat and stress,
+   * zero temporary bonuses, and reset any remaining legacy cooldowns. NPC
+   * characters are left untouched.
    * @returns {Promise<{actorsReset: number, abilitiesFreed: number}|null>}
    */
   static async refreshScene() {
@@ -115,6 +114,7 @@ export class GmToolsApp extends HandlebarsApplicationMixin(ApplicationV2) {
       await actor.update({
         'system.stress.value': 0,
         'system.stress.marked': [],
+        'system.heat.value': 0,
         'system.temphealth': 0,
         'system.tempfortitude': 0,
         'system.tempcontrol': 0,

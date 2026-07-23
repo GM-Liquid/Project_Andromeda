@@ -13,6 +13,8 @@ export const PACK_LINK_MIGRATION_SETTING = 'packLinkMigrationVersion';
 export const PACK_LINK_MIGRATION_VERSION = 1;
 export const WEAPON_TYPE_MIGRATION_SETTING = 'weaponTypeMigrationVersion';
 export const WEAPON_TYPE_MIGRATION_VERSION = 1;
+export const V05_MIGRATION_SETTING = 'v05MigrationVersion';
+export const V05_MIGRATION_VERSION = 2;
 
 export function registerSystemSettings() {
   game.settings.register(MODULE_ID, 'debugMode', {
@@ -98,6 +100,13 @@ export function registerSystemSettings() {
   });
 
   game.settings.register(MODULE_ID, WEAPON_TYPE_MIGRATION_SETTING, {
+    scope: 'world',
+    config: false,
+    type: Number,
+    default: 0
+  });
+
+  game.settings.register(MODULE_ID, V05_MIGRATION_SETTING, {
     scope: 'world',
     config: false,
     type: Number,

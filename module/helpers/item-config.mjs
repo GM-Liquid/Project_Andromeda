@@ -32,7 +32,29 @@ export const ITEM_USAGE_FREQUENCY_LABEL_KEYS = {
 };
 
 export const DEFAULT_ITEM_USAGE_FREQUENCY = 'passive';
+export const ABILITY_MODE_LABEL_KEYS = {
+  standard: 'MY_RPG.AbilityModes.Standard',
+  forced: 'MY_RPG.AbilityModes.Forced'
+};
 export const PERSONALITY_ITEM_ROLE_VALUE = 'value';
+
+export function normalizeAbilityMode(value) {
+  const normalized = String(value ?? '').trim();
+  return Object.hasOwn(ABILITY_MODE_LABEL_KEYS, normalized) ? normalized : '';
+}
+
+// A forced ability costs 2 Heat at the character's rank, 1 Heat one rank later,
+// and becomes free once it is at least two ranks below the character.
+export function getAbilityHeatCost(source, characterRank) {
+  const system = source?.system ?? source ?? {};
+  if (normalizeAbilityMode(system.mode) !== 'forced') return 0;
+  const abilityRank = Math.max(1, Math.floor(Number(system.rank) || 1));
+  const actorRank = Math.max(1, Math.floor(Number(characterRank) || 1));
+  const rankDifference = actorRank - abilityRank;
+  if (rankDifference >= 2) return 0;
+  if (rankDifference === 1) return 1;
+  return 2;
+}
 
 export const ITEM_ACTIVATION_TYPE_LABEL_KEYS = {
   passive: 'MY_RPG.ActivationTypes.Passive',
@@ -147,6 +169,14 @@ function buildUsageFrequencyField() {
   };
 }
 
+function buildAbilityModeField() {
+  return {
+    path: 'mode',
+    labelKey: 'MY_RPG.ItemFields.AbilityMode',
+    type: 'text'
+  };
+}
+
 function buildRankField() {
   return {
     path: 'rank',
@@ -230,6 +260,7 @@ function buildDamageField() {
 
 const EQUIPMENT_ITEM_FIELDS = [
   buildRankField(),
+  buildAbilityModeField(),
   buildUsageFrequencyField(),
   buildActivationTypeField(),
   buildRangeField(),
@@ -242,6 +273,7 @@ const EQUIPMENT_ITEM_FIELDS = [
   buildDamageField()
 ];
 const TRAIT_ITEM_FIELDS = [
+  buildAbilityModeField(),
   buildUsageFrequencyField(),
   buildActivationTypeField(),
   buildRangeField(),
@@ -253,6 +285,7 @@ const TRAIT_ITEM_FIELDS = [
   buildSkillField({ showWhenPath: 'requiresRoll' }),
   buildDamageField()
 ];
+const ABILITY_ITEM_FIELDS = [buildRankField(), ...TRAIT_ITEM_FIELDS];
 const WEAPON_ITEM_FIELDS = [
   buildUsageFrequencyField(),
   buildActivationTypeField(),
@@ -264,6 +297,18 @@ const WEAPON_ITEM_FIELDS = [
 ];
 const ARCHETYPE_ITEM_FIELDS = [
   buildSkillField(),
+  {
+    path: 'abilityName',
+    labelKey: 'MY_RPG.Archetype.SignatureAbility',
+    type: 'text',
+    readonly: true
+  },
+  {
+    path: 'traitName',
+    labelKey: 'MY_RPG.Archetype.SignatureTrait',
+    type: 'text',
+    readonly: true
+  },
   {
     path: 'defenseProfile.strong',
     labelKey: 'MY_RPG.Archetype.StrongDefense',
@@ -278,6 +323,12 @@ const ARCHETYPE_ITEM_FIELDS = [
     path: 'defenseProfile.weak',
     labelKey: 'MY_RPG.Archetype.WeakDefense',
     type: 'archetypeDefense'
+  },
+  {
+    path: 'stressBonusPerRank',
+    labelKey: 'MY_RPG.Archetype.TempStressPerRank',
+    type: 'number',
+    min: 0
   }
 ];
 const ARMOR_ITEM_FIELDS = [
@@ -521,7 +572,26 @@ export const ITEM_TYPE_CONFIGS = [
       requiresRoll: false,
       skill: ''
     },
-    fields: TRAIT_ITEM_FIELDS
+    fields: ABILITY_ITEM_FIELDS
+  },
+  {
+    type: 'artifact',
+    supertype: 'equipment',
+    groupKey: 'artifacts',
+    sheet: 'generic',
+    badgeGroupKey: 'artifacts',
+    showQuantity: false,
+    allowEquip: false,
+    exclusive: false,
+    canRoll: false,
+    defaults: {
+      rank: '',
+      mode: '',
+      requiresRoll: false,
+      skill: '',
+      skillBonus: '0/0/0/0'
+    },
+    fields: EQUIPMENT_ITEM_FIELDS
   },
   {
     type: 'archetype',
@@ -535,6 +605,10 @@ export const ITEM_TYPE_CONFIGS = [
     defaults: {
       skill: '',
       defenseProfile: { strong: '', medium: '', weak: '' },
+      stressBonusPerRank: 0,
+      trait: {},
+      traitSyncId: '',
+      traitName: '',
       abilitySyncId: '',
       abilityName: ''
     },
@@ -618,46 +692,16 @@ export const ITEM_GROUP_CONFIGS = [
     showKindBadge: false
   },
   {
-    key: 'weapons',
-    compendiumFolder: 'Оружие',
-    types: ['weapon'],
+    key: 'artifacts',
+    compendiumFolder: 'Артефакты',
+    types: ['artifact'],
+    createTypes: ['artifact'],
     tab: 'inventory',
-    icon: 'fas fa-crosshairs',
-    labelKey: 'MY_RPG.ItemGroups.Weapons',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyWeapons',
-    createKey: 'MY_RPG.ItemGroups.CreateWeapon',
-    newNameKey: 'MY_RPG.ItemGroups.NewWeapon',
-    showQuantity: false,
-    allowEquip: false,
-    exclusive: false,
-    canRoll: true
-  },
-  {
-    key: 'armor',
-    compendiumFolder: 'Броня',
-    types: ['armor'],
-    tab: 'inventory',
-    icon: 'fas fa-shield-alt',
-    labelKey: 'MY_RPG.ItemGroups.Armor',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyArmor',
-    createKey: 'MY_RPG.ItemGroups.CreateArmor',
-    newNameKey: 'MY_RPG.ItemGroups.NewArmor',
-    showQuantity: false,
-    allowEquip: true,
-    exclusive: true,
-    canRoll: false
-  },
-  {
-    key: 'equipment',
-    compendiumFolder: 'Предметы',
-    types: ['equipment', 'equipment-consumable', 'implant', 'cartridge'],
-    createTypes: ['equipment'],
-    tab: 'inventory',
-    icon: 'fas fa-toolbox',
-    labelKey: 'MY_RPG.ItemGroups.Equipment',
-    emptyKey: 'MY_RPG.ItemGroups.EmptyEquipment',
-    createKey: 'MY_RPG.ItemGroups.CreateEquipment',
-    newNameKey: 'MY_RPG.ItemGroups.NewEquipment',
+    icon: 'fas fa-gem',
+    labelKey: 'MY_RPG.ItemGroups.Artifacts',
+    emptyKey: 'MY_RPG.ItemGroups.EmptyArtifacts',
+    createKey: 'MY_RPG.ItemGroups.CreateArtifact',
+    newNameKey: 'MY_RPG.ItemGroups.NewArtifact',
     showQuantity: false,
     allowEquip: false,
     exclusive: false,
@@ -752,6 +796,7 @@ export function getItemTabLabel(tabKey) {
 
 function buildUsageFrequencyBadge(item, helpers) {
   const system = item.system ?? {};
+  if (normalizeAbilityMode(system.mode)) return [];
   const value = normalizeUsageFrequency(system.usageFrequency);
   const labelKey = ITEM_USAGE_FREQUENCY_LABEL_KEYS[value];
   if (!labelKey) return [];
@@ -872,5 +917,7 @@ export const ITEM_BADGE_BUILDERS = {
     }
     return badges;
   },
-  ...Object.fromEntries(TRAIT_BADGE_GROUPS.map((groupKey) => [groupKey, buildTraitBadges]))
+  ...Object.fromEntries(
+    [...TRAIT_BADGE_GROUPS, 'artifacts'].map((groupKey) => [groupKey, buildTraitBadges])
+  )
 };

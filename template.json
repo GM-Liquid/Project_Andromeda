@@ -23,7 +23,7 @@
           "control": 1,
           "will": 1
         },
-        "flux": {
+        "heat": {
           "value": 0
         },
         "supplies": 0,
@@ -172,6 +172,7 @@
       "trait-technological",
       "trait-genome",
       "trait-source-ability",
+      "artifact",
       "archetype"
     ],
     "templates": {
@@ -180,6 +181,7 @@
         "equipped": false,
         "rank": "",
         "usageFrequency": "passive",
+        "mode": "",
         "activationCost": "passive",
         "duration": "",
         "area": "",
@@ -405,6 +407,14 @@
       "skillBonus": "0/0/0/0",
       "stepEffects": []
     },
+    "artifact": {
+      "templates": ["base"],
+      "rank": "",
+      "requiresRoll": false,
+      "skill": "",
+      "skillBonus": "0/0/0/0",
+      "stepEffects": []
+    },
     "archetype": {
       "templates": ["base"],
       "skill": "",
@@ -413,6 +423,10 @@
         "medium": "",
         "weak": ""
       },
+      "stressBonusPerRank": 0,
+      "trait": {},
+      "traitSyncId": "",
+      "traitName": "",
       "abilitySyncId": "",
       "abilityName": ""
     }

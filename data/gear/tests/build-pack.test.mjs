@@ -29,8 +29,12 @@ test('pack build includes artifacts while preserving migrated sync ids', () => {
     traits: []
   });
 
-  assert.equal(remote.sheets.abilities.length, 1);
-  assert.equal(remote.sheets.abilities[0].syncId, 'gear:abilities:blackout');
-  assert.equal(remote.sheets.weapons.length, 1);
-  assert.equal(remote.sheets.weapons[0].syncId, 'gear:equipment:okhotnichiy-drobovik');
+  assert.equal(remote.sheets.artifacts.length, 2);
+  assert.deepEqual(
+    remote.sheets.artifacts.map((row) => [row.type, row.syncId]),
+    [
+      ['artifact', 'gear:abilities:blackout'],
+      ['artifact', 'gear:equipment:okhotnichiy-drobovik']
+    ]
+  );
 });

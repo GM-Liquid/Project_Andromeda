@@ -26,6 +26,7 @@ import {
   SKILL_CHECK_FORMULA
 } from '../helpers/skill-check.mjs';
 import {
+  ABILITY_MODE_LABEL_KEYS,
   ITEM_ACTIVATION_TYPE_LABEL_KEYS,
   ITEM_TABS,
   ITEM_BADGE_BUILDERS,
@@ -33,10 +34,12 @@ import {
   ITEM_DURATION_LABEL_KEYS,
   ITEM_TARGET_LABEL_KEYS,
   ITEM_USAGE_FREQUENCY_LABEL_KEYS,
+  getAbilityHeatCost,
   getItemGroupConfigByKey,
   getItemGroupConfigs,
   getItemTypeConfig,
-  getItemTabLabel
+  getItemTabLabel,
+  normalizeAbilityMode
 } from '../helpers/item-config.mjs';
 import {
   findGearLibraryUuidBySyncId,
@@ -47,10 +50,15 @@ import {
 import {
   ARCHETYPE_GRANT_FLAG,
   ARCHETYPE_ITEM_TYPE,
+  ARCHETYPE_RANK_SYNC_OPTION,
   ARCHETYPE_SWAP_OPTION,
+  applyArchetypeAbilityVersionToItemData,
+  buildArchetypeTraitGrantData,
   clearArchetypeEffects,
+  getArchetypeAbilityDisplayName,
   getArchetypeSkillKey,
-  getSkillRankBonus
+  getSkillRankBonus,
+  syncArchetypeAbilityToRank
 } from '../helpers/archetype.mjs';
 import { formatDamageProfile, hasDamageProfileValue } from '../helpers/damage-profile.mjs';
 import { toRoman } from '../helpers/roman.mjs';
@@ -286,8 +294,8 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
   }
 
   // Apply an archetype to a player character: replace any existing archetype and the
-  // ability it previously granted, then create the new archetype (compendium-linked),
-  // grant its signature ability from the pack, and start the archetype skill at rank 2.
+  // grants it previously supplied, then create the new archetype (compendium-linked),
+  // grant its signature ability and trait from the pack, and start its skill at rank 2.
   async _onDropArchetype(itemData, sourceUuid) {
     if (!isPlayerCharacterActorType(this.actor.type)) {
       ui.notifications?.warn(game.i18n.localize('MY_RPG.Archetype.PlayerOnly'));
@@ -320,6 +328,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       if (abilitySource) {
         const abilityData = abilitySource.toObject();
         delete abilityData._id;
+        applyArchetypeAbilityVersionToItemData(abilityData, this.actor.system?.currentRank);
         setLibraryItemLinkOnData(abilityData, abilityUuid);
         abilityData.flags = abilityData.flags ?? {};
         abilityData.flags[MODULE_ID] = {
@@ -329,6 +338,20 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
         await this.actor.createEmbeddedDocuments('Item', [abilityData]);
       } else {
         ui.notifications?.warn(game.i18n.localize('MY_RPG.Archetype.AbilityMissing'));
+      }
+    }
+
+    // Grant the signature Heat-trigger trait as a regular `trait`, so it appears in
+    // the character's Traits tab rather than alongside active abilities.
+    const traitSyncId = String(createdArchetype?.system?.traitSyncId ?? '').trim();
+    if (traitSyncId) {
+      const traitUuid = await findGearLibraryUuidBySyncId(traitSyncId);
+      const traitSource = traitUuid ? await fromUuid(traitUuid) : null;
+      const traitData = buildArchetypeTraitGrantData(traitSource, createdArchetype.id, traitUuid);
+      if (traitData) {
+        await this.actor.createEmbeddedDocuments('Item', [traitData]);
+      } else {
+        ui.notifications?.warn(game.i18n.localize('MY_RPG.Archetype.TraitMissing'));
       }
     }
 
@@ -457,6 +480,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       "input[name='system.progressPoints']",
       "input[name='system.currentRank']",
       "input[name='system.stress.value']",
+      "input[name='system.heat.value']",
       "input[name='system.temphealth']",
       "input[name='system.tempfortitude']",
       "input[name='system.tempcontrol']",
@@ -621,6 +645,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
 
   _prepareCharacterData(context) {
     context.system.skills ??= {};
+    context.system.heat ??= { value: 0 };
     context.system.temphealth ??= 0;
     context.system.tempfortitude ??= 0;
     context.system.tempcontrol ??= 0;
@@ -1011,7 +1036,15 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
         if (rank !== Number(skill?.rank)) updates[`system.skills.${skillKey}.rank`] = rank;
       }
     }
-    await this.actor.update(updates, { render: false });
+    await this.actor.update(updates, {
+      render: false,
+      [ARCHETYPE_RANK_SYNC_OPTION]: input.name === 'system.currentRank'
+    });
+    if (input.name === 'system.currentRank') {
+      await syncArchetypeAbilityToRank(this.actor, { render: false });
+      this.render(false);
+      return;
+    }
     this.actor.prepareData();
     this._refreshSkillRows(this.element);
     this._refreshDerived(this.element);
@@ -1136,6 +1169,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     setVal('system.speed.value', s?.speed?.value);
     setVal('system.progressPoints', s?.progressPoints);
     setVal('system.stress.value', s?.stress?.value);
+    setVal('system.heat.value', s?.heat?.value);
     setVal('system.advancement.totalSpent', s?.advancement?.totalSpent);
     setText('system.advancement.totalSpent', s?.advancement?.totalSpent);
     setText('system.advancement.remaining', s?.advancement?.remaining);
@@ -1325,6 +1359,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
         allowEquip: Boolean(config.allowEquip),
         exclusive: Boolean(config.exclusive),
         isSimple: config.key === 'personalityValues',
+        isCardTable: true,
         items: preparedItems,
         count: preparedItems.length
       };
@@ -1338,6 +1373,9 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     const badges = this._getItemBadges(item, displayConfig);
     const detailRows = this._buildItemDetailRows(item, displayConfig);
     const detailEffect = this._getItemSummary(item, displayConfig);
+    const checkSummary = this._getItemCheckSummary(item, displayConfig);
+    const isCardTableItem = true;
+    const cardTags = this._getItemCardTags(item, displayConfig, checkSummary);
     return {
       id: item.id,
       uuid: item.uuid,
@@ -1351,7 +1389,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       exclusive: Boolean(displayConfig.exclusive),
       equipped: displayConfig.allowEquip ? Boolean(system.equipped) : false,
       skillLabel: system.skill ? this._skillLabel(system.skill) : '—',
-      checkSummary: this._getItemCheckSummary(item, displayConfig),
+      checkSummary,
       activationSummary: this._getItemActivationSummary(item),
       activationShortSummary: this._getItemActivationShortSummary(item),
       hasCooldown: this._hasItemCooldown(item, displayConfig),
@@ -1362,6 +1400,10 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       isExpanded: this._expandedItemIds.has(item.id),
       badges,
       hasBadges: badges.length > 0,
+      isCardTableItem,
+      cardTags,
+      hasCardTags: cardTags.length > 0,
+      cardTagsLabel: game.i18n.localize('MY_RPG.ItemCards.TagsLabel'),
       hasDetails: detailRows.length > 0 || Boolean(detailEffect),
       canRoll: Boolean(displayConfig.canRoll),
       hasActivationControl: this._hasItemActivationControl(item, displayConfig),
@@ -1379,7 +1421,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
   _getItemCheckSummary(item, displayConfig = null) {
     const skillKey = String(item?.system?.skill ?? '').trim();
     const canRoll = Boolean(displayConfig?.canRoll ?? this._getItemDisplayConfig(item).canRoll);
-    if (!skillKey || !canRoll) return { hasCheck: false };
+    if (!skillKey) return { hasSkill: false, hasCheck: false };
 
     const skill = normalizeSkill(
       this.actor.system?.skills?.[skillKey],
@@ -1387,7 +1429,8 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       getSkillRankBonus(this.actor, skillKey)
     );
     return {
-      hasCheck: true,
+      hasSkill: true,
+      hasCheck: canRoll,
       skillLabel: this._skillLabel(skillKey),
       rank: skill.rank,
       rankRoman: toRoman(skill.rank),
@@ -1416,6 +1459,84 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     });
   }
 
+  _getItemCardTags(item, displayConfig = null, checkSummary = null) {
+    const system = item?.system ?? {};
+    const rank = Math.max(0, Math.floor(Number(system.rank) || 0));
+    const normalizedRank = Math.min(rank, 5);
+    const check = checkSummary ?? this._getItemCheckSummary(item, displayConfig);
+    const tags = [];
+
+    if (displayConfig?.showKindBadge) {
+      tags.push({
+        label: this._getItemKindBadgeLabel(item),
+        title: game.i18n.localize('MY_RPG.ItemCards.ItemType'),
+        className: 'item-row__card-tag--kind'
+      });
+    }
+
+    const alwaysShowRank = ['abilities', 'traits', 'artifacts', 'archetypes'].includes(
+      displayConfig?.key
+    );
+    if (rank || alwaysShowRank) {
+      tags.push({
+        label: rank ? getRankLabel(rank) : game.i18n.localize('MY_RPG.ItemCards.NoRank'),
+        title: game.i18n.localize('MY_RPG.ItemFields.Rank'),
+        className: `item-row__card-tag--rank rank${normalizedRank}`
+      });
+    }
+
+    if (check?.hasSkill || system.requiresRoll || displayConfig?.key === 'abilities') {
+      tags.push({
+        isCheck: true,
+        hasSkill: Boolean(check?.hasSkill),
+        hasCheck: Boolean(check?.hasCheck),
+        skillLabel: check?.skillLabel ?? '',
+        rankRoman: check?.rankRoman ?? '',
+        rankClass: check?.rankClass ?? '',
+        bonusLabel: this._formatSkillBonus(check?.bonus),
+        emptyLabel: game.i18n.localize('MY_RPG.ItemCards.NoRoll'),
+        title: game.i18n.localize('MY_RPG.ItemCards.LinkedSkill'),
+        className: 'item-row__card-tag--check'
+      });
+    }
+
+    if (displayConfig?.key === 'equipment' && hasDamageProfileValue(system.skillBonus)) {
+      tags.push({
+        label: this._formatDamage(system.skillBonus),
+        title: game.i18n.localize('MY_RPG.WeaponsTable.DamageLabel'),
+        className: 'item-row__card-tag--damage'
+      });
+    }
+
+    const mode = normalizeAbilityMode(system.mode);
+    if (displayConfig?.key === 'abilities' || mode) {
+      tags.push({
+        label: game.i18n.format('MY_RPG.ItemCards.HeatTag', {
+          cost: getAbilityHeatCost(item, this.actor.system?.currentRank)
+        }),
+        title: game.i18n.localize('MY_RPG.Heat.CostLabel'),
+        className: 'item-row__card-tag--heat'
+      });
+    }
+
+    const frequency = String(system.usageFrequency ?? '').trim();
+    if (frequency && frequency !== 'passive' && !mode) {
+      tags.push({
+        label: this._formatMappedValue(frequency, ITEM_USAGE_FREQUENCY_LABEL_KEYS),
+        title: game.i18n.localize('MY_RPG.ItemFields.UsageFrequency'),
+        className: 'item-row__card-tag--frequency'
+      });
+    }
+
+    tags.push({
+      label: this._getItemActivationSummary(item),
+      title: game.i18n.localize('MY_RPG.ItemFields.ActivationCost'),
+      className: 'item-row__card-tag--activation'
+    });
+
+    return tags;
+  }
+
   _hasItemActivationControl(item, displayConfig = null) {
     return Boolean(
       item &&
@@ -1426,7 +1547,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
   }
 
   _hasItemChatControl(item, displayConfig = null) {
-    if (!item || !['abilities', 'equipment'].includes(displayConfig?.key)) return false;
+    if (!item || !['abilities', 'artifacts'].includes(displayConfig?.key)) return false;
     return !this._hasItemActivationControl(item, displayConfig);
   }
 
@@ -1457,12 +1578,13 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
 
   _hasItemCooldown(item, displayConfig = null) {
     if (displayConfig?.key !== 'abilities') return false;
+    if (normalizeAbilityMode(item?.system?.mode)) return false;
     const frequency = String(item?.system?.usageFrequency ?? '').trim();
     return Boolean(frequency && frequency !== 'passive');
   }
 
   _hasItemActivationCost(item, displayConfig = null) {
-    if (displayConfig?.key !== 'abilities' && displayConfig?.key !== 'equipment') return false;
+    if (!['abilities', 'artifacts'].includes(displayConfig?.key)) return false;
     const activationCost = String(
       item?.system?.activationCost ?? item?.system?.activationType ?? ''
     ).trim();
@@ -1477,7 +1599,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     const config = typeConfig ?? getItemTypeConfig(item?.type) ?? {};
     return (
       Boolean(item?.system?.requiresRoll) &&
-      (item?.type === 'equipment' || config.supertype === 'traits')
+      (item?.type === 'equipment' || item?.type === 'artifact' || config.supertype === 'traits')
     );
   }
 
@@ -1506,6 +1628,16 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     if (config?.showKindBadge && config?.key !== 'equipment') {
       const kindBadge = this._getItemKindBadgeLabel(item);
       if (kindBadge) badges.push(kindBadge);
+    }
+
+    const mode = normalizeAbilityMode(item?.system?.mode);
+    if (mode) {
+      const modeLabel = game.i18n.localize(ABILITY_MODE_LABEL_KEYS[mode]);
+      const heatCost = getAbilityHeatCost(item, this.actor.system?.currentRank);
+      badges.push(
+        `${game.i18n.localize('MY_RPG.ItemFields.AbilityMode')}: ${modeLabel}`,
+        `${game.i18n.localize('MY_RPG.Heat.CostLabel')}: ${heatCost || '—'}`
+      );
     }
 
     const builder = ITEM_BADGE_BUILDERS[config?.badgeGroupKey ?? config?.key];
@@ -1540,6 +1672,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     if (displayConfig?.key === 'personalityValues') return [];
 
     const system = item?.system ?? {};
+    const isCardTableItem = Boolean(displayConfig?.key);
     const rows = [];
     const primaryRow = [];
     const activationCostValue = String(system.activationCost ?? system.activationType ?? '').trim();
@@ -1547,7 +1680,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       activationCostValue && activationCostValue !== 'passive'
         ? this._formatMappedValue(activationCostValue, ITEM_ACTIVATION_TYPE_LABEL_KEYS)
         : '';
-    if (activationCost) {
+    if (activationCost && !isCardTableItem) {
       primaryRow.push({
         label: game.i18n.localize('MY_RPG.ItemFields.ActivationCost'),
         value: activationCost
@@ -1588,26 +1721,63 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     this._pushItemDetailEntry(
       secondaryEntries,
       'MY_RPG.AbilityConfig.Skill',
-      system.skill ? this._skillLabel(system.skill) : ''
+      !isCardTableItem && system.skill ? this._skillLabel(system.skill) : ''
     );
     this._pushItemDetailEntry(
       secondaryEntries,
       'MY_RPG.ItemFields.RequiresRoll',
-      this._shouldShowRequiresRoll(item, displayConfig)
+      !isCardTableItem && this._shouldShowRequiresRoll(item, displayConfig)
         ? game.i18n.localize(system.requiresRoll ? 'MY_RPG.Inventory.Yes' : 'MY_RPG.Inventory.No')
         : ''
     );
     this._pushItemDetailEntry(
       secondaryEntries,
       'MY_RPG.ItemFields.UsageFrequency',
-      String(system.usageFrequency ?? '').trim() &&
+      !isCardTableItem &&
+        String(system.usageFrequency ?? '').trim() &&
+        !normalizeAbilityMode(system.mode) &&
         String(system.usageFrequency).trim() !== 'passive'
         ? this._formatMappedValue(system.usageFrequency, ITEM_USAGE_FREQUENCY_LABEL_KEYS)
         : ''
     );
 
+    const mode = normalizeAbilityMode(system.mode);
+    if (mode && !isCardTableItem) {
+      this._pushItemDetailEntry(
+        secondaryEntries,
+        'MY_RPG.ItemFields.AbilityMode',
+        game.i18n.localize(ABILITY_MODE_LABEL_KEYS[mode])
+      );
+      this._pushItemDetailEntry(
+        secondaryEntries,
+        'MY_RPG.Heat.CostLabel',
+        `${getAbilityHeatCost(item, this.actor.system?.currentRank) || '—'}`
+      );
+    }
+
+    if (item?.type === 'archetype') {
+      this._pushItemDetailEntry(
+        secondaryEntries,
+        'MY_RPG.Archetype.SignatureAbility',
+        getArchetypeAbilityDisplayName(this.actor, item)
+      );
+      this._pushItemDetailEntry(
+        secondaryEntries,
+        'MY_RPG.Archetype.SignatureTrait',
+        String(system.traitName ?? system.trait?.name ?? '').trim()
+      );
+      const stressBonus = Math.max(0, Number(system.stressBonusPerRank) || 0);
+      if (stressBonus) {
+        this._pushItemDetailEntry(
+          secondaryEntries,
+          'MY_RPG.Archetype.TempStressPerRank',
+          `${stressBonus}`
+        );
+      }
+    }
+
     const rank = Number(system.rank) || 0;
-    if (rank) {
+    if (rank && !isCardTableItem) {
       this._pushItemDetailEntry(secondaryEntries, 'MY_RPG.ItemFields.Rank', getRankLabel(rank));
     }
 
@@ -1709,7 +1879,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
 
   _shouldShowRequiresRoll(item, displayConfig = null) {
     if (item?.type === 'weapon') return true;
-    if (displayConfig?.key === 'abilities' || displayConfig?.key === 'equipment') return true;
+    if (displayConfig?.key === 'abilities' || displayConfig?.key === 'artifacts') return true;
     return Boolean(item?.system?.requiresRoll);
   }
 
@@ -2041,6 +2211,15 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       return;
     }
 
+    const heatCost = getAbilityHeatCost(item, this.actor.system?.currentRank);
+    const availableHeat = Math.max(0, Number(this.actor.system?.heat?.value) || 0);
+    if (heatCost > availableHeat) {
+      ui.notifications?.warn(
+        game.i18n.format('MY_RPG.Heat.NotEnough', { cost: heatCost, available: availableHeat })
+      );
+      return;
+    }
+
     if (displayConfig?.canRoll) {
       const rolled = await this._rollItem(item, itemId, {
         includeItemContent: true,
@@ -2053,6 +2232,14 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
 
     if (hasCooldown) {
       await this._setItemCooldownUsed(item, $row, true);
+    }
+    if (heatCost > 0) {
+      await this.actor.update(
+        { 'system.heat.value': Math.max(0, availableHeat - heatCost) },
+        { render: false }
+      );
+      this.actor.prepareData();
+      this._refreshDerived(this.element);
     }
   }
 
