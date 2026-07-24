@@ -20,6 +20,8 @@ import {
 } from './helpers/foundry-compat.mjs';
 import { renderAndromedaCombatTracker } from './helpers/combat-tracker.mjs';
 import {
+  CONTENT_HEAT_MIGRATION_SETTING,
+  CONTENT_HEAT_MIGRATION_VERSION,
   GEAR_CATALOG_AUTO_SYNC_STATE_SETTING,
   GM_HERO_POOL_SETTING,
   LEGACY_EQUIPMENT_TYPE_MIGRATION_SETTING,
@@ -90,6 +92,7 @@ import {
 import { getSceneActorTokens, getTokenIsolationPlan } from './helpers/token-isolation.mjs';
 import { runStartupTasks } from './helpers/startup-tasks.mjs';
 import { migrateWorldV04ToV05 } from './helpers/v05-migration.mjs';
+import { migrateContentAndHeatModel } from './helpers/content-heat-migration.mjs';
 
 const ITEM_SUPERTYPE_ORDER = ['equipment', 'environment', 'traits', 'other'];
 const ITEM_LIBRARY_SYNC_OPTION_KEY = getLibrarySyncOptionKey();
@@ -825,7 +828,7 @@ async function resolveDroppedItem(data) {
 function isEnvironmentTokenProxyActor(actor) {
   return Boolean(
     actor?.getFlag?.(MODULE_ID, ENVIRONMENT_PROXY_ACTOR_FLAG) ??
-      actor?.flags?.[MODULE_ID]?.[ENVIRONMENT_PROXY_ACTOR_FLAG]
+    actor?.flags?.[MODULE_ID]?.[ENVIRONMENT_PROXY_ACTOR_FLAG]
   );
 }
 
@@ -834,7 +837,7 @@ const TOKEN_ISOLATION_FLAG = 'tokenIsolated';
 function isTokenIsolated(token) {
   return Boolean(
     token?.getFlag?.(MODULE_ID, TOKEN_ISOLATION_FLAG) ??
-      token?.flags?.[MODULE_ID]?.[TOKEN_ISOLATION_FLAG]
+    token?.flags?.[MODULE_ID]?.[TOKEN_ISOLATION_FLAG]
   );
 }
 
@@ -873,7 +876,9 @@ async function initializeSceneTokenIsolation() {
 
   for (const scene of game.scenes?.contents ?? []) {
     const actorIds = new Set(
-      (scene.tokens?.contents ?? []).map((token) => String(token.actorId ?? '').trim()).filter(Boolean)
+      (scene.tokens?.contents ?? [])
+        .map((token) => String(token.actorId ?? '').trim())
+        .filter(Boolean)
     );
 
     for (const actorId of actorIds) {
@@ -1461,6 +1466,22 @@ async function runV05MigrationIfNeeded() {
   return summary;
 }
 
+async function runContentHeatMigrationIfNeeded() {
+  const currentVersion = Number(game.settings.get(MODULE_ID, CONTENT_HEAT_MIGRATION_SETTING)) || 0;
+  if (currentVersion >= CONTENT_HEAT_MIGRATION_VERSION) return null;
+  const summary = await migrateContentAndHeatModel();
+  if (!summary?.packAvailable) {
+    debugLog('Content and Heat migration deferred (gear-library pack unavailable or outdated)');
+    return summary;
+  }
+  await game.settings.set(
+    MODULE_ID,
+    CONTENT_HEAT_MIGRATION_SETTING,
+    CONTENT_HEAT_MIGRATION_VERSION
+  );
+  return summary;
+}
+
 /* -------------------------------------------- */
 /*  Init Hook                                   */
 /* -------------------------------------------- */
@@ -1911,7 +1932,8 @@ Hooks.once('ready', async function () {
         { name: 'pack link migration', run: runPackLinkMigrationIfNeeded },
         { name: 'weapon type migration', run: runWeaponTypeMigrationIfNeeded },
         { name: 'compendium pack refresh', run: runCompendiumPackRefreshIfNeeded },
-        { name: '0.4 to 0.5 migration', run: runV05MigrationIfNeeded }
+        { name: '0.4 to 0.5 migration', run: runV05MigrationIfNeeded },
+        { name: 'content and Heat migration', run: runContentHeatMigrationIfNeeded }
       ],
       { onError: reportStartupError }
     );

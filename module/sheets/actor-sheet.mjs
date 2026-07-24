@@ -26,7 +26,6 @@ import {
   SKILL_CHECK_FORMULA
 } from '../helpers/skill-check.mjs';
 import {
-  ABILITY_MODE_LABEL_KEYS,
   ITEM_ACTIVATION_TYPE_LABEL_KEYS,
   ITEM_TABS,
   ITEM_BADGE_BUILDERS,
@@ -34,12 +33,12 @@ import {
   ITEM_DURATION_LABEL_KEYS,
   ITEM_TARGET_LABEL_KEYS,
   ITEM_USAGE_FREQUENCY_LABEL_KEYS,
+  getAbilityBaseHeatCost,
   getAbilityHeatCost,
   getItemGroupConfigByKey,
   getItemGroupConfigs,
   getItemTypeConfig,
-  getItemTabLabel,
-  normalizeAbilityMode
+  getItemTabLabel
 } from '../helpers/item-config.mjs';
 import {
   findGearLibraryUuidBySyncId,
@@ -1323,6 +1322,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     return {
       edit: game.i18n.localize('MY_RPG.ItemControls.Edit'),
       delete: game.i18n.localize('MY_RPG.ItemControls.Delete'),
+      chat: game.i18n.localize('MY_RPG.ItemControls.Chat'),
       roll: game.i18n.localize('MY_RPG.ItemControls.Roll'),
       equip: game.i18n.localize('MY_RPG.ItemControls.Equip'),
       equipAria: game.i18n.localize('MY_RPG.ItemControls.EquipAria'),
@@ -1508,8 +1508,8 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       });
     }
 
-    const mode = normalizeAbilityMode(system.mode);
-    if (displayConfig?.key === 'abilities' || mode) {
+    const usesHeat = displayConfig?.key === 'abilities' || getAbilityBaseHeatCost(item) > 0;
+    if (usesHeat) {
       tags.push({
         label: game.i18n.format('MY_RPG.ItemCards.HeatTag', {
           cost: getAbilityHeatCost(item, this.actor.system?.currentRank)
@@ -1520,7 +1520,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     }
 
     const frequency = String(system.usageFrequency ?? '').trim();
-    if (frequency && frequency !== 'passive' && !mode) {
+    if (frequency && frequency !== 'passive' && !usesHeat) {
       tags.push({
         label: this._formatMappedValue(frequency, ITEM_USAGE_FREQUENCY_LABEL_KEYS),
         title: game.i18n.localize('MY_RPG.ItemFields.UsageFrequency'),
@@ -1542,13 +1542,12 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       item &&
       (displayConfig?.canRoll ||
         this._hasItemCooldown(item, displayConfig) ||
-        this._hasItemActivationCost(item, displayConfig))
+        this._hasItemActivationCost(item))
     );
   }
 
   _hasItemChatControl(item, displayConfig = null) {
-    if (!item || !['abilities', 'artifacts'].includes(displayConfig?.key)) return false;
-    return !this._hasItemActivationControl(item, displayConfig);
+    return Boolean(item && !this._hasItemActivationControl(item, displayConfig));
   }
 
   _getItemActivationControlTitle(item, displayConfig = null) {
@@ -1576,15 +1575,11 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     return displayConfig?.canRoll ? 'fa-solid fa-dice-d10' : 'fa-solid fa-bolt';
   }
 
-  _hasItemCooldown(item, displayConfig = null) {
-    if (displayConfig?.key !== 'abilities') return false;
-    if (normalizeAbilityMode(item?.system?.mode)) return false;
-    const frequency = String(item?.system?.usageFrequency ?? '').trim();
-    return Boolean(frequency && frequency !== 'passive');
+  _hasItemCooldown(_item, _displayConfig = null) {
+    return false;
   }
 
-  _hasItemActivationCost(item, displayConfig = null) {
-    if (!['abilities', 'artifacts'].includes(displayConfig?.key)) return false;
+  _hasItemActivationCost(item) {
     const activationCost = String(
       item?.system?.activationCost ?? item?.system?.activationType ?? ''
     ).trim();
@@ -1630,14 +1625,10 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       if (kindBadge) badges.push(kindBadge);
     }
 
-    const mode = normalizeAbilityMode(item?.system?.mode);
-    if (mode) {
-      const modeLabel = game.i18n.localize(ABILITY_MODE_LABEL_KEYS[mode]);
+    const usesHeat = config?.key === 'abilities' || getAbilityBaseHeatCost(item) > 0;
+    if (usesHeat) {
       const heatCost = getAbilityHeatCost(item, this.actor.system?.currentRank);
-      badges.push(
-        `${game.i18n.localize('MY_RPG.ItemFields.AbilityMode')}: ${modeLabel}`,
-        `${game.i18n.localize('MY_RPG.Heat.CostLabel')}: ${heatCost || '—'}`
-      );
+      badges.push(`${game.i18n.localize('MY_RPG.Heat.CostLabel')}: ${heatCost}`);
     }
 
     const builder = ITEM_BADGE_BUILDERS[config?.badgeGroupKey ?? config?.key];
@@ -1735,23 +1726,19 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       'MY_RPG.ItemFields.UsageFrequency',
       !isCardTableItem &&
         String(system.usageFrequency ?? '').trim() &&
-        !normalizeAbilityMode(system.mode) &&
+        displayConfig?.key !== 'abilities' &&
+        getAbilityBaseHeatCost(item) === 0 &&
         String(system.usageFrequency).trim() !== 'passive'
         ? this._formatMappedValue(system.usageFrequency, ITEM_USAGE_FREQUENCY_LABEL_KEYS)
         : ''
     );
 
-    const mode = normalizeAbilityMode(system.mode);
-    if (mode && !isCardTableItem) {
-      this._pushItemDetailEntry(
-        secondaryEntries,
-        'MY_RPG.ItemFields.AbilityMode',
-        game.i18n.localize(ABILITY_MODE_LABEL_KEYS[mode])
-      );
+    const usesHeat = displayConfig?.key === 'abilities' || getAbilityBaseHeatCost(item) > 0;
+    if (usesHeat && !isCardTableItem) {
       this._pushItemDetailEntry(
         secondaryEntries,
         'MY_RPG.Heat.CostLabel',
-        `${getAbilityHeatCost(item, this.actor.system?.currentRank) || '—'}`
+        `${getAbilityHeatCost(item, this.actor.system?.currentRank)}`
       );
     }
 
@@ -2487,7 +2474,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     const target = event.target && typeof event.target.closest === 'function' ? event.target : null;
     if (
       target?.closest(
-        '.item-edit, .item-delete, .item-roll, .item-activate, .item-quantity-step, .item-equip-toggle, .item-equip-checkbox'
+        '.item-edit, .item-delete, .item-roll, .item-activate, .item-chat, .item-quantity-step, .item-equip-toggle, .item-equip-checkbox'
       )
     ) {
       return;

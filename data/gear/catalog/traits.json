@@ -495,5 +495,84 @@
       "новые опции"
     ],
     "status": "approved"
+  },
+  {
+    "id": "protokol-parirovaniya",
+    "name": "Протокол парирования",
+    "type": "trait",
+    "rank": 1,
+    "skill": "blizhniy_boy",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "trigger": "firstMeleeAttackAgainstYou"
+          },
+          "outcomes": [
+            {
+              "key": "forceMinRoll"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Выпавшее на кубе значение для первой атаки ближнего боя против вас за сцену автоматически считается успехом с ценой",
+    "shortDescription": "Первая атака ближнего боя по вам — минимальный результат.",
+    "price": 2,
+    "tags": [
+      "живучесть"
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "protokol-ubiytsa",
+    "name": "Протокол «Убийца»",
+    "type": "trait",
+    "rank": 2,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "trigger": "onKill",
+            "targets": "self",
+            "duration": "untilStartOfYourNextTurn"
+          },
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "hidden"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "trigger": "onSuccessfulAttackAfterHidden"
+          },
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "vulnerable"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Когда вы выводите цель из строя, становитесь Невидимым до начала своего следующего хода. При успехе первой атаки после этой Невидимости цель также становится Уязвимой до начала своего следующего хода.",
+    "shortDescription": "Станьте Невидимым после добивания и откройте следующую цель.",
+    "price": 4,
+    "tags": [
+      "новые опции"
+    ],
+    "status": "approved"
   }
 ]

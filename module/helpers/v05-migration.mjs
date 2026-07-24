@@ -151,7 +151,7 @@ export async function migrateWorldV04ToV05() {
         summary.obsoleteCatalogItemsDeleted += 1;
         continue;
       }
-      if (item.type === 'trait-source-ability' && String(item.system?.mode ?? '').trim()) {
+      if (item.type === 'trait-source-ability') {
         const update = { _id: item.id };
         if (String(item.system?.usageFrequency ?? '') !== 'passive') {
           update['system.usageFrequency'] = 'passive';

@@ -1,6 +1,6 @@
 import { MODULE_ID } from '../config.mjs';
 import { isPlayerCharacterActorType } from './actor-types.mjs';
-import { deepClone } from './object-utils.mjs';
+import { areJsonValuesEqual, deepClone } from './object-utils.mjs';
 import { ARCHETYPE_RANK_BONUS, MIN_SKILL_RANK, normalizeCharacterRank } from './skill-check.mjs';
 
 // The archetype is a single Item dropped onto a player character. While present it
@@ -119,7 +119,7 @@ export function buildArchetypeAbilityVersionSystemData(ability, characterRank) {
     system: {
       description: String(version.description ?? '').trim(),
       rank: String(Math.max(1, Math.floor(Number(version.rank) || 1))),
-      mode: String(ability?.mode ?? 'standard').trim() || 'standard',
+      heatCost: Math.max(0, Math.floor(Number(ability?.heatCost) || 0)),
       usageFrequency: 'passive',
       activationCost: activation,
       activationType: activation,
@@ -190,7 +190,17 @@ export async function syncArchetypeAbilityToRank(actor, { render = false } = {})
   for (const item of actor.items ?? []) {
     if (!item.getFlag?.(MODULE_ID, ARCHETYPE_GRANT_FLAG)) continue;
     if (!item.system?.details?.archetypeAbility) continue;
-    const data = applyArchetypeAbilityVersionToItemData(item.toObject(), actor.system?.currentRank);
+    const currentData = item.toObject();
+    const data = applyArchetypeAbilityVersionToItemData(
+      deepClone(currentData),
+      actor.system?.currentRank
+    );
+    if (
+      String(data.name ?? '') === String(currentData.name ?? '') &&
+      areJsonValuesEqual(data.system, currentData.system)
+    ) {
+      continue;
+    }
     updates.push({ _id: item.id, name: data.name, system: data.system });
   }
   if (!updates.length) return 0;

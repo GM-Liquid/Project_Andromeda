@@ -4,6 +4,10 @@ import {
   MODULE_ID,
   debugLog
 } from '../config.mjs';
+import {
+  ARCHETYPE_GRANT_FLAG,
+  applyArchetypeAbilityVersionToItemData
+} from './archetype.mjs';
 import { getItemGroupConfigs } from './item-config.mjs';
 import { areJsonValuesEqual, deepClone, stableStringify } from './object-utils.mjs';
 
@@ -301,20 +305,31 @@ function buildWorldItemUpdateData(actorItem) {
   };
 }
 
-function buildActorItemUpdateDataFromLibrary(libraryItem, actorItem) {
+export function buildActorItemUpdateDataFromLibrary(libraryItem, actorItem) {
   const payload = buildSharedItemPayload(libraryItem);
-  foundry.utils.mergeObject(payload.system, preserveLocalSystemFields(actorItem?.system ?? {}), {
-    insertKeys: true,
-    overwrite: true,
-    inplace: true
-  });
+  payload.system = {
+    ...payload.system,
+    ...preserveLocalSystemFields(actorItem?.system ?? {})
+  };
 
-  return {
+  const updateData = {
     name: payload.name,
     img: payload.img,
     system: payload.system,
     [`flags.${MODULE_ID}.${LIBRARY_ITEM_UUID_FLAG}`]: libraryItem.uuid
   };
+
+  const archetypeGrantId =
+    actorItem?.getFlag?.(MODULE_ID, ARCHETYPE_GRANT_FLAG) ??
+    actorItem?.flags?.[MODULE_ID]?.[ARCHETYPE_GRANT_FLAG];
+  if (archetypeGrantId && updateData.system?.details?.archetypeAbility) {
+    applyArchetypeAbilityVersionToItemData(
+      updateData,
+      actorItem?.parent?.system?.currentRank
+    );
+  }
+
+  return updateData;
 }
 
 function buildLibraryItemStructureUpdate(libraryItem, linkedActorItems) {
@@ -861,9 +876,16 @@ export async function refreshCompendiumLinkedActorItems() {
 
       const source = await resolveSource(uuid);
       if (!source) continue;
-      if (sameValue(buildSharedItemPayload(source), buildSharedItemPayload(item))) continue;
+      const updateData = buildActorItemUpdateDataFromLibrary(source, item);
+      const desiredPayload = {
+        name: updateData.name,
+        type: item.type,
+        img: updateData.img,
+        system: updateData.system
+      };
+      if (sameValue(desiredPayload, buildSharedItemPayload(item))) continue;
 
-      updates.push({ _id: item.id, ...buildActorItemUpdateDataFromLibrary(source, item) });
+      updates.push({ _id: item.id, ...updateData });
     }
 
     if (updates.length) {

@@ -32,28 +32,31 @@ export const ITEM_USAGE_FREQUENCY_LABEL_KEYS = {
 };
 
 export const DEFAULT_ITEM_USAGE_FREQUENCY = 'passive';
-export const ABILITY_MODE_LABEL_KEYS = {
-  standard: 'MY_RPG.AbilityModes.Standard',
-  forced: 'MY_RPG.AbilityModes.Forced'
-};
 export const PERSONALITY_ITEM_ROLE_VALUE = 'value';
 
-export function normalizeAbilityMode(value) {
-  const normalized = String(value ?? '').trim();
-  return Object.hasOwn(ABILITY_MODE_LABEL_KEYS, normalized) ? normalized : '';
+export function normalizeBaseHeatCost(value) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? Math.max(0, Math.floor(numeric)) : 0;
 }
 
-// A forced ability costs 2 Heat at the character's rank, 1 Heat one rank later,
-// and becomes free once it is at least two ranks below the character.
+export function getAbilityBaseHeatCost(source) {
+  const system = source?.system ?? source ?? {};
+  if (system.heatCost !== '' && system.heatCost != null) {
+    return normalizeBaseHeatCost(system.heatCost);
+  }
+  // Compatibility fallback until the one-time migration rewrites legacy world items.
+  return String(system.mode ?? '').trim() === 'forced' ? 2 : 0;
+}
+
+// Each rank by which the character outgrows the ability reduces its base Heat cost by 1.
+// An ability above the character's rank never costs more than its stored base value.
 export function getAbilityHeatCost(source, characterRank) {
   const system = source?.system ?? source ?? {};
-  if (normalizeAbilityMode(system.mode) !== 'forced') return 0;
+  const baseHeatCost = getAbilityBaseHeatCost(system);
   const abilityRank = Math.max(1, Math.floor(Number(system.rank) || 1));
   const actorRank = Math.max(1, Math.floor(Number(characterRank) || 1));
-  const rankDifference = actorRank - abilityRank;
-  if (rankDifference >= 2) return 0;
-  if (rankDifference === 1) return 1;
-  return 2;
+  const rankDifference = Math.max(0, actorRank - abilityRank);
+  return Math.max(0, baseHeatCost - rankDifference);
 }
 
 export const ITEM_ACTIVATION_TYPE_LABEL_KEYS = {
@@ -169,11 +172,12 @@ function buildUsageFrequencyField() {
   };
 }
 
-function buildAbilityModeField() {
+function buildAbilityHeatCostField() {
   return {
-    path: 'mode',
-    labelKey: 'MY_RPG.ItemFields.AbilityMode',
-    type: 'text'
+    path: 'heatCost',
+    labelKey: 'MY_RPG.ItemFields.BaseHeatCost',
+    type: 'number',
+    min: 0
   };
 }
 
@@ -260,7 +264,6 @@ function buildDamageField() {
 
 const EQUIPMENT_ITEM_FIELDS = [
   buildRankField(),
-  buildAbilityModeField(),
   buildUsageFrequencyField(),
   buildActivationTypeField(),
   buildRangeField(),
@@ -272,8 +275,7 @@ const EQUIPMENT_ITEM_FIELDS = [
   buildSkillField({ showWhenPath: 'requiresRoll' }),
   buildDamageField()
 ];
-const TRAIT_ITEM_FIELDS = [
-  buildAbilityModeField(),
+const TRAIT_EFFECT_FIELDS = [
   buildUsageFrequencyField(),
   buildActivationTypeField(),
   buildRangeField(),
@@ -285,7 +287,13 @@ const TRAIT_ITEM_FIELDS = [
   buildSkillField({ showWhenPath: 'requiresRoll' }),
   buildDamageField()
 ];
-const ABILITY_ITEM_FIELDS = [buildRankField(), ...TRAIT_ITEM_FIELDS];
+const TRAIT_ITEM_FIELDS = [buildRankField(), ...TRAIT_EFFECT_FIELDS];
+const ABILITY_ITEM_FIELDS = [buildRankField(), buildAbilityHeatCostField(), ...TRAIT_EFFECT_FIELDS];
+const ARTIFACT_ITEM_FIELDS = [
+  buildRankField(),
+  buildAbilityHeatCostField(),
+  ...TRAIT_EFFECT_FIELDS
+];
 const WEAPON_ITEM_FIELDS = [
   buildUsageFrequencyField(),
   buildActivationTypeField(),
@@ -562,6 +570,7 @@ export const ITEM_TYPE_CONFIGS = [
     groupKey: 'sourceAbilities',
     sheet: 'generic',
     defaults: {
+      heatCost: 0,
       activationCost: 'passive',
       activationType: 'passive',
       range: '',
@@ -586,12 +595,12 @@ export const ITEM_TYPE_CONFIGS = [
     canRoll: false,
     defaults: {
       rank: '',
-      mode: '',
+      heatCost: 0,
       requiresRoll: false,
       skill: '',
       skillBonus: '0/0/0/0'
     },
-    fields: EQUIPMENT_ITEM_FIELDS
+    fields: ARTIFACT_ITEM_FIELDS
   },
   {
     type: 'archetype',
@@ -796,7 +805,7 @@ export function getItemTabLabel(tabKey) {
 
 function buildUsageFrequencyBadge(item, helpers) {
   const system = item.system ?? {};
-  if (normalizeAbilityMode(system.mode)) return [];
+  if (item.type === 'trait-source-ability' || item.type === 'artifact') return [];
   const value = normalizeUsageFrequency(system.usageFrequency);
   const labelKey = ITEM_USAGE_FREQUENCY_LABEL_KEYS[value];
   if (!labelKey) return [];

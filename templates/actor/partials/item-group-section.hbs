@@ -63,9 +63,6 @@
               <div class='item-row__identity'>
                 <div class='item-row__title-line'>
                   <span class='item-row__label'>{{item.name}}</span>
-                  <span class='item-row__toggle' aria-hidden='true'>
-                    <i class='fa-solid fa-chevron-down item-row__toggle-icon'></i>
-                  </span>
                 </div>
                 {{#if item.hasCardTags}}
                   <ul class='item-row__card-tags' aria-label='{{item.cardTagsLabel}}'>
@@ -146,10 +143,13 @@
                   />
                 </label>
               {{/if}}
+              <span class='item-row__toggle' aria-hidden='true'>
+                <i class='fa-solid fa-chevron-down item-row__toggle-icon'></i>
+              </span>
               {{#if item.hasActivationControl}}
                 <button
                   type='button'
-                  class='item-activate item-control {{#if item.hasCooldown}}item-activate--trackable{{/if}} {{#if item.cooldownUsed}}item-activate--used{{/if}}'
+                  class='item-activate item-action-control item-control {{#if item.hasCooldown}}item-activate--trackable{{/if}} {{#if item.cooldownUsed}}item-activate--used{{/if}}'
                   data-item-id='{{item.id}}'
                   data-group-key='{{item.groupKey}}'
                   data-default-icon='{{item.activationControlDefaultIcon}}'
@@ -164,7 +164,7 @@
               {{#if item.hasChatControl}}
                 <button
                   type='button'
-                  class='item-chat item-control'
+                  class='item-chat item-action-control item-control'
                   data-item-id='{{item.id}}'
                   data-group-key='{{item.groupKey}}'
                   title='{{@root.itemControls.chat}}'

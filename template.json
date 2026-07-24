@@ -181,7 +181,7 @@
         "equipped": false,
         "rank": "",
         "usageFrequency": "passive",
-        "mode": "",
+        "heatCost": 0,
         "activationCost": "passive",
         "duration": "",
         "area": "",

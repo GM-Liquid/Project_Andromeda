@@ -241,7 +241,7 @@ function buildGearCatalogSystemData(entry, config) {
   const systemData = {
     description: getGearCatalogDescription(entry),
     rank: getGearCatalogRank(entry),
-    mode: normalizeOptionalString(entry?.mode),
+    heatCost: Math.max(0, Math.floor(Number(entry?.heatCost) || 0)),
     usageFrequency: getGearCatalogUsageFrequency(entry),
     activationCost: getGearCatalogActivationType(entry),
     activationType: getGearCatalogActivationType(entry),

@@ -7,7 +7,7 @@ function getSystemData(row) {
   return JSON.parse(row.systemJson);
 }
 
-test('gear catalog transform maps ability modes and artifact activation metadata', () => {
+test('gear catalog transform maps base Heat and artifact activation metadata', () => {
   const remoteData = buildGearCatalogRemoteDataFromCatalogs({
     abilities: [
       {
@@ -16,7 +16,7 @@ test('gear catalog transform maps ability modes and artifact activation metadata
         type: 'ability',
         rank: 2,
         skill: 'mistika',
-        mode: 'forced',
+        heatCost: 2,
         description: 'Locks a target in place.',
         mechanics: {
           effects: [
@@ -71,7 +71,8 @@ test('gear catalog transform maps ability modes and artifact activation metadata
   assert.equal(abilityData.targets, 'single');
   assert.equal(abilityData.defense, 'fortitude');
   assert.equal(abilityData.duration, 'untilEndOfScene');
-  assert.equal(abilityData.mode, 'forced');
+  assert.equal(abilityData.heatCost, 2);
+  assert.equal(abilityData.mode, undefined);
 
   const artifactRow = remoteData.sheets.artifacts[0];
   const artifactData = getSystemData(artifactRow);
@@ -110,7 +111,7 @@ test('gear catalog transform keeps archetype descriptions separate from signatur
           defense: 'fortitude',
           activation: 'action',
           check: 'required',
-          mode: 'standard',
+          heatCost: 0,
           versions: [
             {
               rank: 1,
@@ -144,6 +145,7 @@ test('gear catalog transform keeps archetype descriptions separate from signatur
   const abilityData = getSystemData(remoteData.sheets.abilities[0]);
   assert.equal(abilityData.description, 'Dash forward and attack.');
   assert.equal(abilityData.skillBonus, '1/2/3/5');
+  assert.equal(abilityData.heatCost, 0);
   assert.equal(abilityData.details.archetypeAbility.versions.length, 1);
   const traitData = getSystemData(remoteData.sheets.traits[0]);
   assert.equal(traitData.description, 'Gain Heat.');

@@ -15,6 +15,8 @@ export const WEAPON_TYPE_MIGRATION_SETTING = 'weaponTypeMigrationVersion';
 export const WEAPON_TYPE_MIGRATION_VERSION = 1;
 export const V05_MIGRATION_SETTING = 'v05MigrationVersion';
 export const V05_MIGRATION_VERSION = 2;
+export const CONTENT_HEAT_MIGRATION_SETTING = 'contentHeatMigrationVersion';
+export const CONTENT_HEAT_MIGRATION_VERSION = 1;
 
 export function registerSystemSettings() {
   game.settings.register(MODULE_ID, 'debugMode', {
@@ -107,6 +109,13 @@ export function registerSystemSettings() {
   });
 
   game.settings.register(MODULE_ID, V05_MIGRATION_SETTING, {
+    scope: 'world',
+    config: false,
+    type: Number,
+    default: 0
+  });
+
+  game.settings.register(MODULE_ID, CONTENT_HEAT_MIGRATION_SETTING, {
     scope: 'world',
     config: false,
     type: Number,

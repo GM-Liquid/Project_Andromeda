@@ -6,7 +6,8 @@ import {
   buildArchetypeAbilityVersionSystemData,
   buildArchetypeTraitGrantData,
   getArchetypeAbilityDisplayName,
-  selectArchetypeAbilityVersion
+  selectArchetypeAbilityVersion,
+  syncArchetypeAbilityToRank
 } from './archetype.mjs';
 
 const ability = {
@@ -16,7 +17,7 @@ const ability = {
   defense: 'fortitude',
   activation: 'action',
   check: 'required',
-  mode: 'standard',
+  heatCost: 0,
   versions: [
     { rank: 1, name: 'Surge', range: { type: 'meters', value: 30 }, damage: '1/2/3/5' },
     { rank: 2, name: 'Wave', range: { type: 'meters', value: 100 }, damage: '2/4/6/9' },
@@ -61,7 +62,8 @@ test('archetype signature version updates all player-facing combat fields', () =
   assert.equal(version.system.rank, '2');
   assert.equal(version.system.range, '100 m');
   assert.equal(version.system.skillBonus, '2/4/6/9');
-  assert.equal(version.system.mode, 'standard');
+  assert.equal(version.system.heatCost, 0);
+  assert.equal(version.system.mode, undefined);
 
   const itemData = {
     name: 'Surge',
@@ -96,4 +98,43 @@ test('archetype trigger grant is a linked trait, not an ability', () => {
     data.flags['project-andromeda'].libraryItemUuid,
     'Compendium.project-andromeda.gear-library.Item.trigger'
   );
+});
+
+test('archetype rank sync repairs stale rank-one data and then becomes a no-op', async () => {
+  const itemData = {
+    _id: 'ability-id',
+    name: 'Surge',
+    system: {
+      details: { archetypeAbility: ability },
+      rank: '1',
+      range: '30 m',
+      skillBonus: '1/2/3/5'
+    }
+  };
+  const item = {
+    id: 'ability-id',
+    system: itemData.system,
+    getFlag: () => 'archetype-id',
+    toObject: () => structuredClone(itemData)
+  };
+  const updates = [];
+  const actor = {
+    system: { currentRank: 3 },
+    items: [item],
+    async updateEmbeddedDocuments(_documentName, pendingUpdates) {
+      updates.push(...pendingUpdates);
+      const update = pendingUpdates[0];
+      itemData.name = update.name;
+      itemData.system = structuredClone(update.system);
+      item.system = itemData.system;
+    }
+  };
+
+  assert.equal(await syncArchetypeAbilityToRank(actor), 1);
+  assert.equal(updates[0].name, 'Storm');
+  assert.equal(updates[0].system.rank, '3');
+  assert.equal(updates[0].system.skillBonus, '4/6/9/14');
+
+  assert.equal(await syncArchetypeAbilityToRank(actor), 0);
+  assert.equal(updates.length, 1);
 });

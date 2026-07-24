@@ -283,7 +283,7 @@
       "CombatActionsTitle": "Combat Actions",
       "HeroismTitle": "Highlight Points",
       "HeatTitle": "Heat",
-      "HeatText": "Heat starts at 0 when combat begins. Gain 1 Heat at the start of your turn and 1 after your final check outcome in combat is a failure. Your archetype grants 1 more Heat once per combat when its signature trigger occurs. Once per combat scene, spend 1 Highlight Point to gain 2 Heat. A forced ability costs 2 Heat at its own rank, 1 one rank later, and 0 two ranks later. All remaining Heat is lost when combat ends.",
+      "HeatText": "Heat starts at 0 when combat begins. Gain 1 Heat at the start of your turn and 1 after your final check outcome in combat is a failure. Your archetype grants 1 more Heat once per combat when its signature trigger occurs. Once per combat scene, spend 1 Highlight Point to gain 2 Heat. An ability's current cost is its base cost minus each rank by which the character exceeds the ability, to a minimum of 0. All remaining Heat is lost when combat ends.",
       "CombatActionsText": "On their turn, a character has 1 action, 1 maneuver, 1 reaction.\nAnd any number of free actions.\n\nAt the start of your turn, your action, maneuver, and reaction refresh. When all participants have finished their turns, a new round begins.\n\nAvailable action types:\n- Activate an ability\n- Skill check or attack. These differ only because an attack deals damage based on the check outcome.\n- Extra movement. Gain movement points equal to your speed and immediately spend them to move by the usual rules.\n- Ready. Spend your action now, name a condition, and until the start of your next turn you can spend your reaction to perform this action when the condition is triggered.\n\nAvailable maneuver types:\n- Move a distance equal to or less than your speed\n- Reload. Reload a weapon or device that has the Reload X property.\n- Help an ally. Remove a condition from an ally if the effect allows it to be removed by help.\n- Saving throw. Make a saving throw to remove a condition from yourself on a success.\n\nImportant!\nProvoked attacks are a free action. They are not reactions and do not spend the character's reaction.",
       "HeroismText": "How Highlight Points are used\nSpending a Highlight Point does not take an action, maneuver, or reaction.\n- Improve outcome. After your own check, before consequences are described, spend 1 Highlight Point to raise the outcome one step: failure -> success with a cost -> success -> critical success. The outcome cannot rise above a critical success, and only 1 Highlight Point can improve a single check.\n- Add a scene detail. Spend 1 Highlight Point to introduce a plausible, useful detail that could have existed in the scene: a fitting tool, an old contact, a handy route, a target's weak spot, a forgotten cache, or another believable element. It cannot undo events that already happened, erase the consequences of checks, or solve the scene by itself.\n- Remove a condition. Spend 1 Highlight Point to immediately remove one condition from yourself if it can be described in the scene. It does not heal stress and does not cancel long-term consequences.\n\nHighlight Point economy\nEach hero gains 1 Highlight Point at the start of every session and can hold no more than 3 at once. Unused Highlight Points do not carry over to the next session. A hero gains 1 Highlight Point when their motivation or complication actually worsens their situation."
     },
@@ -397,7 +397,7 @@
       "Targets": "Targets",
       "EquipmentSubtype": "Equipment Type",
       "UsageFrequency": "Frequency of use",
-      "AbilityMode": "Ability mode",
+      "BaseHeatCost": "Base Heat cost",
       "AdvancementCost": "Advancement cost"
     },
     "ItemTableColumns": {
@@ -433,10 +433,6 @@
       "Scene": "1/Scene",
       "TwoPerScene": "1/Session",
       "Passive": "Unlimited"
-    },
-    "AbilityModes": {
-      "Standard": "Standard",
-      "Forced": "Forced"
     },
     "ActivationTypes": {
       "Passive": "Passive",

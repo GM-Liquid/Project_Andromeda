@@ -19,7 +19,7 @@ test('item group rows render a collapsible table summary with detail sections', 
   assert.doesNotMatch(template, /item-group__header/);
   assert.match(template, /item-group__column-title/);
   assert.match(template, /item-group__create/);
-  assert.match(template, /item-row__name[\s\S]*item-row__label[\s\S]*item-row__toggle/);
+  assert.match(template, /item-row__name[\s\S]*item-row__label[\s\S]*item-row__actions/);
   assert.match(template, /item-row__summary-grid/);
   assert.match(template, /item-row__check/);
   assert.match(template, /item-row__activation/);
@@ -36,9 +36,15 @@ test('item group rows render a collapsible table summary with detail sections', 
   assert.match(actorSheet, /_getItemRollSummary/);
   assert.match(actorSheet, /_onItemActivate/);
   assert.match(actorSheet, /_onItemChat/);
+  assert.match(
+    actorSheet,
+    /_hasItemChatControl\(item, displayConfig = null\) \{[\s\S]*return Boolean\(item && !this\._hasItemActivationControl\(item, displayConfig\)\);/
+  );
   assert.match(actorSheet, /closest\('\.item-row\[data-item-id\]'\)/);
-  assert.match(template, /item-activate/);
-  assert.match(template, /item-chat/);
+  assert.match(
+    template,
+    /item-row__actions[\s\S]*item-row__toggle[\s\S]*item-activate item-action-control item-control[\s\S]*item-chat item-action-control item-control[\s\S]*item-edit item-control[\s\S]*item-delete item-control/
+  );
   assert.match(stylesheet, /\.project-andromeda \.item-group__columns \{/);
   assert.match(
     stylesheet,
@@ -54,11 +60,15 @@ test('item group rows render a collapsible table summary with detail sections', 
     stylesheet,
     /\.project-andromeda \.item-group__create \{[\s\S]*min-width:\s*var\(--andromeda-item-actions-width\);/
   );
-  assert.match(stylesheet, /\.project-andromeda \.item-row__toggle \{[\s\S]*display:\s*none;/);
   assert.match(
     stylesheet,
-    /\.project-andromeda \.item-row--expanded \.item-row__toggle \{[\s\S]*display:\s*inline-flex;/
+    /\.project-andromeda \.item-row__toggle \{[\s\S]*display:\s*inline-flex;[\s\S]*width:\s*1\.45rem;[\s\S]*height:\s*1\.45rem;/
   );
+  assert.match(
+    stylesheet,
+    /\.project-andromeda \.item-row--expanded \.item-row__toggle-icon \{[\s\S]*transform:\s*rotate\(180deg\);/
+  );
+  assert.equal(english.MY_RPG.ItemControls.Chat, 'Send to chat');
   assert.equal(english.MY_RPG.ItemTableColumns.Name, 'Name');
   assert.equal(english.MY_RPG.ItemTableColumns.Check, 'Check');
   assert.equal(english.MY_RPG.ItemTableColumns.Activation, 'Activation');
@@ -101,6 +111,35 @@ test('all item groups use a compact image-led card table with contextual tags', 
   assert.doesNotMatch(cardTagMethod, /SKILL_CHECK_FORMULA/);
 });
 
+test('item row primary controls follow roll, activation, then passive chat priority', () => {
+  const actorSheet = readFile('module/sheets/actor-sheet.mjs');
+  const activationStart = actorSheet.indexOf('\n  _hasItemActivationControl(');
+  const activationMethods = actorSheet.slice(
+    activationStart,
+    actorSheet.indexOf('\n  _isItemCooldownUsed(', activationStart)
+  );
+  const toggleStart = actorSheet.indexOf('\n  _onItemRowToggle(event)');
+  const toggleMethod = actorSheet.slice(
+    toggleStart,
+    actorSheet.indexOf('\n  _applyItemRowExpandedState(', toggleStart)
+  );
+
+  assert.match(
+    activationMethods,
+    /displayConfig\?\.canRoll[\s\S]*this\._hasItemCooldown\(item, displayConfig\)[\s\S]*this\._hasItemActivationCost\(item\)/
+  );
+  assert.match(
+    activationMethods,
+    /return displayConfig\?\.canRoll \? 'fa-solid fa-dice-d10' : 'fa-solid fa-bolt';/
+  );
+  assert.match(
+    activationMethods,
+    /const activationCost = String\([\s\S]*item\?\.system\?\.activationCost \?\? item\?\.system\?\.activationType[\s\S]*return Boolean\(activationCost && activationCost !== 'passive'\);/
+  );
+  assert.doesNotMatch(activationMethods, /\['abilities', 'artifacts'\]/);
+  assert.match(toggleMethod, /\.item-activate, \.item-chat,/);
+});
+
 test('item tables use a tighter layout with no rail divider and no left gutter', () => {
   const stylesheet = readFile('css/project-andromeda.css');
 
@@ -114,7 +153,7 @@ test('item tables use a tighter layout with no rail divider and no left gutter',
   );
   assert.match(
     stylesheet,
-    /\.project-andromeda \{[\s\S]*--andromeda-item-actions-width:\s*calc\(2rem \+ 2 \* 1\.45rem \+ 2 \* 0\.2rem\);[\s\S]*--andromeda-item-table-columns:\s*minmax\(0,\s*1\.85fr\)\s+minmax\(7\.6rem,\s*0\.82fr\)\s+minmax\(4\.6rem,\s*0\.42fr\)[\s\S]*minmax\(var\(--andromeda-item-actions-width\),\s*auto\);/
+    /\.project-andromeda \{[\s\S]*--andromeda-item-actions-width:\s*calc\(2rem \+ 3 \* 1\.45rem \+ 3 \* 0\.2rem\);[\s\S]*--andromeda-item-table-columns:\s*minmax\(0,\s*1\.85fr\)\s+minmax\(7\.6rem,\s*0\.82fr\)\s+minmax\(4\.6rem,\s*0\.42fr\)[\s\S]*minmax\(var\(--andromeda-item-actions-width\),\s*auto\);/
   );
   assert.match(
     stylesheet,
@@ -135,6 +174,18 @@ test('item tables use a tighter layout with no rail divider and no left gutter',
   assert.match(
     stylesheet,
     /\.project-andromeda \.item-control \{[\s\S]*width:\s*1\.45rem;[\s\S]*height:\s*1\.45rem;/
+  );
+  assert.match(
+    stylesheet,
+    /\.project-andromeda \.item-action-control \{[\s\S]*width:\s*2rem;[\s\S]*border-color:\s*var\(--andromeda-color-accent\);[\s\S]*background:\s*var\(--andromeda-color-panel\);[\s\S]*color:\s*var\(--andromeda-color-accent\);/
+  );
+  assert.match(
+    stylesheet,
+    /\.project-andromeda \.item-row__actions \{[\s\S]*flex-wrap:\s*nowrap;[\s\S]*align-items:\s*center;/
+  );
+  assert.match(
+    stylesheet,
+    /\.project-andromeda \.item-group--card-table \.item-row__actions \{[\s\S]*align-self:\s*center;[\s\S]*padding-top:\s*0;/
   );
   assert.doesNotMatch(stylesheet, /\.project-andromeda \.item-control:focus,/);
   assert.match(stylesheet, /\.project-andromeda \.item-control:focus-visible,/);
