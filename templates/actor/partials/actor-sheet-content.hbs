@@ -66,19 +66,20 @@
                   inputmode='numeric'
                 />
               </label>
-
-              <label class='andromeda-status-card andromeda-status-card--heat'>
-                <span>{{localize 'MY_RPG.Heat.Label'}}</span>
-                <input
-                  type='number'
-                  name='system.heat.value'
-                  value='{{system.heat.value}}'
-                  step='1'
-                  min='0'
-                  inputmode='numeric'
-                />
-              </label>
             {{/if}}
+
+            {{! Накал есть у всех: противники тоже платят им за свои способности. }}
+            <label class='andromeda-status-card andromeda-status-card--heat'>
+              <span>{{localize 'MY_RPG.Heat.Label'}}</span>
+              <input
+                type='number'
+                name='system.heat.value'
+                value='{{system.heat.value}}'
+                step='1'
+                min='0'
+                inputmode='numeric'
+              />
+            </label>
 
             {{#if isElite}}
               <label class='andromeda-status-card andromeda-status-card--glory andromeda-status-card--aside'>
@@ -313,6 +314,59 @@
                 data-group='primary'
                 data-tab='{{tab.key}}'
               >
+                {{! Базовые атаки есть у каждого персонажа всегда: их не покупают и не
+                    хранят предметами, поэтому лист выводит их отдельным блоком. }}
+                {{#if tab.isAbilities}}
+                  <section
+                    class='andromeda-basic-attacks'
+                    aria-label='{{localize "MY_RPG.BasicAttacks.Title"}}'
+                  >
+                    <div class='andromeda-basic-attacks__header'>
+                      <i class='fas fa-burst'></i>
+                      <span class='andromeda-basic-attacks__title'>
+                        {{localize 'MY_RPG.BasicAttacks.Title'}}
+                      </span>
+                      <span class='andromeda-basic-attacks__hint'>
+                        {{localize 'MY_RPG.BasicAttacks.Hint'}}
+                      </span>
+                    </div>
+                    <ol class='andromeda-basic-attacks__list'>
+                      {{#each @root.basicAttacks as |attack|}}
+                        <li class='andromeda-basic-attack' data-basic-attack='{{attack.key}}'>
+                          <button
+                            type='button'
+                            class='basic-attack-roll andromeda-basic-attack__roll'
+                            data-basic-attack='{{attack.key}}'
+                            title='{{attack.rollTitle}}'
+                          >
+                            <i class='{{attack.icon}}'></i>
+                            <span class='andromeda-basic-attack__name'>{{attack.label}}</span>
+                          </button>
+                          <span class='andromeda-basic-attack__check'>
+                            <span class='andromeda-basic-attack__skill'>{{attack.skillLabel}}</span>
+                            <span
+                              class='andromeda-basic-attack__rank {{attack.rankClass}}'
+                            >{{attack.rankRoman}}</span>
+                            <strong class='andromeda-basic-attack__bonus'>{{attack.bonusLabel}}</strong>
+                          </span>
+                          <span
+                            class='andromeda-basic-attack__meta'
+                            title='{{localize "MY_RPG.ItemFields.Defense"}}'
+                          >{{attack.defenseLabel}}</span>
+                          <span
+                            class='andromeda-basic-attack__meta'
+                            title='{{localize "MY_RPG.ItemFields.Range"}}'
+                          >{{attack.rangeLabel}}</span>
+                          <span
+                            class='andromeda-basic-attack__damage'
+                            title='{{localize "MY_RPG.WeaponsTable.DamageLabel"}}'
+                          >{{attack.damageLabel}}</span>
+                        </li>
+                      {{/each}}
+                    </ol>
+                  </section>
+                {{/if}}
+
                 <section class='item-groups' data-groups='{{tab.key}}'>
                   {{#each tab.groups as |group|}}
                     {{> "systems/project-andromeda/templates/actor/partials/item-group-section.hbs" group=group}}

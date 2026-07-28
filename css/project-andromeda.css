@@ -1103,7 +1103,8 @@ textarea[disabled] {
 .project-andromeda .andromeda-hud--gm .andromeda-hud__stats-row {
   grid-template-areas:
     'stress'
-    'speed';
+    'speed'
+    'heat';
   grid-template-columns: 4.75rem;
   justify-content: flex-start;
   justify-items: start;
@@ -1113,7 +1114,8 @@ textarea[disabled] {
 .project-andromeda.elite .andromeda-hud--gm .andromeda-hud__stats-row {
   grid-template-areas:
     'stress glory'
-    'speed glory';
+    'speed glory'
+    'heat glory';
   grid-template-columns: 4.75rem 8rem;
 }
 
@@ -1126,6 +1128,15 @@ textarea[disabled] {
 
 .project-andromeda .andromeda-hud--gm .andromeda-status-card--stress {
   grid-area: stress;
+  justify-self: start;
+  width: 4.75rem;
+  text-align: center;
+}
+
+/* Opponents spend Heat on their own abilities, so their HUD tracks it too — in the
+   narrow left column, under Speed, instead of the wide player-side card. */
+.project-andromeda .andromeda-hud--gm .andromeda-status-card--heat {
+  grid-area: heat;
   justify-self: start;
   width: 4.75rem;
   text-align: center;
@@ -2538,6 +2549,152 @@ textarea[disabled] {
    complications group must not add its own trailing margin on top of that. */
 .project-andromeda .personality-item-groups {
   margin-bottom: 0;
+}
+
+/* Basic attacks are always-available derived rows, not items: no create, edit, or
+   delete controls, so they get their own compact card above the ability groups. */
+.project-andromeda .andromeda-basic-attacks {
+  overflow: hidden;
+  margin-bottom: 0.65rem;
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text));
+  border: 2px solid var(--andromeda-color-text, var(--andromeda-fallback-text));
+  border-radius: var(--andromeda-radius-lg, var(--andromeda-fallback-radius-lg));
+  background: var(--andromeda-color-surface, var(--andromeda-fallback-surface));
+}
+
+.project-andromeda .andromeda-basic-attacks__header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.6rem;
+  border-bottom: 2px solid var(--andromeda-color-text, var(--andromeda-fallback-text));
+  background: var(--andromeda-color-panel, var(--andromeda-fallback-panel));
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.project-andromeda .andromeda-basic-attacks__hint {
+  margin-left: auto;
+  color: var(--andromeda-color-muted, var(--andromeda-fallback-muted));
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.project-andromeda .andromeda-basic-attacks__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.project-andromeda .andromeda-basic-attack {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto) auto auto auto;
+  gap: 0.45rem;
+  align-items: center;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.84rem;
+}
+
+.project-andromeda .andromeda-basic-attack + .andromeda-basic-attack {
+  border-top: 1px solid var(--andromeda-color-line, var(--andromeda-fallback-line));
+}
+
+.project-andromeda .andromeda-basic-attack__roll {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  width: auto;
+  margin: 0;
+  padding: 0.15rem 0.35rem;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text));
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: left;
+  cursor: pointer;
+}
+
+.project-andromeda .andromeda-basic-attack__roll:hover,
+.project-andromeda .andromeda-basic-attack__roll:focus-visible {
+  border-color: var(--andromeda-color-accent);
+  background: var(--andromeda-color-panel, var(--andromeda-fallback-panel));
+}
+
+.project-andromeda .andromeda-basic-attack__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-andromeda .andromeda-basic-attack__check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+  color: var(--andromeda-color-muted, var(--andromeda-fallback-muted));
+}
+
+.project-andromeda .andromeda-basic-attack__skill {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--andromeda-color-text, var(--andromeda-fallback-text));
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-andromeda .andromeda-basic-attack__rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-width: 1.5rem;
+  height: 1.15rem;
+  padding: 0 0.3rem;
+  border-radius: 4px;
+  color: var(--andromeda-raw-charcoal-800);
+  font-family: var(--andromeda-font-heading);
+  font-weight: 700;
+}
+
+.project-andromeda .andromeda-basic-attack__rank.rank1 {
+  background: var(--andromeda-color-rank1);
+}
+
+.project-andromeda .andromeda-basic-attack__rank.rank2 {
+  background: var(--andromeda-color-rank2);
+}
+
+.project-andromeda .andromeda-basic-attack__rank.rank3 {
+  background: var(--andromeda-color-rank3);
+}
+
+.project-andromeda .andromeda-basic-attack__rank.rank4 {
+  background: var(--andromeda-color-rank4);
+}
+
+.project-andromeda .andromeda-basic-attack__meta {
+  flex: 0 0 auto;
+  color: var(--andromeda-color-muted, var(--andromeda-fallback-muted));
+  white-space: nowrap;
+}
+
+.project-andromeda .andromeda-basic-attack__damage {
+  flex: 0 0 auto;
+  font-family: var(--andromeda-font-data, var(--andromeda-fallback-font-data));
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .project-andromeda .item-group {

@@ -64,6 +64,7 @@ export const ITEM_ACTIVATION_TYPE_LABEL_KEYS = {
   action: 'MY_RPG.ActivationTypes.Action',
   maneuver: 'MY_RPG.ActivationTypes.Maneuver',
   freeAction: 'MY_RPG.ActivationTypes.FreeAction',
+  outOfCombatAction: 'MY_RPG.ActivationTypes.OutOfCombatAction',
   reaction: 'MY_RPG.ActivationTypes.Reaction'
 };
 

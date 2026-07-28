@@ -225,6 +225,16 @@
       "CostLabel": "Накал",
       "NotEnough": "Недостаточно Накала: нужно {cost}, доступно {available}."
     },
+    "BasicAttacks": {
+      "Title": "Базовые атаки",
+      "Hint": "Есть всегда, не стоят Накала",
+      "Melee": "Ближняя базовая атака",
+      "Ranged": "Дальняя базовая атака",
+      "MeleeRange": "Ближний бой",
+      "RangeMeters": "{distance} м",
+      "Roll": "Бросить: {attack}",
+      "Note": "Базовая атака: ранг проверки равен рангу персонажа, к броску прибавляется значение навыка."
+    },
     "TempSpeed": {
       "Label": "Врем. скорость"
     },
@@ -439,6 +449,7 @@
       "Action": "Действие",
       "Maneuver": "Маневр",
       "FreeAction": "Свободное действие",
+      "OutOfCombatAction": "Внебоевое действие",
       "Reaction": "Реакция"
     },
     "ActivationTypesShort": {
@@ -446,6 +457,7 @@
       "Action": "Действ.",
       "Maneuver": "Маневр",
       "FreeAction": "Своб.",
+      "OutOfCombatAction": "Внебоев.",
       "Reaction": "Реакц."
     },
     "ItemDurations": {
@@ -469,9 +481,10 @@
       "Self": "На себя"
     },
     "ItemAreaTypes": {
-      "blast": "Взрыв",
-      "circle": "Круг, диаметр",
-      "ray": "Луч"
+      "circle": "Круг, радиус",
+      "cone": "Конус, длина",
+      "ray": "Луч, ширина",
+      "scene": "Вся сцена"
     },
     "RollFlavor": {
       "Modifiers": "Модификаторы",

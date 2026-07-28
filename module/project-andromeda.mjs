@@ -61,6 +61,7 @@ import {
   ARCHETYPE_RANK_SYNC_OPTION,
   ARCHETYPE_SWAP_OPTION,
   clearArchetypeEffects,
+  syncArchetypeAbilitiesForActors,
   syncArchetypeAbilityToRank,
   syncArchetypeTraitGrant
 } from './helpers/archetype.mjs';
@@ -1457,6 +1458,21 @@ async function runCompendiumPackRefreshIfNeeded() {
   return result;
 }
 
+// Repeatable, not a migration: every catalog refresh and one-time migration above
+// rewrites actor items straight from the gear pack, where an archetype signature
+// ability is stored at its rank-1 version. This is the single place that puts the
+// grant back on the character's own rank, so entering the world never shows a
+// rank-II hero holding the rank-I version of their signature ability.
+async function runArchetypeAbilityRankSync() {
+  const summary = await syncArchetypeAbilitiesForActors(game.actors?.contents ?? [], {
+    render: false
+  });
+  if (summary.abilitiesUpdated) {
+    debugLog('Archetype signature abilities resynced to character rank', summary);
+  }
+  return summary;
+}
+
 async function runV05MigrationIfNeeded() {
   const currentVersion = Number(game.settings.get(MODULE_ID, V05_MIGRATION_SETTING)) || 0;
   if (currentVersion >= V05_MIGRATION_VERSION) return null;
@@ -1955,7 +1971,12 @@ Hooks.once('ready', async function () {
         { name: 'compendium pack refresh', run: runCompendiumPackRefreshIfNeeded },
         { name: '0.4 to 0.5 migration', run: runV05MigrationIfNeeded },
         { name: 'content and Heat migration', run: runContentHeatMigrationIfNeeded },
-        { name: 'campaign ability migration', run: runCampaignAbilityMigrationIfNeeded }
+        { name: 'campaign ability migration', run: runCampaignAbilityMigrationIfNeeded },
+        {
+          name: 'archetype ability rank sync',
+          continueOnError: true,
+          run: runArchetypeAbilityRankSync
+        }
       ],
       { onError: reportStartupError }
     );

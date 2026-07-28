@@ -220,6 +220,16 @@
       "CostLabel": "Heat",
       "NotEnough": "Not enough Heat: {cost} required, {available} available."
     },
+    "BasicAttacks": {
+      "Title": "Basic Attacks",
+      "Hint": "Always available, cost no Heat",
+      "Melee": "Melee Basic Attack",
+      "Ranged": "Ranged Basic Attack",
+      "MeleeRange": "Melee",
+      "RangeMeters": "{distance} m",
+      "Roll": "Roll: {attack}",
+      "Note": "Basic attack: the check rank equals the character's rank, and the skill value is added to the roll."
+    },
     "Temp": {
       "BonusFortitudeLabel": "Temp. Fortitude",
       "BonusControlLabel": "Temp. Control",
@@ -439,6 +449,7 @@
       "Action": "Action",
       "Maneuver": "Maneuver",
       "FreeAction": "Free Action",
+      "OutOfCombatAction": "Out-of-combat Action",
       "Reaction": "Reaction"
     },
     "ActivationTypesShort": {
@@ -446,6 +457,7 @@
       "Action": "Action",
       "Maneuver": "Move",
       "FreeAction": "Free",
+      "OutOfCombatAction": "Out-of-cbt",
       "Reaction": "React"
     },
     "ItemDurations": {
@@ -469,9 +481,10 @@
       "Self": "Self"
     },
     "ItemAreaTypes": {
-      "blast": "Blast",
-      "circle": "Circle, diameter",
-      "ray": "Ray"
+      "circle": "Circle, radius",
+      "cone": "Cone, length",
+      "ray": "Ray, width",
+      "scene": "Whole scene"
     },
     "RollFlavor": {
       "Modifiers": "Modifiers",

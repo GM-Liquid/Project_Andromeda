@@ -208,6 +208,24 @@ export async function syncArchetypeAbilityToRank(actor, { render = false } = {})
   return updates.length;
 }
 
+/**
+ * Reconcile the signature ability of every listed actor with its current rank.
+ * Catalog refreshes and one-time migrations rewrite actor items straight from the
+ * gear pack, where the archetype ability is stored at its rank-1 version, so the
+ * grant can silently fall back a rank. Running this after those tasks restores the
+ * matching version; it writes nothing when the data already agrees.
+ */
+export async function syncArchetypeAbilitiesForActors(actors = [], { render = false } = {}) {
+  const summary = { actorsUpdated: 0, abilitiesUpdated: 0 };
+  for (const actor of actors) {
+    const updated = await syncArchetypeAbilityToRank(actor, { render });
+    if (!updated) continue;
+    summary.actorsUpdated += 1;
+    summary.abilitiesUpdated += updated;
+  }
+  return summary;
+}
+
 export function getSkillRankBonus(actor, skillKey) {
   const archetypeSkill = getArchetypeSkillKey(actor);
   return archetypeSkill && archetypeSkill === skillKey ? ARCHETYPE_RANK_BONUS : 0;

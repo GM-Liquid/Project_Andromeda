@@ -1,4 +1,5 @@
 import { MODULE_ID, debugLog } from '../config.mjs';
+import { syncArchetypeAbilityToRank } from './archetype.mjs';
 import { getGearLibraryPack, getLibrarySyncOptionKey } from './item-library-sync.mjs';
 
 const ABILITY_ITEM_TYPE = 'trait-source-ability';
@@ -238,6 +239,7 @@ export async function migrateCampaignAbilitiesToCatalog() {
     actorsUpdated: 0,
     itemsUpdated: 0,
     itemsReplaced: 0,
+    archetypeAbilitiesResynced: 0,
     duplicateLegacyItemsRemoved: 0,
     matchedByWorldMetadata: 0,
     matchedByCatalogKey: 0,
@@ -316,7 +318,14 @@ export async function migrateCampaignAbilitiesToCatalog() {
     if (createData.length) await actor.createEmbeddedDocuments('Item', createData, options);
     if (updates.length) await actor.updateEmbeddedDocuments('Item', updates, options);
     if (deleteIds.length) await actor.deleteEmbeddedDocuments('Item', deleteIds, options);
-    if (createData.length || updates.length || deleteIds.length) summary.actorsUpdated += 1;
+    // The pack stores an archetype signature ability at its rank-1 version, so the
+    // refresh above would knock a higher-rank character back a version. Restore the
+    // version that matches the character right after the catalog data lands.
+    const rankUpdates = await syncArchetypeAbilityToRank(actor, { render: false });
+    summary.archetypeAbilitiesResynced += rankUpdates;
+    if (createData.length || updates.length || deleteIds.length || rankUpdates) {
+      summary.actorsUpdated += 1;
+    }
   }
 
   debugLog('Campaign abilities refreshed from the catalog', summary);

@@ -97,11 +97,16 @@ test('HUD stat grid keeps stress and progression columns compact', () => {
   );
   assert.match(
     stylesheet,
-    /\.project-andromeda \.andromeda-hud--gm \.andromeda-hud__stats-row \{[\s\S]*grid-template-areas:\s*'stress'\s*'speed';[\s\S]*grid-template-columns:\s*4\.75rem;/
+    /\.project-andromeda \.andromeda-hud--gm \.andromeda-hud__stats-row \{[\s\S]*grid-template-areas:\s*'stress'\s*'speed'\s*'heat';[\s\S]*grid-template-columns:\s*4\.75rem;/
   );
   assert.match(
     stylesheet,
-    /\.project-andromeda\.elite \.andromeda-hud--gm \.andromeda-hud__stats-row \{[\s\S]*grid-template-areas:\s*'stress glory'\s*'speed glory';[\s\S]*grid-template-columns:\s*4\.75rem 8rem;/
+    /\.project-andromeda\.elite \.andromeda-hud--gm \.andromeda-hud__stats-row \{[\s\S]*grid-template-areas:\s*'stress glory'\s*'speed glory'\s*'heat glory';[\s\S]*grid-template-columns:\s*4\.75rem 8rem;/
+  );
+  // Opponents pay Heat for their abilities, so the GM HUD tracks it in its own slot.
+  assert.match(
+    stylesheet,
+    /\.project-andromeda \.andromeda-hud--gm \.andromeda-status-card--heat \{[\s\S]*grid-area:\s*heat;[\s\S]*width:\s*4\.75rem;/
   );
   assert.match(
     stylesheet,

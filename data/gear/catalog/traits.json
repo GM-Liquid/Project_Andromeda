@@ -1581,7 +1581,10 @@
               "type": "circle",
               "value": 500
             },
-            "frequency": "oncePerScene"
+            "frequency": "oncePerScene",
+            "range": {
+              "type": "self"
+            }
           },
           "outcomes": [
             {

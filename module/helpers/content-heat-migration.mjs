@@ -177,10 +177,20 @@ export async function deleteExistingDocuments(collection, ids, deleteDocuments) 
     } catch (error) {
       const remainingIds = filterExistingDocumentIds(collection, pendingIds);
       // Foundry hooks can remove a linked world item while this migration is awaiting
-      // another document operation. Retry only when the failed batch actually shrank;
-      // unrelated deletion failures must still abort the one-time migration.
-      if (remainingIds.length >= pendingIds.length) throw error;
-      pendingIds = remainingIds;
+      // another document operation. Retry only when the failed batch actually shrank.
+      if (remainingIds.length < pendingIds.length) {
+        pendingIds = remainingIds;
+        continue;
+      }
+      // Батч не уменьшился. Значит документ пропал уже внутри самой операции удаления
+      // (например, хук снял предмет, выданный архетипом), и Foundry отменила весь батч
+      // целиком. Дальше удаляем поштучно: одна исчезнувшая запись не должна отменять
+      // разовую миграцию, а настоящая ошибка удаления всё равно всплывёт.
+      if (pendingIds.length === 1) throw error;
+      for (const id of pendingIds) {
+        await deleteExistingDocuments(collection, [id], deleteDocuments);
+      }
+      return;
     }
   }
 }

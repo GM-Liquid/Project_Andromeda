@@ -63,6 +63,7 @@ const usageValueLabels = {
   actionCost: {
     action: 'Действие',
     freeAction: 'Свободное действие',
+    outOfCombatAction: 'Внебоевое действие',
     reaction: 'Реакция',
     maneuver: 'Маневр'
   },
@@ -416,19 +417,23 @@ function formatAreaValue(value) {
     return value.trim();
   }
 
+  // Круг всегда задаётся радиусом, луч — шириной, конус — длиной,
+  // см. «Дистанции и перемещение» в приватном каноне.
   switch (value.type) {
-    case 'blast':
-      return value.value ? `Взрыв ${value.value} м` : 'Взрыв';
     case 'circle':
-      return value.value ? `Круг, диаметр ${value.value} м` : 'Круг';
+      return value.value ? `Круг, радиус ${value.value} м` : 'Круг';
+    case 'cone':
+      return value.value ? `Конус, длина ${value.value} м` : 'Конус';
     case 'custom':
       return String(value.value ?? '').trim();
     case 'line':
       return value.value ? `Линия ${value.value} м` : 'Линия';
     case 'ray':
-      return value.value ? `Луч ${value.value} м` : 'Луч';
+      return value.value ? `Луч, ширина ${value.value} м` : 'Луч';
     case 'radius':
       return value.value ? `Радиус ${value.value} м` : 'Радиус';
+    case 'scene':
+      return 'Вся сцена';
     default:
       return '';
   }

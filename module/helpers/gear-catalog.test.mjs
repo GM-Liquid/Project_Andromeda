@@ -196,6 +196,60 @@ test('gear catalog transform preserves freeAction abilities as freeAction activa
   assert.equal(abilityData.requiresRoll, false);
 });
 
+test('gear catalog transform supports out-of-combat activation and scene-wide areas', () => {
+  const remoteData = buildGearCatalogRemoteDataFromCatalogs({
+    armor: [],
+    equipment: [],
+    abilities: [
+      {
+        id: 'otkrytyy-razum',
+        name: 'Открытый разум',
+        type: 'ability',
+        rank: 1,
+        skill: 'obayanie',
+        description: 'Read surface thoughts.',
+        mechanics: {
+          effects: [
+            {
+              activation: { type: 'outOfCombatAction' },
+              conditions: { range: { type: 'meters', value: 10 } },
+              outcomes: [{ key: 'readThoughts' }]
+            }
+          ]
+        }
+      },
+      {
+        id: 'biosensorika',
+        name: 'Биосенсорика',
+        type: 'ability',
+        rank: 1,
+        skill: 'mistika',
+        description: 'Sense every living creature in sight.',
+        mechanics: {
+          effects: [
+            {
+              activation: { type: 'freeAction' },
+              conditions: {
+                range: { type: 'self' },
+                targets: 'allInArea',
+                area: { type: 'scene' }
+              },
+              outcomes: [{ key: 'utility', value: 1 }]
+            }
+          ]
+        }
+      }
+    ]
+  });
+
+  const [outOfCombat, sceneWide] = remoteData.sheets.abilities.map(getSystemData);
+  assert.equal(outOfCombat.activationCost, 'outOfCombatAction');
+  assert.equal(outOfCombat.activationType, 'outOfCombatAction');
+  // Область «вся сцена» не имеет размера, поэтому остаётся голым типом.
+  assert.equal(sceneWide.area, 'scene');
+  assert.equal(sceneWide.range, 'self');
+});
+
 test('gear catalog transform keeps all migrated equipment in the artifact group', () => {
   const remoteData = buildGearCatalogRemoteDataFromCatalogs({
     abilities: [],

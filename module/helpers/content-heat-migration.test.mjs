@@ -133,3 +133,39 @@ test('content migration ignores duplicate and already removed document ids', asy
   ]);
   assert.equal(documents.size, 0);
 });
+
+test('content migration falls back to single deletes when a batch fails as a whole', async () => {
+  const documents = new Map([
+    ['keep-a', { id: 'keep-a' }],
+    ['ghost', { id: 'ghost' }],
+    ['keep-b', { id: 'keep-b' }]
+  ]);
+
+  const attempts = [];
+  await deleteExistingDocuments(documents, ['keep-a', 'ghost', 'keep-b'], async (ids) => {
+    attempts.push([...ids]);
+    // Foundry отменяет весь батч и ничего не удаляет, а сам документ при этом
+    // остаётся видимым в коллекции — повторная фильтрация батч не уменьшает.
+    if (ids.includes('ghost') && ids.length > 1) {
+      throw new Error('undefined id [ghost] does not exist in the EmbeddedCollection collection');
+    }
+    if (ids.includes('ghost')) {
+      documents.delete('ghost');
+      throw new Error('undefined id [ghost] does not exist in the EmbeddedCollection collection');
+    }
+    for (const id of ids) documents.delete(id);
+  });
+
+  assert.deepEqual(attempts, [['keep-a', 'ghost', 'keep-b'], ['keep-a'], ['ghost'], ['keep-b']]);
+  assert.equal(documents.size, 0);
+});
+
+test('content migration still reports a deletion failure it cannot explain', async () => {
+  const documents = new Map([['stuck', { id: 'stuck' }]]);
+  await assert.rejects(
+    deleteExistingDocuments(documents, ['stuck'], async () => {
+      throw new Error('database is locked');
+    }),
+    /database is locked/u
+  );
+});

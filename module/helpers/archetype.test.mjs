@@ -7,6 +7,7 @@ import {
   buildArchetypeTraitGrantData,
   getArchetypeAbilityDisplayName,
   selectArchetypeAbilityVersion,
+  syncArchetypeAbilitiesForActors,
   syncArchetypeAbilityToRank
 } from './archetype.mjs';
 
@@ -98,6 +99,56 @@ test('archetype trigger grant is a linked trait, not an ability', () => {
     data.flags['project-andromeda'].libraryItemUuid,
     'Compendium.project-andromeda.gear-library.Item.trigger'
   );
+});
+
+function buildRankSyncActor(currentRank) {
+  const itemData = {
+    _id: 'ability-id',
+    name: 'Surge',
+    system: {
+      details: { archetypeAbility: ability },
+      rank: '1',
+      range: '30 m',
+      skillBonus: '1/2/3/5'
+    }
+  };
+  const item = {
+    id: 'ability-id',
+    system: itemData.system,
+    getFlag: () => 'archetype-id',
+    toObject: () => structuredClone(itemData)
+  };
+  return {
+    system: { currentRank },
+    items: [item],
+    async updateEmbeddedDocuments(_documentName, pendingUpdates) {
+      const update = pendingUpdates[0];
+      itemData.name = update.name;
+      itemData.system = structuredClone(update.system);
+      item.system = itemData.system;
+    },
+    get abilityName() {
+      return itemData.name;
+    }
+  };
+}
+
+test('world-load sync puts every archetype ability back on its character rank', async () => {
+  // The gear pack stores the rank-1 version, so a catalog refresh can leave a rank-II
+  // hero holding the rank-I text. The startup reconciliation must repair that.
+  const secondRank = buildRankSyncActor(2);
+  const firstRank = buildRankSyncActor(1);
+
+  await syncArchetypeAbilitiesForActors([secondRank, firstRank]);
+
+  assert.equal(secondRank.abilityName, 'Wave');
+  assert.equal(firstRank.abilityName, 'Surge');
+
+  // Idempotent: a second load writes nothing.
+  assert.deepEqual(await syncArchetypeAbilitiesForActors([secondRank, firstRank]), {
+    actorsUpdated: 0,
+    abilitiesUpdated: 0
+  });
 });
 
 test('archetype rank sync repairs stale rank-one data and then becomes a no-op', async () => {

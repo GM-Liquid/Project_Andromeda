@@ -41,6 +41,11 @@ import {
   getItemTabLabel
 } from '../helpers/item-config.mjs';
 import {
+  BASIC_ATTACK_MELEE,
+  buildBasicAttacks,
+  getBasicAttack
+} from '../helpers/basic-attacks.mjs';
+import {
   findGearLibraryUuidBySyncId,
   getGearLibraryPack,
   isLibrarySyncManagedType,
@@ -503,6 +508,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     $html.on('click', '.item-activate', this._onItemActivate.bind(this));
     $html.on('click', '.item-chat', this._onItemChat.bind(this));
     $html.on('click', '.item-roll', this._onItemRoll.bind(this));
+    $html.on('click', '.basic-attack-roll', this._onBasicAttackRoll.bind(this));
     $html.on('click', '.item-quantity-step', this._onItemQuantityStep.bind(this));
     $html.on('change', '.item-equip-checkbox', this._onItemEquipChange.bind(this));
     $html.on('click', '[data-item-summary-toggle]', this._onItemRowToggle.bind(this));
@@ -616,6 +622,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       key: tab.key,
       label: game.i18n.localize(getItemTabLabel(tab.key)),
       groups: itemGroupsByTab[tab.key] ?? [],
+      isAbilities: tab.key === 'abilities',
       isInventory: tab.key === 'inventory',
       supplies: context.system?.supplies ?? 0,
       money: context.system?.money ?? 0
@@ -623,6 +630,34 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     context.itemControls = this._getItemControlLabels();
 
     return context;
+  }
+
+  // Базовые атаки не предметы: их нельзя купить, отредактировать или удалить, поэтому
+  // лист строит их из ранга и навыков персонажа при каждом рендере.
+  _buildBasicAttackDisplays() {
+    return buildBasicAttacks(this.actor.system ?? {}, this.actor.type).map((attack) => {
+      const label = game.i18n.localize(
+        attack.key === BASIC_ATTACK_MELEE
+          ? 'MY_RPG.BasicAttacks.Melee'
+          : 'MY_RPG.BasicAttacks.Ranged'
+      );
+      return {
+        ...attack,
+        label,
+        icon: attack.key === BASIC_ATTACK_MELEE ? 'fas fa-hand-fist' : 'fas fa-crosshairs',
+        rollTitle: game.i18n.format('MY_RPG.BasicAttacks.Roll', { attack: label }),
+        skillLabel: this._skillLabel(attack.skillKey),
+        bonusLabel: `+${attack.skillValue}`,
+        rankRoman: toRoman(attack.rank),
+        rankClass: `rank${attack.rank}`,
+        defenseLabel: game.i18n.localize(ITEM_DEFENSE_LABEL_KEYS[attack.defenseKey]),
+        rangeLabel:
+          attack.rangeMeters === null
+            ? game.i18n.localize('MY_RPG.BasicAttacks.MeleeRange')
+            : game.i18n.format('MY_RPG.BasicAttacks.RangeMeters', { distance: attack.rangeMeters }),
+        damageLabel: formatDamageProfile(attack.damageProfile)
+      };
+    });
   }
 
   _preparePersonalityData(context) {
@@ -692,6 +727,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     context.system.skills = sortedSkills;
     context.skillList = skillList;
     context.defenseRows = defenseRows;
+    context.basicAttacks = this._buildBasicAttackDisplays();
 
     const stress = context.system.stress ?? { value: 0, max: 0 };
     const stressMax = Math.max(Number(stress.max) || 0, 0);
@@ -1844,13 +1880,13 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
 
   _formatAreaValue(value) {
     const normalized = String(value ?? '').trim();
-    const match = /^([a-z]+)\s+(.+)$/i.exec(normalized);
+    // `scene` не имеет размера: это вся сцена, поэтому у него нет числовой части.
+    const match = /^([a-z]+)(?:\s+(.+))?$/i.exec(normalized);
     if (!match) return normalized;
     const [, areaType, rest] = match;
     const localizedType = game.i18n.localize(`MY_RPG.ItemAreaTypes.${areaType}`);
-    return localizedType === `MY_RPG.ItemAreaTypes.${areaType}`
-      ? normalized
-      : `${localizedType} ${rest}`;
+    if (localizedType === `MY_RPG.ItemAreaTypes.${areaType}`) return normalized;
+    return rest ? `${localizedType} ${rest}` : localizedType;
   }
 
   _formatNumericDetail(value) {
@@ -2177,6 +2213,74 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       return;
     }
     await this._rollItem(item, itemId, { includeItemContent: true });
+  }
+
+  // Базовая атака бросается не так, как остальные: ранг проверки равен рангу
+  // персонажа, а не рангу навыка, а навык добавляет к `2d8` только своё значение.
+  async _onBasicAttackRoll(event) {
+    event.preventDefault();
+    event.currentTarget?.blur?.();
+    const attackKey = event.currentTarget?.dataset?.basicAttack ?? '';
+    const attack = getBasicAttack(this.actor.system ?? {}, this.actor.type, attackKey);
+    if (!attack) {
+      debugLog('Basic attack roll failed - unknown attack', {
+        actor: this.actor.uuid,
+        attackKey
+      });
+      return;
+    }
+
+    const skillLabel = this._skillLabel(attack.skillKey);
+    const attackLabel = game.i18n.localize(
+      attack.key === BASIC_ATTACK_MELEE ? 'MY_RPG.BasicAttacks.Melee' : 'MY_RPG.BasicAttacks.Ranged'
+    );
+    const parts = [
+      {
+        label: game.i18n.format('MY_RPG.RollFlavor.SkillValue', { skill: skillLabel }),
+        value: attack.skillValue
+      }
+    ];
+    const roll = await new Roll(`${SKILL_CHECK_FORMULA} + @mod`, {
+      mod: attack.skillValue
+    }).roll();
+    const outcomeKey = getSkillCheckOutcomeKey(roll.total);
+    const note = game.i18n.localize('MY_RPG.BasicAttacks.Note');
+    const flavor = this._buildSkillCheckFlavor(attackLabel, parts, attack.rank, outcomeKey, {
+      total: roll.total,
+      damageProfile: attack.damageProfile,
+      note
+    });
+
+    await roll.toMessage({
+      speaker: ChatMessage.getSpeaker({ actor: this.actor }),
+      flavor,
+      rollMode: game.settings.get('core', 'rollMode'),
+      flags: {
+        [MODULE_ID]: {
+          skillCheck: {
+            skill: attack.skillKey,
+            skillLabel,
+            sourceName: attackLabel,
+            rank: attack.rank,
+            outcome: outcomeKey,
+            shift: 0,
+            label: attackLabel,
+            parts,
+            damageProfile: attack.damageProfile,
+            stepEffects: [],
+            note
+          }
+        }
+      }
+    });
+
+    debugLog('Actor sheet basic attack roll', {
+      actor: this.actor.uuid,
+      attack: attack.key,
+      skill: attack.skillKey,
+      rank: attack.rank,
+      skillValue: attack.skillValue
+    });
   }
 
   async _onItemActivate(event) {

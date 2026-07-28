@@ -300,3 +300,79 @@ test('campaign migration uses world library metadata to repair an already wrong 
     globalThis.game = previousGame;
   }
 });
+
+test('campaign migration leaves an archetype signature ability on the character rank', async () => {
+  // The pack entry for an archetype signature ability always carries the rank-1
+  // version; refreshing a rank-III character from it must not demote the grant.
+  const archetypeAbility = {
+    id: 'razryad',
+    name: 'Разряд',
+    skill: 'rezonans',
+    versions: [
+      { rank: 1, name: 'Разряд', range: { type: 'meters', value: 30 }, damage: '1/2/3/5' },
+      { rank: 3, name: 'Гроза', range: { type: 'meters', value: 300 }, damage: '4/6/9/14' }
+    ]
+  };
+  const packAbility = packItem({ id: 'razryad', name: 'Разряд' });
+  packAbility.system.rank = '1';
+  packAbility.system.skillBonus = '1/2/3/5';
+  packAbility.system.details.archetypeAbility = archetypeAbility;
+
+  const grantedItem = {
+    id: 'granted-ability',
+    name: 'Гроза',
+    type: 'trait-source-ability',
+    system: {
+      rank: '3',
+      skillBonus: '4/6/9/14',
+      details: {
+        gearCatalog: { id: 'razryad', catalog: 'abilities' },
+        archetypeAbility
+      }
+    },
+    flags: { [MODULE_ID]: { grantedByArchetype: 'archetype-id' } },
+    getFlag(scope, key) {
+      return this.flags?.[scope]?.[key];
+    },
+    toObject() {
+      const { toObject: _toObject, getFlag: _getFlag, ...data } = this;
+      return structuredClone(data);
+    }
+  };
+
+  const actor = {
+    id: 'actor',
+    system: { currentRank: 3 },
+    items: [grantedItem],
+    async createEmbeddedDocuments() {},
+    async updateEmbeddedDocuments(_type, updates) {
+      for (const update of updates) {
+        if (update._id !== grantedItem.id) continue;
+        if (update.name !== undefined) grantedItem.name = update.name;
+        if (update.system !== undefined) grantedItem.system = structuredClone(update.system);
+      }
+    },
+    async deleteEmbeddedDocuments() {}
+  };
+
+  const previousGame = globalThis.game;
+  globalThis.game = {
+    user: { isGM: true },
+    actors: { contents: [actor] },
+    items: { contents: [] },
+    packs: new Map([
+      ['project-andromeda.gear-library', { getDocuments: async () => [packAbility] }]
+    ])
+  };
+
+  try {
+    const summary = await migrateCampaignAbilitiesToCatalog();
+    assert.equal(summary.itemsUpdated, 1);
+    assert.equal(summary.archetypeAbilitiesResynced, 1);
+    assert.equal(grantedItem.name, 'Гроза');
+    assert.equal(grantedItem.system.rank, '3');
+    assert.equal(grantedItem.system.skillBonus, '4/6/9/14');
+  } finally {
+    globalThis.game = previousGame;
+  }
+});

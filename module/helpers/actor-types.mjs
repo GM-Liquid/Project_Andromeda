@@ -36,6 +36,10 @@ export function isGmCharacterActorType(actorType) {
   return GM_CHARACTER_ACTOR_TYPES.includes(normalizeActorType(actorType));
 }
 
+export function isMinionActorType(actorType) {
+  return normalizeActorType(actorType) === MINION_ACTOR_TYPE;
+}
+
 export function isEliteActorType(actorType) {
   return normalizeActorType(actorType) === ELITE_ACTOR_TYPE;
 }
