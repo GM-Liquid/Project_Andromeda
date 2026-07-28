@@ -26,8 +26,8 @@
         }
       ]
     },
-    "description": "Свободным действием превратите небольшой объект 2-го ранга в порошок. Для активации способности необходимо иметь навык Мистика 3. Проверка не требуется.",
-    "shortDescription": "Превращает небольшой объект в порошок",
+    "description": "Свободным действием превратите небольшой бесхозный неартефактный объект 2-го ранга или ниже в порошок. Для активации способности необходимо иметь навык Мистика 3. Проверка не требуется.",
+    "shortDescription": "Превращает небольшой бесхозный неартефактный объект в порошок",
     "price": 6,
     "heatCost": 2
   },
@@ -50,7 +50,6 @@
             },
             "targets": "single",
             "defense": "fortitude",
-            "duration": "untilEndOfScene",
             "check": "required"
           },
           "outcomes": [
@@ -113,7 +112,7 @@
           "outcomes": [
             {
               "key": "damage",
-              "value": "5/8/12/18"
+              "value": "2/4/6/9"
             }
           ]
         },
@@ -128,6 +127,7 @@
             },
             "targets": "single",
             "defense": "fortitude",
+            "duration": "untilStartOfTargetNextTurn",
             "check": "successBonus",
             "trigger": "onSuccess"
           },
@@ -140,7 +140,7 @@
         }
       ]
     },
-    "description": "Сожмите пространство вокруг цели. Атака Мощи против Стойкости. Урон: 5/8/12/18. При успехе цель становится Уязвимой до конца вашего следующего хода.",
+    "description": "Сожмите пространство вокруг цели. Атака Мощи против Стойкости. Урон: 2/4/6/9. При успехе цель становится Уязвимой до начала своего следующего хода.",
     "shortDescription": "Вы сжимаете пространство вокруг цели тисками гравитации, ломая её кости и броню.",
     "price": 6,
     "heatCost": 2
@@ -173,7 +173,7 @@
           "outcomes": [
             {
               "key": "damage",
-              "value": "2/4/6/9"
+              "value": "0/1/3/4"
             }
           ]
         },
@@ -197,13 +197,14 @@
           },
           "outcomes": [
             {
-              "key": "moveTarget"
+              "key": "moveTarget",
+              "distance": 7.5
             }
           ]
         }
       ]
     },
-    "description": "Стяните всех в зоне к центру атакой Мощи против Стойкости. Урон: 2/4/6/9. При успехе цель также сдвигается в центр круга.",
+    "description": "Стяните всех в зоне к центру атакой Мощи против Стойкости. Урон: 0/1/3/4. При успехе цель также сдвигается к центру круга на расстояние до 7,5 м.",
     "shortDescription": "Стяните всех в зоне к центру и нанесите урон.",
     "price": 6,
     "heatCost": 2
@@ -223,30 +224,52 @@
           "conditions": {
             "range": {
               "type": "meters",
-              "value": 30
+              "value": 50
             },
             "targets": "allInArea",
             "area": {
               "type": "circle",
-              "value": 15
+              "value": 30
             },
             "defense": "will",
-            "duration": "untilEndOfScene",
             "check": "required"
           },
           "outcomes": [
             {
               "key": "damage",
-              "value": "4/6/9/14"
+              "value": "0/1/3/4"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 50
+            },
+            "targets": "area",
+            "area": {
+              "type": "circle",
+              "value": 30
+            },
+            "duration": "untilStartOfYourNextTurn"
+          },
+          "outcomes": [
+            {
+              "key": "createWall"
             }
           ]
         }
       ]
     },
-    "description": "Создайте пылающую зону. Когда существо впервые за ход оказывается в ней, атакуйте его Резонансом против Воли. Урон: 4/6/9/14.",
-    "shortDescription": "Вы создаете пылающую зону, обжигающую тех, кто входит в неё.",
+    "description": "Разлейте и воспламените огнесмесь в круге диаметром 30 м с центром в пределах 50 м. Атакуйте Резонансом против Воли каждого существа в области. Урон: 0/1/3/4. До начала вашего следующего хода пламя закрывает обзор и вынуждает обходить область; повторного урона оно не наносит.",
+    "shortDescription": "Поджигает область и ненадолго перекрывает путь",
     "price": 9,
-    "heatCost": 2
+    "heatCost": 2,
+    "status": "approved"
   },
   {
     "id": "iskra",
@@ -272,7 +295,7 @@
           "outcomes": [
             {
               "key": "damage",
-              "value": "1/2/3/5"
+              "value": "0/1/2/3"
             }
           ]
         },
@@ -296,7 +319,7 @@
         }
       ]
     },
-    "description": "Свободным действием создайте или погасите небольшой летающий огонёк в пределах 30 м. Действием бросьте его в цель: атака Резонанса против Стойкости. Урон: 1/2/3/5.",
+    "description": "Свободным действием создайте или погасите небольшой летающий огонёк в пределах 30 м. Действием бросьте его в цель: атака Резонанса против Стойкости. Урон: 0/1/2/3.",
     "shortDescription": "Создайте огонек свободным действием или атакуйте огнем действием.",
     "price": 3,
     "heatCost": 0
@@ -324,21 +347,26 @@
               "value": 15
             },
             "defense": "will",
-            "duration": "untilStartOfYourNextTurn",
-            "check": "required"
+            "duration": "untilEndOfTargetNextTurn",
+            "check": "successBonus",
+            "trigger": "onSuccess"
           },
           "outcomes": [
             {
-              "key": "specialRule"
+              "key": "removeStatus",
+              "status": "hidden"
+            },
+            {
+              "key": "imposeDisadvantage"
             }
           ]
         }
       ]
     },
-    "description": "Взорвите в выбранной точке резкую вспышку жара и света. Атака Резонанса против Воли каждого противника в малой зоне. При успехе цель не считается скрытой и получает помеху на следующую атаку до начала вашего следующего хода.",
+    "description": "Взорвите в выбранной точке резкую вспышку жара и света. Атака Резонанса против Воли каждого противника в малой зоне. При успехе цель перестаёт быть Скрытой и получает помеху на следующую атаку до конца своего следующего хода.",
     "shortDescription": "Раскройте скрытых противников и ослабьте их следующую атаку в малой зоне.",
     "price": 3,
-    "heatCost": 2
+    "heatCost": 1
   },
   {
     "id": "kristallizatsiya",
@@ -356,7 +384,9 @@
             "range": {
               "type": "melee"
             },
-            "targets": "single"
+            "targets": "single",
+            "defense": "will",
+            "check": "required"
           },
           "outcomes": [
             {
@@ -404,7 +434,7 @@
     "description": "Создайте сверхострый клинок и атакуйте Ближним боем против Стойкости. Урон: 4/8/11/16. После удара клинок распадается; он может прорезать материал 3-го ранга и ниже.",
     "shortDescription": "Создайте сверхострый клинок и ударьте перед собой.",
     "price": 9,
-    "heatCost": 2
+    "heatCost": 1
   },
   {
     "id": "zakon-prevyshe-vsego",
@@ -419,32 +449,82 @@
             "type": "action"
           },
           "conditions": {
-            "targets": "allInArea",
-            "defense": "will",
-            "duration": "untilEndOfScene",
-            "check": "required",
             "range": {
               "type": "meters",
               "value": 100
             },
+            "targets": "allInArea",
             "area": {
               "type": "circle",
               "value": 100
-            }
+            },
+            "defense": "will",
+            "duration": "untilStartOfTargetNextTurn",
+            "check": "required"
           },
           "outcomes": [
             {
-              "key": "damage",
-              "value": "6/10/14/21"
+              "key": "applyStatus",
+              "status": "weakened"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 100
+            },
+            "targets": "allInArea",
+            "area": {
+              "type": "circle",
+              "value": 100
+            },
+            "defense": "will",
+            "check": "successBonus",
+            "trigger": "onSuccess"
+          },
+          "outcomes": [
+            {
+              "key": "moveTarget",
+              "distance": 30
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 100
+            },
+            "targets": "allInArea",
+            "area": {
+              "type": "circle",
+              "value": 100
+            },
+            "defense": "will",
+            "check": "successBonus",
+            "trigger": "onCriticalSuccess"
+          },
+          "outcomes": [
+            {
+              "key": "cancelAction"
             }
           ]
         }
       ]
     },
-    "description": "Произнесите короткий приказ, которому трудно противиться. Атакуйте Доминированием против Воли каждого противника, который слышит вас, в пределах 100 м. Урон: 6/10/14/21. При успехе цель выполняет приказ, если он не вынуждает её причинить себе прямой вред.",
-    "shortDescription": "Произнесите короткий приказ. Все, кто слышат вас, должны его выполнить.",
+    "description": "Отдайте короткий приказ всем противникам, которые слышат вас в пределах 100 м, и атакуйте Доминированием против Воли каждого из них. До начала своего следующего хода цель Ослаблена. При успехе заставьте её немедленно переместиться на расстояние до 30 м в указанном направлении или выронить один удерживаемый предмет. При критическом успехе она вдобавок пропускает своё следующее действие. Приказ не заставляет причинить себе прямой вред.",
+    "shortDescription": "Ослабляет толпу и заставляет её подчиниться приказу",
     "price": 6,
-    "heatCost": 2
+    "heatCost": 2,
+    "status": "approved"
   },
   {
     "id": "davlenie",
@@ -470,16 +550,16 @@
           "outcomes": [
             {
               "key": "damage",
-              "value": "1/3/4/5"
+              "value": "4/6/9/14"
             }
           ]
         }
       ]
     },
-    "description": "Сдавите цель гравитационным полем: атака Мощи против Стойкости. Урон: 1/3/4/5.",
+    "description": "Сдавите цель гравитационным полем: атака Мощи против Стойкости. Урон: 4/6/9/14.",
     "shortDescription": "Снаряжение цели сдавливает её.",
     "price": 9,
-    "heatCost": 2
+    "heatCost": 0
   },
   {
     "id": "yadovitoe-oblako",
@@ -496,7 +576,6 @@
           "conditions": {
             "targets": "allInArea",
             "defense": "fortitude",
-            "duration": "untilEndOfScene",
             "check": "required",
             "range": {
               "type": "meters",
@@ -505,20 +584,19 @@
             "area": {
               "type": "circle",
               "value": 15
-            },
-            "trigger": "onFirstEnterOrStartTurn"
+            }
           },
           "outcomes": [
             {
               "key": "damage",
-              "value": "1/2/3/5"
+              "value": "0/1/2/2"
             }
           ]
         }
       ]
     },
-    "description": "Создайте в пределах 30 м ядовитое облако радиусом 15 м до конца сцены. Когда существо впервые входит в облако или начинает в нём ход, атакуйте Мистикой против его Стойкости. Урон: 1/2/3/5.",
-    "shortDescription": "Создайте ядовитое облако.",
+    "description": "Создайте в пределах 30 м ядовитое облако радиусом 15 м. Атакуйте Мистикой против Стойкости каждого существа в области. Урон: 0/1/2/2. После атаки облако рассеивается.",
+    "shortDescription": "Накройте область ядовитым облаком и сразу нанесите урон.",
     "price": 3,
     "heatCost": 2
   },
@@ -545,6 +623,10 @@
           },
           "outcomes": [
             {
+              "key": "armorPiercing",
+              "value": 1
+            },
+            {
               "key": "damage",
               "value": "5/9/13/19"
             }
@@ -552,8 +634,8 @@
         }
       ]
     },
-    "description": "Создайте из окружающей материи облако игл и атакуйте Мощью против Стойкости. Урон: 5/9/13/19.",
-    "shortDescription": "Из материи под рукой вы создаете облако острейших игл, направляя их в цель.",
+    "description": "Создайте из окружающей материи облако игл и атакуйте Мощью против Стойкости. Урон: 5/9/13/19. Бронебойность 1.",
+    "shortDescription": "Создайте облако бронебойных игл и направьте его в цель.",
     "price": 9,
     "heatCost": 2
   },
@@ -576,14 +658,31 @@
             },
             "targets": "single",
             "defense": "fortitude",
-            "check": "required",
-            "duration": "untilEndOfScene"
+            "check": "required"
           },
           "outcomes": [
             {
               "key": "damage",
               "value": "2/4/6/9"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 30
             },
+            "targets": "single",
+            "defense": "fortitude",
+            "duration": "untilStartOfTargetNextTurn",
+            "check": "successBonus",
+            "trigger": "onSuccess"
+          },
+          "outcomes": [
             {
               "key": "applyStatus",
               "status": "vulnerable"
@@ -592,8 +691,8 @@
         }
       ]
     },
-    "description": "Раскалите цель изнутри. Атака Резонансом против Стойкости цели в пределах 30 м. Урон: 2/4/6/9. При успехе цель становится Уязвимой до конца сцены.",
-    "shortDescription": "Нанесите урон и сделайте цель Уязвимой до конца сцены.",
+    "description": "Раскалите цель изнутри. Атака Резонансом против Стойкости цели в пределах 30 м. Урон: 2/4/6/9. При успехе цель становится Уязвимой до начала своего следующего хода.",
+    "shortDescription": "Нанесите урон и ненадолго сделайте цель Уязвимой.",
     "price": 6,
     "heatCost": 2
   },
@@ -621,7 +720,7 @@
           "outcomes": [
             {
               "key": "damage",
-              "value": "1/2/5/8"
+              "value": "0/1/3/5"
             },
             {
               "key": "extraAttack",
@@ -631,7 +730,7 @@
         }
       ]
     },
-    "description": "Обрушьте два удара огня. Совершите две атаки Резонанса против Стойкости одной или двух целей в пределах 30 м. Урон каждой атаки: 1/2/5/8.",
+    "description": "Обрушьте два удара огня. Совершите две атаки Резонанса против Стойкости одной или двух целей в пределах 30 м. Урон каждой атаки: 0/1/3/5.",
     "shortDescription": "Две огненные атаки по одной или двум целям.",
     "price": 6,
     "heatCost": 2
@@ -655,23 +754,41 @@
             },
             "targets": "single",
             "defense": "will",
-            "duration": "untilEndOfScene",
             "check": "required"
           },
           "outcomes": [
             {
               "key": "damage",
-              "value": "2/4/6/9"
+              "value": "0/0/1/2"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 30
             },
+            "targets": "single",
+            "defense": "will",
+            "duration": "untilEndOfScene",
+            "check": "successBonus",
+            "trigger": "onSuccess"
+          },
+          "outcomes": [
             {
-              "key": "specialRule"
+              "key": "preventStatus",
+              "status": "hidden"
             }
           ]
         }
       ]
     },
-    "description": "Зажгите на цели яркую метку: атака Резонанса против Воли. Урон: 2/4/6/9. При успехе цель не может быть скрытой до конца сцены или пока не потратит действие, чтобы сбить метку.",
-    "shortDescription": "Нанесите урон и не дайте цели скрыться.",
+    "description": "Зажгите на цели яркую метку: атака Резонанса против Воли. Урон: 0/0/1/2. При успехе цель не может быть скрытой до конца сцены или пока не потратит действие, чтобы сбить метку.",
+    "shortDescription": "Пометьте цель слабым пламенем и не дайте ей скрыться.",
     "price": 6,
     "heatCost": 2
   },
@@ -697,7 +814,7 @@
           },
           "outcomes": [
             {
-              "key": "specialRule"
+              "key": "grantAdvantage"
             }
           ]
         }
@@ -706,7 +823,7 @@
     "description": "Реакцией, когда союзник в пределах 30 м совершает атаку, подсветите его цель. Союзник получает преимущество на эту атаку. Вы не можете применить эту способность к своей атаке.",
     "shortDescription": "Реакцией усильте атаку союзника световой наводкой.",
     "price": 6,
-    "heatCost": 2
+    "heatCost": 0
   },
   {
     "id": "ognennyy-shar",
@@ -736,13 +853,13 @@
           "outcomes": [
             {
               "key": "damage",
-              "value": "2/4/6/9"
+              "value": "0/2/3/5"
             }
           ]
         }
       ]
     },
-    "description": "Метните огненный шар в точку в пределах 30 м. Атакуйте Резонансом против Стойкости каждого существа в зоне. Урон: 2/4/6/9.",
+    "description": "Метните огненный шар в точку в пределах 30 м. Атакуйте Резонансом против Стойкости каждого существа в зоне. Урон: 0/2/3/5.",
     "shortDescription": "Огненный взрыв с умеренным уроном по малой зоне.",
     "price": 6,
     "heatCost": 2
@@ -766,7 +883,6 @@
               "value": 30
             },
             "defense": "will",
-            "duration": "untilStartOfYourNextTurn",
             "check": "required",
             "range": {
               "type": "meters",
@@ -776,8 +892,30 @@
           "outcomes": [
             {
               "key": "damage",
-              "value": "2/4/6/9"
+              "value": "0/0/1/2"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "targets": "allInArea",
+            "area": {
+              "type": "ray",
+              "value": 30
             },
+            "defense": "will",
+            "duration": "untilStartOfTargetNextTurn",
+            "check": "successBonus",
+            "trigger": "onSuccess",
+            "range": {
+              "type": "meters",
+              "value": 30
+            }
+          },
+          "outcomes": [
             {
               "key": "applyStatus",
               "status": "vulnerable"
@@ -786,7 +924,7 @@
         }
       ]
     },
-    "description": "Испустите луч длиной 30 м и атакуйте Резонансом против Воли каждого противника на его пути. Урон: 2/4/6/9. При успехе цель становится Уязвимой до начала вашего следующего хода.",
+    "description": "Испустите луч длиной 30 м и атакуйте Резонансом против Воли каждого противника на его пути. Урон: 0/0/1/2. При успехе цель становится Уязвимой до начала своего следующего хода.",
     "shortDescription": "Вы излучаете концентрированный луч радиации, нанося урон и делая всех пораженных врагов уязвимыми.",
     "price": 6,
     "heatCost": 2
@@ -835,31 +973,33 @@
       "effects": [
         {
           "activation": {
-            "type": "action"
+            "type": "freeAction"
           },
           "conditions": {
             "range": {
               "type": "meters",
-              "value": 15
+              "value": 5
             },
             "targets": "single",
             "defense": "will",
+            "duration": "untilEndOfScene",
             "check": "successBonus",
             "trigger": "onSuccess"
           },
           "outcomes": [
             {
-              "key": "applyStatus",
-              "status": "charmed"
+              "key": "utility",
+              "value": 1
             }
           ]
         }
       ]
     },
-    "description": "Очаруйте цель, заставив считать вас своим другом. Проверка Обаяния против Воли цели. При успехе цель очаровывается вами. Пока заклинание не окончиться или вы не причините вред цели, цель считает вас своим другом.",
-    "shortDescription": "Очаруйте цель, заставив считать вас своим другом.",
+    "description": "Выберите цель в пределах 5 м и совершите проверку Обаяния против её Воли. При успехе до конца сцены цель считает вас доброжелательным знакомым и готова выслушать, но не исполняет опасные или явно невыгодные просьбы. Эффект заканчивается, если вы или ваши союзники причиняете ей вред.",
+    "shortDescription": "На сцену располагает цель к себе",
     "price": 3,
-    "heatCost": 2
+    "heatCost": 2,
+    "status": "approved"
   },
   {
     "id": "gallyutsinatsii",
@@ -879,7 +1019,6 @@
             },
             "targets": "single",
             "defense": "will",
-            "duration": "untilEndOfScene",
             "check": "required"
           },
           "outcomes": [
@@ -891,7 +1030,7 @@
         },
         {
           "activation": {
-            "type": "passive"
+            "type": "action"
           },
           "conditions": {
             "range": {
@@ -899,22 +1038,23 @@
             },
             "targets": "single",
             "defense": "will",
-            "duration": "untilEndOfScene",
-            "check": "required",
-            "trigger": "whileActive"
+            "duration": "untilStartOfTargetNextTurn",
+            "check": "successBonus",
+            "trigger": "onSuccess"
           },
           "outcomes": [
             {
-              "key": "suppressReactions"
+              "key": "applyStatus",
+              "status": "weakened"
             }
           ]
         }
       ]
     },
-    "description": "Внушите цели ужасающие галлюцинации: атака Доминирования против Воли. Урон: 2/4/6/9. При успехе цель теряет реакции, пока не распознает иллюзию проверкой или иным подходящим способом.",
-    "shortDescription": "Вы внушаете цели ужасающие галлюцинации.",
+    "description": "Внушите цели ужасающие галлюцинации: атака Доминирования против Воли. Урон: 2/4/6/9. При успехе цель становится Ослабленной до начала своего следующего хода.",
+    "shortDescription": "Нанесите цели урон и ослабьте её галлюцинациями.",
     "price": 6,
-    "heatCost": 2
+    "heatCost": 0
   },
   {
     "id": "otkrytyy-razum",
@@ -926,7 +1066,7 @@
       "effects": [
         {
           "activation": {
-            "type": "action"
+            "type": "freeAction"
           },
           "conditions": {
             "range": {
@@ -970,14 +1110,31 @@
             },
             "targets": "single",
             "defense": "fortitude",
-            "duration": "untilStartOfYourNextTurn",
             "check": "required"
           },
           "outcomes": [
             {
               "key": "damage",
-              "value": "1/2/4/6"
+              "value": "2/4/6/9"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 30
             },
+            "targets": "single",
+            "defense": "fortitude",
+            "duration": "untilStartOfTargetNextTurn",
+            "check": "successBonus",
+            "trigger": "onSuccess"
+          },
+          "outcomes": [
             {
               "key": "applyStatus",
               "status": "weakened"
@@ -986,7 +1143,7 @@
         }
       ]
     },
-    "description": "Разрушьте тело цели на клеточном уровне: атакуйте Мистикой против Стойкости цели в пределах 30 м. Урон: 1/2/4/6. При успехе цель становится Ослабленной до начала вашего следующего хода.",
+    "description": "Разрушьте тело цели на клеточном уровне: атакуйте Мистикой против Стойкости цели в пределах 30 м. Урон: 2/4/6/9. При успехе цель становится Ослабленной до начала своего следующего хода.",
     "shortDescription": "Нанесите урон, ослабив тело цели.",
     "price": 6,
     "heatCost": 2
@@ -1001,7 +1158,7 @@
       "effects": [
         {
           "activation": {
-            "type": "action"
+            "type": "freeAction"
           },
           "conditions": {
             "range": {
@@ -1010,58 +1167,19 @@
             },
             "targets": "single",
             "defense": "control",
-            "check": "none"
+            "check": "required"
           },
           "outcomes": [
             {
               "key": "learnFacts",
-              "value": 1
-            }
-          ]
-        },
-        {
-          "activation": {
-            "type": "action"
-          },
-          "conditions": {
-            "range": {
-              "type": "meters",
-              "value": 30
-            },
-            "targets": "single",
-            "defense": "control",
-            "check": "successBonus"
-          },
-          "outcomes": [
-            {
-              "key": "learnFacts",
-              "value": 1
-            }
-          ]
-        },
-        {
-          "activation": {
-            "type": "action"
-          },
-          "conditions": {
-            "range": {
-              "type": "meters",
-              "value": 30
-            },
-            "targets": "self",
-            "check": "failureRisk"
-          },
-          "outcomes": [
-            {
-              "key": "selfDamage",
-              "value": 2
+              "value": "1/1/2/2"
             }
           ]
         }
       ]
     },
-    "description": "Вы анализируете цель, получая информацию. Проверка Анализа против Контроля. При успехе узнайте 2 факта о цели: 2 её способности, слабости или параметра, например Защиты. При провале узнайте 1 и получите 2 урона.",
-    "shortDescription": "Вы анализируете цель, получая информацию.",
+    "description": "Свободным действием проанализируйте цель в пределах 30 м: проверка Анализа против Контроля. При успехе или критическом успехе узнайте 2 факта о цели — её способности, слабости или параметры, например Защиты. При успехе с ценой или провале узнайте 1 факт.",
+    "shortDescription": "Свободным действием узнайте один или два факта о цели.",
     "price": 6,
     "heatCost": 2
   },
@@ -1078,18 +1196,15 @@
             "type": "reaction"
           },
           "conditions": {
-            "range": {
-              "type": "meters",
-              "value": 500
-            },
             "targets": "single",
             "defense": "control",
             "duration": "untilEndOfScene",
-            "check": "required"
+            "check": "successBonus",
+            "trigger": "onSuccess"
           },
           "outcomes": [
             {
-              "key": "specialRule"
+              "key": "imposeDisadvantage"
             }
           ]
         }
@@ -1098,7 +1213,7 @@
     "description": "Когда противник впервые применяет против вас действие, реакцией совершите проверку Анализа против его Контроля. При успехе повторные применения этого действия против вас получают помеху до конца сцены.",
     "shortDescription": "Изучите действие противника и дайте его повторам помеху.",
     "price": 6,
-    "heatCost": 2
+    "heatCost": 0
   },
   {
     "id": "tsepkiy-glaz",
@@ -1119,21 +1234,44 @@
             },
             "targets": "single",
             "defense": "control",
-            "duration": "untilEndOfScene",
             "check": "required"
           },
           "outcomes": [
             {
-              "key": "specialRule"
+              "key": "learnFacts",
+              "value": "1/1/1/2"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 30
+            },
+            "targets": "single",
+            "defense": "control",
+            "duration": "untilEndOfScene",
+            "check": "successBonus",
+            "trigger": "onSuccess"
+          },
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "vulnerable"
             }
           ]
         }
       ]
     },
-    "description": "Проанализируйте противника, найдя его уязвимость. Проверка Анализа против Контроля. При успехе до конца сцены раз за ход, когда этот противник получает урон, он получает еще 2 урона.",
-    "shortDescription": "Проанализируйте противника, найдя его уязвимость. Этот противник получает дополнительный урон от всех атак.",
+    "description": "Проанализируйте противника в пределах 30 м и совершите проверку Анализа против его Контроля. Узнайте одну его способность, слабость или параметр; при критическом успехе узнайте два факта. При успехе цель также становится Уязвимой до конца сцены или пока не потратит манёвр, чтобы сменить тактику и закрыть найденную уязвимость.",
+    "shortDescription": "Находит слабость и делает цель Уязвимой",
     "price": 6,
-    "heatCost": 2
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "perenapravlenie",
@@ -1148,20 +1286,47 @@
             "type": "reaction"
           },
           "conditions": {
-            "targets": "allInArea"
+            "range": {
+              "type": "melee"
+            },
+            "targets": "single",
+            "trigger": "onTargetedByRangedAttack",
+            "defense": "control",
+            "check": "required"
           },
           "outcomes": [
             {
-              "key": "specialRule"
+              "key": "damage",
+              "value": "0/0/1/2"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "range": {
+              "type": "melee"
+            },
+            "targets": "single",
+            "trigger": "onSuccess",
+            "defense": "control",
+            "check": "successBonus"
+          },
+          "outcomes": [
+            {
+              "key": "cancelAction"
             }
           ]
         }
       ]
     },
-    "description": "Перенаправьте промахнувшуюся по вам атаку дальнего боя в противника рядом с вами. Когда атака дальнего боя по вам проваливается, совершите проверку Анализа против результата этой атаки. При успехе атака перенаправляется в противника рядом с вами и наносит минимальный урон.",
-    "shortDescription": "Перенаправьте промахнувшуюся по вам атаку дальнего боя в противника рядом с вами.",
+    "description": "Когда вас атакуют с дистанции и рядом с вами есть другой противник, реакцией атакуйте его Анализом против Контроля. Урон: 0/0/1/2. При успехе исходная атака промахивается по вам и считается источником этого урона.",
+    "shortDescription": "Перенаправляет дальнюю атаку в другого противника",
     "price": 6,
-    "heatCost": 2
+    "heatCost": 2,
+    "status": "approved"
   },
   {
     "id": "filtr-vospriyatia",
@@ -1176,12 +1341,13 @@
             "type": "freeAction"
           },
           "conditions": {
+            "targets": "self",
             "duration": "untilEndOfScene"
           },
           "outcomes": [
             {
-              "key": "utility",
-              "value": 2
+              "key": "applyStatus",
+              "status": "hidden"
             }
           ]
         }
@@ -1190,7 +1356,7 @@
     "description": "Наложите на себя \"фильтр\" для окружающих людей и аппаратуры. Вы невидимы для любых средств обнаружения, до тех пор пока не выдадите себя атакой или другим способом.",
     "shortDescription": "Наложите на себя \"фильтр\" для окружающих людей и аппаратуры.",
     "price": 6,
-    "heatCost": 2
+    "heatCost": 1
   },
   {
     "id": "nyrok-v-ten",
@@ -1205,11 +1371,17 @@
             "type": "reaction"
           },
           "conditions": {
-            "targets": "self"
+            "targets": "self",
+            "trigger": "onTargeted",
+            "check": "required"
           },
           "outcomes": [
             {
-              "key": "specialRule"
+              "key": "cancelAction"
+            },
+            {
+              "key": "applyStatus",
+              "status": "hidden"
             }
           ]
         }
@@ -1218,7 +1390,7 @@
     "description": "Когда вас атакуют, совершите проверку Сокрытия против атаки противника. При успехе вы уходите из вида, а атака проваливается.",
     "shortDescription": "Реакцией уйдите из вида и сорвите атаку при успехе проверки Сокрытия.",
     "price": 9,
-    "heatCost": 2
+    "heatCost": 1
   },
   {
     "id": "desh",
@@ -1235,12 +1407,14 @@
           "conditions": {
             "range": {
               "type": "meters",
-              "value": 15
-            }
+              "value": 20
+            },
+            "targets": "self"
           },
           "outcomes": [
             {
-              "key": "specialRule"
+              "key": "moveSelf",
+              "distance": 20
             }
           ]
         }
@@ -1249,7 +1423,7 @@
     "description": "Совершите рывок на 20 м в горизонтальном направлении.",
     "shortDescription": "Совершите рывок на 20 м.",
     "price": 3,
-    "heatCost": 2
+    "heatCost": 1
   },
   {
     "id": "vikhr",
@@ -1313,17 +1487,17 @@
           "outcomes": [
             {
               "key": "damage",
-              "value": "1/2/3/5"
+              "value": "0/0/1/2"
             },
             {
               "key": "extraAttack",
-              "attacks": 4
+              "attacks": 3
             }
           ]
         }
       ]
     },
-    "description": "Выберите до четырёх разных целей в пределах 300 м и совершите по одной атаке Стрельбой против Контроля каждой цели. Урон каждой атаки: 1/2/3/5.",
+    "description": "Выберите до четырёх разных целей в пределах 300 м и совершите по одной атаке Стрельбой против Контроля каждой цели. Урон каждой атаки: 0/0/1/2.",
     "shortDescription": "Атакуйте Стрельбой до четырёх разных целей.",
     "price": 9,
     "heatCost": 2
@@ -1347,12 +1521,12 @@
               "value": 15
             },
             "defense": "control",
-            "check": "required"
+            "check": "successBonus",
+            "trigger": "onSuccess"
           },
           "outcomes": [
             {
-              "key": "utility",
-              "value": 2
+              "key": "cancelAction"
             }
           ]
         }
@@ -1361,7 +1535,7 @@
     "description": "Выведите из строя технику коротким ЭМИ-импульсом. Проверка Инженерии против Контроля. При успехе вся техника в круге диаметром 15 м выключается на 1 раунд. Запертые двери открываются, а механические противники пропускают свой ход.",
     "shortDescription": "Коротким ЭМИ-импульсом выведите из строя технику 1 ранга.",
     "price": 6,
-    "heatCost": 2
+    "heatCost": 1
   },
   {
     "id": "perezaryadka-kartridzha",
@@ -1378,24 +1552,32 @@
           "conditions": {
             "range": {
               "type": "meters",
-              "value": 30
+              "value": 15
             },
             "targets": "single",
-            "trigger": "oncePerTurn"
+            "duration": "untilEndOfTurn"
           },
           "outcomes": [
             {
-              "key": "transferHeat",
-              "value": 2
+              "key": "removeStatus",
+              "status": "weakened"
+            },
+            {
+              "key": "moveTarget",
+              "distance": 10
+            },
+            {
+              "key": "grantAdvantage"
             }
           ]
         }
       ]
     },
-    "description": "Один раз за ход свободным действием передайте союзнику в пределах 30 м до 2 своего Накала. Передать больше Накала, чем у вас есть, нельзя.",
-    "shortDescription": "Передайте союзнику до 2 своего Накала.",
+    "description": "Передайте союзнику в пределах 15 м импульс энергии. Снимите с него состояние Ослаблен, немедленно переместите его на расстояние до 10 м без провоцированных атак, и дайте преимущество на следующую атаку до конца его текущего хода.",
+    "shortDescription": "Передаёт союзнику энергию для рывка и атаки",
     "price": 6,
-    "heatCost": 0
+    "heatCost": 2,
+    "status": "approved"
   },
   {
     "id": "sboy-navedeniya",
@@ -1410,20 +1592,23 @@
             "type": "reaction"
           },
           "conditions": {
-            "targets": "single"
+            "targets": "single",
+            "defense": "control",
+            "trigger": "onTargetedByTechnology",
+            "check": "required"
           },
           "outcomes": [
             {
-              "key": "specialRule"
+              "key": "cancelAction"
             }
           ]
         }
       ]
     },
-    "description": "Когда любое техническое устройство, атакует или воздействует на вас, внесите помехи в его контур. Проверка Хакерства против Контроля. При успехе воздействие прерывается, а атака проваливается.",
-    "shortDescription": "Реакцией, когда техническое устройство, атакует или воздействует на вас, внесите помехи в его контур.",
+    "description": "Когда техническое устройство атакует или воздействует на вас, внесите помехи в его контур. Проверка Хакерства против Контроля. При успехе воздействие прерывается, а атака проваливается.",
+    "shortDescription": "Реакцией сорвите атаку или воздействие технического устройства.",
     "price": 9,
-    "heatCost": 2
+    "heatCost": 1
   },
   {
     "id": "prikaz",
@@ -1440,24 +1625,47 @@
           "conditions": {
             "range": {
               "type": "meters",
-              "value": 30
+              "value": 10
             },
             "targets": "single",
             "defense": "control",
-            "check": "required"
+            "check": "successBonus",
+            "trigger": "onSuccess"
           },
           "outcomes": [
             {
-              "key": "specialRule"
+              "key": "cancelAction"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 10
+            },
+            "targets": "single",
+            "defense": "control",
+            "check": "successBonus",
+            "trigger": "onCriticalSuccess"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 1
             }
           ]
         }
       ]
     },
-    "description": "Действием отдайте быстрый приказ техническому устройству. Проверка Хакерства против Контроля. При успехе вы отдаете один приказ, который устройство мгновенно выполняет.",
-    "shortDescription": "Отдайте быстрый приказ техническому устройству.",
+    "description": "Отдайте технической цели в пределах 10 м один короткий приказ и совершите проверку Хакерства против её Контроля. При успехе цель тратит своё следующее действие на безопасную простую операцию: останавливается, перемещается в указанную точку, выпускает удерживаемый объект или открывает доступный механизм. При критическом успехе после этого она выполняет ещё одну такую операцию.",
+    "shortDescription": "Заставляет техническую цель выполнить простой приказ",
     "price": 3,
-    "heatCost": 2
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "korotkoe-zamykanie",
@@ -1484,7 +1692,25 @@
             {
               "key": "damage",
               "value": "2/4/6/9"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 100
             },
+            "targets": "single",
+            "defense": "control",
+            "duration": "untilStartOfTargetNextTurn",
+            "check": "successBonus",
+            "trigger": "onSuccess"
+          },
+          "outcomes": [
             {
               "key": "applyStatus",
               "status": "vulnerable"
@@ -1511,12 +1737,13 @@
             "type": "freeAction"
           },
           "conditions": {
+            "targets": "self",
             "duration": "untilStartOfYourNextTurn"
           },
           "outcomes": [
             {
-              "key": "utility",
-              "value": 1
+              "key": "applyStatus",
+              "status": "invisible"
             }
           ]
         }
@@ -1525,7 +1752,7 @@
     "description": "Свободным действием станьте невидимы до начала вашего следующего хода.",
     "shortDescription": "Станьте невидимы до начала вашего следующего хода, или пока не совершите атаку или иначе не выдадете себя.",
     "price": 3,
-    "heatCost": 2
+    "heatCost": 1
   },
   {
     "id": "psikhicheskiy-mayachok",
@@ -1537,7 +1764,7 @@
       "effects": [
         {
           "activation": {
-            "type": "action"
+            "type": "freeAction"
           },
           "conditions": {
             "range": {
@@ -1551,14 +1778,14 @@
           "outcomes": [
             {
               "key": "utility",
-              "value": 2
+              "value": 0
             }
           ]
         }
       ]
     },
-    "description": "Запомните сигнатуру цели. Совершите проверку Наблюдательности против Контроля. При успехе вы понимаете направление и близость этой цели. даже если не видите её.",
-    "shortDescription": "Установите маячок на цель",
+    "description": "Запомните сигнатуру цели. Совершите проверку Наблюдательности против Контроля. При успехе вы понимаете направление и близость этой цели, даже если не видите её.",
+    "shortDescription": "Установите маячок на цель.",
     "price": 6,
     "heatCost": 2
   },
@@ -1612,7 +1839,7 @@
     "description": "Когда цель в пределах 30 м совершает действие, реакцией сделайте встречную проверку Доминирования против использованного ею навыка. При победе действие прерывается; при поражении оно продолжается с помехой.",
     "shortDescription": "Реакцией прервите действие цели или ослабьте его.",
     "price": 6,
-    "heatCost": 2
+    "heatCost": 1
   },
   {
     "id": "cherez-tvoi-glaza",
@@ -1636,7 +1863,8 @@
           },
           "outcomes": [
             {
-              "key": "specialRule"
+              "key": "utility",
+              "value": 0
             }
           ]
         }
@@ -1670,29 +1898,14 @@
           },
           "outcomes": [
             {
-              "key": "applyStatus",
-              "status": "truthBound"
-            }
-          ]
-        },
-        {
-          "activation": {
-            "type": "passive"
-          },
-          "conditions": {
-            "targets": "single",
-            "trigger": "onRefuseAnswer"
-          },
-          "outcomes": [
-            {
-              "key": "damage",
-              "value": "4/7/10/15"
+              "key": "utility",
+              "value": 2
             }
           ]
         }
       ]
     },
-    "description": "Коснитесь цели и совершите проверку Доминирования против Воли. При успехе цель не может вам лгать, но может молчать. Если она отказывается отвечать, то получает урон 4/7/10/15 по исходу этой проверки, после чего эффект заканчивается.",
+    "description": "Коснитесь цели и совершите проверку Доминирования против Воли. При успехе до конца сцены цель не может вам лгать, но может молчать. Эффект заканчивается, если вы причиняете цели вред.",
     "shortDescription": "Цель не может лгать вам.",
     "price": 6,
     "heatCost": 2
@@ -1725,7 +1938,7 @@
           "outcomes": [
             {
               "key": "damage",
-              "value": "1/2/3/5"
+              "value": "0/0/1/1"
             }
           ]
         },
@@ -1734,7 +1947,7 @@
             "type": "action"
           },
           "conditions": {
-            "targets": "allInArea",
+            "targets": "upTo2",
             "trigger": "onSuccess",
             "range": {
               "type": "meters",
@@ -1749,7 +1962,7 @@
           "outcomes": [
             {
               "key": "restoreStress",
-              "value": "1/2/3/5"
+              "value": "0/0/3/5"
             },
             {
               "key": "grantAdvantage"
@@ -1758,7 +1971,7 @@
         }
       ]
     },
-    "description": "Обратитесь ко всем в пределах 100 м. Атакуйте Обаянием против Воли каждого противника, который слышит вас. Урон: 1/2/3/5. При успехе каждый союзник в области восстанавливает указанное число ячеек стресса и получает преимущество до конца сцены.",
+    "description": "Обратитесь ко всем в пределах 100 м и совершите одну проверку Обаяния. Сравните её с Волей каждого противника, который вас слышит: урон 0/0/1/1. Если базовый исход проверки до сдвигов за защиты — успех, выберите до двух союзников в области: каждый восстанавливает 3 ячейки стресса; при критическом успехе — 5. Каждый выбранный союзник также получает преимущество на следующую проверку до конца сцены.",
     "shortDescription": "Нанесите врагам урон, восстановите стресс союзникам и поддержите их.",
     "price": 6,
     "heatCost": 2
@@ -1777,21 +1990,29 @@
           },
           "conditions": {
             "targets": "allInArea",
+            "area": {
+              "type": "circle",
+              "value": 30
+            },
             "defense": "will",
-            "duration": "untilStartOfYourNextTurn",
-            "check": "required"
+            "duration": "untilStartOfTargetNextTurn",
+            "check": "successBonus",
+            "trigger": "onSuccess"
           },
           "outcomes": [
             {
+              "key": "cancelAction"
+            },
+            {
               "key": "applyStatus",
-              "status": "cannotTargetYou"
+              "status": "weakened"
             }
           ]
         }
       ]
     },
-    "description": "Произнесите угрожающую речь. Проверка Доминирования против Воли всех, кто вас слышит. При успехе цели не могут атаковать вас до начала вашего следующего хода.",
-    "shortDescription": "Цели не могут атаковать вас.",
+    "description": "Произнесите угрожающую речь. Проверка Доминирования против Воли каждого противника в круге диаметром 30 м вокруг вас. При успехе цель пропускает своё следующее действие и становится Ослабленной до начала своего следующего хода.",
+    "shortDescription": "Лишите противников следующего действия и Ослабьте их угрожающей речью.",
     "price": 6,
     "heatCost": 2
   },
@@ -1805,7 +2026,7 @@
       "effects": [
         {
           "activation": {
-            "type": "action"
+            "type": "freeAction"
           },
           "conditions": {
             "targets": "self",
@@ -1813,7 +2034,7 @@
           },
           "outcomes": [
             {
-              "key": "specialRule"
+              "key": "enableReaction"
             }
           ]
         },
@@ -1824,6 +2045,8 @@
           "conditions": {
             "trigger": "onMovePast",
             "targets": "single",
+            "defense": "fortitude",
+            "duration": "untilStartOfTargetNextTurn",
             "check": "required"
           },
           "outcomes": [
@@ -1835,10 +2058,10 @@
         }
       ]
     },
-    "description": "Вы становитесь непробиваемым бастионом. Пока вы не смените позицию, когда враг проходит мимо вас, вы можете реакцией совершить проверку Мощи. При успехе его движение заканчивается рядом с вами, и он становится обездвиженным до начала своего следующего хода.",
+    "description": "Свободным действием займите оборонительную позицию. Пока вы не смените её, когда враг проходит мимо вас, вы можете реакцией совершить проверку Мощи против его Стойкости. При успехе его движение заканчивается рядом с вами, и он становится Обездвиженным до начала своего следующего хода.",
     "shortDescription": "Останавливайте врагов, пытающихся пройти мимо.",
     "price": 6,
-    "heatCost": 2
+    "heatCost": 0
   },
   {
     "id": "na-taran",
@@ -1857,14 +2080,12 @@
               "type": "meters",
               "value": 50
             },
-            "targets": "allInLine",
-            "defense": "fortitude",
-            "check": "required"
+            "targets": "self"
           },
           "outcomes": [
             {
-              "key": "damage",
-              "value": "2/4/6/9"
+              "key": "moveSelf",
+              "distance": 50
             }
           ]
         },
@@ -1873,9 +2094,41 @@
             "type": "action"
           },
           "conditions": {
-            "targets": "allInLine",
+            "range": {
+              "type": "meters",
+              "value": 50
+            },
+            "targets": "allInArea",
+            "area": {
+              "type": "ray",
+              "value": 50
+            },
+            "defense": "fortitude",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": "0/0/1/2"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 50
+            },
+            "targets": "allInArea",
+            "area": {
+              "type": "ray",
+              "value": 50
+            },
             "trigger": "onHit",
-            "duration": "untilStartOfYourNextTurn"
+            "duration": "untilStartOfTargetNextTurn"
           },
           "outcomes": [
             {
@@ -1886,7 +2139,7 @@
         }
       ]
     },
-    "description": "Переместитесь по прямой на 50 м, разрушая препятствия, и атакуйте Мощью против Стойкости каждую цель на пути. Урон: 2/4/6/9. Получившая урон цель становится Обездвиженной до начала своего следующего хода.",
+    "description": "Переместитесь по прямой на 50 м, разрушая препятствия, и атакуйте Мощью против Стойкости каждую цель на пути. Урон: 0/0/1/2. Получившая урон цель становится Обездвиженной до начала своего следующего хода.",
     "shortDescription": "Проломитесь через врагов по линии.",
     "price": 6,
     "heatCost": 2
@@ -1901,24 +2154,34 @@
       "effects": [
         {
           "activation": {
-            "type": "freeAction"
+            "type": "action"
           },
           "conditions": {
-            "targets": "self"
+            "range": {
+              "type": "melee"
+            },
+            "targets": "single",
+            "defense": "fortitude",
+            "check": "required"
           },
           "outcomes": [
             {
-              "key": "healStressBySkill",
-              "multiplier": 2
+              "key": "damage",
+              "value": "2/3/4/6"
+            },
+            {
+              "key": "restoreStress",
+              "amount": 3
             }
           ]
         }
       ]
     },
-    "description": "Восполните количество ячеек стресса, равное вашему навыку Мощи, умноженному на 2.",
-    "shortDescription": "Восстановление стресса от Мощи.",
+    "description": "Соберите последние силы и атакуйте Мощью против Стойкости цели рядом с собой. Урон: 2/3/4/6. После атаки восстановите 3 ячейки стресса.",
+    "shortDescription": "Атакует и восстанавливает 3 ячейки стресса",
     "price": 6,
-    "heatCost": 2
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "pokrov-nochi",
@@ -1930,7 +2193,7 @@
       "effects": [
         {
           "activation": {
-            "type": "freeAction"
+            "type": "action"
           },
           "conditions": {
             "range": {
@@ -1942,13 +2205,17 @@
           },
           "outcomes": [
             {
-              "key": "specialRule"
+              "key": "createWall"
+            },
+            {
+              "key": "applyStatus",
+              "status": "hidden"
             }
           ]
         }
       ]
     },
-    "description": "Создайте занавес тьмы между двумя точками в пределах 30 м. Только вы можете видеть сквозь эту тьму. Для противников по ту сторону завесы вы считаетесь скрытым. Эффект длится до конца сцены.",
+    "description": "Действием создайте занавес тьмы между двумя точками в пределах 30 м. Только вы можете видеть сквозь эту тьму. Для противников по ту сторону завесы вы считаетесь скрытым. Эффект длится до конца сцены.",
     "shortDescription": "Создайте завесу тьмы, сквозь которую видите только вы.",
     "price": 6,
     "heatCost": 2
@@ -1971,7 +2238,8 @@
           },
           "outcomes": [
             {
-              "key": "createShadowAnchor"
+              "key": "createShadowAnchor",
+              "value": 0
             }
           ]
         },
@@ -1980,19 +2248,24 @@
             "type": "maneuver"
           },
           "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 60
+            },
             "targets": "self",
             "trigger": "whileActive"
           },
           "outcomes": [
             {
-              "key": "swapWithAnchor"
+              "key": "teleport",
+              "distance": 60
             }
           ]
         }
       ]
     },
-    "description": "Оставьте свою тень в текущем местоположении. Один раз до конца сцены вы можете манёвром поменяться с ней местами, если вы и тень всё ещё находитесь в рамках одной сцены.",
-    "shortDescription": "Оставьте тень и один раз поменяйтесь с ней местами.",
+    "description": "Оставьте свою тень в текущем местоположении. Один раз до конца сцены вы можете манёвром поменяться с ней местами, если расстояние между вами не превышает 60 м.",
+    "shortDescription": "Оставьте тень и один раз телепортируйтесь к ней с расстояния до 60 м.",
     "price": 6,
     "heatCost": 2
   },
@@ -2013,10 +2286,11 @@
               "type": "meters",
               "value": 30
             },
-            "targets": "upTo3",
+            "targets": "upTo2",
             "defense": "will",
             "duration": "untilEndOfScene",
-            "check": "required"
+            "check": "successBonus",
+            "trigger": "onSuccess"
           },
           "outcomes": [
             {
@@ -2027,10 +2301,10 @@
         }
       ]
     },
-    "description": "Цели обвивают цепи, сотканные из тьмы. Совершите проверку Мистики против Воли до трёх целей в пределах 30 м. При успехе цель становится обездвиженной до конца сцены или пока не разрушит цепи.",
-    "shortDescription": "Обездвижьте до трёх целей цепями из тьмы.",
+    "description": "Цели обвивают цепи, сотканные из тьмы. Совершите проверку Мистики против Воли до двух целей в пределах 30 м. При успехе цель становится Обездвиженной до конца сцены или пока не потратит манёвр «Снятие продолжительного эффекта», чтобы разрушить цепи.",
+    "shortDescription": "Обездвижьте до двух целей цепями из тьмы.",
     "price": 6,
-    "heatCost": 2
+    "heatCost": 0
   },
   {
     "id": "snayperskaya-vintovka-igla",
@@ -2073,6 +2347,2596 @@
     "description": "Действием атакуйте Стрельбой против Контроля одной цели в пределах 100 м. Урон: 2/4/6/9. Бронебойность 1. Стабилизация.",
     "shortDescription": "Дальний бронебойный выстрел со стабилизацией и уроном 2/4/6/9.",
     "price": 6,
+    "heatCost": 2
+  },
+  {
+    "id": "bazovaya-sposobnost-istochnika",
+    "name": "Базовая способность: Источника",
+    "type": "ability",
+    "rank": 1,
+    "skill": "mistika",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "maneuver"
+          },
+          "conditions": {
+            "range": {
+              "type": "melee"
+            },
+            "targets": "single"
+          },
+          "outcomes": [
+            {
+              "key": "removeStatus",
+              "status": "weakened",
+              "value": "chooseOne"
+            },
+            {
+              "key": "removeStatus",
+              "status": "immobilized",
+              "value": "chooseOne"
+            },
+            {
+              "key": "restoreStress",
+              "amount": 1
+            },
+            {
+              "key": "grantAdvantage"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Коснитесь союзника. Снимите с него одно состояние на выбор — Ослаблен или Обездвижен — и восстановите ему 1 ячейку стресса. Союзник получает преимущество на следующий спасбросок до конца сцены.",
+    "shortDescription": "Очищает союзника и немного восстанавливает стресс",
+    "price": 3,
+    "heatCost": 1,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "9L2oo4YTeDuNtxO0"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Зверь, Лоренцо"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "biosensorika",
+    "name": "Биосенсорика",
+    "type": "ability",
+    "rank": 1,
+    "skill": "mistika",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "targets": "allInArea",
+            "area": {
+              "type": "circle",
+              "value": 100
+            },
+            "duration": "untilStartOfYourNextTurn"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    "description": "До начала вашего следующего хода ощутите всех живых существ в радиусе 100 м, игнорируя обычные преграды. Вы различаете растения и животных и понимаете примерный размер и число существ, но не узнаёте личности и точное состояние.",
+    "shortDescription": "Чувствует живых существ в радиусе 100 м",
+    "price": 3,
+    "heatCost": 1,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "4TNDyvTz2Sf0HEoe"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Зверь, Лоренцо"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "boevoy-kupol",
+    "name": "Боевой купол",
+    "type": "ability",
+    "rank": 2,
+    "skill": "inzheneriya",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "targets": "area",
+            "area": {
+              "type": "circle",
+              "value": 30
+            },
+            "duration": "untilStartOfYourNextTurn"
+          },
+          "outcomes": [
+            {
+              "key": "createWall"
+            },
+            {
+              "key": "imposeDisadvantage"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Создайте вокруг своей позиции защитный купол диаметром 30 м. До начала вашего следующего хода противники не могут пройти через границу купола, а дальние атаки, проходящие через неё, получают помеху.",
+    "shortDescription": "До следующего хода защищает область силовым куполом",
+    "price": 6,
+    "heatCost": 0,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "8t8KZSQMzkKciuYK"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Мари"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "boevoy-trans",
+    "name": "Боевой транс",
+    "type": "ability",
+    "rank": 2,
+    "skill": "analiz",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "targets": "self",
+            "duration": "untilStartOfYourNextTurn"
+          },
+          "outcomes": [
+            {
+              "key": "grantAdvantage",
+              "value": 2
+            },
+            {
+              "key": "enableReaction"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Войдите в боевой транс до начала вашего следующего хода. Получите преимущество на следующие две проверки Ближнего боя, Мощи или Ловкости и сможете совершить одну дополнительную реакцию за это время.",
+    "shortDescription": "Усиливает две боевые проверки и даёт дополнительную реакцию",
+    "price": 6,
+    "heatCost": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "Cy3yrde6iv3Rvh6P"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Эравель"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "boevye-feromony",
+    "name": "Феромонная перегрузка",
+    "type": "ability",
+    "rank": 3,
+    "skill": "mistika",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "maneuver"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 50
+            },
+            "targets": "single",
+            "duration": "untilEndOfTargetNextTurn"
+          },
+          "outcomes": [
+            {
+              "key": "removeStatus",
+              "status": "weakened"
+            },
+            {
+              "key": "moveTarget",
+              "distance": 100
+            },
+            {
+              "key": "grantAdvantage",
+              "value": 2
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Измените биохимию живой цели в пределах 50 м. Снимите с неё состояние Ослаблен, немедленно переместите её на расстояние до 100 м без провоцированных атак и дайте преимущество на следующие две атаки до конца её следующего хода.",
+    "shortDescription": "Вводит живую цель в состояние боевой ярости",
+    "price": 9,
+    "heatCost": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "82ZKLQMN1XAP9fmd"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Лоренцо"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "boevye-feromony-zver",
+    "name": "Боевые феромоны",
+    "type": "ability",
+    "rank": 1,
+    "skill": "mistika",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "range": {
+              "type": "melee"
+            },
+            "targets": "single",
+            "duration": "untilEndOfTurn"
+          },
+          "outcomes": [
+            {
+              "key": "removeStatus",
+              "status": "weakened"
+            },
+            {
+              "key": "moveTarget",
+              "distance": 10
+            },
+            {
+              "key": "grantAdvantage"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Коснитесь живой цели и вызовите короткий всплеск боевой ярости. Снимите с неё состояние Ослаблен, немедленно переместите её на расстояние до 10 м без провоцированных атак и дайте преимущество на следующую атаку до конца её текущего хода.",
+    "shortDescription": "Снимает слабость и подталкивает цель к атаке",
+    "price": 3,
+    "heatCost": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "fhKHpMRh68nERzTK"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Зверь"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "bystryy-vzlom",
+    "name": "Быстрый взлом",
+    "type": "ability",
+    "rank": 2,
+    "skill": "khakerstvo",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "maneuver"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 15
+            },
+            "targets": "single",
+            "defense": "control",
+            "check": "successBonus",
+            "trigger": "onSuccess"
+          },
+          "outcomes": [
+              {
+                "key": "moveTarget",
+                "distance": 30
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "maneuver"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 15
+            },
+            "targets": "single",
+            "defense": "control",
+            "duration": "untilStartOfTargetNextTurn",
+            "trigger": "onFailure"
+          },
+          "outcomes": [
+            {
+              "key": "imposeDisadvantage"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Манёвром взломайте техническую цель в пределах 15 м и совершите проверку Хакерства против её Контроля. При успехе заставьте цель немедленно переместиться на расстояние до 30 м, выронить удерживаемый объект или открыть доступный механизм. При неудаче её следующая проверка до начала следующего хода получает помеху.",
+    "shortDescription": "Манёвром заставляет технику выполнить простую операцию",
+    "price": 6,
+    "heatCost": 1,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "k1zRcrkgEeK49Dgu"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Мари"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "grad-udarov",
+    "name": "Град ударов",
+    "type": "ability",
+    "rank": 3,
+    "skill": "blizhniy_boy",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "melee"
+            },
+            "targets": "single",
+            "defense": "fortitude",
+            "check": "required"
+          },
+          "outcomes": [
+              {
+                "key": "damage",
+                "value": "0/0/1/2"
+            },
+            {
+              "key": "extraAttack",
+              "attacks": 3
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Совершите четыре быстрые атаки Ближним боем против Стойкости одной или нескольких целей рядом с собой. Урон каждой атаки: 0/0/1/2.",
+    "shortDescription": "Проводит четыре слабые атаки ближнего боя",
+    "price": 9,
+    "heatCost": 1,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "ZjCFPDqbAICXCDjL"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Эравель"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "zaryadka",
+    "name": "Зарядка",
+    "type": "ability",
+    "rank": 1,
+    "skill": "inzheneriya",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 5
+            },
+            "targets": "single",
+            "duration": "untilStartOfTargetNextTurn",
+            "trigger": "onTargetDamaged"
+          },
+          "outcomes": [
+            {
+              "key": "damageReduction",
+              "amount": 2
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Подзарядите силовой щит цели в пределах 5 м. Следующий раз до начала её следующего хода, когда она получает урон, уменьшите этот урон на 2.",
+    "shortDescription": "Подзаряжает щит для снижения следующего урона",
+    "price": 3,
+    "heatCost": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "8ignLKzdvFGzeOBm"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Мари"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "kamidzare",
+    "name": "Камидзарэ",
+    "type": "ability",
+    "rank": 3,
+    "skill": "blizhniy_boy",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "targets": "self"
+          },
+          "outcomes": [
+              {
+                "key": "moveSelf",
+                "distance": 100
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 100
+            },
+            "targets": "allInArea",
+            "area": {
+              "type": "ray",
+              "value": 100
+            },
+            "defense": "fortitude",
+            "check": "required"
+          },
+          "outcomes": [
+              {
+                "key": "damage",
+                "value": "0/0/1/2"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Рванитесь по прямой на расстояние до 100 м и атакуйте Ближним боем против Стойкости каждого противника на пути. Урон: 0/0/1/2.",
+    "shortDescription": "Проносится через строй и атакует всех на пути",
+    "price": 9,
+    "heatCost": 0,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "NWgyhsNhZUmb2o7G"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Эравель"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "kontrataka",
+    "name": "Контратака",
+    "type": "ability",
+    "rank": 3,
+    "skill": "lovkost",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "range": {
+              "type": "melee"
+            },
+            "targets": "single",
+            "trigger": "onTargetedByMelee",
+            "defense": "control",
+            "check": "required"
+          },
+          "outcomes": [
+              {
+                "key": "damage",
+                "value": "0/0/1/2"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "range": {
+              "type": "melee"
+            },
+            "targets": "single",
+            "trigger": "onSuccess",
+            "defense": "control",
+            "check": "successBonus"
+          },
+          "outcomes": [
+            {
+              "key": "cancelAction"
+            },
+              {
+                "key": "moveSelf",
+                "distance": 30
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Когда вас атакуют в ближнем бою, реакцией атакуйте нападающего Ловкостью против Контроля. Урон: 0/0/1/2. При успехе атака противника проваливается, а вы можете переместиться на расстояние до 30 м, не провоцируя атаки.",
+    "shortDescription": "Уклоняется от атаки и отвечает ударом",
+    "price": 9,
+    "heatCost": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "0SNmR7cLTZnEmNiC"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Эравель"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "obnaruzhenie-tekhniki",
+    "name": "Обнаружение техники",
+    "type": "ability",
+    "rank": 2,
+    "skill": "khakerstvo",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "targets": "allInArea",
+            "area": {
+              "type": "circle",
+              "value": 100
+            }
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Обнаружьте все электронные устройства в радиусе 100 м, включая выключенные устройства с собственным источником энергии. Вы понимаете их точное направление, примерный тип и текущее состояние, но не получаете доступ к данным и не замечаете полностью обесточенные устройства.",
+    "shortDescription": "Находит и распознаёт электронику в радиусе 100 м",
+    "price": 6,
+    "heatCost": 1,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "tezgiLmKNVckabnP"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Мари"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "otrazhayushchiy-shchit",
+    "name": "Отражающий щит",
+    "type": "ability",
+    "rank": 3,
+    "skill": "inzheneriya",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "targets": "self",
+            "trigger": "onTargetDamaged"
+          },
+          "outcomes": [
+              {
+                "key": "damageReduction",
+                "amount": 8
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "targets": "single",
+            "duration": "untilEndOfTargetNextTurn",
+            "trigger": "onDamageSource"
+          },
+          "outcomes": [
+            {
+              "key": "imposeDisadvantage"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Когда вы получаете урон, реакцией разверните отражающий щит. Уменьшите полученный урон на 8; отражённый импульс даёт источнику атаки помеху на его следующую проверку до конца следующего хода.",
+    "shortDescription": "Снижает урон и мешает следующему действию атакующего",
+    "price": 9,
+    "heatCost": 1,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "3yj0qQrMTVoQGswS"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Мари"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "otrazhenie-snaryadov",
+    "name": "Отражение снарядов",
+    "type": "ability",
+    "rank": 3,
+    "skill": "lovkost",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 50
+            },
+            "targets": "single",
+            "trigger": "onTargetedByProjectile",
+            "check": "successBonus"
+          },
+          "outcomes": [
+              {
+                "key": "damageReduction",
+                "amount": 15
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Когда выпущенный снаряд атакует вас или союзника в пределах 50 м, реакцией совершите встречную проверку Ловкости против использованного для атаки навыка. При победе поймайте или отбейте снаряд и уменьшите урон от атаки на 15.",
+    "shortDescription": "Ловит снаряд и уменьшает его урон",
+    "price": 9,
+    "heatCost": 1,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "kZ3Dv5CLD9oGUaEM"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Эравель"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "ochishchenie",
+    "name": "Очищение",
+    "type": "ability",
+    "rank": 2,
+    "skill": "mistika",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "maneuver"
+          },
+          "conditions": {
+            "range": {
+              "type": "melee"
+            },
+            "targets": "single"
+          },
+          "outcomes": [
+            {
+              "key": "removeStatus",
+              "status": "vulnerable",
+              "value": "chooseOne"
+            },
+            {
+              "key": "removeStatus",
+              "status": "weakened",
+              "value": "chooseOne"
+            },
+            {
+              "key": "removeStatus",
+              "status": "immobilized",
+              "value": "chooseOne"
+            },
+            {
+              "key": "removeStatus",
+              "status": "grabbed",
+              "value": "chooseOne"
+            },
+            {
+              "key": "restoreStress",
+              "amount": 3
+            },
+            {
+              "key": "grantAdvantage"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Коснитесь цели и снимите с неё одно состояние, кроме Истощения от Быстрого восстановления. Цель восстанавливает 3 ячейки стресса и получает преимущество на следующий спасбросок до конца сцены.",
+    "shortDescription": "Снимает состояние и восстанавливает 3 ячейки стресса",
+    "price": 6,
+    "heatCost": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "7Du8xMRtXJsnk8mB"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Зверь, Лоренцо"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "pomekhi",
+    "name": "Помехи",
+    "type": "ability",
+    "rank": 2,
+    "skill": "khakerstvo",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "targets": "area",
+            "area": {
+              "type": "circle",
+              "value": 30
+            },
+            "duration": "untilEndOfScene",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Совершите проверку Хакерства и создайте до конца сцены движущуюся вместе с вами зону помех диаметром 30 м. Электронная связь и передача данных через зону работают только после проверки Хакерства или подходящего навыка против результата вашей проверки.",
+    "shortDescription": "Создаёт вокруг себя зону подавления связи",
+    "price": 6,
+    "heatCost": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "9oQUpdioA1ikHocm"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Мари"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "programmiruya-realnost",
+    "name": "Программируя реальность",
+    "type": "ability",
+    "rank": 3,
+    "skill": "moshch",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 50
+            },
+            "targets": "single",
+            "duration": "untilEndOfScene"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Выберите один предмет массой до 1 тонны в пределах 50 м. До конца сцены вы можете манёвром перемещать его на расстояние до 30 м или выполнять им простое физическое действие: нажать кнопку, повернуть рычаг, открыть дверь или совершить похожую операцию. Если предмет удерживают или контролируют, совершите встречную проверку Мощи.",
+    "shortDescription": "Дистанционно управляет предметом массой до тонны",
+    "price": 9,
+    "heatCost": 1,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "pXAYNi6wIPCQPbgf"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Мари"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "razgovor-s-zhivotnymi-rasteniyami",
+    "name": "Разговор с животными и растениями",
+    "type": "ability",
+    "rank": 1,
+    "skill": "mistika",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "maneuver"
+          },
+          "conditions": {
+            "range": {
+              "type": "melee"
+            },
+            "targets": "single",
+            "duration": "untilEndOfScene"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Коснитесь животного или растения. До конца сцены вы понимаете его сигналы и можете отвечать ему вслух. Сложность разговора ограничена интеллектом существа и тем, что оно способно воспринять.",
+    "shortDescription": "Позволяет говорить с животным или растением",
+    "price": 3,
+    "heatCost": 1,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "L4ERx1iGTnosFhRA"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Зверь, Лоренцо"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "razryv-realnosti",
+    "name": "Разрыв реальности",
+    "type": "ability",
+    "rank": 3,
+    "skill": "blizhniy_boy",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "melee"
+            },
+            "targets": "allInArea",
+            "area": {
+              "type": "cone",
+              "value": 30
+            },
+            "defense": "control",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": "0/2/4/6"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "melee"
+            },
+            "targets": "allInArea",
+            "area": {
+              "type": "cone",
+              "value": 30
+            },
+            "defense": "control",
+            "duration": "untilEndOfTargetNextTurn",
+            "check": "successBonus",
+            "trigger": "onSuccess"
+          },
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "weakened"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "melee"
+            },
+            "targets": "allInArea",
+            "area": {
+              "type": "cone",
+              "value": 30
+            },
+            "defense": "control",
+            "duration": "untilStartOfTargetNextTurn",
+            "check": "successBonus",
+            "trigger": "onCriticalSuccess"
+          },
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "immobilized"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Разрубите ткань реальности перед собой. Атакуйте Ближним боем против Контроля каждой технической цели в конусе длиной 30 м. Урон: 0/2/4/6. При успехе цель становится Ослабленной до конца своего следующего хода. При критическом успехе она также становится Обездвиженной до начала своего следующего хода.",
+    "shortDescription": "Разрезает и нарушает работу техники перед собой",
+    "price": 9,
+    "heatCost": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "sgzIC43koCeWd7S6"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Эравель"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "szhatyy-vozdukh",
+    "name": "Сжатый воздух",
+    "type": "ability",
+    "rank": 2,
+    "skill": "blizhniy_boy",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "melee"
+            },
+            "targets": "allInArea",
+            "area": {
+              "type": "circle",
+              "value": 15
+            },
+            "defense": "fortitude",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": "0/2/4/6"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "melee"
+            },
+            "targets": "allInArea",
+            "area": {
+              "type": "circle",
+              "value": 15
+            },
+            "defense": "fortitude",
+            "check": "successBonus",
+            "trigger": "onSuccess"
+          },
+          "outcomes": [
+            {
+              "key": "moveTarget",
+              "distance": 10
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Ударьте так быстро, что вокруг вас расходится волна сжатого воздуха. Атакуйте Ближним боем против Стойкости каждого противника в круге диаметром 15 м. Урон: 0/2/4/6. При успехе сдвиньте цель на расстояние до 10 м от себя.",
+    "shortDescription": "Ударной волной повреждает и отталкивает противников",
+    "price": 6,
+    "heatCost": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "QD2iyBltjdFIAeB7"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Эравель"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "silovoy-zaslon",
+    "name": "Силовой заслон",
+    "type": "ability",
+    "rank": 2,
+    "skill": "inzheneriya",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "maneuver"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 15
+            },
+            "targets": "area",
+            "duration": "untilStartOfYourNextTurn"
+          },
+          "outcomes": [
+            {
+              "key": "createWall"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Создайте в пределах 15 м стену силового поля шириной и высотой до 10 м. До начала вашего следующего хода она перекрывает движение и линию атаки; обойти её можно обычным перемещением.",
+    "shortDescription": "Ненадолго создаёт стену силового поля",
+    "price": 6,
+    "heatCost": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "dAyy5S50T3BtfQNI"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Мари"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "uderzhanie",
+    "name": "Удержание",
+    "type": "ability",
+    "rank": 2,
+    "skill": "mistika",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 15
+            },
+            "targets": "single",
+            "defense": "fortitude",
+            "duration": "untilStartOfTargetNextTurn",
+            "check": "successBonus",
+            "trigger": "onSuccess"
+          },
+          "outcomes": [
+            {
+              "key": "grantAdvantage"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 15
+            },
+            "targets": "single",
+            "defense": "fortitude",
+            "duration": "untilStartOfTargetNextTurn",
+            "check": "successBonus",
+            "trigger": "onCriticalSuccess"
+          },
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "immobilized"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Заставьте мышцы цели в пределах 15 м одеревенеть и совершите проверку Мистики против её Стойкости. При успехе следующая проверка против цели до начала её следующего хода получает преимущество. При критическом успехе цель также становится Обездвиженной на тот же срок.",
+    "shortDescription": "Открывает цель для союзника, а на крите обездвиживает",
+    "price": 6,
+    "heatCost": 1,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "96GtLpwGMrJRsI28"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Зверь, Лоренцо"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "umirotvorenie",
+    "name": "Умиротворение",
+    "type": "ability",
+    "rank": 1,
+    "skill": "mistika",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 10
+            },
+            "targets": "single",
+            "defense": "will",
+            "duration": "untilEndOfScene",
+            "check": "successBonus",
+            "trigger": "onSuccess"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 10
+            },
+            "targets": "single",
+            "defense": "will",
+            "duration": "untilStartOfTargetNextTurn",
+            "check": "successBonus",
+            "trigger": "onSuccess"
+          },
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "weakened"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Успокойте живую цель в пределах 10 м и совершите проверку Мистики против её Воли. При успехе до конца сцены цель относится к происходящему нейтрально, пока ей не угрожают и не причиняют вред. До начала своего следующего хода она также Ослаблена.",
+    "shortDescription": "Успокаивает живую цель и ненадолго ослабляет её",
+    "price": 3,
+    "heatCost": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "CxVLiWjxNguDsiDk"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Зверь, Лоренцо"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "upravlyaemaya-mutatsiya",
+    "name": "Управляемая мутация",
+    "type": "ability",
+    "rank": 1,
+    "skill": "mistika",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "maneuver"
+          },
+          "conditions": {
+            "range": {
+              "type": "melee"
+            },
+            "targets": "single",
+            "duration": "untilStartOfTargetNextTurn"
+          },
+          "outcomes": [
+            {
+              "key": "grantAdvantage",
+              "value": "chooseOne"
+            },
+            {
+              "key": "moveTarget",
+              "distance": 10,
+              "value": "chooseOne"
+            },
+            {
+              "key": "damageReduction",
+              "amount": 4,
+              "value": "chooseOne"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Коснитесь живой цели и выберите одну краткую мутацию. Усиленные чувства дают преимущество на следующую проверку Наблюдательности до конца сцены; усиленные ноги немедленно перемещают цель на расстояние до 10 м без провоцированных атак; упрочнённая кожа уменьшает следующий полученный до начала следующего хода урон на 4.",
+    "shortDescription": "Даёт живой цели одну из трёх кратких мутаций",
+    "price": 3,
+    "heatCost": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "cVX7ZcBZrJhqzYCr"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Зверь, Лоренцо"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "uskorenie-regeneratsii",
+    "name": "Ускорение регенерации",
+    "type": "ability",
+    "rank": 2,
+    "skill": "mistika",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "maneuver"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 15
+            },
+            "targets": "single"
+          },
+          "outcomes": [
+            {
+              "key": "removeStatus",
+              "status": "weakened"
+            },
+            {
+              "key": "restoreStress",
+              "amount": 3
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Ускорьте восстановление живой цели в пределах 15 м. Снимите с неё состояние Ослаблен и восстановите ей 3 ячейки стресса.",
+    "shortDescription": "Снимает слабость и восстанавливает 3 ячейки стресса",
+    "price": 6,
+    "heatCost": 1,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "Kn3pYh5EGSL675dr"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Зверь, Лоренцо"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "kaskadnyy-vzlom",
+    "name": "Каскадный взлом",
+    "type": "ability",
+    "rank": 3,
+    "skill": "khakerstvo",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 50
+            },
+            "targets": "upTo2",
+            "defense": "control",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": "0/2/4/6"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 50
+            },
+            "targets": "upTo2",
+            "defense": "control",
+            "duration": "untilStartOfTargetNextTurn",
+            "check": "successBonus",
+            "trigger": "onSuccess"
+          },
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "weakened"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Перегрузите до двух технических целей в пределах 50 м. Атакуйте Хакерством против Контроля каждой цели. Урон: 0/2/4/6. При успехе цель становится Ослабленной до начала своего следующего хода.",
+    "shortDescription": "Повреждает и ослабляет до двух технических целей",
+    "price": 9,
+    "heatCost": 2
+  },
+  {
+    "id": "avariynoe-otklyuchenie",
+    "name": "Аварийное отключение",
+    "type": "ability",
+    "rank": 3,
+    "skill": "khakerstvo",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 100
+            },
+            "targets": "upTo2",
+            "defense": "control",
+            "duration": "untilStartOfTargetNextTurn",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "weakened"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 100
+            },
+            "targets": "upTo2",
+            "defense": "control",
+            "duration": "untilStartOfTargetNextTurn",
+            "check": "successBonus",
+            "trigger": "onSuccess"
+          },
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "immobilized"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 100
+            },
+            "targets": "upTo2",
+            "defense": "control",
+            "check": "successBonus",
+            "trigger": "onCriticalSuccess"
+          },
+          "outcomes": [
+            {
+              "key": "cancelAction"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Атакуйте Хакерством против Контроля до двух технических целей в пределах 100 м. Каждая цель становится Ослабленной до начала своего следующего хода. При успехе она также становится Обездвиженной на тот же срок, а при критическом успехе вдобавок пропускает своё следующее действие.",
+    "shortDescription": "Ступенчато отключает до двух технических целей",
+    "price": 9,
+    "heatCost": 2
+  },
+  {
+    "id": "fazovyy-zaslon",
+    "name": "Фазовый заслон",
+    "type": "ability",
+    "rank": 3,
+    "skill": "inzheneriya",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 50
+            },
+            "targets": "single",
+            "trigger": "onTargetDamaged"
+          },
+          "outcomes": [
+            {
+              "key": "damageReduction",
+              "amount": 12
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Когда цель в пределах 50 м получает урон, реакцией разверните перед ней фазовый заслон и уменьшите этот урон на 12.",
+    "shortDescription": "Реакцией уменьшает урон по цели на 12",
+    "price": 9,
+    "heatCost": 2
+  },
+  {
+    "id": "kaskadnyy-demontazh",
+    "name": "Каскадный демонтаж",
+    "type": "ability",
+    "rank": 3,
+    "skill": "inzheneriya",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 50
+            },
+            "targets": "allInArea",
+            "area": {
+              "type": "circle",
+              "value": 30
+            },
+            "defense": "control",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": "0/2/4/6"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 50
+            },
+            "targets": "allInArea",
+            "area": {
+              "type": "circle",
+              "value": 30
+            },
+            "defense": "control",
+            "duration": "untilStartOfTargetNextTurn",
+            "check": "successBonus",
+            "trigger": "onSuccess"
+          },
+          "outcomes": [
+            {
+              "key": "moveTarget",
+              "distance": 20
+            },
+            {
+              "key": "applyStatus",
+              "status": "weakened"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Разберите опоры и покрытия в круге диаметром 30 м с центром в пределах 50 м. Атакуйте Инженерией против Контроля каждой цели в области. Урон: 0/2/4/6. При успехе сдвиньте цель на расстояние до 20 м к центру области; она становится Ослабленной до начала своего следующего хода.",
+    "shortDescription": "Обрушает область, стягивая и ослабляя цели",
+    "price": 9,
+    "heatCost": 2
+  },
+  {
+    "id": "evakuatsionnaya-platforma",
+    "name": "Эвакуационная платформа",
+    "type": "ability",
+    "rank": 3,
+    "skill": "inzheneriya",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "maneuver"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 50
+            },
+            "targets": "single"
+          },
+          "outcomes": [
+            {
+              "key": "removeStatus",
+              "status": "grabbed"
+            },
+            {
+              "key": "removeStatus",
+              "status": "immobilized"
+            },
+            {
+              "key": "moveTarget",
+              "distance": 100
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Выберите себя или согласного союзника в пределах 50 м. Снимите с цели состояния Схвачен и Обездвижен, затем переместите её на расстояние до 100 м. Это перемещение не провоцирует атаки.",
+    "shortDescription": "Освобождает и эвакуирует героя на расстояние до 100 м",
+    "price": 9,
+    "heatCost": 2
+  },
+  {
+    "id": "bezuderzhnyy-ryvok",
+    "name": "Безудержный рывок",
+    "type": "ability",
+    "rank": 3,
+    "skill": "moshch",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "targets": "self"
+          },
+          "outcomes": [
+            {
+              "key": "removeStatus",
+              "status": "grabbed"
+            },
+            {
+              "key": "removeStatus",
+              "status": "immobilized"
+            },
+            {
+              "key": "moveSelf",
+              "distance": 100
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "melee"
+            },
+            "targets": "single",
+            "defense": "fortitude",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": "0/2/4/6"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "melee"
+            },
+            "targets": "single",
+            "defense": "fortitude",
+            "duration": "untilStartOfTargetNextTurn",
+            "check": "successBonus",
+            "trigger": "onSuccess"
+          },
+          "outcomes": [
+            {
+              "key": "moveTarget",
+              "distance": 50
+            },
+            {
+              "key": "applyStatus",
+              "status": "immobilized"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Снимите с себя состояния Схвачен и Обездвижен, затем переместитесь по прямой на расстояние до 100 м, разрушая препятствия 2-го ранга и ниже. В конце перемещения атакуйте Мощью против Стойкости одной цели рядом с собой. Урон: 0/2/4/6. При успехе сдвиньте цель на расстояние до 50 м по ходу рывка; она становится Обездвиженной до начала своего следующего хода.",
+    "shortDescription": "Вырывается из контроля и таранит цель",
+    "price": 9,
+    "heatCost": 2
+  },
+  {
+    "id": "otbor-zhiznennoy-sily",
+    "name": "Отбор жизненной силы",
+    "type": "ability",
+    "rank": 3,
+    "skill": "mistika",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "melee"
+            },
+            "targets": "single",
+            "defense": "fortitude",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": "4/6/9/14"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 50
+            },
+            "targets": "single",
+            "trigger": "onBaseOutcome"
+          },
+          "outcomes": [
+            {
+              "key": "restoreStress",
+              "value": "0/0/3/4"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Коснитесь живой цели и атакуйте Мистикой против Стойкости. Урон: 4/6/9/14. Выберите себя или союзника в пределах 50 м: при базовом успехе проверки выбранный герой восстанавливает 3 ячейки стресса, а при базовом критическом успехе — 4.",
+    "shortDescription": "Атакует вблизи и передаёт союзнику жизненную силу",
+    "price": 9,
     "heatCost": 1
+  },
+  {
+    "id": "adaptivnaya-plot",
+    "name": "Адаптивная плоть",
+    "type": "ability",
+    "rank": 3,
+    "skill": "mistika",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "targets": "self",
+            "trigger": "onTargetDamaged"
+          },
+          "outcomes": [
+            {
+              "key": "damageReduction",
+              "amount": 15
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Когда вы получаете урон, реакцией перестройте своё тело и уменьшите этот урон на 15.",
+    "shortDescription": "Реакцией уменьшает полученный урон на 15",
+    "price": 9,
+    "heatCost": 2
+  },
+  {
+    "id": "massovyy-spazm",
+    "name": "Массовый спазм",
+    "type": "ability",
+    "rank": 3,
+    "skill": "mistika",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 50
+            },
+            "targets": "allInArea",
+            "area": {
+              "type": "circle",
+              "value": 30
+            },
+            "defense": "fortitude",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": "0/1/3/4"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "meters",
+              "value": 50
+            },
+            "targets": "allInArea",
+            "area": {
+              "type": "circle",
+              "value": 30
+            },
+            "defense": "fortitude",
+            "duration": "untilStartOfTargetNextTurn",
+            "check": "successBonus",
+            "trigger": "onSuccess"
+          },
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "immobilized"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Вызовите болезненный спазм у всех биологических целей в круге диаметром 30 м с центром в пределах 50 м. Атакуйте Мистикой против Стойкости каждой цели. Урон: 0/1/3/4. При успехе цель становится Обездвиженной до начала своего следующего хода.",
+    "shortDescription": "Повреждает и обездвиживает биологические цели в области",
+    "price": 9,
+    "heatCost": 2
+  },
+  {
+    "id": "skvoz-stroy",
+    "name": "Сквозь строй",
+    "type": "ability",
+    "rank": 3,
+    "skill": "lovkost",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "targets": "self"
+          },
+          "outcomes": [
+            {
+              "key": "removeStatus",
+              "status": "grabbed"
+            },
+            {
+              "key": "removeStatus",
+              "status": "immobilized"
+            },
+            {
+              "key": "moveSelf",
+              "distance": 100
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "melee"
+            },
+            "targets": "single",
+            "defense": "control",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": "2/4/6/9"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Снимите с себя состояния Схвачен и Обездвижен, затем переместитесь на расстояние до 100 м и атакуйте Ловкостью против Контроля одну цель, мимо которой проходите. Урон: 2/4/6/9. Это перемещение не провоцирует атаки.",
+    "shortDescription": "Вырывается из контроля, перемещается и атакует",
+    "price": 9,
+    "heatCost": 2
+  },
+  {
+    "id": "uskolzanie",
+    "name": "Ускользание",
+    "type": "ability",
+    "rank": 3,
+    "skill": "lovkost",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "targets": "single",
+            "trigger": "onSuccess",
+            "check": "successBonus"
+          },
+          "outcomes": [
+            {
+              "key": "cancelAction"
+            },
+            {
+              "key": "moveSelf",
+              "distance": 30
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "targets": "self",
+            "trigger": "onFailure"
+          },
+          "outcomes": [
+            {
+              "key": "damageReduction",
+              "amount": 6
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Когда вас атакуют, реакцией совершите встречную проверку Ловкости против использованного для атаки навыка. При победе атака проваливается, а вы перемещаетесь на расстояние до 30 м, не провоцируя атаки. При поражении уменьшите полученный урон на 6.",
+    "shortDescription": "Уклоняется от атаки или уменьшает её урон",
+    "price": 9,
+    "heatCost": 1
+  },
+  {
+    "id": "skolzyashchiy-kaskad",
+    "name": "Скользящий каскад",
+    "type": "ability",
+    "rank": 3,
+    "skill": "lovkost",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "targets": "self"
+          },
+          "outcomes": [
+            {
+              "key": "moveSelf",
+              "distance": 100
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "melee"
+            },
+            "targets": "upTo2",
+            "defense": "control",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": "0/1/3/4"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "melee"
+            },
+            "targets": "upTo2",
+            "defense": "control",
+            "duration": "untilStartOfTargetNextTurn",
+            "check": "successBonus",
+            "trigger": "onSuccess"
+          },
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "immobilized"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Переместитесь на расстояние до 100 м. Во время движения выберите до двух целей и атакуйте каждую Ловкостью против Контроля. Урон: 0/1/3/4. При успехе цель становится Обездвиженной до начала своего следующего хода.",
+    "shortDescription": "Проносится через две цели и обездвиживает их",
+    "price": 9,
+    "heatCost": 2
+  },
+  {
+    "id": "boevoy-tanets",
+    "name": "Боевой танец",
+    "type": "ability",
+    "rank": 3,
+    "skill": "blizhniy_boy",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "targets": "self"
+          },
+          "outcomes": [
+            {
+              "key": "moveSelf",
+              "distance": 30
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "melee"
+            },
+            "targets": "allInArea",
+            "area": {
+              "type": "circle",
+              "value": 30
+            },
+            "defense": "fortitude",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": "2/4/6/9"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Переместитесь на расстояние до 30 м, затем атакуйте Ближним боем против Стойкости каждого противника в круге диаметром 30 м вокруг себя. Урон: 2/4/6/9.",
+    "shortDescription": "Перемещается и атакует всех противников рядом",
+    "price": 9,
+    "heatCost": 2
+  },
+  {
+    "id": "idealnoe-parirovanie",
+    "name": "Идеальное парирование",
+    "type": "ability",
+    "rank": 3,
+    "skill": "blizhniy_boy",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "range": {
+              "type": "melee"
+            },
+            "targets": "single",
+            "duration": "untilStartOfTargetNextTurn",
+            "trigger": "onSuccess",
+            "check": "successBonus"
+          },
+          "outcomes": [
+            {
+              "key": "cancelAction"
+            },
+            {
+              "key": "applyStatus",
+              "status": "weakened"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "range": {
+              "type": "melee"
+            },
+            "targets": "self",
+            "trigger": "onFailure"
+          },
+          "outcomes": [
+            {
+              "key": "damageReduction",
+              "amount": 6
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Когда вас атакуют в ближнем бою, реакцией совершите встречную проверку Ближнего боя против использованного для атаки навыка. При победе атака проваливается, а атакующий становится Ослабленным до начала своего следующего хода. При поражении уменьшите полученный урон на 6.",
+    "shortDescription": "Парирует ближнюю атаку или уменьшает её урон",
+    "price": 9,
+    "heatCost": 1
+  },
+  {
+    "id": "zhazhda-krovi",
+    "name": "Жажда крови",
+    "type": "ability",
+    "rank": 2,
+    "skill": "mistika",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "targets": "self",
+            "duration": "untilEndOfTargetNextTurn"
+          },
+          "outcomes": [
+            {
+              "key": "removeStatus",
+              "status": "weakened"
+            },
+            {
+              "key": "grantAdvantage"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "targets": "self",
+            "duration": "untilEndOfTargetNextTurn",
+            "trigger": "onNextMeleeHit"
+          },
+          "outcomes": [
+            {
+              "key": "restoreStress",
+              "amount": 3
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Снимите с себя состояние Ослаблен. До конца вашего следующего хода следующая атака ближнего боя получает преимущество. Если она наносит урон, после атаки восстановите 3 ячейки стресса. После первого попадания эффект заканчивается.",
+    "shortDescription": "Усиливает следующую ближнюю атаку и восстанавливает стресс",
+    "price": 6,
+    "heatCost": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "vWDamgtWVUkZpnTv"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-genome"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Зверь, Лоренцо"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "kineticheskiy-shchit",
+    "name": "Кинетический щит",
+    "type": "ability",
+    "rank": 2,
+    "skill": "mistika",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "reaction"
+          },
+          "conditions": {
+            "targets": "single",
+            "trigger": "onTargetDamagedByRangedAttack"
+          },
+          "outcomes": [
+            {
+              "key": "damageReduction",
+              "amount": 6
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Когда дальняя атака наносит урон вам или существу, находящемуся прямо за вами, реакцией создайте кинетический щит и уменьшите этот урон на 6.",
+    "shortDescription": "Реакцией уменьшает урон от дальней атаки на 6",
+    "price": 6,
+    "heatCost": 1,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "GZvEwXNlTVATdAAx"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-genome"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Эравель"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "pikirovanie",
+    "name": "Пикирование",
+    "type": "ability",
+    "rank": 3,
+    "skill": "blizhniy_boy",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "targets": "self"
+          },
+          "outcomes": [
+            {
+              "key": "moveSelf",
+              "distance": 100
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "melee"
+            },
+            "targets": "single",
+            "defense": "fortitude",
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": "4/6/9/14"
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "action"
+          },
+          "conditions": {
+            "range": {
+              "type": "melee"
+            },
+            "targets": "single",
+            "defense": "fortitude",
+            "duration": "untilStartOfTargetNextTurn",
+            "check": "successBonus",
+            "trigger": "onSuccess"
+          },
+          "outcomes": [
+            {
+              "key": "applyStatus",
+              "status": "immobilized"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Переместитесь по прямой на расстояние до 100 м к видимой цели, не провоцируя атаки, и атакуйте её Ближним боем против Стойкости. Урон: 4/6/9/14. При успехе цель становится Обездвиженной до начала своего следующего хода.",
+    "shortDescription": "Пикирует на цель, атакует и прижимает её к месту",
+    "price": 9,
+    "heatCost": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "sjXDwH0xGgwEKScN"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-genome"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Эравель"
+      }
+    ],
+    "status": "approved"
   }
 ]

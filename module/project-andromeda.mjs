@@ -20,6 +20,8 @@ import {
 } from './helpers/foundry-compat.mjs';
 import { renderAndromedaCombatTracker } from './helpers/combat-tracker.mjs';
 import {
+  CAMPAIGN_ABILITY_MIGRATION_SETTING,
+  CAMPAIGN_ABILITY_MIGRATION_VERSION,
   CONTENT_HEAT_MIGRATION_SETTING,
   CONTENT_HEAT_MIGRATION_VERSION,
   GEAR_CATALOG_AUTO_SYNC_STATE_SETTING,
@@ -93,6 +95,7 @@ import { getSceneActorTokens, getTokenIsolationPlan } from './helpers/token-isol
 import { runStartupTasks } from './helpers/startup-tasks.mjs';
 import { migrateWorldV04ToV05 } from './helpers/v05-migration.mjs';
 import { migrateContentAndHeatModel } from './helpers/content-heat-migration.mjs';
+import { migrateCampaignAbilitiesToCatalog } from './helpers/campaign-ability-migration.mjs';
 
 const ITEM_SUPERTYPE_ORDER = ['equipment', 'environment', 'traits', 'other'];
 const ITEM_LIBRARY_SYNC_OPTION_KEY = getLibrarySyncOptionKey();
@@ -1482,6 +1485,23 @@ async function runContentHeatMigrationIfNeeded() {
   return summary;
 }
 
+async function runCampaignAbilityMigrationIfNeeded() {
+  const currentVersion =
+    Number(game.settings.get(MODULE_ID, CAMPAIGN_ABILITY_MIGRATION_SETTING)) || 0;
+  if (currentVersion >= CAMPAIGN_ABILITY_MIGRATION_VERSION) return null;
+  const summary = await migrateCampaignAbilitiesToCatalog();
+  if (!summary?.packAvailable) {
+    debugLog('Campaign ability migration deferred (gear-library pack unavailable or outdated)');
+    return summary;
+  }
+  await game.settings.set(
+    MODULE_ID,
+    CAMPAIGN_ABILITY_MIGRATION_SETTING,
+    CAMPAIGN_ABILITY_MIGRATION_VERSION
+  );
+  return summary;
+}
+
 /* -------------------------------------------- */
 /*  Init Hook                                   */
 /* -------------------------------------------- */
@@ -1503,6 +1523,7 @@ Hooks.once('init', function () {
     migrateActorItemsToLibrary,
     migrateActorLinksToCompendium,
     migrateCatalogWeaponsToWeaponType,
+    migrateCampaignAbilitiesToCatalog,
     refreshCompendiumLinkedActorItems,
     removeOrphanCatalogWorldItems,
     sessionStats,
@@ -1933,7 +1954,8 @@ Hooks.once('ready', async function () {
         { name: 'weapon type migration', run: runWeaponTypeMigrationIfNeeded },
         { name: 'compendium pack refresh', run: runCompendiumPackRefreshIfNeeded },
         { name: '0.4 to 0.5 migration', run: runV05MigrationIfNeeded },
-        { name: 'content and Heat migration', run: runContentHeatMigrationIfNeeded }
+        { name: 'content and Heat migration', run: runContentHeatMigrationIfNeeded },
+        { name: 'campaign ability migration', run: runCampaignAbilityMigrationIfNeeded }
       ],
       { onError: reportStartupError }
     );

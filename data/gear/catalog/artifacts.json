@@ -1964,5 +1964,59 @@
     "shortDescription": "Форма тени для перемещения между тёмными участками.",
     "price": null,
     "heatCost": 0
+  },
+  {
+    "id": "kus",
+    "name": "Кусь",
+    "type": "artifact",
+    "rank": 3,
+    "skill": "blizhniy_boy",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "check": "required"
+          },
+          "outcomes": [
+            {
+              "key": "damage",
+              "value": "4/6/9/14"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "TODO: заполнить описание из мира Stellar.",
+    "shortDescription": "TODO: заполнить краткое описание.",
+    "price": null,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "jolDPlwwpCaHlDE8"
+      },
+      {
+        "key": "sourceType",
+        "value": "weapon"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Зверь"
+      }
+    ],
+    "tags": [
+      "legacy-world-312",
+      "TODO: mechanics",
+      "TODO: shortDescription",
+      "TODO: description",
+      "source-type: weapon"
+    ],
+    "status": "legacy"
   }
 ]

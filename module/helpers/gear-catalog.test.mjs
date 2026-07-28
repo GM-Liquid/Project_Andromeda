@@ -17,7 +17,13 @@ test('gear catalog transform maps base Heat and artifact activation metadata', (
         rank: 2,
         skill: 'mistika',
         heatCost: 2,
+        status: 'approved',
         description: 'Locks a target in place.',
+        properties: [
+          { key: 'sourceItemId', value: 'legacy-item-a' },
+          { key: 'sourceItemId', value: 'legacy-item-a' },
+          { key: 'sourceWorld', value: '312' }
+        ],
         mechanics: {
           effects: [
             {
@@ -73,6 +79,8 @@ test('gear catalog transform maps base Heat and artifact activation metadata', (
   assert.equal(abilityData.duration, 'untilEndOfScene');
   assert.equal(abilityData.heatCost, 2);
   assert.equal(abilityData.mode, undefined);
+  assert.equal(abilityData.details.gearCatalog.status, 'approved');
+  assert.deepEqual(abilityData.details.gearCatalog.sourceItemIds, ['legacy-item-a']);
 
   const artifactRow = remoteData.sheets.artifacts[0];
   const artifactData = getSystemData(artifactRow);

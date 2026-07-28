@@ -156,8 +156,8 @@
         }
       ]
     },
-    "description": "1 раз за сессию вы можете добавить деталь сцены, как при трате Очка Свершения, не тратя его — но только в виде полезной мелочи, которая «как раз оказалась с собой»: инструмент, немного боеприпасов, расходник, нужная безделушка. Ограничения на детали сцены действуют как обычно.",
-    "shortDescription": "1/сессию — нужный предмет «оказался с собой»",
+    "description": "1 раз за сессию вы можете свободным действием объявить, что нужная мелочь как раз оказалась с собой: инструмент, немного боеприпасов, расходник, нужная безделушка. Предмет не должен отменять уже произошедшие события, стирать последствия проверок или решать сцену сам по себе. Ведущий может уточнить деталь или потребовать проверку для её использования.",
+    "shortDescription": "1/сессию — нужная мелочь «оказалась с собой»",
     "price": 2,
     "tags": [
       "новые опции"
@@ -355,8 +355,8 @@
         }
       ]
     },
-    "description": "Сама судьба благословила вас. В начале каждой игровой встречи вы получаете 2 Очка Свершений вместо 1.",
-    "shortDescription": "2 ОС в начале встречи вместо 1",
+    "description": "Сама судьба благословила вас. В начале каждой сессии вы получаете 1 Очко Свершения, даже если у вас уже есть очки.",
+    "shortDescription": "+1 ОС в начале каждой сессии",
     "price": 6,
     "tags": [
       "новые опции"
@@ -388,13 +388,13 @@
         }
       ]
     },
-    "description": "Вы умеете копить героическое усилие. Вы можете хранить до 4 Очков Свершений одновременно вместо 3.",
-    "shortDescription": "Кап ОС = 4",
+    "description": "УСТАРЕЛО: верхний предел Очков Свершений убран, черта потеряла предмет регулирования. Требует переработки. Не выдавать и не покупать до замены. Прежний эффект: хранить до 4 Очков Свершений вместо 3.",
+    "shortDescription": "Устарела: кап ОС убран, нужна замена",
     "price": 6,
     "tags": [
       "новые опции"
     ],
-    "status": "approved"
+    "status": "deprecated"
   },
   {
     "id": "nesgibaemyy",
@@ -570,6 +570,1049 @@
     "description": "Когда вы выводите цель из строя, становитесь Невидимым до начала своего следующего хода. При успехе первой атаки после этой Невидимости цель также становится Уязвимой до начала своего следующего хода.",
     "shortDescription": "Станьте Невидимым после добивания и откройте следующую цель.",
     "price": 4,
+    "tags": [
+      "новые опции"
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "zhivaya-stal",
+    "name": "Живая сталь",
+    "type": "trait",
+    "rank": 3,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "legacyEffect"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Вы можете повысить свою мощь до следующего ранга (можно превысить свой ранг)",
+    "shortDescription": "TODO: заполнить краткое описание.",
+    "price": 6,
+    "heatCost": 0,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "Cjq2Rqto0ZUhnX8m"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Лоренцо"
+      }
+    ],
+    "tags": [
+      "legacy-world-312",
+      "TODO: mechanics",
+      "TODO: shortDescription"
+    ],
+    "status": "legacy"
+  },
+  {
+    "id": "zhivaya-stal-zver",
+    "name": "Живая Сталь",
+    "type": "trait",
+    "rank": 1,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "legacyEffect"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "3й ранг\nПри имплантации этого генома ваше Тело перманентно возрастает на 1 ступень. Таким образом Тело может выходить за рамки доступного максимума.\nВместе с этим, при выполнении различных задач этой характеристики вы считаетесь гораздо крепче (можете переносить более высокую температуру, боль, и без труда работать с прочными материалами голыми руками).",
+    "shortDescription": "TODO: заполнить краткое описание.",
+    "price": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "CI9QQrG76dQDXuYb"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-genome"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Зверь"
+      }
+    ],
+    "tags": [
+      "legacy-world-312",
+      "TODO: mechanics",
+      "TODO: shortDescription",
+      "TODO: rank",
+      "source-type: trait-genome"
+    ],
+    "status": "legacy"
+  },
+  {
+    "id": "kletochnaya-azur-membrana",
+    "name": "Клеточная азур-мембрана",
+    "type": "trait",
+    "rank": 3,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "legacyEffect"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Вы восстанавливаете весь полученный азур-урон",
+    "shortDescription": "TODO: заполнить краткое описание.",
+    "price": 6,
+    "heatCost": 0,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "aS3nGFY2jmOlkqwA"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-genome"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Зверь, Лоренцо"
+      }
+    ],
+    "tags": [
+      "legacy-world-312",
+      "TODO: mechanics",
+      "TODO: shortDescription",
+      "source-type: trait-genome"
+    ],
+    "status": "legacy"
+  },
+  {
+    "id": "koshache-chute",
+    "name": "Кошачье чутье",
+    "type": "trait",
+    "rank": 3,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "targets": "self",
+            "trigger": "начинается бой"
+          },
+          "outcomes": [
+            {
+              "key": "moveSelf",
+              "distance": 30
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "targets": "self",
+            "trigger": "начинается бой",
+            "duration": "untilStartOfYourNextTurn"
+          },
+          "outcomes": [
+            {
+              "key": "enableReaction"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Вы чувствуете опасность раньше, чем успеваете её осознать. Когда начинается бой, сразу переместитесь на расстояние до 30 м, не провоцируя атаки. До начала вашего первого хода в этом бою вы можете совершить одну дополнительную реакцию.",
+    "shortDescription": "В начале боя перемещается и получает дополнительную реакцию",
+    "price": 6,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "L59E1Cb0jyfhkNtx"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-genome"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Эравель"
+      }
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "lovkost-zverya",
+    "name": "Ловкость Зверя",
+    "type": "trait",
+    "rank": 1,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "legacyEffect"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Дальность прыжка зверя равна x3 его скорости. \nЗверь двигается по стене с такой же скоростью, как и по любой другой поверхности.",
+    "shortDescription": "TODO: заполнить краткое описание.",
+    "price": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "lWBG5I5utrXIfGCw"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Зверь"
+      }
+    ],
+    "tags": [
+      "legacy-world-312",
+      "TODO: mechanics",
+      "TODO: shortDescription",
+      "TODO: rank"
+    ],
+    "status": "legacy"
+  },
+  {
+    "id": "magnetizm",
+    "name": "Магнетизм",
+    "type": "trait",
+    "rank": 1,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "legacyEffect"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Вы получаете слабую способность контролировать металл, которую вы можете развивать покупками копии этой черты. \n1й ранг черты: Действием, в пределах 20*ваш ранг метров вы можете перемещать никем не контролируемые небольшие (~20-30 кг) металлические объекты на 30м в любую сторону.",
+    "shortDescription": "TODO: заполнить краткое описание.",
+    "price": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "KxH9SKPL08CTSP7D"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Мари"
+      }
+    ],
+    "tags": [
+      "legacy-world-312",
+      "TODO: mechanics",
+      "TODO: shortDescription",
+      "TODO: rank"
+    ],
+    "status": "legacy"
+  },
+  {
+    "id": "mutirovavshiy-trudogolizm",
+    "name": "Мутировавший трудоголизм",
+    "type": "trait",
+    "rank": 1,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "legacyEffect"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Из-за \"новых\" для себя способностей Эравель не чувствует границ своего тела. Она просто не понимает, когда нужно остановиться и взять передышку.",
+    "shortDescription": "TODO: заполнить краткое описание.",
+    "price": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "3DgBdHaHr6DddHO4"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Эравель"
+      }
+    ],
+    "tags": [
+      "legacy-world-312",
+      "TODO: mechanics",
+      "TODO: shortDescription",
+      "TODO: rank"
+    ],
+    "status": "legacy"
+  },
+  {
+    "id": "novaya-tsennost",
+    "name": "Новая ценность",
+    "type": "trait",
+    "rank": 1,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "legacyEffect"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "TODO: заполнить описание из мира Stellar.",
+    "shortDescription": "TODO: заполнить краткое описание.",
+    "price": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "Naf4ZZVN2QZotLoj"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Зверь"
+      }
+    ],
+    "tags": [
+      "legacy-world-312",
+      "TODO: mechanics",
+      "TODO: shortDescription",
+      "TODO: rank",
+      "TODO: description"
+    ],
+    "status": "legacy"
+  },
+  {
+    "id": "oslozhnenie",
+    "name": "Осложнение",
+    "type": "trait",
+    "rank": 1,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "legacyEffect"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "TODO: заполнить описание из мира Stellar.",
+    "shortDescription": "TODO: заполнить краткое описание.",
+    "price": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "bXbiM8AAufnVO56l"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Лоренцо"
+      }
+    ],
+    "tags": [
+      "legacy-world-312",
+      "TODO: mechanics",
+      "TODO: shortDescription",
+      "TODO: rank",
+      "TODO: description"
+    ],
+    "status": "legacy"
+  },
+  {
+    "id": "prevrashchenie-v-zverya",
+    "name": "Превращение в Зверя",
+    "type": "trait",
+    "rank": 1,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "legacyEffect"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Свободное действие",
+    "shortDescription": "TODO: заполнить краткое описание.",
+    "price": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "tDMH4fUn1WD4WzYA"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-genome"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Лоренцо"
+      }
+    ],
+    "tags": [
+      "legacy-world-312",
+      "TODO: mechanics",
+      "TODO: shortDescription",
+      "TODO: rank",
+      "source-type: trait-genome"
+    ],
+    "status": "legacy"
+  },
+  {
+    "id": "prevrashchenie-v-skuchnogo-uchenogo",
+    "name": "Превращение в скучного ученого",
+    "type": "trait",
+    "rank": 1,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "legacyEffect"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Реакция",
+    "shortDescription": "TODO: заполнить краткое описание.",
+    "price": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "SpU9FXUzYBeJ0L2D"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-genome"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Зверь"
+      }
+    ],
+    "tags": [
+      "legacy-world-312",
+      "TODO: mechanics",
+      "TODO: shortDescription",
+      "TODO: rank",
+      "source-type: trait-genome"
+    ],
+    "status": "legacy"
+  },
+  {
+    "id": "prochnost-zverya",
+    "name": "Прочность Зверя",
+    "type": "trait",
+    "rank": 1,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "legacyEffect"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Чтобы превращаться в Зверя, нужно носить легкую или среднюю броню.\n\nБонус брони сохраняется у Зверя, и все защиты увеличиваются на 1.",
+    "shortDescription": "TODO: заполнить краткое описание.",
+    "price": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "ddtKTgQoyP71NvH4"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Зверь"
+      }
+    ],
+    "tags": [
+      "legacy-world-312",
+      "TODO: mechanics",
+      "TODO: shortDescription",
+      "TODO: rank"
+    ],
+    "status": "legacy"
+  },
+  {
+    "id": "sindrom-samozvantsa",
+    "name": "Синдром самозванца",
+    "type": "trait",
+    "rank": 1,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "legacyEffect"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Ненавидит принимать важные решения без возможности просчитать последствия. Боится, что последствия ошибки могут нанести существенный урон человечеству.",
+    "shortDescription": "TODO: заполнить краткое описание.",
+    "price": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "uCUlJARqX58fNOEw"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Эравель"
+      }
+    ],
+    "tags": [
+      "legacy-world-312",
+      "TODO: mechanics",
+      "TODO: shortDescription",
+      "TODO: rank"
+    ],
+    "status": "legacy"
+  },
+  {
+    "id": "uchenyy-prizvanie",
+    "name": "Ученый. Призвание",
+    "type": "trait",
+    "rank": 1,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "legacyEffect"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Ваш разум проницателен, как ничей больше.\nВы находите решения, где другие видят лишь преграды и используете законы физики так, будто они были созданы для вашего удобства.\n\n✦ Совершая “поиск уязвимости”, вы обнаруживаете 2 уязвимости вместо одной.",
+    "shortDescription": "TODO: заполнить краткое описание.",
+    "price": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "B6glssGNXn9X083x"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Зверь"
+      }
+    ],
+    "tags": [
+      "legacy-world-312",
+      "TODO: mechanics",
+      "TODO: shortDescription",
+      "TODO: rank"
+    ],
+    "status": "legacy"
+  },
+  {
+    "id": "ego",
+    "name": "Эго",
+    "type": "trait",
+    "rank": 1,
+    "skill": null,
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {},
+          "outcomes": [
+            {
+              "key": "legacyEffect"
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Никто кроме неё не справится с этой ношей.",
+    "shortDescription": "TODO: заполнить краткое описание.",
+    "price": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "AC6bEjzk6w24fzJ7"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Эравель"
+      }
+    ],
+    "tags": [
+      "legacy-world-312",
+      "TODO: mechanics",
+      "TODO: shortDescription",
+      "TODO: rank"
+    ],
+    "status": "legacy"
+  },
+  {
+    "id": "vzlom",
+    "name": "Взлом",
+    "type": "trait",
+    "rank": 1,
+    "skill": "khakerstvo",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "targets": "self",
+            "frequency": "passive"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Вы можете взламывать устройства через доступную сеть без прямой видимости и физического доступа. Дальность определяется связью и инфраструктурой сцены; защищённая сеть всё равно требует обычной проверки Хакерства.",
+    "shortDescription": "Позволяет взламывать устройства через сеть",
+    "price": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "mXhsNIvFePzmSPsz"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Мари"
+      }
+    ],
+    "tags": [
+      "новые опции"
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "legkaya-postup",
+    "name": "Лёгкая поступь",
+    "type": "trait",
+    "rank": 1,
+    "skill": "lovkost",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "targets": "self",
+            "frequency": "passive"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Когда вы используете манёвр «Шаг», можете переместиться на расстояние до половины своей скорости вместо трети.",
+    "shortDescription": "Шаг перемещает на половину скорости",
+    "price": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "W4NBaCmuASofWAZR"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Эравель"
+      }
+    ],
+    "tags": [
+      "мобильность"
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "legkaya-postup-passivnaya-sposobnost",
+    "name": "Безупречная поступь",
+    "type": "trait",
+    "rank": 1,
+    "skill": "lovkost",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "targets": "self",
+            "frequency": "passive"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Обычная пересечённая местность не замедляет вас, а безопасно приземлиться после падения в пределах масштаба вашего ранга можно без отдельной проверки.",
+    "shortDescription": "Игнорирует обычную пересечённую местность и безопасно падает",
+    "price": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "wmxpOsUjw3MbqLNl"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Эравель"
+      }
+    ],
+    "tags": [
+      "мобильность"
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "chtenie",
+    "name": "Чтение",
+    "type": "trait",
+    "rank": 1,
+    "skill": "nablyudatelnost",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "targets": "self",
+            "frequency": "oncePerScene"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 1
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Вы читаете подготовку противника по едва заметным движениям. Один раз за сцену, если ваша реакция требует проверки против видимого существа вашего ранга или ниже и вы терпите неудачу, реакция не считается потраченной.",
+    "shortDescription": "1/сцену сохраняет реакцию после неудачной проверки",
+    "price": 2,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "xdo8Z7KxsaOcXyE9"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Эравель"
+      }
+    ],
+    "tags": [
+      "новые опции"
+    ],
+    "status": "approved"
+  },
+  {
+    "id": "chuvstvo-azur",
+    "name": "Чувство Азур",
+    "type": "trait",
+    "rank": 3,
+    "skill": "mistika",
+    "mechanics": {
+      "effects": [
+        {
+          "activation": {
+            "type": "passive"
+          },
+          "conditions": {
+            "targets": "self",
+            "frequency": "passive"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 3
+            }
+          ]
+        },
+        {
+          "activation": {
+            "type": "freeAction"
+          },
+          "conditions": {
+            "targets": "allInArea",
+            "area": {
+              "type": "circle",
+              "value": 500
+            },
+            "frequency": "oncePerScene"
+          },
+          "outcomes": [
+            {
+              "key": "utility",
+              "value": 3
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Вы постоянно ощущаете применение Азур в радиусе 20 м. Один раз за сцену свободным действием расширьте чувство до 500 м до начала вашего следующего хода: вы определяете направление, примерный ранг и тип каждого Азур-воздействия, игнорируя обычные преграды.",
+    "shortDescription": "Чувствует Азур поблизости и 1/сцену сканирует 500 м",
+    "price": 6,
+    "properties": [
+      {
+        "key": "sourceWorld",
+        "value": "312"
+      },
+      {
+        "key": "sourceItemId",
+        "value": "gBkz98KLVSbpjBO2"
+      },
+      {
+        "key": "sourceType",
+        "value": "trait-source-ability"
+      },
+      {
+        "key": "sourceActors",
+        "value": "Зверь, Лоренцо"
+      }
+    ],
     "tags": [
       "новые опции"
     ],

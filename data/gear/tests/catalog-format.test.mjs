@@ -109,7 +109,7 @@ test('requested content entities are moved, removed, and rewritten by stable id'
   const sniper = abilities.get('snayperskaya-vintovka-igla');
   assert.equal(sniper.name, 'Снайперский выстрел');
   assert.equal(sniper.rank, 2);
-  assert.equal(sniper.heatCost, 1);
+  assert.equal(sniper.heatCost, 2);
   assert.deepEqual(
     sniper.mechanics.effects[0].outcomes.map((outcome) => outcome.key),
     ['armorPiercing', 'stabilization', 'damage']

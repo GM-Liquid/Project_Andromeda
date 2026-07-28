@@ -134,6 +134,14 @@ function getGearCatalogStepEffects(entry) {
   return normalizeStepEffects(entry?.stepEffects);
 }
 
+function getGearCatalogPropertyValues(entry, key) {
+  const values = (Array.isArray(entry?.properties) ? entry.properties : [])
+    .filter((property) => normalizeOptionalString(property?.key) === key)
+    .map((property) => normalizeOptionalString(property?.value))
+    .filter(Boolean);
+  return [...new Set(values)];
+}
+
 function getFirstOutcomeDamageProfile(entry) {
   for (const outcome of getGearCatalogOutcomes(entry)) {
     if (String(outcome?.key ?? '') !== 'damage') continue;
@@ -225,15 +233,21 @@ function getGearCatalogRequiresRoll(entry, { fallbackToSkill = true } = {}) {
 }
 
 function buildGearCatalogDetails(catalogKey, entry) {
+  const sourceItemIds = getGearCatalogPropertyValues(entry, 'sourceItemId');
+  const gearCatalog = {
+    id: normalizeOptionalString(entry?.id),
+    catalog: catalogKey,
+    sourceType: normalizeOptionalString(entry?.type),
+    price: entry?.price ?? null,
+    shortDescription: getGearCatalogShortDescription(entry),
+    mechanics: deepClone(entry?.mechanics ?? {})
+  };
+  const status = normalizeOptionalString(entry?.status);
+  if (status) gearCatalog.status = status;
+  if (sourceItemIds.length) gearCatalog.sourceItemIds = sourceItemIds;
+
   return {
-    gearCatalog: {
-      id: normalizeOptionalString(entry?.id),
-      catalog: catalogKey,
-      sourceType: normalizeOptionalString(entry?.type),
-      price: entry?.price ?? null,
-      shortDescription: getGearCatalogShortDescription(entry),
-      mechanics: deepClone(entry?.mechanics ?? {})
-    }
+    gearCatalog
   };
 }
 
