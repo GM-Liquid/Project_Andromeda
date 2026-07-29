@@ -224,6 +224,67 @@ test('campaign migration refreshes same-type items and replaces reclassified one
   }
 });
 
+test('campaign migration keeps a name-matched item the catalog does not really own', async () => {
+  // The catalog entry is already on the sheet under its own id. A second item that
+  // only shares the name may be unrelated homebrew, so it is left untouched instead
+  // of being swept up as a duplicate.
+  const bloodThirst = packItem({ id: 'zhazhda-krovi', name: 'Жажда крови' });
+  const calls = { create: [], update: [], delete: [] };
+  const actor = {
+    id: 'actor',
+    items: [
+      {
+        id: 'catalog-copy',
+        name: 'Жажда крови',
+        type: 'trait-source-ability',
+        system: { details: { gearCatalog: { id: 'zhazhda-krovi', catalog: 'abilities' } } },
+        flags: {}
+      },
+      {
+        id: 'homebrew-namesake',
+        name: 'Жажда крови',
+        type: 'trait',
+        system: { description: 'Своя черта' },
+        flags: {}
+      }
+    ],
+    async createEmbeddedDocuments(_type, data) {
+      calls.create.push(...data);
+    },
+    async updateEmbeddedDocuments(_type, data) {
+      calls.update.push(...data);
+    },
+    async deleteEmbeddedDocuments(_type, ids) {
+      calls.delete.push(...ids);
+    }
+  };
+
+  const previousGame = globalThis.game;
+  globalThis.game = {
+    user: { isGM: true },
+    actors: { contents: [actor] },
+    items: { contents: [] },
+    packs: new Map([
+      ['project-andromeda.gear-library', { getDocuments: async () => [bloodThirst] }]
+    ])
+  };
+
+  try {
+    const summary = await migrateCampaignAbilitiesToCatalog();
+    assert.equal(summary.itemsUpdated, 1);
+    assert.equal(summary.nameMatchedDuplicatesKept, 1);
+    assert.equal(summary.duplicateLegacyItemsRemoved, 0);
+    assert.deepEqual(calls.delete, []);
+    assert.deepEqual(calls.create, []);
+    assert.deepEqual(
+      calls.update.map((update) => update._id),
+      ['catalog-copy']
+    );
+  } finally {
+    globalThis.game = previousGame;
+  }
+});
+
 test('campaign migration uses world library metadata to repair an already wrong catalog link', async () => {
   const lorenzoPheromones = packItem({
     id: 'boevye-feromony',

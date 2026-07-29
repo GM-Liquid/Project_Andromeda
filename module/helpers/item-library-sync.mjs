@@ -849,13 +849,20 @@ async function buildPackSyncIdToUuidMap() {
 }
 
 /**
- * Phase 3 — refresh every actor item linked to a compendium catalog item from its
+ * Phase 3 — refresh every actor item that matches a compendium catalog entry from its
  * pack source. Shared content (name/img/system) is pulled down; local fields
  * (quantity/equipped/cooldown) are preserved. No-op when content already matches.
+ *
+ * An item is matched either by its compendium link or, when that link is missing or
+ * dangling, by its stable catalog id (`sheetSyncId` / `system.details.gearCatalog`) —
+ * a match then also repairs the link. Strictly additive: an item whose id has no
+ * counterpart in the pack (homebrew, retired catalog content, a link to a world item
+ * that is not catalog-backed) is left exactly as it is and is never removed.
  */
 export async function refreshCompendiumLinkedActorItems() {
-  if (!game.user?.isGM) return { actorsUpdated: 0, itemsUpdated: 0 };
+  if (!game.user?.isGM) return { actorsUpdated: 0, itemsUpdated: 0, itemsRelinked: 0 };
 
+  const packUuidBySyncId = await buildPackSyncIdToUuidMap();
   const sourceCache = new Map();
   const resolveSource = async (uuid) => {
     if (sourceCache.has(uuid)) return sourceCache.get(uuid);
@@ -864,27 +871,49 @@ export async function refreshCompendiumLinkedActorItems() {
     return source;
   };
 
+  // The pack entry a sheet item should follow, or null when the world holds content
+  // the catalog does not (or cannot) describe. Never resolves across item types: a
+  // reclassified entry is handled by the dedicated one-time type migrations.
+  const resolvePackSource = async (item) => {
+    const linkedUuid = getLibraryItemUuid(item);
+    if (isCompendiumUuid(linkedUuid)) {
+      const linkedSource = await resolveSource(linkedUuid);
+      if (linkedSource) return linkedSource;
+    } else if (getWorldItemFromUuid(linkedUuid)) {
+      // Still backed by a live world item: that copy may carry GM edits and follows
+      // the world library lifecycle. The one-time pack-link migration already moved
+      // the campaign-era links over; a later refresh must not take one back.
+      return null;
+    }
+
+    const syncId = getGearCatalogSyncId(item);
+    const packUuid = syncId ? packUuidBySyncId.get(syncId) : '';
+    return packUuid ? await resolveSource(packUuid) : null;
+  };
+
   let actorsUpdated = 0;
   let itemsUpdated = 0;
+  let itemsRelinked = 0;
 
   for (const actor of getActors()) {
     const updates = [];
     for (const item of actor.items ?? []) {
       if (!isLibrarySyncManagedType(item.type)) continue;
-      const uuid = getLibraryItemUuid(item);
-      if (!isCompendiumUuid(uuid)) continue;
 
-      const source = await resolveSource(uuid);
-      if (!source) continue;
+      const source = await resolvePackSource(item);
+      if (!source || source.type !== item.type) continue;
+
       const updateData = buildActorItemUpdateDataFromLibrary(source, item);
+      const relinked = getLibraryItemUuid(item) !== source.uuid;
       const desiredPayload = {
         name: updateData.name,
         type: item.type,
         img: updateData.img,
         system: updateData.system
       };
-      if (sameValue(desiredPayload, buildSharedItemPayload(item))) continue;
+      if (!relinked && sameValue(desiredPayload, buildSharedItemPayload(item))) continue;
 
+      if (relinked) itemsRelinked += 1;
       updates.push({ _id: item.id, ...updateData });
     }
 
@@ -898,8 +927,12 @@ export async function refreshCompendiumLinkedActorItems() {
     }
   }
 
-  debugLog('Compendium-linked actor items refreshed from pack', { actorsUpdated, itemsUpdated });
-  return { actorsUpdated, itemsUpdated };
+  debugLog('Compendium-linked actor items refreshed from pack', {
+    actorsUpdated,
+    itemsUpdated,
+    itemsRelinked
+  });
+  return { actorsUpdated, itemsUpdated, itemsRelinked };
 }
 
 /**

@@ -10,7 +10,10 @@ const LIBRARY_ITEM_UUID_FLAG = 'libraryItemUuid';
 const LIBRARY_SYNC_OPTION_KEY = getLibrarySyncOptionKey();
 const LOCAL_SYSTEM_FIELDS = ['quantity', 'equipped', 'cooldown'];
 
-export const DELETED_CATALOG_ENTRY_IDS = new Set([
+// Catalog entries 0.5 retired. They are intentionally *not* removed from characters:
+// a sheet keeps every entry it already has, even when the compendium no longer
+// carries it, and the GM decides whether to delete it by hand.
+export const RETIRED_CATALOG_ENTRY_IDS = new Set([
   'vykidnoe-oruzhie-dalnego-boya',
   'takticheskiy-pritsel',
   'vibroklinok'
@@ -77,7 +80,7 @@ export function buildLegacyHeatCostUpdate(item) {
 
 export function getCatalogContentMigrationAction(item, catalogEntryId = '') {
   const id = String(catalogEntryId ?? '').trim() || getCatalogEntryId(item);
-  if (DELETED_CATALOG_ENTRY_IDS.has(id)) return { action: 'delete', id };
+  if (RETIRED_CATALOG_ENTRY_IDS.has(id)) return { action: 'keep', id };
   const target = MOVED_CATALOG_ENTRIES.get(id);
   if (target) {
     const syncId = getDirectCatalogSyncId(item);
@@ -217,7 +220,6 @@ export async function migrateContentAndHeatModel() {
     actorsUpdated: 0,
     itemsReplaced: 0,
     itemsRefreshed: 0,
-    itemsDeleted: 0,
     heatFieldsMigrated: 0,
     worldItemsDeleted: 0,
     worldItemsRefreshed: 0,
@@ -247,11 +249,6 @@ export async function migrateContentAndHeatModel() {
     for (const item of actor.items ?? []) {
       const linkedId = getLinkedCatalogEntryId(item, packUuidToId);
       const action = getCatalogContentMigrationAction(item, linkedId);
-      if (action.action === 'delete') {
-        deleteIds.push(item.id);
-        summary.itemsDeleted += 1;
-        continue;
-      }
       if (action.action === 'replace') {
         if (!existingTargets.has(action.target.syncId)) {
           createData.push(
@@ -260,6 +257,8 @@ export async function migrateContentAndHeatModel() {
           existingTargets.add(action.target.syncId);
           summary.itemsReplaced += 1;
         }
+        // Removed only because the same catalog entry now sits on the sheet under its
+        // new type — the entry itself never leaves the character.
         deleteIds.push(item.id);
         continue;
       }
@@ -289,7 +288,7 @@ export async function migrateContentAndHeatModel() {
   const worldDeleteIds = [];
   for (const item of game.items?.contents ?? []) {
     const action = getCatalogContentMigrationAction(item);
-    if (action.action === 'delete' || action.action === 'replace') {
+    if (action.action === 'replace') {
       worldDeleteIds.push(item.id);
       summary.worldItemsDeleted += 1;
       continue;

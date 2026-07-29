@@ -31,8 +31,26 @@ const {
   buildActorItemUpdateDataFromLibrary,
   getLibraryItemUuid,
   isCompendiumLibraryUuid,
+  refreshCompendiumLinkedActorItems,
   setLibraryItemLinkOnData
 } = await import('./item-library-sync.mjs');
+
+const MODULE_ID = 'project-andromeda';
+
+function packDocument({ id, name, type = 'trait-source-ability', catalog = 'abilities' }) {
+  return {
+    uuid: `Compendium.project-andromeda.gear-library.Item.pack-${id}`,
+    documentName: 'Item',
+    name,
+    type,
+    img: `icons/${id}.webp`,
+    system: {
+      description: `Canonical ${name}`,
+      details: { gearCatalog: { id, catalog } }
+    },
+    flags: { [MODULE_ID]: { sheetSyncId: `gear:${catalog}:${id}` } }
+  };
+}
 
 test('isCompendiumLibraryUuid distinguishes pack links from world links', () => {
   assert.equal(
@@ -53,6 +71,114 @@ test('drop link round-trip: what setLibraryItemLinkOnData stamps is what getLibr
   // This is the contract the dupe fix relies on: the drop handler pre-stamps the
   // flag, and ensureActorItemLibraryLink reads it back to reuse the source.
   assert.equal(getLibraryItemUuid(droppedData), uuid);
+});
+
+test('compendium refresh syncs matching catalog ids and leaves everything else alone', async () => {
+  const razryad = packDocument({ id: 'razryad', name: 'Разряд' });
+  const relic = packDocument({
+    id: 'relikt',
+    name: 'Реликт',
+    type: 'artifact',
+    catalog: 'equipment'
+  });
+  const staleSystem = (id, catalog) => ({
+    description: 'Stale',
+    details: { gearCatalog: { id, catalog } }
+  });
+
+  const linked = {
+    id: 'linked',
+    name: 'Разряд (старая редакция)',
+    type: 'trait-source-ability',
+    img: 'icons/razryad.webp',
+    system: staleSystem('razryad', 'abilities'),
+    flags: { [MODULE_ID]: { libraryItemUuid: razryad.uuid } }
+  };
+  // Carries the catalog id but its link points at a world item that is long gone —
+  // the refresh has to re-attach it to the pack entry instead of skipping it.
+  const danglingLink = {
+    id: 'dangling',
+    name: 'Разряд',
+    type: 'trait-source-ability',
+    img: 'icons/razryad.webp',
+    system: staleSystem('razryad', 'abilities'),
+    flags: { [MODULE_ID]: { libraryItemUuid: 'Item.deleted-world-item' } }
+  };
+  const homebrew = {
+    id: 'homebrew',
+    name: 'Своя способность',
+    type: 'trait-source-ability',
+    img: 'icons/custom.webp',
+    system: { description: 'Homebrew' },
+    flags: {}
+  };
+  // A live world-item copy of a catalog entry: it may carry GM edits and follows the
+  // world library lifecycle, so the pack refresh leaves it to that path.
+  const worldLinked = {
+    id: 'world-linked',
+    name: 'Разряд (домашняя редакция)',
+    type: 'trait-source-ability',
+    img: 'icons/razryad.webp',
+    system: staleSystem('razryad', 'abilities'),
+    flags: { [MODULE_ID]: { libraryItemUuid: 'Item.world-razryad' } }
+  };
+  // A catalog id the shipped pack no longer carries. It stays on the sheet untouched.
+  const retired = {
+    id: 'retired',
+    name: 'Виброклинок',
+    type: 'artifact',
+    img: 'icons/vibro.webp',
+    system: staleSystem('vibroklinok', 'equipment'),
+    flags: { [MODULE_ID]: { sheetSyncId: 'gear:equipment:vibroklinok' } }
+  };
+  // Same catalog id, different Foundry type: reclassification is the job of the
+  // one-time type migrations, so the refresh must not copy content across types.
+  const reclassified = {
+    id: 'reclassified',
+    name: 'Реликт',
+    type: 'trait-source-ability',
+    img: 'icons/relikt.webp',
+    system: staleSystem('relikt', 'equipment'),
+    flags: { [MODULE_ID]: { sheetSyncId: 'gear:equipment:relikt' } }
+  };
+
+  const updates = [];
+  const actor = {
+    id: 'actor',
+    items: [linked, danglingLink, homebrew, worldLinked, retired, reclassified],
+    async updateEmbeddedDocuments(_type, data) {
+      updates.push(...data);
+    }
+  };
+
+  const previousGame = globalThis.game;
+  const previousFromUuid = globalThis.fromUuid;
+  globalThis.game = {
+    user: { isGM: true },
+    actors: { contents: [actor] },
+    items: new Map([['world-razryad', { id: 'world-razryad', type: 'trait-source-ability' }]]),
+    packs: new Map([
+      ['project-andromeda.gear-library', { getDocuments: async () => [razryad, relic] }]
+    ])
+  };
+  globalThis.fromUuid = async (uuid) => [razryad, relic].find((doc) => doc.uuid === uuid) ?? null;
+
+  try {
+    const summary = await refreshCompendiumLinkedActorItems();
+
+    assert.equal(summary.itemsUpdated, 2);
+    assert.equal(summary.itemsRelinked, 1);
+    assert.deepEqual(
+      updates.map((update) => update._id),
+      ['linked', 'dangling']
+    );
+    assert.equal(updates[0].name, 'Разряд');
+    assert.equal(updates[1].system.description, 'Canonical Разряд');
+    assert.equal(updates[1][`flags.${MODULE_ID}.libraryItemUuid`], razryad.uuid);
+  } finally {
+    globalThis.game = previousGame;
+    globalThis.fromUuid = previousFromUuid;
+  }
 });
 
 test('library refresh reapplies the actor-rank version of an archetype ability', () => {

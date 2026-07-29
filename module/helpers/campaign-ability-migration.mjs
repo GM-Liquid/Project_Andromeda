@@ -241,6 +241,7 @@ export async function migrateCampaignAbilitiesToCatalog() {
     itemsReplaced: 0,
     archetypeAbilitiesResynced: 0,
     duplicateLegacyItemsRemoved: 0,
+    nameMatchedDuplicatesKept: 0,
     matchedByWorldMetadata: 0,
     matchedByCatalogKey: 0,
     matchedByStableId: 0,
@@ -304,6 +305,14 @@ export async function migrateCampaignAbilitiesToCatalog() {
       }
 
       if (presentTargetUuids.has(match.source.uuid)) {
+        // The catalog entry is already on the sheet under its correct type, so this
+        // legacy copy is a duplicate — but only when it was matched by a catalog id.
+        // A name-only match may well be unrelated homebrew that merely shares a title,
+        // and nothing is ever deleted on that evidence alone.
+        if (match.matchedBy === 'name') {
+          summary.nameMatchedDuplicatesKept += 1;
+          continue;
+        }
         deleteIds.push(item.id);
         summary.duplicateLegacyItemsRemoved += 1;
         continue;

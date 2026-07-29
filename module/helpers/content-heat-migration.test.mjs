@@ -18,11 +18,11 @@ function catalogItem(id, type = 'artifact', catalog = 'artifacts') {
   };
 }
 
-test('content migration deletes only the requested stable catalog ids', () => {
-  assert.equal(getCatalogContentMigrationAction(catalogItem('vibroklinok')).action, 'delete');
+test('content migration keeps retired catalog entries on the sheet', () => {
+  assert.equal(getCatalogContentMigrationAction(catalogItem('vibroklinok')).action, 'keep');
   assert.equal(
     getCatalogContentMigrationAction(catalogItem('takticheskiy-pritsel')).action,
-    'delete'
+    'keep'
   );
   assert.equal(getCatalogContentMigrationAction(catalogItem('unrelated-artifact')).action, 'keep');
 });

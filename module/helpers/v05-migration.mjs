@@ -8,14 +8,6 @@ import { getGearLibraryPack, getLibraryItemUuid } from './item-library-sync.mjs'
 
 const GEAR_CATALOG_SYNC_ID_FLAG = 'sheetSyncId';
 const LIBRARY_ITEM_UUID_FLAG = 'libraryItemUuid';
-const OBSOLETE_INVENTORY_TYPES = new Set([
-  'armor',
-  'weapon',
-  'equipment',
-  'equipment-consumable',
-  'implant',
-  'cartridge'
-]);
 
 function getDirectCatalogSyncId(item) {
   const flagValue =
@@ -39,12 +31,13 @@ function getCatalogSyncId(item, packUuidToSyncId = new Map()) {
   return getDirectCatalogSyncId(game.items?.get(worldMatch[1]));
 }
 
-export function getV05ItemMigrationAction({ itemType, syncId, artifactSyncIds }) {
+// Only content the shipped pack can account for is rewritten: a catalog entry that
+// became an artifact in 0.5 is recreated as one. Everything else stays on the sheet —
+// legacy inventory whose catalog entry 0.5 dropped is kept, not deleted, so a
+// character never loses an item the compendium happens to no longer describe.
+export function getV05ItemMigrationAction({ syncId, artifactSyncIds }) {
   const normalizedSyncId = String(syncId ?? '').trim();
   if (normalizedSyncId && artifactSyncIds?.has(normalizedSyncId)) return 'convert-to-artifact';
-  if (OBSOLETE_INVENTORY_TYPES.has(String(itemType ?? '').trim()) && normalizedSyncId) {
-    return 'delete-obsolete-catalog-item';
-  }
   return 'keep';
 }
 
@@ -101,7 +94,6 @@ export async function migrateWorldV04ToV05() {
     packAvailable: true,
     actorsUpdated: 0,
     artifactsConverted: 0,
-    obsoleteCatalogItemsDeleted: 0,
     abilityCooldownsCleared: 0,
     archetypeAbilitiesUpdated: 0,
     archetypeTraitsCreated: 0,
@@ -132,23 +124,16 @@ export async function migrateWorldV04ToV05() {
 
     for (const item of actor.items ?? []) {
       const syncId = getCatalogSyncId(item, packUuidToSyncId);
-      const action = getV05ItemMigrationAction({
-        itemType: item.type,
-        syncId,
-        artifactSyncIds
-      });
+      const action = getV05ItemMigrationAction({ syncId, artifactSyncIds });
       if (action === 'convert-to-artifact' && item.type !== 'artifact') {
         if (!existingArtifactSyncIds.has(syncId)) {
           createData.push(buildArtifactCreateData(artifactBySyncId.get(syncId), item));
           existingArtifactSyncIds.add(syncId);
           summary.artifactsConverted += 1;
         }
+        // Deleted only because the very same entry now lives on the sheet as an
+        // artifact; nothing is dropped that the pack does not carry.
         deleteIds.push(item.id);
-        continue;
-      }
-      if (action === 'delete-obsolete-catalog-item') {
-        deleteIds.push(item.id);
-        summary.obsoleteCatalogItemsDeleted += 1;
         continue;
       }
       if (item.type === 'trait-source-ability') {

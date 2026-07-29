@@ -27,14 +27,16 @@ test('v0.5 migration converts every catalog entry that moved to artifacts', () =
   );
 });
 
-test('v0.5 migration deletes only catalog-backed obsolete inventory', () => {
+test('v0.5 migration keeps every item the pack no longer describes', () => {
+  // Legacy inventory whose catalog entry 0.5 dropped stays on the character: the
+  // migration never removes an id that has no counterpart in the compendium.
   assert.equal(
     getV05ItemMigrationAction({
       itemType: 'armor',
       syncId: 'gear:armor:combat-suit',
       artifactSyncIds
     }),
-    'delete-obsolete-catalog-item'
+    'keep'
   );
   assert.equal(
     getV05ItemMigrationAction({ itemType: 'armor', syncId: '', artifactSyncIds }),
