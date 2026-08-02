@@ -12,12 +12,11 @@
           },
           "conditions": {
             "range": {
-              "type": "meters",
-              "value": 30
+              "type": "sight"
             },
             "area": {
               "type": "circle",
-              "value": 8
+              "value": 5
             },
             "duration": "untilEndOfScene",
             "trigger": "whileActive",
@@ -32,10 +31,11 @@
         }
       ]
     },
-    "description": "Действием погасите свет в круге радиусом 8 м вокруг точки в пределах 30 м. До конца сцены все цели в зоне считаются скрытыми.",
-    "shortDescription": "Действием погасите свет в круге радиусом 8 м вокруг точки в пределах 30 м. До конца сцены все цели в зоне считаются скрытыми.",
+    "description": "Действием погасите свет в круге радиусом 5 м вокруг точки в пределах видимости. До конца сцены все цели в зоне считаются скрытыми.",
+    "shortDescription": "Действием погасите свет в круге радиусом 5 м вокруг точки в пределах видимости. До конца сцены все цели в зоне считаются скрытыми.",
     "price": null,
-    "heatCost": 2
+    "heatCost": 2,
+    "status": "approved"
   },
   {
     "id": "rychag",
@@ -62,7 +62,8 @@
     "description": "Свободным действием включите перегрузку: до конца хода ваши проверки получают преимущество, а до конца следующего хода — помеху.",
     "shortDescription": "Свободным действием включите перегрузку: до конца хода ваши проверки получают преимущество, а до конца следующего хода — помеху.",
     "price": null,
-    "heatCost": 2
+    "heatCost": 2,
+    "status": "approved"
   },
   {
     "id": "ekstrennyy-teleport",
@@ -92,7 +93,8 @@
     "description": "Реакцией телепортируйтесь на расстояние до 15 м в видимую свободную точку.",
     "shortDescription": "Реакцией телепортируйтесь на расстояние до 15 м в видимую свободную точку.",
     "price": null,
-    "heatCost": 2
+    "heatCost": 2,
+    "status": "approved"
   },
   {
     "id": "zashchita",
@@ -120,7 +122,8 @@
     "description": "Реакцией выберите Стойкость, Контроль или Волю. До начала вашего следующего хода атаки против выбранной защиты получают помеху.",
     "shortDescription": "Реакцией выберите Стойкость, Контроль или Волю. До начала вашего следующего хода атаки против выбранной защиты получают помеху.",
     "price": null,
-    "heatCost": 2
+    "heatCost": 2,
+    "status": "approved"
   },
   {
     "id": "vrata",
@@ -136,7 +139,7 @@
           "conditions": {
             "range": {
               "type": "meters",
-              "value": 50
+              "value": 30
             }
           },
           "outcomes": [
@@ -148,10 +151,11 @@
         }
       ]
     },
-    "description": "Свободным действием создайте малый портал между собой и видимой точкой в пределах 50 м. Первое перемещение через портал не требует движения; затем он исчезает.",
-    "shortDescription": "Свободным действием создайте малый портал между собой и видимой точкой в пределах 50 м. Первое перемещение через портал не требует движения; затем он исчезает.",
+    "description": "Свободным действием создайте малый портал между собой и видимой точкой в пределах 30 м. Первое перемещение через портал не требует движения; затем он исчезает.",
+    "shortDescription": "Свободным действием создайте малый портал между собой и видимой точкой в пределах 30 м. Первое перемещение через портал не требует движения; затем он исчезает.",
     "price": null,
-    "heatCost": 2
+    "heatCost": 2,
+    "status": "approved"
   },
   {
     "id": "spasitel",
@@ -167,13 +171,13 @@
           "conditions": {
             "range": {
               "type": "meters",
-              "value": 15
+              "value": 10
             }
           },
           "outcomes": [
             {
               "key": "moveSelf",
-              "distance": 15
+              "distance": 10
             },
             {
               "key": "cancelAttackIfOutOfReach"
@@ -182,10 +186,11 @@
         }
       ]
     },
-    "description": "Когда вас атакуют, реакцией переместитесь на расстояние до 15 м. Если новая позиция выводит вас из области или дистанции атаки, она проваливается.",
-    "shortDescription": "Когда вас атакуют, реакцией переместитесь на расстояние до 15 м. Если новая позиция выводит вас из области или дистанции атаки, она проваливается.",
+    "description": "Когда вас атакуют, реакцией переместитесь на расстояние до 10 м. Если новая позиция выводит вас из области или дистанции атаки, она проваливается.",
+    "shortDescription": "Когда вас атакуют, реакцией переместитесь на расстояние до 10 м. Если новая позиция выводит вас из области или дистанции атаки, она проваливается.",
     "price": null,
-    "heatCost": 2
+    "heatCost": 2,
+    "status": "approved"
   },
   {
     "id": "tsss",
@@ -201,12 +206,12 @@
           "conditions": {
             "range": {
               "type": "meters",
-              "value": 15
+              "value": 10
             },
             "targets": "allInArea",
             "area": {
               "type": "circle",
-              "value": 8
+              "value": 5
             },
             "duration": "untilStartOfYourNextTurn"
           },
@@ -218,131 +223,11 @@
         }
       ]
     },
-    "description": "Свободным действием выберите точку в пределах 15 м. До начала вашего следующего хода существа в круге радиусом 8 м не могут применять способности 1-го ранга.",
-    "shortDescription": "Свободным действием выберите точку в пределах 15 м. До начала вашего следующего хода существа в круге радиусом 8 м не могут применять способности 1-го ранга.",
+    "description": "Свободным действием выберите точку в пределах 10 м. До начала вашего следующего хода существа в круге радиусом 5 м не могут применять способности 1-го ранга.",
+    "shortDescription": "Свободным действием выберите точку в пределах 10 м. До начала вашего следующего хода существа в круге радиусом 5 м не могут применять способности 1-го ранга.",
     "price": null,
-    "heatCost": 2
-  },
-  {
-    "id": "okhotnichiy-drobovik",
-    "name": "Охотничий дробовик",
-    "type": "artifact",
-    "rank": 2,
-    "skill": "strelba",
-    "mechanics": {
-      "effects": [
-        {
-          "activation": {
-            "type": "action"
-          },
-          "conditions": {
-            "targets": "upTo2",
-            "range": {
-              "type": "meters",
-              "value": 15
-            },
-            "defense": "fortitude",
-            "check": "required"
-          },
-          "outcomes": [
-            {
-              "key": "damage",
-              "value": "2/4/6/9"
-            }
-          ]
-        }
-      ]
-    },
-    "description": "Выберите до двух целей в пределах 15 м и атакуйте Стрельбой против Стойкости каждой из них. Урон каждой цели: 2/4/6/9.",
-    "shortDescription": "Дробовик для удара по двум целям сразу",
-    "price": null,
-    "heatCost": 0
-  },
-  {
-    "id": "reyderskaya-snayperskaya-vintovka",
-    "name": "Рейдерская снайперская винтовка",
-    "type": "artifact",
-    "rank": 1,
-    "skill": "strelba",
-    "mechanics": {
-      "effects": [
-        {
-          "activation": {
-            "type": "action"
-          },
-          "conditions": {
-            "range": {
-              "type": "meters",
-              "value": 30
-            },
-            "targets": "single",
-            "defense": "control",
-            "check": "required"
-          },
-          "outcomes": [
-            {
-              "key": "stabilization",
-              "value": 1
-            },
-            {
-              "key": "reload",
-              "value": 2
-            },
-            {
-              "key": "damage",
-              "value": "1/2/3/5"
-            }
-          ]
-        }
-      ]
-    },
-    "description": "Атакуйте Стрельбой против Контроля цели в пределах 30 м. Урон: 1/2/3/5. Перезарядка 2. Стабилизация.",
-    "shortDescription": "Легкая снайперская винтовка",
-    "price": null,
-    "heatCost": 0
-  },
-  {
-    "id": "razvedochnaya-vintovka-blik",
-    "name": "Разведочная винтовка «Блик»",
-    "type": "artifact",
-    "rank": 1,
-    "skill": "strelba",
-    "mechanics": {
-      "effects": [
-        {
-          "activation": {
-            "type": "action"
-          },
-          "conditions": {
-            "range": {
-              "type": "meters",
-              "value": 30
-            },
-            "targets": "single",
-            "defense": "control",
-            "check": "required"
-          },
-          "outcomes": [
-            {
-              "key": "courage",
-              "value": 1
-            },
-            {
-              "key": "reload",
-              "value": 2
-            },
-            {
-              "key": "damage",
-              "value": "1/2/3/5"
-            }
-          ]
-        }
-      ]
-    },
-    "description": "Атакуйте Стрельбой против Контроля цели в пределах 30 м. Урон: 1/2/3/5. Перезарядка 2. Кураж.",
-    "shortDescription": "Легкая винтовка для стрельбы после смены позиции.",
-    "price": null,
-    "heatCost": 0
+    "heatCost": 2,
+    "status": "approved"
   },
   {
     "id": "vintovka-shturmovaya-ares",
@@ -358,8 +243,7 @@
           },
           "conditions": {
             "range": {
-              "type": "meters",
-              "value": 100
+              "type": "sight"
             },
             "targets": "single",
             "defense": "fortitude",
@@ -402,147 +286,11 @@
         }
       ]
     },
-    "description": "Атакуйте Стрельбой против Стойкости цели в пределах 100 м. Урон: 2/4/6/9. Бронебойность 1. Вы игнорируете штраф за стрельбу в ближнем бою; в указанное окно реакции винтовка позволяет совершить дополнительную атаку.",
+    "description": "Атакуйте Стрельбой против Стойкости цели в пределах видимости. Урон: 2/4/6/9. Бронебойность 1. Вы игнорируете штраф за стрельбу в ближнем бою; в указанное окно реакции винтовка позволяет совершить дополнительную атаку.",
     "shortDescription": "Штурмовая винтовка",
     "price": null,
-    "heatCost": 0
-  },
-  {
-    "id": "snayperskaya-vintovka-mirazh",
-    "name": "Снайперская винтовка «Мираж»",
-    "type": "artifact",
-    "rank": 2,
-    "skill": "strelba",
-    "mechanics": {
-      "effects": [
-        {
-          "activation": {
-            "type": "action"
-          },
-          "conditions": {
-            "range": {
-              "type": "meters",
-              "value": 100
-            },
-            "targets": "single",
-            "defense": "control",
-            "check": "required"
-          },
-          "outcomes": [
-            {
-              "key": "courage",
-              "value": 1
-            },
-            {
-              "key": "concealable",
-              "value": true
-            },
-            {
-              "key": "reload",
-              "value": 2
-            },
-            {
-              "key": "damage",
-              "value": "2/4/6/9"
-            }
-          ]
-        }
-      ]
-    },
-    "description": "Атакуйте Стрельбой против Контроля цели в пределах 100 м. Урон: 2/4/6/9. Скрытное. Перезарядка 2. Кураж.",
-    "shortDescription": "Скрытная снайперская винтовка для смены позиции.",
-    "price": null,
-    "heatCost": 0
-  },
-  {
-    "id": "skladnoy-karabin-rys",
-    "name": "Складной карабин «Рысь»",
-    "type": "artifact",
-    "rank": 2,
-    "skill": "strelba",
-    "mechanics": {
-      "effects": [
-        {
-          "activation": {
-            "type": "action"
-          },
-          "conditions": {
-            "range": {
-              "type": "meters",
-              "value": 100
-            },
-            "targets": "single",
-            "defense": "control",
-            "check": "required"
-          },
-          "outcomes": [
-            {
-              "key": "courage",
-              "value": 1
-            },
-            {
-              "key": "concealable",
-              "value": true
-            },
-            {
-              "key": "damage",
-              "value": "2/4/6/9"
-            }
-          ]
-        }
-      ]
-    },
-    "description": "Атакуйте Стрельбой против Контроля цели в пределах 100 м. Урон: 2/4/6/9. Скрытное. Кураж.",
-    "shortDescription": "Скрытный карабин для мобильной перестрелки.",
-    "price": null,
-    "heatCost": 0
-  },
-  {
-    "id": "raketnitsa-ptr-3",
-    "name": "Ракетница ПТР-3",
-    "type": "artifact",
-    "rank": 2,
-    "skill": "strelba",
-    "mechanics": {
-      "effects": [
-        {
-          "activation": {
-            "type": "action"
-          },
-          "conditions": {
-            "targets": "allInArea",
-            "area": {
-              "type": "circle",
-              "value": 15
-            },
-            "range": {
-              "type": "meters",
-              "value": 100
-            },
-            "defense": "fortitude",
-            "check": "required"
-          },
-          "outcomes": [
-            {
-              "key": "escalation",
-              "value": 3
-            },
-            {
-              "key": "reload",
-              "value": 2
-            },
-            {
-              "key": "damage",
-              "value": "2/4/6/9"
-            }
-          ]
-        }
-      ]
-    },
-    "description": "Выберите точку в пределах 100 м и атакуйте Стрельбой против Стойкости каждого существа в круге радиусом 15 м. Урон: 2/4/6/9. Перезарядка 2. Эскалация 3.",
-    "shortDescription": "Ракетница для взрывного урона по группе целей с редкой перезарядкой.",
-    "price": null,
-    "heatCost": 0
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "ognemet-ifrit",
@@ -570,7 +318,8 @@
     },
     "description": "Ваши атаки Резонансом получают +2 к урону при успехе и критическом успехе.",
     "shortDescription": "+2 к урону атак Резонансом при успехе и критическом успехе.",
-    "price": null
+    "price": null,
+    "status": "approved"
   },
   {
     "id": "karabin-s-impulsnym-modulem",
@@ -626,16 +375,18 @@
           "outcomes": [
             {
               "key": "moveTarget",
-              "distance": 10
+              "distance": 10,
+              "control": "vector"
             }
           ]
         }
       ]
     },
-    "description": "Совершите две атаки Стрельбой против Стойкости по одной или двум целям в пределах 30 м. Урон каждой атаки: 2/4/6/9. При попадании сдвиньте цель на 10 м.",
+    "description": "Совершите две атаки Стрельбой против Стойкости по одной или двум целям в пределах 30 м. Урон каждой атаки: 2/4/6/9. При попадании оттолкните цель на 10 м.",
     "shortDescription": "Карабин, который отбрасывает цель мощным попаданием.",
     "price": null,
-    "heatCost": 0
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "plazmennaya-rapira-spektralis",
@@ -688,191 +439,8 @@
     "description": "Атакуйте Ближним боем против Стойкости цели в своей досягаемости. Урон: 4/6/9/14. Бронебойность 2. Реакцией на атаку против вашей Стойкости совершите проверку, чтобы понизить её исход на одну ступень.",
     "shortDescription": "Бронебойная рапира, которой можно отвести удар.",
     "price": null,
-    "heatCost": 0
-  },
-  {
-    "id": "snayperskaya-vintovka-kope",
-    "name": "Снайперская винтовка \"Копье\"",
-    "type": "artifact",
-    "rank": 3,
-    "skill": "strelba",
-    "mechanics": {
-      "effects": [
-        {
-          "activation": {
-            "type": "action"
-          },
-          "conditions": {
-            "targets": "single",
-            "range": {
-              "type": "meters",
-              "value": 300
-            },
-            "defense": "control",
-            "check": "required"
-          },
-          "outcomes": [
-            {
-              "key": "armorPiercing",
-              "value": 2
-            },
-            {
-              "key": "escalation",
-              "value": 1
-            },
-            {
-              "key": "stabilization",
-              "value": 1
-            },
-            {
-              "key": "reload",
-              "value": 2
-            },
-            {
-              "key": "damage",
-              "value": "4/6/9/14"
-            }
-          ]
-        }
-      ]
-    },
-    "description": "Атакуйте Стрельбой против Контроля цели в пределах 300 м. Урон: 4/6/9/14. Бронебойность 2. Эскалация 1. Перезарядка 2. Стабилизация.",
-    "shortDescription": "Тяжелая снайперская винтовка, требующая перезарядки",
-    "price": null,
-    "heatCost": 0
-  },
-  {
-    "id": "dvuruchnyy-vibromech",
-    "name": "Двуручный вибромеч",
-    "type": "artifact",
-    "rank": 3,
-    "skill": "blizhniy_boy",
-    "mechanics": {
-      "effects": [
-        {
-          "activation": {
-            "type": "action"
-          },
-          "conditions": {
-            "range": {
-              "type": "melee"
-            },
-            "targets": "single",
-            "defense": "fortitude",
-            "check": "required"
-          },
-          "outcomes": [
-            {
-              "key": "armorPiercing",
-              "value": 2
-            },
-            {
-              "key": "damage",
-              "value": "4/6/9/14"
-            }
-          ]
-        },
-        {
-          "activation": {
-            "type": "passive"
-          },
-          "conditions": {
-            "trigger": "onCriticalSuccess",
-            "targets": "single"
-          },
-          "outcomes": [
-            {
-              "key": "applyStatus",
-              "status": "weakened"
-            }
-          ]
-        }
-      ]
-    },
-    "description": "Атакуйте Ближним боем против Стойкости цели в своей досягаемости. Урон: 4/6/9/14. Бронебойность 2. При критическом успехе цель становится Ослабленной.",
-    "shortDescription": "Тяжёлый бронебойный меч, способный нанести длительное ранение.",
-    "price": null,
-    "heatCost": 0
-  },
-  {
-    "id": "kompaktnyy-plazmorez",
-    "name": "Компактный плазморез",
-    "type": "artifact",
-    "rank": 3,
-    "skill": "blizhniy_boy",
-    "mechanics": {
-      "effects": [
-        {
-          "activation": {
-            "type": "action"
-          },
-          "conditions": {
-            "range": {
-              "type": "melee"
-            },
-            "targets": "single",
-            "defense": "fortitude",
-            "check": "required"
-          },
-          "outcomes": [
-            {
-              "key": "armorPiercing",
-              "value": 4
-            },
-            {
-              "key": "reload",
-              "value": 1
-            },
-            {
-              "key": "damage",
-              "value": "4/6/9/14"
-            }
-          ]
-        }
-      ]
-    },
-    "description": "Атакуйте Ближним боем против Стойкости цели в своей досягаемости. Урон: 4/6/9/14. Бронебойность 4. Перезарядка 1.",
-    "shortDescription": "Плазморез для ближнего боя и вскрытия прочных материалов.",
-    "price": null,
-    "heatCost": 0
-  },
-  {
-    "id": "kineticheskiy-molot",
-    "name": "Кинетический молот \"Раскол\"",
-    "type": "artifact",
-    "rank": 2,
-    "skill": "blizhniy_boy",
-    "mechanics": {
-      "effects": [
-        {
-          "activation": {
-            "type": "action"
-          },
-          "conditions": {
-            "range": {
-              "type": "melee"
-            },
-            "targets": "allInArea",
-            "defense": "fortitude",
-            "check": "required"
-          },
-          "outcomes": [
-            {
-              "key": "armorPiercing",
-              "value": 2
-            },
-            {
-              "key": "damage",
-              "value": "2/4/6/9"
-            }
-          ]
-        }
-      ]
-    },
-    "description": "Атакуйте Ближним боем против Стойкости каждого противника в своей досягаемости. Урон: 2/4/6/9. Бронебойность 2.",
-    "shortDescription": "Молот, наносящий урон всем вокруг.",
-    "price": null,
-    "heatCost": 0
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "vintovka-spets-naznacheniya-loza",
@@ -889,17 +457,12 @@
           "conditions": {
             "targets": "single",
             "range": {
-              "type": "meters",
-              "value": 300
+              "type": "sight"
             },
             "defense": "control",
             "check": "required"
           },
           "outcomes": [
-            {
-              "key": "concealable",
-              "value": true
-            },
             {
               "key": "damage",
               "value": "4/6/9/14"
@@ -923,88 +486,11 @@
         }
       ]
     },
-    "description": "Атакуйте Стрельбой против Контроля цели в пределах 300 м. Урон: 4/6/9/14. Скрытное. При успехе цель становится Обездвиженной.",
+    "description": "Атакуйте Стрельбой против Контроля цели в пределах видимости. Урон: 4/6/9/14. При успехе цель становится Обездвиженной.",
     "shortDescription": "Скрытная винтовка, которая обездвиживает цель тросами.",
     "price": null,
-    "heatCost": 0
-  },
-  {
-    "id": "tyazhelyy-raketomet-vulkan",
-    "name": "Тяжелый ракетомет \"Вулкан\"",
-    "type": "artifact",
-    "rank": 3,
-    "skill": "strelba",
-    "mechanics": {
-      "effects": [
-        {
-          "activation": {
-            "type": "action"
-          },
-          "conditions": {
-            "area": {
-              "type": "circle",
-              "value": 30
-            },
-            "range": {
-              "type": "meters",
-              "value": 300
-            },
-            "targets": "allInArea",
-            "defense": "fortitude",
-            "check": "required"
-          },
-          "outcomes": [
-            {
-              "key": "reload",
-              "value": 1
-            },
-            {
-              "key": "damage",
-              "value": "4/6/9/14"
-            }
-          ]
-        }
-      ]
-    },
-    "description": "Выберите точку в пределах 300 м и атакуйте Стрельбой против Стойкости каждого существа в круге радиусом 30 м. Урон: 4/6/9/14. Перезарядка 1.",
-    "shortDescription": "Тяжелый ракетомет для удара по большой зоне. Требует частую перезарядку.",
-    "price": null,
-    "heatCost": 0
-  },
-  {
-    "id": "fazovyy-klinok",
-    "name": "Фазовый клинок",
-    "type": "artifact",
-    "rank": 3,
-    "skill": "blizhniy_boy",
-    "mechanics": {
-      "effects": [
-        {
-          "activation": {
-            "type": "action"
-          },
-          "conditions": {
-            "range": {
-              "type": "meters",
-              "value": 15
-            },
-            "targets": "single",
-            "defense": "control",
-            "check": "required"
-          },
-          "outcomes": [
-            {
-              "key": "damage",
-              "value": "4/6/9/14"
-            }
-          ]
-        }
-      ]
-    },
-    "description": "Атакуйте Ближним боем против Контроля цели в пределах 15 м. Урон: 4/6/9/14.",
-    "shortDescription": "Удлинняющийся клинок.",
-    "price": null,
-    "heatCost": 0
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "kereznikov",
@@ -1031,7 +517,8 @@
     },
     "description": "Постоянный ускоритель реакции. Если в начале боя стороны совершают встречную проверку за первый ход и вы представляете героев, ваша проверка получает преимущество. Одновременно можно использовать только один ускоритель.",
     "shortDescription": "Даёт преимущество в споре за первый ход.",
-    "price": null
+    "price": null,
+    "status": "approved"
   },
   {
     "id": "sandevistan",
@@ -1060,7 +547,8 @@
     "description": "Когда герои попали в засаду, свободным действием превратите её начало в спорное: стороны совершают встречную проверку за первый ход, а представляющий героев персонаж получает преимущество. Одновременно можно использовать только один ускоритель.",
     "shortDescription": "Позволяет оспорить первый ход при засаде.",
     "price": null,
-    "heatCost": 2
+    "heatCost": 2,
+    "status": "approved"
   },
   {
     "id": "gasitel-inertsii",
@@ -1087,7 +575,8 @@
     },
     "description": "Вы наносите дополнительный урон в зависимости от пройденного перед этим расстояния. После передвижения ваша следующая атака дополнительно наносит 1 урон за каждые полные 10 м, которые вы прошли перед ней.",
     "shortDescription": "После передвижения вы усиливаете следующую атаку в зависимости от пройденного расстояния.",
-    "price": null
+    "price": null,
+    "status": "approved"
   },
   {
     "id": "maglev-botinki",
@@ -1128,7 +617,8 @@
     },
     "description": "Позволяют перемещаться по отвесным стенам и потолку, тратя на это вашу обычную скорость передвижения. Вы также игнорируете штраф к скорости от пересеченной местности. Другие эффекты этой местности остаются в силе.",
     "shortDescription": "Позволяют ходить по стенам и потолку и игнорировать штраф к скорости от пересеченной местности.",
-    "price": null
+    "price": null,
+    "status": "approved"
   },
   {
     "id": "khimicheskiy-analizator",
@@ -1160,7 +650,8 @@
     "description": "Свободным действием опознайте химическое вещество из обширной базы образцов. Проверка не требуется.",
     "shortDescription": "Опознает химические вещества без проверки.",
     "price": null,
-    "heatCost": 0
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "redaktor-boli",
@@ -1187,54 +678,8 @@
     },
     "description": "Отключает восприятие боли и усталости. Дает 4 временные ячейки стресса, которые очищаются в начале каждой сцены.",
     "shortDescription": "Отключает восприятие боли и усталости, увеличивая запас стресса",
-    "price": null
-  },
-  {
-    "id": "dartgan",
-    "name": "Дартган",
-    "type": "artifact",
-    "rank": 2,
-    "skill": "strelba",
-    "mechanics": {
-      "effects": [
-        {
-          "activation": {
-            "type": "action"
-          },
-          "conditions": {
-            "targets": "single",
-            "range": {
-              "type": "meters",
-              "value": 100
-            },
-            "defense": "control",
-            "check": "required"
-          },
-          "outcomes": [
-            {
-              "key": "concealable",
-              "value": true
-            },
-            {
-              "key": "armorPiercing",
-              "value": 2
-            },
-            {
-              "key": "reload",
-              "value": 1
-            },
-            {
-              "key": "damage",
-              "value": "2/4/6/9"
-            }
-          ]
-        }
-      ]
-    },
-    "description": "Атакуйте Стрельбой против Контроля цели в пределах 100 м. Урон: 2/4/6/9. Скрытное. Бронебойность 2. Перезарядка 1.",
-    "shortDescription": "Скрытый однозарядный имплант-выстрел.",
     "price": null,
-    "heatCost": 0
+    "status": "approved"
   },
   {
     "id": "mikro-optika",
@@ -1262,7 +707,8 @@
     },
     "description": "Ваши атаки дальнего боя наносят на 1 урона больше.",
     "shortDescription": "+1 к урону ваших атак дальнего боя.",
-    "price": null
+    "price": null,
+    "status": "approved"
   },
   {
     "id": "radio-skaner",
@@ -1278,8 +724,7 @@
           },
           "conditions": {
             "range": {
-              "type": "meters",
-              "value": 100
+              "type": "sight"
             },
             "targets": "allInArea"
           },
@@ -1292,10 +737,11 @@
         }
       ]
     },
-    "description": "Распознает все технические устройства в радиусе 100 м.",
+    "description": "Распознает все технические устройства в пределах видимости.",
     "shortDescription": "Распознает все технические устройства в радиусе 100 м.",
     "price": null,
-    "heatCost": 0
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "analizator-golosa",
@@ -1324,7 +770,8 @@
     "description": "На 1 минуту активирует функцию «Детектор лжи». В это время вам невозможно соврать.",
     "shortDescription": "Детектор лжи",
     "price": null,
-    "heatCost": 0
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "radar-sonar",
@@ -1341,7 +788,7 @@
           "conditions": {
             "range": {
               "type": "meters",
-              "value": 50
+              "value": 30
             }
           },
           "outcomes": [
@@ -1353,9 +800,10 @@
         }
       ]
     },
-    "description": "Постоянно сканирует местность в радиусе 50 м. Раз в минуту или при входе объекта в зону ведущий сообщает обо всех движущихся целях. Стены не считаются помехой.",
+    "description": "Постоянно сканирует местность в радиусе 30 м. Раз в минуту или при входе объекта в зону ведущий сообщает обо всех движущихся целях. Стены не считаются помехой.",
     "shortDescription": "Детектор движения, даже сквозь стены",
-    "price": null
+    "price": null,
+    "status": "approved"
   },
   {
     "id": "kiber-zmeya",
@@ -1378,10 +826,6 @@
             "check": "required"
           },
           "outcomes": [
-            {
-              "key": "reload",
-              "value": 1
-            },
             {
               "key": "damage",
               "value": "4/6/9/14"
@@ -1409,10 +853,11 @@
         }
       ]
     },
-    "description": "Атакуйте Ближним боем против Стойкости цели в своей досягаемости. Урон: 4/6/9/14. При успехе цель становится Захваченной и получает помеху до начала вашего следующего хода. Перезарядка 1.",
+    "description": "Атакуйте Ближним боем против Стойкости цели в своей досягаемости. Урон: 4/6/9/14. При успехе цель становится Захваченной и получает помеху до начала вашего следующего хода.",
     "shortDescription": "Скрытое щупальце хватает цель и мешает её следующему действию.",
     "price": null,
-    "heatCost": 0
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "avtoinektor",
@@ -1438,7 +883,8 @@
     "description": "Поставляется в двух версиях: лечебной и адреналиновой. Выбор делается при покупке, взять обе сразу нельзя. Адреналиновая версия дает преимущество на следующую проверку. Лечебная восполняет 4 стресса.",
     "shortDescription": "Автоматически вводит адреналин или лечебный препарат.",
     "price": null,
-    "heatCost": 2
+    "heatCost": 2,
+    "status": "approved"
   },
   {
     "id": "rukokhvat",
@@ -1455,7 +901,7 @@
           "conditions": {
             "range": {
               "type": "meters",
-              "value": 50
+              "value": 30
             },
             "targets": "single"
           },
@@ -1468,10 +914,11 @@
         }
       ]
     },
-    "description": "Запускает крюк в объект на расстоянии до 50 м. По тросу можно двигаться с половиной скорости или подтянуть к себе объект на один размер меньше вас.",
+    "description": "Запускает крюк в объект на расстоянии до 30 м. По тросу можно двигаться с половиной скорости или подтянуть к себе объект на один размер меньше вас.",
     "shortDescription": "Крюк-кошка для быстрого зацепа, подъема и подтягивания объектов.",
     "price": null,
-    "heatCost": 0
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "vykidnoe-oruzhie-blizhnego-boya",
@@ -1488,8 +935,8 @@
           "conditions": {},
           "outcomes": [
             {
-              "key": "concealable",
-              "value": true
+              "key": "utility",
+              "value": 2
             }
           ]
         }
@@ -1498,7 +945,8 @@
     "description": "Любое одноручное оружие можно спрятать внутри руки и свободным действием раскрыть или сложить.",
     "shortDescription": "Прячет любое одноручное оружие внутри руки и позволяет мгновенно раскрыть его.",
     "price": null,
-    "heatCost": 0
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "proektsionnyy-modul-iskra-30",
@@ -1527,10 +975,6 @@
           },
           "outcomes": [
             {
-              "key": "reload",
-              "value": 2
-            },
-            {
               "key": "damage",
               "value": "4/7/10/15"
             }
@@ -1538,10 +982,11 @@
         }
       ]
     },
-    "description": "Выпускает струю пламени по линии длиной 30 м и шириной 15 м. Атака Резонанса против Стойкости всех противников на линии. Урон: 4/7/10/15. Перезарядка 2.",
+    "description": "Выпускает струю пламени по линии длиной 30 м и шириной 15 м. Атака Резонанса против Стойкости всех противников на линии. Урон: 4/7/10/15.",
     "shortDescription": "Модуль Резонанса, выжигающий линию огнем.",
     "price": null,
-    "heatCost": 0
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "manipulyator-kulak-keplera",
@@ -1558,7 +1003,7 @@
           "conditions": {
             "range": {
               "type": "meters",
-              "value": 50
+              "value": 30
             },
             "targets": "single",
             "defense": "fortitude",
@@ -1580,7 +1025,8 @@
     "description": "Вырвите кусок материи не выше 2 ранга размером с кулак и выстрелите им по цели. Атака Мощи против Стойкости. Урон: 3/6/8/12. Бронебойность 1. Дополнительно вы можете свободно левитировать такие куски в радиусе 30 м и взаимодействовать ими с окружением, но не менять их форму или структуру.",
     "shortDescription": "Модуль Мощи, вырывающий куски материи из объектов и выстреливающий ими во врагов.",
     "price": null,
-    "heatCost": 0
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "amplifikator-shepot",
@@ -1608,7 +1054,8 @@
     },
     "description": "Ваши атаки Доминированием получают +2 к урону при успехе и критическом успехе.",
     "shortDescription": "+2 к урону атак Доминированием при успехе и критическом успехе.",
-    "price": null
+    "price": null,
+    "status": "approved"
   },
   {
     "id": "bioinvertor-zimniy-son",
@@ -1636,7 +1083,8 @@
     },
     "description": "Ваши атаки Мистикой получают +2 к урону при успехе и критическом успехе.",
     "shortDescription": "+2 к урону атак Мистикой при успехе и критическом успехе.",
-    "price": null
+    "price": null,
+    "status": "approved"
   },
   {
     "id": "prognosticheskiy-uzel-orakul",
@@ -1667,7 +1115,8 @@
     "description": "Совершите проверку Анализа против Контроля цели. При успехе следующая проверка или атака против неё до начала вашего следующего хода получает преимущество.",
     "shortDescription": "Откройте союзнику выгодное окно для действия против цели.",
     "price": null,
-    "heatCost": 0
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "vykidnoy-shchit",
@@ -1684,10 +1133,6 @@
           "conditions": {},
           "outcomes": [
             {
-              "key": "concealable",
-              "value": true
-            },
-            {
               "key": "imposeDisadvantageAgainstFortitude"
             }
           ]
@@ -1697,7 +1142,8 @@
     "description": "Свободным действием раскройте или сложите скрытый в руке щит. Пока он раскрыт, рука занята, а атаки против вашей Стойкости получают помеху.",
     "shortDescription": "Займите руку щитом, чтобы атаки против Стойкости получали помеху.",
     "price": null,
-    "heatCost": 0
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "povodok-drona-pastukh",
@@ -1714,7 +1160,7 @@
           "conditions": {
             "range": {
               "type": "meters",
-              "value": 50
+              "value": 30
             },
             "targets": "single",
             "defense": "control",
@@ -1731,7 +1177,8 @@
     "description": "Перехватывает управление над техникой, отдавая приказы. Проверка Хакерства против Контроля. При успехе вы определяете, какое следующее действие она совершит. Два раунда подряд воздействовать на одну и ту же цель нельзя.",
     "shortDescription": "Перехватывает управление над техникой, отдавая приказы.",
     "price": null,
-    "heatCost": 0
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "kontur-tishiny-glush",
@@ -1761,7 +1208,8 @@
     "description": "Пока контур работает, вы и стоящие вплотную союзники получаете преимущество к проверкам Сокрытия, связанным с передвижением и короткими взаимодействиями. Эффект заканчивается, если кто-то из вас атакует или поднимает явный шум.",
     "shortDescription": "Заглушает звуки издаваемые вами и окружающими",
     "price": null,
-    "heatCost": 0
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "servisnyy-roy-stezhok",
@@ -1793,7 +1241,8 @@
     "description": "Свободным действием почините выбранную техсистему. Если применить рой к техсистеме с разряженным запасом временных ячеек стресса, он восстановит его до максимума.",
     "shortDescription": "Чинит техсистемы и восстанавливает их запас временных ячеек стресса.",
     "price": null,
-    "heatCost": 0
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "proektor-ukrytiya-rigel",
@@ -1810,7 +1259,7 @@
           "conditions": {
             "area": {
               "type": "circle",
-              "value": 8
+              "value": 15
             },
             "range": {
               "type": "self"
@@ -1825,10 +1274,11 @@
         }
       ]
     },
-    "description": "Перед вами разворачивается защитная зона радиусом 8 м. Она дает Укрытие и запас временных ячеек стресса, равный вашей Инженерии, умноженной на 3.",
+    "description": "Перед вами разворачивается защитная зона радиусом 15 м. Она дает Укрытие и запас временных ячеек стресса, равный вашей Инженерии, умноженной на 3.",
     "shortDescription": "Разворачивает укрытие с запасом временных ячеек стресса для удержания позиции.",
     "price": null,
-    "heatCost": 0
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "sotsialnaya-lichina-maska",
@@ -1857,7 +1307,8 @@
     "description": "Подстраивает ваш голос, мимику и мелкие черты под выбранный образ. Пока у вас есть правдоподобная легенда и доступ к роли, вы получаете преимущество к проверкам Обаяния, связанным с этим образом. Личина срывается после жесткого досмотра, открытого конфликта или грубой ошибки.",
     "shortDescription": "Подстраивает ваш голос, мимику и мелкие черты под выбранный образ.",
     "price": null,
-    "heatCost": 0
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "ekzozakhvat-taran",
@@ -1892,35 +1343,8 @@
     "description": "Экзозахват позволяет ломать преграды и деформировать прочные объекты. В бою атакуйте Мощью против Стойкости цели в своей досягаемости. Урон: 2/4/6/9.",
     "shortDescription": "Ломает преграды и кости врагов.",
     "price": null,
-    "heatCost": 0
-  },
-  {
-    "id": "uragan",
-    "name": "Ураган",
-    "type": "artifact",
-    "rank": 2,
-    "skill": null,
-    "mechanics": {
-      "effects": [
-        {
-          "activation": {
-            "type": "passive"
-          },
-          "conditions": {
-            "targets": "single"
-          },
-          "outcomes": [
-            {
-              "key": "stackingArmorPiercing",
-              "value": 1
-            }
-          ]
-        }
-      ]
-    },
-    "description": "Каждая ваша следующая атака против одной и той же цели в рамках сцены получает суммирующуюся бронебойность 1. Бонус сбрасывается при атаке другой цели.",
-    "shortDescription": "Наращивает бронебойность по одной цели.",
-    "price": null
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "protokol-ten",
@@ -1947,13 +1371,9 @@
         },
         {
           "activation": {
-            "type": "maneuver"
+            "type": "passive"
           },
           "conditions": {
-            "range": {
-              "type": "meters",
-              "value": 30
-            },
             "targets": "self",
             "trigger": "whileInShadowForm"
           },
@@ -1965,10 +1385,11 @@
         }
       ]
     },
-    "description": "Действием вы можете растворить тело, становясь тенью. В этой форме вы можете манёвром перемещаться между неосвещёнными пространствами, если дистанция между ними не больше 30 м. В форме тени вы не можете атаковать или активировать технические устройства. Воплотиться обратно также занимает действие.",
-    "shortDescription": "Форма тени для перемещения между тёмными участками.",
+    "description": "Действием растворите тело, становясь тенью. Пока вы в этой форме, манёвр «Перемещение» переносит вас по неосвещённым пространствам: вы движетесь тенями и не считаетесь на открытом месте. Атаковать и активировать технические устройства в форме тени нельзя. Воплотиться обратно тоже занимает действие.",
+    "shortDescription": "Форма тени: перемещение идёт по неосвещённым пространствам.",
     "price": null,
-    "heatCost": 0
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "braslet-podmena",
@@ -2022,7 +1443,8 @@
     "description": "Действием поменяйте небольшой предмет, который держите в одной руке, на видимый предмет примерно того же размера в пределах 10 м. Бесхозный предмет меняется без проверки. Если другой персонаж держит выбранный предмет, совершите встречную проверку Сокрытия против его Наблюдательности: обмен происходит только при вашей победе. Браслет не меняет надетые предметы, артефакты и живых существ.",
     "shortDescription": "Меняет предмет в вашей руке на другой небольшой предмет в пределах 10 м.",
     "price": null,
-    "heatCost": 0
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "skoba-nol",
@@ -2073,7 +1495,8 @@
     "description": "Действием закрепите скобу на бесхозном неартефактном объекте массой не более 100 кг. Пока скоба работает, объект остаётся неподвижным относительно окружения и не подчиняется гравитации. Коснувшись скобы, вы можете выключить её свободным действием. Другой персонаж может сорвать скобу проверкой Мощи против задачи 1-го ранга; разрушение самого объекта также освобождает его.",
     "shortDescription": "Фиксирует объект массой до 100 кг неподвижно относительно окружения.",
     "price": null,
-    "heatCost": 0
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "kvantovyy-taynik",
@@ -2108,8 +1531,7 @@
           },
           "conditions": {
             "range": {
-              "type": "meters",
-              "value": 100
+              "type": "sight"
             },
             "targets": "single",
             "trigger": "whileStorageAnchorActive"
@@ -2123,10 +1545,11 @@
         }
       ]
     },
-    "description": "Артефакт состоит из карманного контейнера и метки. Действием поместите метку в другой контейнер или комнату, связывая их с тайником. Пока метка находится в пределах 100 м, свободным действием достаньте через тайник один бесхозный неживой неартефактный предмет, который проходит в отверстие диаметром 30 см. Одновременно может быть связано только одно хранилище; удаление метки разрывает связь. Тайник не переносит существ, надетые или удерживаемые предметы.",
-    "shortDescription": "Извлекает небольшие предметы из помеченного хранилища в пределах 100 м.",
+    "description": "Артефакт состоит из карманного контейнера и метки. Действием поместите метку в другой контейнер или комнату, связывая их с тайником. Пока метка находится в пределах видимости, свободным действием достаньте через тайник один бесхозный неживой неартефактный предмет, который проходит в отверстие диаметром 30 см. Одновременно может быть связано только одно хранилище; удаление метки разрывает связь. Тайник не переносит существ, надетые или удерживаемые предметы.",
+    "shortDescription": "Извлекает небольшие предметы из помеченного хранилища в пределах видимости.",
     "price": null,
-    "heatCost": 0
+    "heatCost": 0,
+    "status": "approved"
   },
   {
     "id": "khronoskop-ekho",
@@ -2162,7 +1585,8 @@
     "description": "Вне боя изучите окружающее место и совершите проверку Анализа против ранга задачи, выбранного ведущим. При успехе хроноскоп восстанавливает по физическим и энергетическим следам события последних десяти минут, а ведущий правдиво отвечает на два ваших вопроса о произошедшем. Прибор не показывает события, не оставившие следов, и не раскрывает личность участника без различимых признаков.",
     "shortDescription": "Восстанавливает недавние события по следам, оставшимся в месте.",
     "price": null,
-    "heatCost": 1
+    "heatCost": 1,
+    "status": "approved"
   },
   {
     "id": "dron-sverchok",
@@ -2178,8 +1602,7 @@
           },
           "conditions": {
             "range": {
-              "type": "meters",
-              "value": 100
+              "type": "sight"
             },
             "targets": "self",
             "duration": "untilEndOfScene"
@@ -2193,63 +1616,10 @@
         }
       ]
     },
-    "description": "Действием выпустите небольшого летающего дрона до конца сцены. Он выполняет одну простую команду за раз, пролезает в отверстия шириной от 5 см и передаёт вам изображение и звук, пока находится в пределах 100 м. Дрон не атакует, не активирует устройства и не совершает проверки вместо вас; через его трансляцию вы можете совершать проверки Наблюдательности как обычно. Если противник видит дрон и может до него добраться, он может потратить действие, чтобы вывести его из строя до конца сцены. Одновременно активен только один «Сверчок».",
+    "description": "Действием выпустите небольшого летающего дрона до конца сцены. Он выполняет одну простую команду за раз, пролезает в отверстия шириной от 5 см и передаёт вам изображение и звук, пока находится в пределах видимости. Дрон не атакует, не активирует устройства и не совершает проверки вместо вас; через его трансляцию вы можете совершать проверки Наблюдательности как обычно. Если противник видит дрон и может до него добраться, он может потратить действие, чтобы вывести его из строя до конца сцены. Одновременно активен только один «Сверчок».",
     "shortDescription": "Разведывает удалённую область и передаёт вам изображение и звук.",
     "price": null,
-    "heatCost": 1
-  },
-  {
-    "id": "kus",
-    "name": "Кусь",
-    "type": "artifact",
-    "rank": 3,
-    "skill": "blizhniy_boy",
-    "mechanics": {
-      "effects": [
-        {
-          "activation": {
-            "type": "passive"
-          },
-          "conditions": {
-            "check": "required"
-          },
-          "outcomes": [
-            {
-              "key": "damage",
-              "value": "4/6/9/14"
-            }
-          ]
-        }
-      ]
-    },
-    "description": "TODO: заполнить описание из мира Stellar.",
-    "shortDescription": "TODO: заполнить краткое описание.",
-    "price": null,
-    "properties": [
-      {
-        "key": "sourceWorld",
-        "value": "312"
-      },
-      {
-        "key": "sourceItemId",
-        "value": "jolDPlwwpCaHlDE8"
-      },
-      {
-        "key": "sourceType",
-        "value": "weapon"
-      },
-      {
-        "key": "sourceActors",
-        "value": "Зверь"
-      }
-    ],
-    "tags": [
-      "legacy-world-312",
-      "TODO: mechanics",
-      "TODO: shortDescription",
-      "TODO: description",
-      "source-type: weapon"
-    ],
-    "status": "legacy"
+    "heatCost": 1,
+    "status": "approved"
   }
 ]

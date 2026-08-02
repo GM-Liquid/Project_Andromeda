@@ -26,7 +26,90 @@
             "type": "melee"
           },
           "damage": "1/2/3/5",
-          "description": "Переместитесь к видимой цели на расстояние до вашей Скорости и совершите атаку Ближним боем против Стойкости. Успех: сдвиньте цель на 3 м. Критический успех: цель также становится Уязвимой до начала вашего следующего хода."
+          "description": "Переместитесь к видимой цели на расстояние до 10 м, не провоцируя атак, и атакуйте Ближним боем против Стойкости. Урон: 1/2/3/5. При успехе сдвиньте цель на 5 м по ходу рывка. При критическом успехе цель также становится Уязвимой до начала своего следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "targets": "self"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveSelf",
+                    "distance": 10
+                  },
+                  {
+                    "key": "mobility",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "1/2/3/5"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveTarget",
+                    "distance": 5,
+                    "control": "vector"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilStartOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "vulnerable"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 2,
@@ -35,7 +118,90 @@
             "type": "melee"
           },
           "damage": "2/4/6/9",
-          "description": "Переместитесь к видимой цели на расстояние до вашей Скорости, не провоцируя атак, и совершите атаку Ближним боем против Стойкости. Успех: сдвиньте цель на 10 м. Критический успех: цель также становится Уязвимой до начала вашего следующего хода."
+          "description": "Переместитесь к видимой цели на расстояние до 30 м, не провоцируя атак, и атакуйте Ближним боем против Стойкости. Урон: 2/4/6/9. При успехе сдвиньте цель на 15 м по ходу рывка. При критическом успехе цель также становится Уязвимой до начала своего следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "targets": "self"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveSelf",
+                    "distance": 30
+                  },
+                  {
+                    "key": "mobility",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "2/4/6/9"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveTarget",
+                    "distance": 15,
+                    "control": "vector"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilStartOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "vulnerable"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 3,
@@ -44,7 +210,90 @@
             "type": "melee"
           },
           "damage": "4/6/9/14",
-          "description": "Переместитесь к видимой цели на расстояние до вашей Скорости, не провоцируя атак, и совершите атаку Ближним боем против Стойкости. Успех: сдвиньте цель на 30 м. Критический успех: цель также становится Уязвимой до конца её следующего хода."
+          "description": "Переместитесь к видимой цели на расстояние до 100 м, не провоцируя атак, и атакуйте Ближним боем против Стойкости. Урон: 4/6/9/14. При успехе сдвиньте цель на 50 м по ходу рывка. При критическом успехе цель также становится Уязвимой до конца её следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "targets": "self"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveSelf",
+                    "distance": 100
+                  },
+                  {
+                    "key": "mobility",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "4/6/9/14"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveTarget",
+                    "distance": 50,
+                    "control": "vector"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilEndOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "vulnerable"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 4,
@@ -53,7 +302,110 @@
             "type": "melee"
           },
           "damage": "5/8/12/18",
-          "description": "Переместитесь к видимой цели на расстояние до вашей Скорости, не провоцируя атак; один противник на вашем пути получает 5 урона. Совершите атаку Ближним боем против Стойкости. Успех: сдвиньте цель на 100 м. Критический успех: цель и задетый противник становятся Уязвимыми до конца их следующего хода."
+          "description": "Переместитесь к видимой цели на расстояние до 300 м, не провоцируя атак, и атакуйте Ближним боем против Стойкости. Урон: 5/8/12/18. Один противник на вашем пути получает 2 урона. При успехе сдвиньте цель на 100 м по ходу рывка. При критическом успехе цель также становится Уязвимой до конца её следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "targets": "self"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveSelf",
+                    "distance": 300
+                  },
+                  {
+                    "key": "mobility",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "5/8/12/18"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveTarget",
+                    "distance": 100,
+                    "control": "vector"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilEndOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "vulnerable"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onHit"
+                },
+                "outcomes": [
+                  {
+                    "key": "damageBonus",
+                    "amount": 2
+                  }
+                ]
+              }
+            ]
+          }
         }
       ],
       "heatCost": 0
@@ -111,10 +463,88 @@
           "rank": 1,
           "name": "Хватка",
           "range": {
-            "type": "melee"
+            "type": "meters",
+            "value": 3
           },
           "damage": "1/2/3/5",
-          "description": "Атака Мощью против Стойкости цели в ближнем бою. Успех: притяните цель на 3 м к себе или сдвиньте её на 3 м. Критический успех: цель также схвачена — Обездвижена до начала вашего следующего хода."
+          "description": "Атакуйте Мощью против Стойкости цели в пределах 3 м. Бронебойность 1. Урон: 1/2/3/5. При успехе притяните цель к себе или оттолкните её на 3 м; до начала своего следующего хода она Схвачена. При критическом успехе она также становится Уязвимой до начала своего следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 3
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "armorPiercing",
+                    "value": 1
+                  },
+                  {
+                    "key": "damage",
+                    "value": "1/2/3/5"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 3
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilStartOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveTarget",
+                    "distance": 3,
+                    "control": "vector"
+                  },
+                  {
+                    "key": "applyStatus",
+                    "status": "grabbed"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 3
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilStartOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "vulnerable"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 2,
@@ -124,17 +554,171 @@
             "value": 10
           },
           "damage": "2/4/6/9",
-          "description": "Атака Мощью против Стойкости цели в пределах 10 м. Успех: притяните цель к себе в ближний бой или сдвиньте её на 10 м. Критический успех: цель также схвачена — Обездвижена до начала вашего следующего хода."
+          "description": "Атакуйте Мощью против Стойкости цели в пределах 10 м. Бронебойность 1. Урон: 2/4/6/9. При успехе притяните цель к себе или оттолкните её на 10 м; до начала своего следующего хода она Схвачена. При критическом успехе она также становится Уязвимой до начала своего следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 10
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "armorPiercing",
+                    "value": 1
+                  },
+                  {
+                    "key": "damage",
+                    "value": "2/4/6/9"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 10
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilStartOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveTarget",
+                    "distance": 10,
+                    "control": "vector"
+                  },
+                  {
+                    "key": "applyStatus",
+                    "status": "grabbed"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 10
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilStartOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "vulnerable"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 3,
           "name": "Мёртвая хватка",
           "range": {
             "type": "meters",
-            "value": 30
+            "value": 35
           },
           "damage": "4/6/9/14",
-          "description": "Атака Мощью против Стойкости цели в пределах 30 м. Успех: притяните цель к себе в ближний бой или сдвиньте её на 30 м. Критический успех: цель также схвачена — Обездвижена до конца её следующего хода."
+          "description": "Атакуйте Мощью против Стойкости цели в пределах 35 м. Бронебойность 1. Урон: 4/6/9/14. При успехе притяните цель к себе или оттолкните её на 35 м; до начала своего следующего хода она Схвачена. При критическом успехе она также становится Уязвимой до конца её следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 35
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "armorPiercing",
+                    "value": 1
+                  },
+                  {
+                    "key": "damage",
+                    "value": "4/6/9/14"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 35
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilStartOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveTarget",
+                    "distance": 35,
+                    "control": "vector"
+                  },
+                  {
+                    "key": "applyStatus",
+                    "status": "grabbed"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 35
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilEndOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "vulnerable"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 4,
@@ -144,7 +728,84 @@
             "value": 100
           },
           "damage": "5/8/12/18",
-          "description": "Атака Мощью против Стойкости цели в пределах 100 м. Успех: притяните к себе в ближний бой или сдвиньте на 100 м цель и одного противника в пределах 10 м от неё; этот противник получает 5 урона. Критический успех: цель также схвачена — Обездвижена до конца её следующего хода."
+          "description": "Атакуйте Мощью против Стойкости цели в пределах 100 м. Бронебойность 1. Урон: 5/8/12/18. При успехе притяните цель к себе или оттолкните её на 100 м; до начала своего следующего хода она Схвачена. При критическом успехе она также становится Уязвимой до конца её следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 100
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "armorPiercing",
+                    "value": 1
+                  },
+                  {
+                    "key": "damage",
+                    "value": "5/8/12/18"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 100
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilStartOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveTarget",
+                    "distance": 100,
+                    "control": "vector"
+                  },
+                  {
+                    "key": "applyStatus",
+                    "status": "grabbed"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 100
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilEndOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "vulnerable"
+                  }
+                ]
+              }
+            ]
+          }
         }
       ],
       "heatCost": 0
@@ -205,7 +866,93 @@
             "type": "melee"
           },
           "damage": "1/2/3/5",
-          "description": "Атака Ловкостью против Стойкости цели в ближнем бою. Успех: немедленно шагните до 3 м, не провоцируя атак. Критический успех: цель также становится Уязвимой до начала вашего следующего хода."
+          "description": "Перед атакой шагните до 3 м, не провоцируя атак, и атакуйте Ловкостью против Стойкости цели в ближнем бою. Кураж. Урон: 1/2/3/5. При успехе немедленно отойдите на расстояние до 10 м. При критическом успехе цель становится Уязвимой до начала своего следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "targets": "self"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveSelf",
+                    "distance": 3
+                  },
+                  {
+                    "key": "mobility",
+                    "value": 1
+                  },
+                  {
+                    "key": "courage",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "1/2/3/5"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveSelf",
+                    "distance": 10
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilStartOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "vulnerable"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 2,
@@ -214,7 +961,93 @@
             "type": "melee"
           },
           "damage": "2/4/6/9",
-          "description": "Перед атакой можете шагнуть до 3 м, не провоцируя атак. Атака Ловкостью против Стойкости цели в ближнем бою. Успех: после атаки шагните до 10 м, не провоцируя атак. Критический успех: цель также становится Уязвимой до начала вашего следующего хода."
+          "description": "Перед атакой шагните до 10 м, не провоцируя атак, и атакуйте Ловкостью против Стойкости цели в ближнем бою. Кураж. Урон: 2/4/6/9. При успехе немедленно отойдите на расстояние до 30 м. При критическом успехе цель становится Уязвимой до начала своего следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "targets": "self"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveSelf",
+                    "distance": 10
+                  },
+                  {
+                    "key": "mobility",
+                    "value": 1
+                  },
+                  {
+                    "key": "courage",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "2/4/6/9"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveSelf",
+                    "distance": 30
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilStartOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "vulnerable"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 3,
@@ -223,7 +1056,113 @@
             "type": "melee"
           },
           "damage": "4/6/9/14",
-          "description": "Перед атакой можете шагнуть до 10 м, не провоцируя атак. Атака Ловкостью против Стойкости цели в ближнем бою. Успех: после атаки шагните до 30 м, не провоцируя атак, и следующая атака по вам до начала вашего следующего хода совершается с помехой. Критический успех: цель также становится Уязвимой до конца её следующего хода."
+          "description": "Перед атакой шагните до 35 м, не провоцируя атак, и атакуйте Ловкостью против Стойкости цели в ближнем бою. Кураж. Урон: 4/6/9/14. При успехе немедленно отойдите на расстояние до 100 м, и следующая атака по вам до начала вашего следующего хода совершается с помехой. При критическом успехе цель становится Уязвимой до конца её следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "targets": "self"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveSelf",
+                    "distance": 35
+                  },
+                  {
+                    "key": "mobility",
+                    "value": 1
+                  },
+                  {
+                    "key": "courage",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "4/6/9/14"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveSelf",
+                    "distance": 100
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilEndOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "vulnerable"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilStartOfYourNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "imposeDisadvantage"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 4,
@@ -232,7 +1171,113 @@
             "type": "melee"
           },
           "damage": "5/8/12/18",
-          "description": "Перед атакой можете шагнуть до 30 м, не провоцируя атак; один противник на вашем пути получает 5 урона. Атака Ловкостью против Стойкости цели в ближнем бою. Успех: после атаки шагните до 100 м, не провоцируя атак, и атаки по вам до начала вашего следующего хода совершаются с помехой. Критический успех: цель и задетый противник становятся Уязвимыми до конца их следующего хода."
+          "description": "Перед атакой шагните до 100 м, не провоцируя атак, и атакуйте Ловкостью против Стойкости цели в ближнем бою. Кураж. Урон: 5/8/12/18. При успехе немедленно отойдите на расстояние до 300 м, и следующая атака по вам до начала вашего следующего хода совершается с помехой. При критическом успехе цель становится Уязвимой до конца её следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "targets": "self"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveSelf",
+                    "distance": 100
+                  },
+                  {
+                    "key": "mobility",
+                    "value": 1
+                  },
+                  {
+                    "key": "courage",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "5/8/12/18"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveSelf",
+                    "distance": 300
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilEndOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "vulnerable"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "melee"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilStartOfYourNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "imposeDisadvantage"
+                  }
+                ]
+              }
+            ]
+          }
         }
       ],
       "heatCost": 0
@@ -290,41 +1335,293 @@
           "rank": 1,
           "name": "Отсечка",
           "range": {
-            "type": "meters",
-            "value": 30
+            "type": "sight"
           },
-          "damage": "1/2/3/5",
-          "description": "Атака Стрельбой против Стойкости цели в пределах 30 м. Успех: цель не может использовать реакции и провоцированные атаки до начала вашего следующего хода. Критический успех: вместо этого цель прижата огнём — Обездвижена до начала вашего следующего хода."
+          "damage": "0/1/2/3",
+          "description": "Атакуйте Стрельбой против Стойкости цели в пределах видимости. Урон: 0/1/2/3. При успехе цель прижата огнём: до начала вашего следующего хода она не может использовать реакции и провоцированные атаки. При критическом успехе она также Обездвижена до начала своего следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "0/1/2/3"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilStartOfYourNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "denyReactions"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilStartOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "immobilized"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 2,
           "name": "Плотный огонь",
           "range": {
-            "type": "meters",
-            "value": 100
+            "type": "sight"
           },
-          "damage": "2/4/6/9",
-          "description": "Атака Стрельбой против Стойкости цели в пределах 100 м. Успех: цель не может использовать реакции и провоцированные атаки до начала вашего следующего хода. Критический успех: вместо этого цель прижата огнём — Обездвижена до конца её следующего хода."
+          "damage": "0/2/4/6",
+          "description": "Атакуйте Стрельбой против Стойкости цели в пределах видимости. Урон: 0/2/4/6. При успехе цель прижата огнём: до начала вашего следующего хода она не может использовать реакции и провоцированные атаки. При критическом успехе она также Обездвижена до начала своего следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "0/2/4/6"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilStartOfYourNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "denyReactions"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilStartOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "immobilized"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 3,
           "name": "Заградительный огонь",
           "range": {
-            "type": "meters",
-            "value": 300
+            "type": "sight"
           },
-          "damage": "4/6/9/14",
-          "description": "Атака Стрельбой против Стойкости цели в пределах 300 м. Успех: цель и каждый противник в пределах 10 м от неё не могут использовать реакции и провоцированные атаки до начала вашего следующего хода. Критический успех: основная цель также прижата огнём — Обездвижена до конца её следующего хода."
+          "damage": "0/3/6/9",
+          "description": "Атакуйте Стрельбой против Стойкости цели в пределах видимости. Урон: 0/3/6/9. При успехе цель прижата огнём: до начала вашего следующего хода она не может использовать реакции и провоцированные атаки. При критическом успехе она также Обездвижена до конца её следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "0/3/6/9"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilStartOfYourNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "denyReactions"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilEndOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "immobilized"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 4,
           "name": "Стена свинца",
           "range": {
-            "type": "meters",
-            "value": 1000
+            "type": "sight"
           },
-          "damage": "5/8/12/18",
-          "description": "Атака Стрельбой против Стойкости цели в пределах 1000 м. Успех: цель и каждый противник в пределах 15 м от неё не могут использовать реакции и провоцированные атаки до начала вашего следующего хода, и один из них на ваш выбор получает 5 урона. Критический успех: основная цель также прижата огнём — Обездвижена до конца её следующего хода."
+          "damage": "0/4/8/12",
+          "description": "Атакуйте Стрельбой против Стойкости цели в пределах видимости. Урон: 0/4/8/12. При успехе цель прижата огнём: до начала вашего следующего хода она не может использовать реакции и провоцированные атаки. При критическом успехе она также Обездвижена до конца её следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "0/4/8/12"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilStartOfYourNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "denyReactions"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilEndOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "immobilized"
+                  }
+                ]
+              }
+            ]
+          }
         }
       ],
       "heatCost": 0
@@ -382,39 +1679,341 @@
           "rank": 1,
           "name": "Удар из тени",
           "range": {
-            "type": "melee"
+            "type": "meters",
+            "value": 3
           },
-          "damage": "1/2/3/5",
-          "description": "Атака Сокрытием против Контроля цели в ближнем бою. Успех: немедленно шагните до 3 м, не провоцируя атак. Критический успех: вы также становитесь Невидимы до начала вашего следующего хода."
+          "damage": "0/1/3/4",
+          "description": "Атакуйте Сокрытием против Контроля цели в пределах 3 м. Урон: 0/1/3/4. При успехе немедленно шагните до 3 м, не провоцируя атак, и до начала вашего следующего хода вы Невидимы. При критическом успехе вы вместо этого Скрыты.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 3
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "0/1/3/4"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 3
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilStartOfYourNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveSelf",
+                    "distance": 3
+                  },
+                  {
+                    "key": "mobility",
+                    "value": 1
+                  },
+                  {
+                    "key": "applyStatus",
+                    "status": "invisible"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 3
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "hidden"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 2,
           "name": "Растворение",
           "range": {
-            "type": "melee"
+            "type": "meters",
+            "value": 10
           },
-          "damage": "2/4/6/9",
-          "description": "Атака Сокрытием против Контроля цели в ближнем бою. Успех: немедленно шагните до 10 м, не провоцируя атак, и вы Невидимы до начала вашего следующего хода. Критический успех: вместо этого вы Скрыты (состояние разрушается по обычным правилам)."
+          "damage": "0/2/5/9",
+          "description": "Атакуйте Сокрытием против Контроля цели в пределах 10 м. Урон: 0/2/5/9. При успехе немедленно шагните до 10 м, не провоцируя атак, и до начала вашего следующего хода вы Невидимы. При критическом успехе вы вместо этого Скрыты.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 10
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "0/2/5/9"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 10
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilStartOfYourNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveSelf",
+                    "distance": 10
+                  },
+                  {
+                    "key": "mobility",
+                    "value": 1
+                  },
+                  {
+                    "key": "applyStatus",
+                    "status": "invisible"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 10
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "hidden"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 3,
           "name": "Игра теней",
           "range": {
             "type": "meters",
-            "value": 10
+            "value": 35
           },
-          "damage": "4/6/9/14",
-          "description": "Атака Сокрытием против Контроля цели в пределах 10 м — тень дотягивается сама. Успех: немедленно шагните до 30 м, не провоцируя атак, и вы Невидимы до начала вашего следующего хода. Критический успех: вместо этого вы Скрыты, а цель становится Уязвимой до начала вашего следующего хода."
+          "damage": "0/4/8/13",
+          "description": "Атакуйте Сокрытием против Контроля цели в пределах 35 м. Урон: 0/4/8/13. При успехе немедленно шагните до 35 м, не провоцируя атак, и до начала вашего следующего хода вы Невидимы. При критическом успехе вы вместо этого Скрыты.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 35
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "0/4/8/13"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 35
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilStartOfYourNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveSelf",
+                    "distance": 35
+                  },
+                  {
+                    "key": "mobility",
+                    "value": 1
+                  },
+                  {
+                    "key": "applyStatus",
+                    "status": "invisible"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 35
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "hidden"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 4,
           "name": "Призрак",
           "range": {
             "type": "meters",
-            "value": 30
+            "value": 100
           },
-          "damage": "5/8/12/18",
-          "description": "Атака Сокрытием против Контроля цели в пределах 30 м. Если вы были Скрыты, эта атака не разрушает ваш Скрыт. Успех: немедленно шагните до 100 м, не провоцируя атак, и вы Невидимы до начала вашего следующего хода. Критический успех: вместо этого вы Скрыты, а цель становится Уязвимой до начала вашего следующего хода."
+          "damage": "0/5/11/17",
+          "description": "Атакуйте Сокрытием против Контроля цели в пределах 100 м. Урон: 0/5/11/17. При успехе немедленно шагните до 100 м, не провоцируя атак, и до начала вашего следующего хода вы Невидимы. При критическом успехе вы вместо этого Скрыты.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 100
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "0/5/11/17"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 100
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilStartOfYourNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveSelf",
+                    "distance": 100
+                  },
+                  {
+                    "key": "mobility",
+                    "value": 1
+                  },
+                  {
+                    "key": "applyStatus",
+                    "status": "invisible"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 100
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "hidden"
+                  }
+                ]
+              }
+            ]
+          }
         }
       ],
       "heatCost": 0
@@ -472,41 +2071,293 @@
           "rank": 1,
           "name": "Метка охотника",
           "range": {
-            "type": "meters",
-            "value": 30
+            "type": "sight"
           },
-          "damage": "1/2/3/5",
-          "description": "Атака Наблюдательностью против Контроля цели в пределах 30 м. Успех: ваша следующая атака по этой цели совершается с преимуществом. Критический успех: цель также не может быть Скрытой или Невидимой до начала вашего следующего хода."
+          "damage": "1/2/3/4",
+          "description": "Атакуйте Наблюдательностью против Контроля цели в пределах видимости. Урон: 1/2/3/4. При успехе ваша следующая атака по этой цели до начала вашего следующего хода совершается с преимуществом. При критическом успехе цель также не может стать Скрытой или Невидимой до начала своего следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "1/2/3/4"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilStartOfYourNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "grantAdvantage"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilStartOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "preventStatus",
+                    "status": "hidden"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 2,
           "name": "Загон",
           "range": {
-            "type": "meters",
-            "value": 100
+            "type": "sight"
           },
-          "damage": "2/4/6/9",
-          "description": "Атака Наблюдательностью против Контроля цели в пределах 100 м. Успех: ваша следующая атака по этой цели совершается с преимуществом. Критический успех: цель также не может быть Скрытой или Невидимой до конца её следующего хода."
+          "damage": "2/4/6/8",
+          "description": "Атакуйте Наблюдательностью против Контроля цели в пределах видимости. Урон: 2/4/6/8. При успехе ваша следующая атака по этой цели до начала вашего следующего хода совершается с преимуществом. При критическом успехе цель также не может стать Скрытой или Невидимой до начала своего следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "2/4/6/8"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilStartOfYourNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "grantAdvantage"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilStartOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "preventStatus",
+                    "status": "hidden"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 3,
           "name": "Облава",
           "range": {
-            "type": "meters",
-            "value": 300
+            "type": "sight"
           },
-          "damage": "4/6/9/14",
-          "description": "Атака Наблюдательностью против Контроля цели в пределах 300 м. Успех: ваша следующая атака по этой цели — с преимуществом, и цель не может быть Скрытой или Невидимой до начала вашего следующего хода. Критический успех: следующая атака каждого союзника по этой цели совершается с преимуществом."
+          "damage": "4/6/9/12",
+          "description": "Атакуйте Наблюдательностью против Контроля цели в пределах видимости. Урон: 4/6/9/12. При успехе ваша следующая атака по этой цели до начала вашего следующего хода совершается с преимуществом. При критическом успехе цель также не может стать Скрытой или Невидимой до конца её следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "4/6/9/12"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilStartOfYourNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "grantAdvantage"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilEndOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "preventStatus",
+                    "status": "hidden"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 4,
           "name": "Красная метка",
           "range": {
-            "type": "meters",
-            "value": 1000
+            "type": "sight"
           },
-          "damage": "5/8/12/18",
-          "description": "Атака Наблюдательностью против Контроля цели в пределах 1000 м. Успех: ваша следующая атака по этой цели — с преимуществом, и цель не может быть Скрытой или Невидимой до начала вашего следующего хода. Критический успех: цель Уязвима и не может быть Скрытой или Невидимой до конца её следующего хода."
+          "damage": "5/8/12/16",
+          "description": "Атакуйте Наблюдательностью против Контроля цели в пределах видимости. Урон: 5/8/12/16. При успехе ваша следующая атака по этой цели до начала вашего следующего хода совершается с преимуществом. При критическом успехе цель также не может стать Скрытой или Невидимой до конца её следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "5/8/12/16"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilStartOfYourNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "grantAdvantage"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilEndOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "preventStatus",
+                    "status": "hidden"
+                  }
+                ]
+              }
+            ]
+          }
         }
       ],
       "heatCost": 0
@@ -564,41 +2415,293 @@
           "rank": 1,
           "name": "Слабое место",
           "range": {
-            "type": "meters",
-            "value": 30
+            "type": "sight"
           },
-          "damage": "1/2/3/5",
-          "description": "Атака Анализом против Контроля цели в пределах 30 м. Успех: выбранный союзник получает преимущество на первую атаку по этой цели до начала вашего следующего хода. Критический успех: вместо этого цель становится Уязвимой до начала вашего следующего хода."
+          "damage": "1/2/3/4",
+          "description": "Атакуйте Анализом против Контроля цели в пределах видимости. Урон: 1/2/3/4. При успехе выбранный союзник получает преимущество на первую атаку по этой цели до начала вашего следующего хода. При критическом успехе цель также становится Уязвимой до начала своего следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "1/2/3/4"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilStartOfYourNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "grantAdvantage"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilStartOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "vulnerable"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 2,
           "name": "Брешь",
           "range": {
-            "type": "meters",
-            "value": 100
+            "type": "sight"
           },
-          "damage": "2/4/6/9",
-          "description": "Атака Анализом против Контроля цели в пределах 100 м. Успех: выбранный союзник получает преимущество на первую атаку по этой цели до начала вашего следующего хода. Критический успех: вместо этого цель становится Уязвимой до конца её следующего хода."
+          "damage": "2/4/6/8",
+          "description": "Атакуйте Анализом против Контроля цели в пределах видимости. Урон: 2/4/6/8. При успехе выбранный союзник получает преимущество на первую атаку по этой цели до начала вашего следующего хода. При критическом успехе цель также становится Уязвимой до начала своего следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "2/4/6/8"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilStartOfYourNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "grantAdvantage"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilStartOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "vulnerable"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 3,
           "name": "Вскрытый строй",
           "range": {
-            "type": "meters",
-            "value": 300
+            "type": "sight"
           },
-          "damage": "4/6/9/14",
-          "description": "Атака Анализом против Контроля цели в пределах 300 м. Успех: цель становится Уязвимой до начала вашего следующего хода. Критический успех: цель Уязвима до конца её следующего хода."
+          "damage": "4/6/9/12",
+          "description": "Атакуйте Анализом против Контроля цели в пределах видимости. Урон: 4/6/9/12. При успехе выбранный союзник получает преимущество на первую атаку по этой цели до начала вашего следующего хода. При критическом успехе цель также становится Уязвимой до конца её следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "4/6/9/12"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilStartOfYourNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "grantAdvantage"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilEndOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "vulnerable"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 4,
           "name": "Разбор",
           "range": {
-            "type": "meters",
-            "value": 1000
+            "type": "sight"
           },
-          "damage": "5/8/12/18",
-          "description": "Атака Анализом против Контроля цели в пределах 1000 м. Успех: цель становится Уязвимой до начала вашего следующего хода. Критический успех: цель Уязвима до конца её следующего хода, и один противник в пределах 15 м от неё становится Уязвимым до начала вашего следующего хода."
+          "damage": "5/8/12/16",
+          "description": "Атакуйте Анализом против Контроля цели в пределах видимости. Урон: 5/8/12/16. При успехе выбранный союзник получает преимущество на первую атаку по этой цели до начала вашего следующего хода. При критическом успехе цель также становится Уязвимой до конца её следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "5/8/12/16"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilStartOfYourNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "grantAdvantage"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilEndOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "vulnerable"
+                  }
+                ]
+              }
+            ]
+          }
         }
       ],
       "heatCost": 0
@@ -656,41 +2759,305 @@
           "rank": 1,
           "name": "Сбой",
           "range": {
-            "type": "meters",
-            "value": 30
+            "type": "sight"
           },
-          "damage": "1/2/3/5",
-          "description": "Атака Хакерством против Контроля цели в пределах 30 м. Успех: снаряжение цели барахлит — её следующая атака до начала вашего следующего хода совершается с помехой. Критический успех: одно технологическое устройство цели (оружие, щит, гаджет) также отключается до конца её следующего хода."
+          "damage": "0/1/3/4",
+          "description": "Атакуйте Хакерством против Контроля цели в пределах видимости. Урон: 0/1/3/4. При успехе снаряжение цели барахлит: её следующая атака совершается с помехой, и одно её технологическое устройство отключается до начала своего следующего хода. При критическом успехе цель также Ослаблена до начала своего следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "0/1/3/4"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilStartOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "imposeDisadvantage"
+                  },
+                  {
+                    "key": "disableDevice"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilStartOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "weakened"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 2,
           "name": "Замыкание",
           "range": {
-            "type": "meters",
-            "value": 100
+            "type": "sight"
           },
-          "damage": "2/4/6/9",
-          "description": "Атака Хакерством против Контроля цели в пределах 100 м. Успех: её следующая атака — с помехой, и одно технологическое устройство цели отключается до начала её следующего хода. Критический успех: устройство отключается до конца её следующего хода."
+          "damage": "0/2/5/9",
+          "description": "Атакуйте Хакерством против Контроля цели в пределах видимости. Урон: 0/2/5/9. При успехе снаряжение цели барахлит: её следующая атака совершается с помехой, и одно её технологическое устройство отключается до начала своего следующего хода. При критическом успехе цель также Ослаблена до начала своего следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "0/2/5/9"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilStartOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "imposeDisadvantage"
+                  },
+                  {
+                    "key": "disableDevice"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilStartOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "weakened"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 3,
           "name": "Перегрузка",
           "range": {
-            "type": "meters",
-            "value": 300
+            "type": "sight"
           },
-          "damage": "4/6/9/14",
-          "description": "Атака Хакерством против Контроля цели в пределах 300 м. Успех: её следующая атака — с помехой, и одно технологическое устройство цели отключается до конца её следующего хода. Критический успех: также следующая атака одного противника в пределах 10 м от цели совершается с помехой."
+          "damage": "0/4/8/13",
+          "description": "Атакуйте Хакерством против Контроля цели в пределах видимости. Урон: 0/4/8/13. При успехе снаряжение цели барахлит: её следующая атака совершается с помехой, и одно её технологическое устройство отключается до конца её следующего хода. При критическом успехе цель также Ослаблена до конца её следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "0/4/8/13"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilEndOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "imposeDisadvantage"
+                  },
+                  {
+                    "key": "disableDevice"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilEndOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "weakened"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 4,
           "name": "Каскадный сбой",
           "range": {
-            "type": "meters",
-            "value": 1000
+            "type": "sight"
           },
-          "damage": "5/8/12/18",
-          "description": "Атака Хакерством против Контроля цели в пределах 1000 м. Успех: её следующая атака — с помехой, и одно технологическое устройство цели отключается до конца её следующего хода. Критический успех: вместо этого все технологические устройства цели глохнут до конца её следующего хода, а следующая атака каждого противника в пределах 15 м от неё совершается с помехой."
+          "damage": "0/5/11/17",
+          "description": "Атакуйте Хакерством против Контроля цели в пределах видимости. Урон: 0/5/11/17. При успехе снаряжение цели барахлит: её следующая атака совершается с помехой, и одно её технологическое устройство отключается до конца её следующего хода. При критическом успехе цель также Ослаблена до конца её следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "0/5/11/17"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onSuccess",
+                  "duration": "untilEndOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "imposeDisadvantage"
+                  },
+                  {
+                    "key": "disableDevice"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilEndOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "weakened"
+                  }
+                ]
+              }
+            ]
+          }
         }
       ],
       "heatCost": 0
@@ -748,41 +3115,297 @@
           "rank": 1,
           "name": "Разряд",
           "range": {
-            "type": "meters",
-            "value": 30
+            "type": "sight"
           },
           "damage": "1/2/3/5",
-          "description": "Атака Инженерией против Контроля цели в пределах 30 м. Успех: взрывная волна сдвигает цель на 3 м. Критический успех: цель также Ослаблена до конца её следующего хода."
+          "description": "Атакуйте Инженерией против Контроля цели в пределах видимости. Урон: 1/2/3/5. При успехе взрывная волна сдвигает цель на 3 м. При критическом успехе цель также Ослаблена до конца её следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "1/2/3/5"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveTarget",
+                    "distance": 3,
+                    "control": "vector"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilEndOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "weakened"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 2,
           "name": "Ударная волна",
           "range": {
-            "type": "meters",
-            "value": 100
+            "type": "sight"
           },
           "damage": "2/4/6/9",
-          "description": "Атака Инженерией против Контроля цели в пределах 100 м. Успех: взрывная волна сдвигает цель на 10 м. Критический успех: цель также Ослаблена до конца её следующего хода."
+          "description": "Атакуйте Инженерией против Контроля цели в пределах видимости. Урон: 2/4/6/9. При успехе взрывная волна сдвигает цель на 10 м. При критическом успехе цель также Ослаблена до конца её следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "2/4/6/9"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveTarget",
+                    "distance": 10,
+                    "control": "vector"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilEndOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "weakened"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 3,
           "name": "Детонация",
           "range": {
-            "type": "meters",
-            "value": 300
+            "type": "sight"
           },
           "damage": "4/6/9/14",
-          "description": "Атака Инженерией против Контроля цели в пределах 300 м. Успех: взрывная волна сдвигает цель на 30 м, и каждый противник в пределах 5 м от неё получает 4 урона. Критический успех: цель также Ослаблена до конца её следующего хода."
+          "description": "Атакуйте Инженерией против Контроля цели в пределах видимости. Урон: 4/6/9/14. При успехе взрывная волна сдвигает цель на 35 м. При критическом успехе цель также Ослаблена до конца её следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "4/6/9/14"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveTarget",
+                    "distance": 35,
+                    "control": "vector"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilEndOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "weakened"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 4,
           "name": "Канонада",
           "range": {
-            "type": "meters",
-            "value": 1000
+            "type": "sight"
           },
           "damage": "5/8/12/18",
-          "description": "Атака Инженерией против Контроля цели в пределах 1000 м. Успех: взрывная волна сдвигает цель на 100 м, и каждый противник в пределах 15 м от неё получает 5 урона. Критический успех: цель также Ослаблена до конца её следующего хода, а задетые противники сдвигаются на 10 м от точки взрыва."
+          "description": "Атакуйте Инженерией против Контроля цели в пределах видимости. Урон: 5/8/12/18. При успехе взрывная волна сдвигает цель на 100 м. При критическом успехе цель также Ослаблена до конца её следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "5/8/12/18"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveTarget",
+                    "distance": 100,
+                    "control": "vector"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "control",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilEndOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "weakened"
+                  }
+                ]
+              }
+            ]
+          }
         }
       ],
       "heatCost": 0
@@ -840,41 +3463,293 @@
           "rank": 1,
           "name": "Команда",
           "range": {
-            "type": "meters",
-            "value": 30
+            "type": "sight"
           },
           "damage": "1/2/3/5",
-          "description": "Атака Доминированием против Воли цели в пределах 30 м. Успех: союзник в пределах 15 м от вас немедленно шагает до 3 м, не провоцируя атак. Критический успех: также следующая атака любого союзника по этой цели совершается с преимуществом."
+          "description": "Атакуйте Доминированием против Воли цели в пределах видимости. Урон: 1/2/3/5. При успехе союзник в пределах 10 м от вас немедленно перемещается на расстояние до 3 м. При критическом успехе следующая атака любого союзника по этой цели до начала вашего следующего хода совершается с преимуществом.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "will",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "1/2/3/5"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 10
+                  },
+                  "targets": "single",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveTarget",
+                    "distance": 3,
+                    "control": "willing"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "will",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilStartOfYourNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "grantAdvantage"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 2,
           "name": "Слаженность",
           "range": {
-            "type": "meters",
-            "value": 100
+            "type": "sight"
           },
           "damage": "2/4/6/9",
-          "description": "Атака Доминированием против Воли цели в пределах 100 м. Успех: союзник в пределах 50 м от вас немедленно шагает до 10 м, не провоцируя атак. Критический успех: также следующая атака любого союзника по этой цели совершается с преимуществом."
+          "description": "Атакуйте Доминированием против Воли цели в пределах видимости. Урон: 2/4/6/9. При успехе союзник в пределах 30 м от вас немедленно перемещается на расстояние до 10 м. При критическом успехе следующая атака любого союзника по этой цели до начала вашего следующего хода совершается с преимуществом.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "will",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "2/4/6/9"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 30
+                  },
+                  "targets": "single",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveTarget",
+                    "distance": 10,
+                    "control": "willing"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "will",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilStartOfYourNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "grantAdvantage"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 3,
           "name": "Общий манёвр",
           "range": {
-            "type": "meters",
-            "value": 300
+            "type": "sight"
           },
           "damage": "4/6/9/14",
-          "description": "Атака Доминированием против Воли цели в пределах 300 м. Успех: до двух союзников в пределах 150 м от вас немедленно шагают до 30 м, не провоцируя атак. Критический успех: следующая атака каждого союзника по этой цели совершается с преимуществом."
+          "description": "Атакуйте Доминированием против Воли цели в пределах видимости. Урон: 4/6/9/14. При успехе союзник в пределах 100 м от вас немедленно перемещается на расстояние до 35 м. При критическом успехе следующая атака любого союзника по этой цели до начала вашего следующего хода совершается с преимуществом.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "will",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "4/6/9/14"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 100
+                  },
+                  "targets": "single",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveTarget",
+                    "distance": 35,
+                    "control": "willing"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "will",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilStartOfYourNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "grantAdvantage"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 4,
           "name": "Голос легиона",
           "range": {
-            "type": "meters",
-            "value": 1000
+            "type": "sight"
           },
           "damage": "5/8/12/18",
-          "description": "Атака Доминированием против Воли цели в пределах 1000 м. Успех: до двух союзников в пределах 500 м от вас немедленно шагают до 100 м, не провоцируя атак. Критический успех: цель также становится Уязвимой до конца её следующего хода."
+          "description": "Атакуйте Доминированием против Воли цели в пределах видимости. Урон: 5/8/12/18. При успехе союзник в пределах 300 м от вас немедленно перемещается на расстояние до 100 м. При критическом успехе следующая атака любого союзника по этой цели до начала вашего следующего хода совершается с преимуществом.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "will",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "5/8/12/18"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 300
+                  },
+                  "targets": "single",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveTarget",
+                    "distance": 100,
+                    "control": "willing"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "will",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilStartOfYourNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "grantAdvantage"
+                  }
+                ]
+              }
+            ]
+          }
         }
       ],
       "heatCost": 0
@@ -932,41 +3807,293 @@
           "rank": 1,
           "name": "Вердикт",
           "range": {
-            "type": "meters",
-            "value": 30
+            "type": "sight"
           },
-          "damage": "1/2/3/5",
-          "description": "Атака Обаянием против Воли цели в пределах 30 м, которая вас слышит. Успех: цель отступает под давлением — сдвиньте её на 3 м. Критический успех: вместо этого цель выполняет один короткий приказ, не вредящий ей напрямую."
+          "damage": "1/2/3/4",
+          "description": "Атакуйте Обаянием против Воли цели в пределах видимости, которая вас слышит. Урон: 1/2/3/4. При успехе цель отступает под давлением на 3 м. При критическом успехе она вместо этого выполняет один короткий приказ, не вредящий ей напрямую.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "will",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "1/2/3/4"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "will",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveTarget",
+                    "distance": 3,
+                    "control": "vector"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "will",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "utility",
+                    "value": "shortOrder"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 2,
           "name": "Ультиматум",
           "range": {
-            "type": "meters",
-            "value": 100
+            "type": "sight"
           },
-          "damage": "2/4/6/9",
-          "description": "Атака Обаянием против Воли цели в пределах 100 м, которая вас слышит. Успех: цель отступает под давлением — сдвиньте её на 10 м. Критический успех: вместо этого цель выполняет один короткий приказ, не вредящий ей напрямую."
+          "damage": "2/4/6/8",
+          "description": "Атакуйте Обаянием против Воли цели в пределах видимости, которая вас слышит. Урон: 2/4/6/8. При успехе цель отступает под давлением на 10 м. При критическом успехе она вместо этого выполняет один короткий приказ, не вредящий ей напрямую.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "will",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "2/4/6/8"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "will",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveTarget",
+                    "distance": 10,
+                    "control": "vector"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "will",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "utility",
+                    "value": "shortOrder"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 3,
           "name": "Приговор",
           "range": {
-            "type": "meters",
-            "value": 300
+            "type": "sight"
           },
-          "damage": "4/6/9/14",
-          "description": "Атака Обаянием против Воли цели в пределах 300 м, которая вас слышит. Успех: сдвиньте цель на 30 м, и её следующая атака совершается с помехой. Критический успех: вместо этого цель выполняет один короткий приказ, не вредящий ей напрямую."
+          "damage": "4/6/9/12",
+          "description": "Атакуйте Обаянием против Воли цели в пределах видимости, которая вас слышит. Урон: 4/6/9/12. При успехе цель отступает под давлением на 35 м. При критическом успехе она вместо этого выполняет один короткий приказ, не вредящий ей напрямую.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "will",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "4/6/9/12"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "will",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveTarget",
+                    "distance": 35,
+                    "control": "vector"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "will",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "utility",
+                    "value": "shortOrder"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 4,
           "name": "Слово закона",
           "range": {
-            "type": "meters",
-            "value": 1000
+            "type": "sight"
           },
-          "damage": "5/8/12/18",
-          "description": "Атака Обаянием против Воли цели в пределах 1000 м, которая вас слышит или видит. Успех: сдвиньте цель на 100 м, и её следующая атака совершается с помехой. Критический успех: вместо этого цель выполняет один короткий приказ, не вредящий ей напрямую, и становится Ослабленной до конца её следующего хода."
+          "damage": "5/8/12/16",
+          "description": "Атакуйте Обаянием против Воли цели в пределах видимости, которая вас слышит. Урон: 5/8/12/16. При успехе цель отступает под давлением на 100 м. При критическом успехе она вместо этого выполняет один короткий приказ, не вредящий ей напрямую.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "will",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "5/8/12/16"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "will",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "moveTarget",
+                    "distance": 100,
+                    "control": "vector"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "will",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "utility",
+                    "value": "shortOrder"
+                  }
+                ]
+              }
+            ]
+          }
         }
       ],
       "heatCost": 0
@@ -1024,41 +4151,301 @@
           "rank": 1,
           "name": "Переток",
           "range": {
-            "type": "meters",
-            "value": 30
+            "type": "sight"
           },
-          "damage": "1/2/3/5",
-          "description": "Атака Мистикой против Воли цели в пределах 30 м. Успех: союзник в пределах 15 м от вас (или вы) восстанавливает 1 ячейку стресса. Критический успех: вместо этого он восстанавливает 2 ячейки стресса или снимает с себя одно состояние."
+          "damage": "0/1/3/4",
+          "description": "Атакуйте Мистикой против Воли цели в пределах видимости. Урон: 0/1/3/4. При успехе союзник в пределах 10 м от вас или вы сами восстанавливаете 1 ячейку стресса. При критическом успехе он вместо этого восстанавливает 2 ячейки стресса или снимает с себя одно негативное состояние по своему выбору.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "will",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "0/1/3/4"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 10
+                  },
+                  "targets": "single",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "restoreStress",
+                    "amount": 1
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 10
+                  },
+                  "targets": "single",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "restoreStress",
+                    "amount": 2,
+                    "value": "chooseOne"
+                  },
+                  {
+                    "key": "removeStatus",
+                    "status": "any",
+                    "value": "chooseOne"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 2,
           "name": "Приток",
           "range": {
-            "type": "meters",
-            "value": 100
+            "type": "sight"
           },
-          "damage": "2/4/6/9",
-          "description": "Атака Мистикой против Воли цели в пределах 100 м. Успех: союзник в пределах 50 м от вас (или вы) восстанавливает 2 ячейки стресса. Критический успех: вместо этого он восстанавливает 3 ячейки стресса или снимает с себя одно состояние."
+          "damage": "0/2/5/9",
+          "description": "Атакуйте Мистикой против Воли цели в пределах видимости. Урон: 0/2/5/9. При успехе союзник в пределах 30 м от вас или вы сами восстанавливаете 2 ячейки стресса. При критическом успехе он вместо этого восстанавливает 3 ячейки стресса или снимает с себя одно негативное состояние по своему выбору.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "will",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "0/2/5/9"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 30
+                  },
+                  "targets": "single",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "restoreStress",
+                    "amount": 2
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 30
+                  },
+                  "targets": "single",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "restoreStress",
+                    "amount": 3,
+                    "value": "chooseOne"
+                  },
+                  {
+                    "key": "removeStatus",
+                    "status": "any",
+                    "value": "chooseOne"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 3,
           "name": "Поток",
           "range": {
-            "type": "meters",
-            "value": 300
+            "type": "sight"
           },
-          "damage": "4/6/9/14",
-          "description": "Атака Мистикой против Воли цели в пределах 300 м. Успех: союзник в пределах 150 м от вас (или вы) восстанавливает 3 ячейки стресса. Критический успех: вместо этого он восстанавливает 4 ячейки стресса и снимает с себя одно состояние."
+          "damage": "0/4/8/13",
+          "description": "Атакуйте Мистикой против Воли цели в пределах видимости. Урон: 0/4/8/13. При успехе союзник в пределах 100 м от вас или вы сами восстанавливаете 3 ячейки стресса. При критическом успехе он также снимает с себя одно негативное состояние по своему выбору.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "will",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "0/4/8/13"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 100
+                  },
+                  "targets": "single",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "restoreStress",
+                    "amount": 3
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 100
+                  },
+                  "targets": "single",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "removeStatus",
+                    "status": "any"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 4,
           "name": "Прилив",
           "range": {
-            "type": "meters",
-            "value": 1000
+            "type": "sight"
           },
-          "damage": "5/8/12/18",
-          "description": "Атака Мистикой против Воли цели в пределах 1000 м. Успех: союзник в пределах 500 м от вас (или вы) восстанавливает 5 ячеек стресса. Критический успех: вместо этого он восстанавливает 5 ячеек стресса и снимает с себя одно состояние."
+          "damage": "0/5/11/17",
+          "description": "Атакуйте Мистикой против Воли цели в пределах видимости. Урон: 0/5/11/17. При успехе союзник в пределах 300 м от вас или вы сами восстанавливаете 5 ячеек стресса. При критическом успехе он также снимает с себя одно негативное состояние по своему выбору.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "will",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "0/5/11/17"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 300
+                  },
+                  "targets": "single",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "restoreStress",
+                    "amount": 5
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "meters",
+                    "value": 300
+                  },
+                  "targets": "single",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "removeStatus",
+                    "status": "any"
+                  }
+                ]
+              }
+            ]
+          }
         }
       ],
       "heatCost": 0
@@ -1116,41 +4503,289 @@
           "rank": 1,
           "name": "Всплеск",
           "range": {
-            "type": "meters",
-            "value": 30
+            "type": "sight"
           },
-          "damage": "1/2/3/5",
-          "description": "Атака Резонансом против Стойкости цели в пределах 30 м. Успех: всплеск перехлёстывает — второй противник в пределах 5 м от цели получает 1 урон. Критический успех: основная цель также становится Уязвимой до начала вашего следующего хода."
+          "damage": "0/1/3/4",
+          "description": "Атакуйте Резонансом против Стойкости цели в пределах видимости. Урон: 0/1/3/4. При успехе всплеск перехлёстывает: второй противник рядом с целью получает 1 урона. При критическом успехе основная цель также становится Уязвимой до начала своего следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "0/1/3/4"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "damageBonus",
+                    "amount": 1
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilStartOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "vulnerable"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 2,
           "name": "Волна",
           "range": {
-            "type": "meters",
-            "value": 100
+            "type": "sight"
           },
-          "damage": "2/4/6/9",
-          "description": "Атака Резонансом против Стойкости цели в пределах 100 м. Успех: волна перехлёстывает — второй противник в пределах 10 м от цели получает 2 урона. Критический успех: основная цель также становится Уязвимой до конца её следующего хода."
+          "damage": "0/2/5/9",
+          "description": "Атакуйте Резонансом против Стойкости цели в пределах видимости. Урон: 0/2/5/9. При успехе всплеск перехлёстывает: второй противник рядом с целью получает 2 урона. При критическом успехе основная цель также становится Уязвимой до начала своего следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "0/2/5/9"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "damageBonus",
+                    "amount": 2
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilStartOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "vulnerable"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 3,
           "name": "Шторм",
           "range": {
-            "type": "meters",
-            "value": 300
+            "type": "sight"
           },
-          "damage": "4/6/9/14",
-          "description": "Атака Резонансом против Стойкости цели в пределах 300 м. Успех: каждый противник в пределах 10 м от цели получает 4 урона. Критический успех: основная цель также становится Уязвимой до конца её следующего хода."
+          "damage": "0/4/8/13",
+          "description": "Атакуйте Резонансом против Стойкости цели в пределах видимости. Урон: 0/4/8/13. При успехе всплеск перехлёстывает: второй противник рядом с целью получает 3 урона. При критическом успехе основная цель также становится Уязвимой до конца её следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "0/4/8/13"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "damageBonus",
+                    "amount": 3
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilEndOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "vulnerable"
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           "rank": 4,
           "name": "Катаклизм",
           "range": {
-            "type": "meters",
-            "value": 1000
+            "type": "sight"
           },
-          "damage": "5/8/12/18",
-          "description": "Атака Резонансом против Стойкости цели в пределах 1000 м. Успех: каждый противник в пределах 15 м от цели получает 5 урона. Критический успех: основная цель также становится Уязвимой до конца её следующего хода, а задетые противники сдвигаются на 10 м от неё."
+          "damage": "0/5/11/17",
+          "description": "Атакуйте Резонансом против Стойкости цели в пределах видимости. Урон: 0/5/11/17. При успехе всплеск перехлёстывает: второй противник рядом с целью получает 4 урона. При критическом успехе основная цель также становится Уязвимой до конца её следующего хода.",
+          "mechanics": {
+            "effects": [
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "required"
+                },
+                "outcomes": [
+                  {
+                    "key": "damage",
+                    "value": "0/5/11/17"
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "check": "successBonus",
+                  "trigger": "onSuccess"
+                },
+                "outcomes": [
+                  {
+                    "key": "damageBonus",
+                    "amount": 4
+                  }
+                ]
+              },
+              {
+                "activation": {
+                  "type": "signature"
+                },
+                "conditions": {
+                  "range": {
+                    "type": "sight"
+                  },
+                  "targets": "single",
+                  "defense": "fortitude",
+                  "check": "successBonus",
+                  "trigger": "onCriticalSuccess",
+                  "duration": "untilEndOfTargetNextTurn"
+                },
+                "outcomes": [
+                  {
+                    "key": "applyStatus",
+                    "status": "vulnerable"
+                  }
+                ]
+              }
+            ]
+          }
         }
       ],
       "heatCost": 0
