@@ -64,9 +64,20 @@ export const ITEM_ACTIVATION_TYPE_LABEL_KEYS = {
   action: 'MY_RPG.ActivationTypes.Action',
   maneuver: 'MY_RPG.ActivationTypes.Maneuver',
   freeAction: 'MY_RPG.ActivationTypes.FreeAction',
-  outOfCombatAction: 'MY_RPG.ActivationTypes.OutOfCombatAction',
   reaction: 'MY_RPG.ActivationTypes.Reaction'
 };
+
+// «Внебоевое действие» никогда не было способом активации: это счётная категория
+// калькулятора ЕС, а сама запись всегда остаётся обычным действием. Старые записи
+// миров и паков читаем как action, чтобы значение не всплывало в интерфейсе.
+const LEGACY_ACTIVATION_TYPE_ALIASES = {
+  outOfCombatAction: 'action'
+};
+
+export function normalizeActivationType(value) {
+  const normalized = String(value ?? '').trim();
+  return LEGACY_ACTIVATION_TYPE_ALIASES[normalized] ?? normalized;
+}
 
 export const ITEM_DEFENSE_LABEL_KEYS = {
   fortitude: 'MY_RPG.Defenses.FortitudeLabel',
@@ -829,7 +840,7 @@ function buildTraitBadges(item, helpers) {
     badges.push(`${t.localize('MY_RPG.ItemFields.AdvancementCost')}: ${advancementCost}`);
   }
 
-  const activationCost = String(system.activationCost ?? system.activationType ?? '').trim();
+  const activationCost = normalizeActivationType(system.activationCost ?? system.activationType);
   const activationLabelKey = ITEM_ACTIVATION_TYPE_LABEL_KEYS[activationCost];
   if (activationLabelKey) {
     badges.push(

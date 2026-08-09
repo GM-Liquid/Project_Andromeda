@@ -38,10 +38,12 @@ import {
   getItemGroupConfigByKey,
   getItemGroupConfigs,
   getItemTypeConfig,
-  getItemTabLabel
+  getItemTabLabel,
+  normalizeActivationType
 } from '../helpers/item-config.mjs';
 import {
   BASIC_ATTACK_MELEE,
+  BASIC_ATTACK_SKILL_KEYS,
   buildBasicAttacks,
   getBasicAttack
 } from '../helpers/basic-attacks.mjs';
@@ -632,32 +634,59 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     return context;
   }
 
+  // Ранг проверки базовой атаки берётся из навыка, поэтому листу нужен архетипный
+  // бонус ранга для каждого навыка, которым можно бить.
+  _getBasicAttackSkillRankBonuses() {
+    const bonuses = {};
+    for (const skillKeys of Object.values(BASIC_ATTACK_SKILL_KEYS)) {
+      for (const skillKey of skillKeys) {
+        bonuses[skillKey] = getSkillRankBonus(this.actor, skillKey);
+      }
+    }
+    return bonuses;
+  }
+
   // Базовые атаки не предметы: их нельзя купить, отредактировать или удалить, поэтому
-  // лист строит их из ранга и навыков персонажа при каждом рендере.
+  // лист строит их из навыков и ранга персонажа при каждом рендере. У дальней атаки
+  // вариантов броска два — Стрельба и Резонанс, — и игрок выбирает при каждой атаке.
   _buildBasicAttackDisplays() {
-    return buildBasicAttacks(this.actor.system ?? {}, this.actor.type).map((attack) => {
-      const label = game.i18n.localize(
-        attack.key === BASIC_ATTACK_MELEE
-          ? 'MY_RPG.BasicAttacks.Melee'
-          : 'MY_RPG.BasicAttacks.Ranged'
-      );
-      return {
-        ...attack,
-        label,
-        icon: attack.key === BASIC_ATTACK_MELEE ? 'fas fa-hand-fist' : 'fas fa-crosshairs',
-        rollTitle: game.i18n.format('MY_RPG.BasicAttacks.Roll', { attack: label }),
-        skillLabel: this._skillLabel(attack.skillKey),
-        bonusLabel: `+${attack.skillValue}`,
-        rankRoman: toRoman(attack.rank),
-        rankClass: `rank${attack.rank}`,
-        defenseLabel: game.i18n.localize(ITEM_DEFENSE_LABEL_KEYS[attack.defenseKey]),
-        rangeLabel:
-          attack.rangeMeters === null
-            ? game.i18n.localize('MY_RPG.BasicAttacks.MeleeRange')
-            : game.i18n.format('MY_RPG.BasicAttacks.RangeMeters', { distance: attack.rangeMeters }),
-        damageLabel: formatDamageProfile(attack.damageProfile)
-      };
-    });
+    const skillRankBonuses = this._getBasicAttackSkillRankBonuses();
+    return buildBasicAttacks(this.actor.system ?? {}, this.actor.type, { skillRankBonuses }).map(
+      (attack) => {
+        const label = game.i18n.localize(
+          attack.key === BASIC_ATTACK_MELEE
+            ? 'MY_RPG.BasicAttacks.Melee'
+            : 'MY_RPG.BasicAttacks.Ranged'
+        );
+        return {
+          ...attack,
+          label,
+          icon: attack.key === BASIC_ATTACK_MELEE ? 'fas fa-hand-fist' : 'fas fa-crosshairs',
+          options: attack.options.map((option) => {
+            const skillLabel = this._skillLabel(option.skillKey);
+            return {
+              ...option,
+              skillLabel,
+              rollTitle: game.i18n.format('MY_RPG.BasicAttacks.Roll', {
+                attack: label,
+                skill: skillLabel
+              }),
+              bonusLabel: `+${option.skillValue}`,
+              rankRoman: toRoman(option.rank),
+              rankClass: `rank${option.rank}`
+            };
+          }),
+          defenseLabel: game.i18n.localize(ITEM_DEFENSE_LABEL_KEYS[attack.defenseKey]),
+          rangeLabel:
+            attack.rangeMeters === null
+              ? game.i18n.localize('MY_RPG.BasicAttacks.MeleeRange')
+              : game.i18n.format('MY_RPG.BasicAttacks.RangeMeters', {
+                  distance: attack.rangeMeters
+                }),
+          damageLabel: formatDamageProfile(attack.damageProfile)
+        };
+      }
+    );
   }
 
   _preparePersonalityData(context) {
@@ -1477,14 +1506,18 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
 
   _getItemActivationSummary(item) {
     const system = item?.system ?? {};
-    const activationCostValue = String(system.activationCost ?? system.activationType ?? '').trim();
+    const activationCostValue = normalizeActivationType(
+      system.activationCost ?? system.activationType
+    );
     const normalized = activationCostValue || 'passive';
     return this._formatMappedValue(normalized, ITEM_ACTIVATION_TYPE_LABEL_KEYS);
   }
 
   _getItemActivationShortSummary(item) {
     const system = item?.system ?? {};
-    const activationCostValue = String(system.activationCost ?? system.activationType ?? '').trim();
+    const activationCostValue = normalizeActivationType(
+      system.activationCost ?? system.activationType
+    );
     const normalized = activationCostValue || 'passive';
     return this._formatMappedValue(normalized, {
       passive: 'MY_RPG.ActivationTypesShort.Passive',
@@ -1616,9 +1649,9 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
   }
 
   _hasItemActivationCost(item) {
-    const activationCost = String(
-      item?.system?.activationCost ?? item?.system?.activationType ?? ''
-    ).trim();
+    const activationCost = normalizeActivationType(
+      item?.system?.activationCost ?? item?.system?.activationType
+    );
     return Boolean(activationCost && activationCost !== 'passive');
   }
 
@@ -1702,7 +1735,9 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     const isCardTableItem = Boolean(displayConfig?.key);
     const rows = [];
     const primaryRow = [];
-    const activationCostValue = String(system.activationCost ?? system.activationType ?? '').trim();
+    const activationCostValue = normalizeActivationType(
+      system.activationCost ?? system.activationType
+    );
     const activationCost =
       activationCostValue && activationCostValue !== 'passive'
         ? this._formatMappedValue(activationCostValue, ITEM_ACTIVATION_TYPE_LABEL_KEYS)
@@ -2215,13 +2250,17 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     await this._rollItem(item, itemId, { includeItemContent: true });
   }
 
-  // Базовая атака бросается не так, как остальные: ранг проверки равен рангу
-  // персонажа, а не рангу навыка, а навык добавляет к `2d8` только своё значение.
+  // Базовая атака бросается как обычная проверка навыка: ранг проверки равен рангу
+  // выбранного навыка, он же добавляет к `2d8` своё значение. Ранг персонажа в бросок
+  // не входит — он задаёт только линейку урона и дальность.
   async _onBasicAttackRoll(event) {
     event.preventDefault();
     event.currentTarget?.blur?.();
     const attackKey = event.currentTarget?.dataset?.basicAttack ?? '';
-    const attack = getBasicAttack(this.actor.system ?? {}, this.actor.type, attackKey);
+    const skillKey = event.currentTarget?.dataset?.basicAttackSkill ?? '';
+    const attack = getBasicAttack(this.actor.system ?? {}, this.actor.type, attackKey, skillKey, {
+      skillRankBonuses: this._getBasicAttackSkillRankBonuses()
+    });
     if (!attack) {
       debugLog('Basic attack roll failed - unknown attack', {
         actor: this.actor.uuid,

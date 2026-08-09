@@ -227,8 +227,8 @@
       "Ranged": "Ranged Basic Attack",
       "MeleeRange": "Melee",
       "RangeMeters": "{distance} m",
-      "Roll": "Roll: {attack}",
-      "Note": "Basic attack: the check rank equals the character's rank, and the skill value is added to the roll."
+      "Roll": "Roll: {attack} ({skill})",
+      "Note": "Basic attack: the check rank equals the skill's rank, and that skill's value is added to the roll. The character's rank only sets damage and range."
     },
     "Temp": {
       "BonusFortitudeLabel": "Temp. Fortitude",
@@ -449,7 +449,6 @@
       "Action": "Action",
       "Maneuver": "Maneuver",
       "FreeAction": "Free Action",
-      "OutOfCombatAction": "Out-of-combat Action",
       "Reaction": "Reaction"
     },
     "ActivationTypesShort": {
@@ -457,7 +456,6 @@
       "Action": "Action",
       "Maneuver": "Move",
       "FreeAction": "Free",
-      "OutOfCombatAction": "Out-of-cbt",
       "Reaction": "React"
     },
     "ItemDurations": {

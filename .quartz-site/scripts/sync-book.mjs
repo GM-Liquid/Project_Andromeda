@@ -63,7 +63,6 @@ const usageValueLabels = {
   actionCost: {
     action: 'Действие',
     freeAction: 'Свободное действие',
-    outOfCombatAction: 'Внебоевое действие',
     reaction: 'Реакция',
     maneuver: 'Маневр'
   },

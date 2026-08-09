@@ -10,6 +10,7 @@ import {
   ITEM_USAGE_FREQUENCY_LABEL_KEYS,
   getItemTypeConfig,
   isPersonalityValueItem,
+  normalizeActivationType,
   normalizeUsageFrequency
 } from '../helpers/item-config.mjs';
 import { STEP_EFFECT_THRESHOLDS } from '../helpers/step-effects.mjs';
@@ -106,7 +107,10 @@ function buildUsageFrequencyOptions(selected) {
 }
 
 function buildActivationTypeOptions(selected) {
-  return buildSelectOptions(selected || 'passive', ITEM_ACTIVATION_TYPE_LABEL_KEYS);
+  return buildSelectOptions(
+    normalizeActivationType(selected) || 'passive',
+    ITEM_ACTIVATION_TYPE_LABEL_KEYS
+  );
 }
 
 function buildSelectOptions(selected, labelKeys, blankLabelKey = '') {
