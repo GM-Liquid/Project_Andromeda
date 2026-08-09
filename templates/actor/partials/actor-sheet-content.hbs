@@ -333,21 +333,28 @@
                     <ol class='andromeda-basic-attacks__list'>
                       {{#each @root.basicAttacks as |attack|}}
                         <li class='andromeda-basic-attack' data-basic-attack='{{attack.key}}'>
-                          <button
-                            type='button'
-                            class='basic-attack-roll andromeda-basic-attack__roll'
-                            data-basic-attack='{{attack.key}}'
-                            title='{{attack.rollTitle}}'
-                          >
+                          <span class='andromeda-basic-attack__title'>
                             <i class='{{attack.icon}}'></i>
                             <span class='andromeda-basic-attack__name'>{{attack.label}}</span>
-                          </button>
+                          </span>
+                          {{! Навык выбирает игрок при каждой атаке, поэтому каждый
+                              допустимый навык — своя кнопка броска со своим рангом. }}
                           <span class='andromeda-basic-attack__check'>
-                            <span class='andromeda-basic-attack__skill'>{{attack.skillLabel}}</span>
-                            <span
-                              class='andromeda-basic-attack__rank {{attack.rankClass}}'
-                            >{{attack.rankRoman}}</span>
-                            <strong class='andromeda-basic-attack__bonus'>{{attack.bonusLabel}}</strong>
+                            {{#each attack.options as |option|}}
+                              <button
+                                type='button'
+                                class='basic-attack-roll andromeda-basic-attack__roll'
+                                data-basic-attack='{{attack.key}}'
+                                data-basic-attack-skill='{{option.skillKey}}'
+                                title='{{option.rollTitle}}'
+                              >
+                                <span class='andromeda-basic-attack__skill'>{{option.skillLabel}}</span>
+                                <span
+                                  class='andromeda-basic-attack__rank {{option.rankClass}}'
+                                >{{option.rankRoman}}</span>
+                                <strong class='andromeda-basic-attack__bonus'>{{option.bonusLabel}}</strong>
+                              </button>
+                            {{/each}}
                           </span>
                           <span
                             class='andromeda-basic-attack__meta'

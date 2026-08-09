@@ -2605,10 +2605,18 @@ textarea[disabled] {
   border-top: 1px solid var(--andromeda-color-line, var(--andromeda-fallback-line));
 }
 
-.project-andromeda .andromeda-basic-attack__roll {
+.project-andromeda .andromeda-basic-attack__title {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+  min-width: 0;
+  font-weight: 700;
+}
+
+.project-andromeda .andromeda-basic-attack__roll {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
   min-width: 0;
   width: auto;
   margin: 0;
@@ -2640,8 +2648,9 @@ textarea[disabled] {
 
 .project-andromeda .andromeda-basic-attack__check {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.2rem;
   min-width: 0;
   color: var(--andromeda-color-muted, var(--andromeda-fallback-muted));
 }
@@ -2682,6 +2691,10 @@ textarea[disabled] {
 
 .project-andromeda .andromeda-basic-attack__rank.rank4 {
   background: var(--andromeda-color-rank4);
+}
+
+.project-andromeda .andromeda-basic-attack__rank.rank5 {
+  background: var(--andromeda-color-rank5);
 }
 
 .project-andromeda .andromeda-basic-attack__meta {

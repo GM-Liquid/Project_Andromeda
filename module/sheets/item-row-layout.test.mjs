@@ -134,7 +134,7 @@ test('item row primary controls follow roll, activation, then passive chat prior
   );
   assert.match(
     activationMethods,
-    /const activationCost = String\([\s\S]*item\?\.system\?\.activationCost \?\? item\?\.system\?\.activationType[\s\S]*return Boolean\(activationCost && activationCost !== 'passive'\);/
+    /const activationCost = normalizeActivationType\([\s\S]*item\?\.system\?\.activationCost \?\? item\?\.system\?\.activationType[\s\S]*return Boolean\(activationCost && activationCost !== 'passive'\);/
   );
   assert.doesNotMatch(activationMethods, /\['abilities', 'artifacts'\]/);
   assert.match(toggleMethod, /\.item-activate, \.item-chat,/);

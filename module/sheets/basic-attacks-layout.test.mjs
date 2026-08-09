@@ -18,7 +18,12 @@ test('every character sheet renders the two basic attacks as rollable, non-item 
   // opponents have basic attacks too.
   assert.match(template, /\{\{#if tab\.isAbilities\}\}[\s\S]*andromeda-basic-attacks/);
   assert.match(template, /\{\{#each @root\.basicAttacks as \|attack\|\}\}/);
-  assert.match(template, /basic-attack-roll[\s\S]*data-basic-attack='\{\{attack\.key\}\}'/);
+  // У дальней атаки навык выбирает игрок, поэтому кнопка броска своя на каждый навык.
+  assert.match(template, /\{\{#each attack\.options as \|option\|\}\}/);
+  assert.match(
+    template,
+    /basic-attack-roll[\s\S]*data-basic-attack='\{\{attack\.key\}\}'[\s\S]*data-basic-attack-skill='\{\{option\.skillKey\}\}'/
+  );
   assert.match(template, /andromeda-basic-attack__damage/);
   // No create / edit / delete controls: basic attacks cannot be bought or removed.
   const block = /andromeda-basic-attacks[\s\S]*?<\/section>/.exec(template)?.[0] ?? '';

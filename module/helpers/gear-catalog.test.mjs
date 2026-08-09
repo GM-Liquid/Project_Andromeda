@@ -196,7 +196,7 @@ test('gear catalog transform preserves freeAction abilities as freeAction activa
   assert.equal(abilityData.requiresRoll, false);
 });
 
-test('gear catalog transform supports out-of-combat activation and scene-wide areas', () => {
+test('gear catalog transform reads legacy out-of-combat activation as an action and supports scene-wide areas', () => {
   const remoteData = buildGearCatalogRemoteDataFromCatalogs({
     armor: [],
     equipment: [],
@@ -242,9 +242,10 @@ test('gear catalog transform supports out-of-combat activation and scene-wide ar
     ]
   });
 
+  // «Внебоевое действие» больше не способ активации: устаревшее значение читается как action.
   const [outOfCombat, sceneWide] = remoteData.sheets.abilities.map(getSystemData);
-  assert.equal(outOfCombat.activationCost, 'outOfCombatAction');
-  assert.equal(outOfCombat.activationType, 'outOfCombatAction');
+  assert.equal(outOfCombat.activationCost, 'action');
+  assert.equal(outOfCombat.activationType, 'action');
   // Область «вся сцена» не имеет размера, поэтому остаётся голым типом.
   assert.equal(sceneWide.area, 'scene');
   assert.equal(sceneWide.range, 'self');

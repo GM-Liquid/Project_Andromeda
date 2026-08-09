@@ -2,6 +2,7 @@ import { MODULE_ID } from '../config.mjs';
 import {
   DEFAULT_ITEM_USAGE_FREQUENCY,
   ITEM_ACTIVATION_TYPE_LABEL_KEYS,
+  normalizeActivationType,
   normalizeUsageFrequency
 } from './item-config.mjs';
 import { formatDamageProfile } from './damage-profile.mjs';
@@ -152,8 +153,10 @@ function getFirstOutcomeDamageProfile(entry) {
 }
 
 function getGearCatalogActivationType(entry) {
-  const activationType = normalizeOptionalString(
-    getGearCatalogEffects(entry).find((effect) => effect?.activation?.type)?.activation?.type
+  const activationType = normalizeActivationType(
+    normalizeOptionalString(
+      getGearCatalogEffects(entry).find((effect) => effect?.activation?.type)?.activation?.type
+    )
   );
   if (GEAR_CATALOG_SYNC_ALLOWED_ACTIVATION_TYPES.has(activationType)) return activationType;
   return 'passive';

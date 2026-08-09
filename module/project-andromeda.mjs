@@ -48,6 +48,7 @@ import {
   LEGACY_EQUIPMENT_TYPES as LEGACY_EQUIPMENT_TYPE_LIST,
   LEGACY_TRAIT_TYPES as LEGACY_TRAIT_TYPE_LIST,
   isEquipmentLikeType,
+  normalizeActivationType,
   normalizeUsageFrequency
 } from './helpers/item-config.mjs';
 import {
@@ -110,18 +111,21 @@ const ENVIRONMENT_PROXY_ACTOR_FLAG = 'isEnvironmentTokenProxy';
 const ENVIRONMENT_TOKEN_ACTOR_TYPE = MINION_ACTOR_TYPE;
 const HERO_POINT_INPUT_SELECTOR = 'input[name="system.momentOfGlory"]';
 const SHARED_HERO_POOL_INPUT_SELECTOR = '.shared-hero-pool-input';
-// Highlight Point economy (rulebook §"Очки Свершений"): each hero gains 1 at the
-// start of a session and can hold no more than 3 at once.
-const HERO_POINT_MAX = 3;
+// Highlight Point economy (rulebook §"Очки Свершений"): the pool has no upper limit and
+// carries over between sessions; a hero who starts a session with an empty pool gains 1.
 const HERO_POINT_SESSION_GRANT = 1;
 const SESSION_HOOK_STARTED = 'projectAndromeda.sessionStarted';
-const SESSION_HOOK_ENDED = 'projectAndromeda.sessionEnded';
 const OBSOLETE_CARTRIDGE_ITEM_FIELDS = ['runeType'];
 const LEGACY_EQUIPMENT_TYPES = new Set(LEGACY_EQUIPMENT_TYPE_LIST);
 const LEGACY_TRAIT_TYPES = new Set(LEGACY_TRAIT_TYPE_LIST);
 const LIBRARY_ITEM_UUID_FLAG = 'libraryItemUuid';
 const LIBRARY_ACTOR_ID_FLAG = 'libraryActorId';
 const LIBRARY_ACTOR_ITEM_ID_FLAG = 'libraryActorItemId';
+// TEMPORARY debug switch: skips the whole `ready` migration/refresh chain so entering
+// a world never rewrites character-sheet items from the gear-library pack. Set back to
+// `false` to restore normal startup behaviour (migration settings keep their stored
+// versions meanwhile, so nothing is marked complete while this is on).
+const DISABLE_STARTUP_WORLD_MIGRATIONS = true;
 
 function getSessionStatsService() {
   return game.projectAndromeda?.sessionStats ?? null;
@@ -261,10 +265,9 @@ async function updateActorHeroPoints(actor, nextValue) {
     return value;
   }
 
-  const cappedValue = Math.min(value, HERO_POINT_MAX);
-  await actor.update({ 'system.momentOfGlory': cappedValue }, { render: false });
-  syncHeroPointInputs(actor, cappedValue);
-  return cappedValue;
+  await actor.update({ 'system.momentOfGlory': value }, { render: false });
+  syncHeroPointInputs(actor, value);
+  return value;
 }
 
 function isPrimaryActiveGM() {
@@ -287,8 +290,9 @@ function getPlayerCharacterActors() {
   return (game.actors ?? []).filter((actor) => isPlayerCharacterActorType(actor?.type));
 }
 
-// Grants +1 Highlight Point (capped at HERO_POINT_MAX) to every player character when a
-// session starts. Runs once on the primary active GM to avoid duplicate world writes.
+// Pool floor: a player character that starts a session with an empty pool gains 1 Highlight
+// Point. Heroes who kept points from the previous session get nothing extra. Runs once on the
+// primary active GM to avoid duplicate world writes.
 async function grantSessionStartHeroPoints(session) {
   if (!isPrimaryActiveGM()) return;
   const sessionStats = getSessionStatsService();
@@ -296,19 +300,8 @@ async function grantSessionStartHeroPoints(session) {
   if (!grantClaimed) return;
 
   for (const actor of getPlayerCharacterActors()) {
-    const current = getActorHeroPoints(actor);
-    if (current >= HERO_POINT_MAX) continue;
-    await updateActorHeroPoints(actor, current + HERO_POINT_SESSION_GRANT);
-  }
-}
-
-// Clears unspent Highlight Points from player characters when a session ends, since
-// unused points do not carry over to the next session.
-async function clearSessionHeroPoints() {
-  if (!isPrimaryActiveGM()) return;
-  for (const actor of getPlayerCharacterActors()) {
-    if (getActorHeroPoints(actor) <= 0) continue;
-    await updateActorHeroPoints(actor, 0);
+    if (getActorHeroPoints(actor) > 0) continue;
+    await updateActorHeroPoints(actor, HERO_POINT_SESSION_GRANT);
   }
 }
 
@@ -986,9 +979,9 @@ function getMigratedEquipmentSystemData(item) {
   systemData.usageFrequency = normalizeUsageFrequency(
     systemData.usageFrequency ?? DEFAULT_ITEM_USAGE_FREQUENCY
   );
-  systemData.activationCost = String(
+  systemData.activationCost = normalizeActivationType(
     systemData.activationCost ?? systemData.activationType ?? 'passive'
-  ).trim();
+  );
   systemData.activationType = systemData.activationCost || 'passive';
   systemData.range = String(systemData.range ?? '');
   systemData.duration = String(systemData.duration ?? '');
@@ -1039,9 +1032,9 @@ function getMigratedTraitSystemData(item) {
   systemData.usageFrequency = normalizeUsageFrequency(
     systemData.usageFrequency ?? DEFAULT_ITEM_USAGE_FREQUENCY
   );
-  systemData.activationCost = String(
+  systemData.activationCost = normalizeActivationType(
     systemData.activationCost ?? systemData.activationType ?? 'passive'
-  ).trim();
+  );
   systemData.activationType = systemData.activationCost || 'passive';
   systemData.range = String(systemData.range ?? '');
   systemData.duration = String(systemData.duration ?? '');
@@ -1668,15 +1661,15 @@ Hooks.on('renderChatMessage', (message, html) => {
   wireSkillCheckShiftControls(message, html);
 });
 
-// Keep the stored Highlight Point total within [0, HERO_POINT_MAX] no matter the
-// source of the update (sheet input, programmatic spend, session grant).
+// Keep the stored Highlight Point total a non-negative integer no matter the source of the
+// update (sheet input, programmatic spend, session grant). The pool itself has no upper limit.
 Hooks.on('preUpdateActor', (actor, changes) => {
   if (isGmCharacterActorType(actor?.type)) return;
   const raw = foundry.utils.getProperty(changes, 'system.momentOfGlory');
   if (raw === undefined) return;
-  const clamped = Math.min(Math.max(Math.floor(Number(raw) || 0), 0), HERO_POINT_MAX);
-  if (clamped !== raw) {
-    foundry.utils.setProperty(changes, 'system.momentOfGlory', clamped);
+  const normalized = Math.max(Math.floor(Number(raw) || 0), 0);
+  if (normalized !== raw) {
+    foundry.utils.setProperty(changes, 'system.momentOfGlory', normalized);
   }
 });
 
@@ -1699,14 +1692,10 @@ Hooks.on('updateActor', (actor, changes, options) => {
   });
 });
 
-// Highlight Point economy: each player character gains 1 at the start of a session
-// (capped at HERO_POINT_MAX) and loses any unspent points when the session ends.
+// Highlight Point economy: unspent points carry over between sessions, so the session hook
+// only tops up player characters whose pool is empty at the start of a session.
 Hooks.on(SESSION_HOOK_STARTED, (session) => {
   void grantSessionStartHeroPoints(session);
-});
-
-Hooks.on(SESSION_HOOK_ENDED, () => {
-  void clearSessionHeroPoints();
 });
 
 Hooks.on('updateActor', (actor, changes, options) => {
@@ -1959,7 +1948,9 @@ Hooks.once('ready', async function () {
 
   // World migrations and cleanups run once, on the primary active GM only, so two
   // connected GMs never execute the same document writes concurrently.
-  if (isPrimaryActiveGM()) {
+  if (DISABLE_STARTUP_WORLD_MIGRATIONS) {
+    debugLog('Startup world migrations and compendium refresh are temporarily disabled');
+  } else if (isPrimaryActiveGM()) {
     await runStartupTasks(
       [
         { name: 'legacy equipment migration', run: runLegacyEquipmentTypeMigrationIfNeeded },
