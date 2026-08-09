@@ -64,6 +64,8 @@ test('an archetype rank bonus raises the check rank of its own skill only', () =
 test('damage and range still follow the creature rank, not the skill rank', () => {
   assert.equal(getBasicAttackDamageProfile(1), '1/2/2/4');
   assert.equal(getBasicAttackDamageProfile(4), '4/7/10/14');
+  assert.equal(getBasicAttackDamageProfile(1, 'ranged'), '1/2/2/3');
+  assert.equal(getBasicAttackDamageProfile(4, 'ranged'), '4/6/8/13');
   assert.equal(getBasicAttackRangeMeters(2), 10);
   assert.equal(getBasicAttackRangeMeters(4), 100);
 
@@ -74,6 +76,7 @@ test('damage and range still follow the creature rank, not the skill rank', () =
   assert.equal(attacks[0].options[0].rank, 1);
   assert.equal(attacks[0].characterRank, 3);
   assert.equal(attacks[0].damageProfile, '3/5/7/11');
+  assert.equal(attacks[1].damageProfile, '3/5/6/9');
   assert.equal(attacks[1].rangeMeters, 30);
 });
 
@@ -107,8 +110,9 @@ test('opponents have no skills, so their check rank stays at their own rank', ()
 test('a minion deals its flat rank damage on any outcome above failure', () => {
   assert.equal(getMinionBasicAttackDamageProfile(2), '0/2/2/2');
 
-  const [melee] = buildBasicAttacks({ currentRank: 2 }, 'minion');
+  const [melee, ranged] = buildBasicAttacks({ currentRank: 2 }, 'minion');
   assert.equal(melee.damageProfile, '0/2/2/2');
+  assert.equal(ranged.damageProfile, '0/2/2/2');
 });
 
 test('getBasicAttack resolves one attack with the chosen skill and rejects unknown keys', () => {

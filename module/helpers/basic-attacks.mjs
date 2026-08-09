@@ -9,14 +9,23 @@ export const BASIC_ATTACK_MELEE = 'melee';
 export const BASIC_ATTACK_RANGED = 'ranged';
 export const BASIC_ATTACK_KEYS = Object.freeze([BASIC_ATTACK_MELEE, BASIC_ATTACK_RANGED]);
 
-// Линейка урона базовой атаки по рангу существа — примерно 0.8 стандартной.
-// Урон идёт от ранга самого существа, а не от ранга навыка: вложение в боевой
-// навык делает атаку точнее, но не сильнее.
-const BASIC_ATTACK_DAMAGE_BY_RANK = Object.freeze({
-  1: '1/2/2/4',
-  2: '2/3/5/7',
-  3: '3/5/7/11',
-  4: '4/7/10/14'
+// Обе базовые атаки стоят 0.8 ЕС, но дальняя отдаёт 0.1 ЕС за дистанцию и
+// поэтому получает более слабую линейку урона. Урон идёт от ранга самого
+// существа, а не от ранга навыка: вложение в боевой навык делает атаку точнее,
+// но не сильнее.
+const BASIC_ATTACK_DAMAGE_BY_KEY_AND_RANK = Object.freeze({
+  [BASIC_ATTACK_MELEE]: Object.freeze({
+    1: '1/2/2/4',
+    2: '2/3/5/7',
+    3: '3/5/7/11',
+    4: '4/7/10/14'
+  }),
+  [BASIC_ATTACK_RANGED]: Object.freeze({
+    1: '1/2/2/3',
+    2: '2/3/4/6',
+    3: '3/5/6/9',
+    4: '4/6/8/13'
+  })
 });
 
 // Дальность дальней базовой атаки — треть скорости своего ранга.
@@ -40,8 +49,9 @@ const BASIC_ATTACK_DEFENSE_KEYS = Object.freeze({
   [BASIC_ATTACK_RANGED]: 'control'
 });
 
-export function getBasicAttackDamageProfile(characterRank) {
-  return BASIC_ATTACK_DAMAGE_BY_RANK[normalizeCharacterRank(characterRank)];
+export function getBasicAttackDamageProfile(characterRank, attackKey = BASIC_ATTACK_MELEE) {
+  const profiles = BASIC_ATTACK_DAMAGE_BY_KEY_AND_RANK[attackKey];
+  return profiles?.[normalizeCharacterRank(characterRank)] ?? null;
 }
 
 export function getBasicAttackRangeMeters(characterRank) {
@@ -55,10 +65,14 @@ export function getMinionBasicAttackDamageProfile(characterRank) {
   return `0/${rank}/${rank}/${rank}`;
 }
 
-export function getBasicAttackDamageProfileForActorType(actorType, characterRank) {
+export function getBasicAttackDamageProfileForActorType(
+  actorType,
+  characterRank,
+  attackKey = BASIC_ATTACK_MELEE
+) {
   return isMinionActorType(actorType)
     ? getMinionBasicAttackDamageProfile(characterRank)
-    : getBasicAttackDamageProfile(characterRank);
+    : getBasicAttackDamageProfile(characterRank, attackKey);
 }
 
 export function getBasicAttackSkillKeys(attackKey = '') {
@@ -98,14 +112,12 @@ function buildBasicAttackOption(system, actorType, skillKey, characterRank, skil
 export function buildBasicAttacks(system = {}, actorType = '', { skillRankBonuses = {} } = {}) {
   const normalizedType = normalizeActorType(actorType);
   const characterRank = normalizeCharacterRank(system?.currentRank);
-  const damageProfile = getBasicAttackDamageProfileForActorType(normalizedType, characterRank);
-
   return BASIC_ATTACK_KEYS.map((key) => ({
     key,
     characterRank,
     defenseKey: BASIC_ATTACK_DEFENSE_KEYS[key],
     rangeMeters: key === BASIC_ATTACK_MELEE ? null : getBasicAttackRangeMeters(characterRank),
-    damageProfile,
+    damageProfile: getBasicAttackDamageProfileForActorType(normalizedType, characterRank, key),
     options: BASIC_ATTACK_SKILL_KEYS[key].map((skillKey) =>
       buildBasicAttackOption(system, normalizedType, skillKey, characterRank, skillRankBonuses)
     )
