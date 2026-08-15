@@ -34,29 +34,20 @@ export const ITEM_USAGE_FREQUENCY_LABEL_KEYS = {
 export const DEFAULT_ITEM_USAGE_FREQUENCY = 'passive';
 export const PERSONALITY_ITEM_ROLE_VALUE = 'value';
 
-export function normalizeBaseHeatCost(value) {
+export function normalizeHeatCost(value) {
   const numeric = Number(value);
   return Number.isFinite(numeric) ? Math.max(0, Math.floor(numeric)) : 0;
 }
 
-export function getAbilityBaseHeatCost(source) {
+// Стоимость Накала записана в самой способности и не зависит ни от ранга записи,
+// ни от ранга персонажа: сколько указано, столько и платится всегда.
+export function getAbilityHeatCost(source) {
   const system = source?.system ?? source ?? {};
   if (system.heatCost !== '' && system.heatCost != null) {
-    return normalizeBaseHeatCost(system.heatCost);
+    return normalizeHeatCost(system.heatCost);
   }
   // Compatibility fallback until the one-time migration rewrites legacy world items.
   return String(system.mode ?? '').trim() === 'forced' ? 2 : 0;
-}
-
-// Each rank by which the character outgrows the ability reduces its base Heat cost by 1.
-// An ability above the character's rank never costs more than its stored base value.
-export function getAbilityHeatCost(source, characterRank) {
-  const system = source?.system ?? source ?? {};
-  const baseHeatCost = getAbilityBaseHeatCost(system);
-  const abilityRank = Math.max(1, Math.floor(Number(system.rank) || 1));
-  const actorRank = Math.max(1, Math.floor(Number(characterRank) || 1));
-  const rankDifference = Math.max(0, actorRank - abilityRank);
-  return Math.max(0, baseHeatCost - rankDifference);
 }
 
 export const ITEM_ACTIVATION_TYPE_LABEL_KEYS = {
@@ -187,7 +178,7 @@ function buildUsageFrequencyField() {
 function buildAbilityHeatCostField() {
   return {
     path: 'heatCost',
-    labelKey: 'MY_RPG.ItemFields.BaseHeatCost',
+    labelKey: 'MY_RPG.ItemFields.HeatCost',
     type: 'number',
     min: 0
   };

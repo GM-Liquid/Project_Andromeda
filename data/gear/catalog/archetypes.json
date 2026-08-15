@@ -3909,39 +3909,18 @@
       "name": "Переток",
       "type": "ability",
       "skill": "mistika",
-      "defense": "will",
       "activation": "action",
-      "check": "required",
+      "check": "none",
       "versions": [
         {
           "rank": 1,
           "name": "Переток",
           "range": {
-            "type": "melee"
+            "type": "self"
           },
-          "damage": "0/0/2/2",
-          "description": "Атакуйте Мистикой против Воли противника в ближнем бою. Урон: 0/0/2/2. При любом исходе, кроме провала, выберите до трёх союзников в круге радиусом 2 м вокруг вас: каждый снимает с себя одно негативное состояние по своему выбору. При успехе один из них также может немедленно совершить одну базовую атаку.",
+          "description": "Выберите до трёх союзников в круге радиусом 3 м вокруг вас. Каждый снимает с себя одно негативное состояние по своему выбору и немедленно совершает одну базовую атаку.",
           "mechanics": {
             "effects": [
-              {
-                "activation": {
-                  "type": "signature"
-                },
-                "conditions": {
-                  "range": {
-                    "type": "melee"
-                  },
-                  "targets": "single",
-                  "defense": "will",
-                  "check": "required"
-                },
-                "outcomes": [
-                  {
-                    "key": "damage",
-                    "value": "0/0/2/2"
-                  }
-                ]
-              },
               {
                 "activation": {
                   "type": "signature"
@@ -3953,35 +3932,15 @@
                   "targets": "upTo3",
                   "area": {
                     "type": "circle",
-                    "value": 2
+                    "value": 3
                   },
-                  "check": "successBonus",
-                  "trigger": "onFailure"
+                  "check": "none"
                 },
                 "outcomes": [
                   {
                     "key": "removeStatus",
                     "status": "any"
-                  }
-                ]
-              },
-              {
-                "activation": {
-                  "type": "signature"
-                },
-                "conditions": {
-                  "range": {
-                    "type": "self"
                   },
-                  "targets": "single",
-                  "area": {
-                    "type": "circle",
-                    "value": 2
-                  },
-                  "check": "successBonus",
-                  "trigger": "onSuccess"
-                },
-                "outcomes": [
                   {
                     "key": "extraBasicAttack"
                   }
@@ -3994,10 +3953,9 @@
           "rank": 2,
           "name": "Приток",
           "range": {
-            "type": "melee"
+            "type": "self"
           },
-          "damage": "0/2/4/4",
-          "description": "Атакуйте Мистикой против Воли противника в ближнем бою. Урон: 0/2/4/4. При любом исходе, кроме провала, выберите до трёх союзников в круге радиусом 5 м вокруг вас: каждый снимает с себя одно негативное состояние по своему выбору. При успехе каждый из них также может немедленно совершить одну базовую атаку.",
+          "description": "Каждый союзник в круге радиусом 8 м вокруг вас снимает с себя одно негативное состояние по своему выбору и немедленно совершает одну базовую атаку.",
           "mechanics": {
             "effects": [
               {
@@ -4006,59 +3964,20 @@
                 },
                 "conditions": {
                   "range": {
-                    "type": "melee"
-                  },
-                  "targets": "single",
-                  "defense": "will",
-                  "check": "required"
-                },
-                "outcomes": [
-                  {
-                    "key": "damage",
-                    "value": "0/2/4/4"
-                  }
-                ]
-              },
-              {
-                "activation": {
-                  "type": "signature"
-                },
-                "conditions": {
-                  "range": {
                     "type": "self"
                   },
-                  "targets": "upTo3",
+                  "targets": "allInArea",
                   "area": {
                     "type": "circle",
-                    "value": 5
+                    "value": 8
                   },
-                  "check": "successBonus",
-                  "trigger": "onFailure"
+                  "check": "none"
                 },
                 "outcomes": [
                   {
                     "key": "removeStatus",
                     "status": "any"
-                  }
-                ]
-              },
-              {
-                "activation": {
-                  "type": "signature"
-                },
-                "conditions": {
-                  "range": {
-                    "type": "self"
                   },
-                  "targets": "upTo3",
-                  "area": {
-                    "type": "circle",
-                    "value": 5
-                  },
-                  "check": "successBonus",
-                  "trigger": "onSuccess"
-                },
-                "outcomes": [
                   {
                     "key": "extraBasicAttack"
                   }
@@ -4071,10 +3990,9 @@
           "rank": 3,
           "name": "Поток",
           "range": {
-            "type": "melee"
+            "type": "self"
           },
-          "damage": "0/0/0/1",
-          "description": "Атакуйте Мистикой против Воли противника в ближнем бою. Урон: 0/0/0/1. При любом исходе, кроме провала, выберите до трёх союзников в круге радиусом 25 м вокруг вас: каждый снимает с себя все негативные состояния. При успехе каждый из них также может немедленно совершить одну базовую атаку.",
+          "description": "Каждый союзник в круге радиусом 15 м вокруг вас снимает с себя все негативные состояния и немедленно совершает одну базовую атаку.",
           "mechanics": {
             "effects": [
               {
@@ -4083,59 +4001,20 @@
                 },
                 "conditions": {
                   "range": {
-                    "type": "melee"
-                  },
-                  "targets": "single",
-                  "defense": "will",
-                  "check": "required"
-                },
-                "outcomes": [
-                  {
-                    "key": "damage",
-                    "value": "0/0/0/1"
-                  }
-                ]
-              },
-              {
-                "activation": {
-                  "type": "signature"
-                },
-                "conditions": {
-                  "range": {
                     "type": "self"
                   },
-                  "targets": "upTo3",
+                  "targets": "allInArea",
                   "area": {
                     "type": "circle",
-                    "value": 25
+                    "value": 15
                   },
-                  "check": "successBonus",
-                  "trigger": "onFailure"
+                  "check": "none"
                 },
                 "outcomes": [
                   {
                     "key": "removeStatus",
                     "status": "all"
-                  }
-                ]
-              },
-              {
-                "activation": {
-                  "type": "signature"
-                },
-                "conditions": {
-                  "range": {
-                    "type": "self"
                   },
-                  "targets": "upTo3",
-                  "area": {
-                    "type": "circle",
-                    "value": 25
-                  },
-                  "check": "successBonus",
-                  "trigger": "onSuccess"
-                },
-                "outcomes": [
                   {
                     "key": "extraBasicAttack"
                   }
@@ -4148,10 +4027,9 @@
           "rank": 4,
           "name": "Прилив",
           "range": {
-            "type": "melee"
+            "type": "self"
           },
-          "damage": "0/0/0/1",
-          "description": "Атакуйте Мистикой против Воли противника в ближнем бою. Урон: 0/0/0/1. При любом исходе, кроме провала, выберите до трёх союзников в круге радиусом 75 м вокруг вас: каждый снимает с себя все негативные состояния. При успехе каждый из них также может немедленно совершить одну базовую атаку. При критическом успехе эти атаки совершаются с преимуществом.",
+          "description": "Вы и каждый союзник в круге радиусом 50 м вокруг вас снимаете с себя все негативные состояния и немедленно совершаете по одной базовой атаке.",
           "mechanics": {
             "effects": [
               {
@@ -4160,83 +4038,22 @@
                 },
                 "conditions": {
                   "range": {
-                    "type": "melee"
-                  },
-                  "targets": "single",
-                  "defense": "will",
-                  "check": "required"
-                },
-                "outcomes": [
-                  {
-                    "key": "damage",
-                    "value": "0/0/0/1"
-                  }
-                ]
-              },
-              {
-                "activation": {
-                  "type": "signature"
-                },
-                "conditions": {
-                  "range": {
                     "type": "self"
                   },
-                  "targets": "upTo3",
+                  "targets": "allInArea",
                   "area": {
                     "type": "circle",
-                    "value": 75
+                    "value": 50
                   },
-                  "check": "successBonus",
-                  "trigger": "onFailure"
+                  "check": "none"
                 },
                 "outcomes": [
                   {
                     "key": "removeStatus",
                     "status": "all"
-                  }
-                ]
-              },
-              {
-                "activation": {
-                  "type": "signature"
-                },
-                "conditions": {
-                  "range": {
-                    "type": "self"
                   },
-                  "targets": "upTo3",
-                  "area": {
-                    "type": "circle",
-                    "value": 75
-                  },
-                  "check": "successBonus",
-                  "trigger": "onSuccess"
-                },
-                "outcomes": [
                   {
                     "key": "extraBasicAttack"
-                  }
-                ]
-              },
-              {
-                "activation": {
-                  "type": "signature"
-                },
-                "conditions": {
-                  "range": {
-                    "type": "self"
-                  },
-                  "targets": "upTo3",
-                  "area": {
-                    "type": "circle",
-                    "value": 75
-                  },
-                  "check": "successBonus",
-                  "trigger": "onCriticalSuccess"
-                },
-                "outcomes": [
-                  {
-                    "key": "grantAdvantage"
                   }
                 ]
               }

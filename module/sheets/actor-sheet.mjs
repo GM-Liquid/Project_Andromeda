@@ -33,7 +33,6 @@ import {
   ITEM_DURATION_LABEL_KEYS,
   ITEM_TARGET_LABEL_KEYS,
   ITEM_USAGE_FREQUENCY_LABEL_KEYS,
-  getAbilityBaseHeatCost,
   getAbilityHeatCost,
   getItemGroupConfigByKey,
   getItemGroupConfigs,
@@ -1577,11 +1576,11 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       });
     }
 
-    const usesHeat = displayConfig?.key === 'abilities' || getAbilityBaseHeatCost(item) > 0;
+    const usesHeat = displayConfig?.key === 'abilities' || getAbilityHeatCost(item) > 0;
     if (usesHeat) {
       tags.push({
         label: game.i18n.format('MY_RPG.ItemCards.HeatTag', {
-          cost: getAbilityHeatCost(item, this.actor.system?.currentRank)
+          cost: getAbilityHeatCost(item)
         }),
         title: game.i18n.localize('MY_RPG.Heat.CostLabel'),
         className: 'item-row__card-tag--heat'
@@ -1694,9 +1693,9 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       if (kindBadge) badges.push(kindBadge);
     }
 
-    const usesHeat = config?.key === 'abilities' || getAbilityBaseHeatCost(item) > 0;
+    const usesHeat = config?.key === 'abilities' || getAbilityHeatCost(item) > 0;
     if (usesHeat) {
-      const heatCost = getAbilityHeatCost(item, this.actor.system?.currentRank);
+      const heatCost = getAbilityHeatCost(item);
       badges.push(`${game.i18n.localize('MY_RPG.Heat.CostLabel')}: ${heatCost}`);
     }
 
@@ -1798,18 +1797,18 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       !isCardTableItem &&
         String(system.usageFrequency ?? '').trim() &&
         displayConfig?.key !== 'abilities' &&
-        getAbilityBaseHeatCost(item) === 0 &&
+        getAbilityHeatCost(item) === 0 &&
         String(system.usageFrequency).trim() !== 'passive'
         ? this._formatMappedValue(system.usageFrequency, ITEM_USAGE_FREQUENCY_LABEL_KEYS)
         : ''
     );
 
-    const usesHeat = displayConfig?.key === 'abilities' || getAbilityBaseHeatCost(item) > 0;
+    const usesHeat = displayConfig?.key === 'abilities' || getAbilityHeatCost(item) > 0;
     if (usesHeat && !isCardTableItem) {
       this._pushItemDetailEntry(
         secondaryEntries,
         'MY_RPG.Heat.CostLabel',
-        `${getAbilityHeatCost(item, this.actor.system?.currentRank)}`
+        `${getAbilityHeatCost(item)}`
       );
     }
 
@@ -2341,7 +2340,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       return;
     }
 
-    const heatCost = getAbilityHeatCost(item, this.actor.system?.currentRank);
+    const heatCost = getAbilityHeatCost(item);
     const availableHeat = Math.max(0, Number(this.actor.system?.heat?.value) || 0);
     if (heatCost > availableHeat) {
       ui.notifications?.warn(

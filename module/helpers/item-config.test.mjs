@@ -1,26 +1,28 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { getAbilityBaseHeatCost, getAbilityHeatCost, getItemTypeConfig } from './item-config.mjs';
+import { getAbilityHeatCost, getItemTypeConfig, normalizeHeatCost } from './item-config.mjs';
 
-test('base Heat cost falls by each positive rank difference', () => {
+test('Heat cost stays at its recorded value for every character rank', () => {
   const ability = { system: { heatCost: 2, rank: 2 } };
-  assert.equal(getAbilityHeatCost(ability, 2), 2);
-  assert.equal(getAbilityHeatCost(ability, 3), 1);
-  assert.equal(getAbilityHeatCost(ability, 4), 0);
-  assert.equal(getAbilityHeatCost({ system: { heatCost: 4, rank: 2 } }, 4), 2);
+  assert.equal(getAbilityHeatCost(ability), 2);
+  assert.equal(getAbilityHeatCost({ system: { heatCost: 4, rank: 2 } }), 4);
+  assert.equal(getAbilityHeatCost({ system: { heatCost: 1, rank: 4 } }), 1);
 });
 
-test('an ability above character rank never costs more than its base Heat', () => {
-  assert.equal(getAbilityHeatCost({ system: { heatCost: 1, rank: 4 } }, 1), 1);
+test('Heat cost is normalized to a nonnegative integer', () => {
+  assert.equal(normalizeHeatCost('3'), 3);
+  assert.equal(normalizeHeatCost(-2), 0);
+  assert.equal(normalizeHeatCost('abc'), 0);
+  assert.equal(getAbilityHeatCost({ system: { heatCost: '' } }), 0);
 });
 
 test('legacy modes remain readable until the one-time migration runs', () => {
-  assert.equal(getAbilityBaseHeatCost({ system: { mode: 'forced' } }), 2);
-  assert.equal(getAbilityBaseHeatCost({ system: { mode: 'standard' } }), 0);
+  assert.equal(getAbilityHeatCost({ system: { mode: 'forced' } }), 2);
+  assert.equal(getAbilityHeatCost({ system: { mode: 'standard' } }), 0);
 });
 
-test('ability editor exposes rank and arbitrary nonnegative base Heat', () => {
+test('ability editor exposes rank and arbitrary nonnegative Heat cost', () => {
   const ability = getItemTypeConfig('trait-source-ability');
   assert.ok(ability.fields.some((field) => field.path === 'rank' && field.type === 'rank'));
   assert.ok(
