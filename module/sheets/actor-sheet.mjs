@@ -69,6 +69,7 @@ import { formatDamageProfile, hasDamageProfileValue } from '../helpers/damage-pr
 import { toRoman } from '../helpers/roman.mjs';
 import { hasStepEffects, normalizeStepEffects } from '../helpers/step-effects.mjs';
 import { buildSkillCheckRollFlavor } from '../helpers/roll-card.mjs';
+import { scaleGearCatalogSystemDataForOwnerRank } from '../helpers/gear-catalog.mjs';
 
 export const FoundryActorSheet = getFoundryActorSheetClass();
 
@@ -191,7 +192,7 @@ export async function updateActorDocumentType(actor, nextType) {
     return false;
   }
 
-  await actor.update({ type: normalizedType }, { diff: false });
+  await actor.update({ type: normalizedType }, { recursive: false });
   return true;
 }
 
@@ -1430,16 +1431,34 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
     });
   }
 
+  _getRankScaledItem(item) {
+    const scaledSystem = scaleGearCatalogSystemDataForOwnerRank(
+      item?.system ?? {},
+      this.actor.system?.currentRank
+    );
+    if (scaledSystem === item?.system) return item;
+    return {
+      id: item.id,
+      uuid: item.uuid,
+      name: item.name,
+      img: item.img,
+      type: item.type,
+      sort: item.sort,
+      system: scaledSystem
+    };
+  }
+
   _prepareItemForDisplay(item, config) {
-    const system = item.system ?? {};
-    const displayConfig = this._getItemDisplayConfig(item, config);
+    const displayItem = this._getRankScaledItem(item);
+    const system = displayItem.system ?? {};
+    const displayConfig = this._getItemDisplayConfig(displayItem, config);
     const quantity = displayConfig.showQuantity ? Math.max(Number(system.quantity) || 0, 0) : 1;
-    const badges = this._getItemBadges(item, displayConfig);
-    const detailRows = this._buildItemDetailRows(item, displayConfig);
-    const detailEffect = this._getItemSummary(item, displayConfig);
-    const checkSummary = this._getItemCheckSummary(item, displayConfig);
+    const badges = this._getItemBadges(displayItem, displayConfig);
+    const detailRows = this._buildItemDetailRows(displayItem, displayConfig);
+    const detailEffect = this._getItemSummary(displayItem, displayConfig);
+    const checkSummary = this._getItemCheckSummary(displayItem, displayConfig);
     const isCardTableItem = true;
-    const cardTags = this._getItemCardTags(item, displayConfig, checkSummary);
+    const cardTags = this._getItemCardTags(displayItem, displayConfig, checkSummary);
     return {
       id: item.id,
       uuid: item.uuid,
@@ -1454,11 +1473,11 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       equipped: displayConfig.allowEquip ? Boolean(system.equipped) : false,
       skillLabel: system.skill ? this._skillLabel(system.skill) : '—',
       checkSummary,
-      activationSummary: this._getItemActivationSummary(item),
-      activationShortSummary: this._getItemActivationShortSummary(item),
-      hasCooldown: this._hasItemCooldown(item, displayConfig),
-      cooldownUsed: this._isItemCooldownUsed(item),
-      rollSummary: this._getItemRollSummary(item, displayConfig),
+      activationSummary: this._getItemActivationSummary(displayItem),
+      activationShortSummary: this._getItemActivationShortSummary(displayItem),
+      hasCooldown: this._hasItemCooldown(displayItem, displayConfig),
+      cooldownUsed: this._isItemCooldownUsed(displayItem),
+      rollSummary: this._getItemRollSummary(displayItem, displayConfig),
       detailRows,
       detailEffect,
       isExpanded: this._expandedItemIds.has(item.id),
@@ -1470,15 +1489,18 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       cardTagsLabel: game.i18n.localize('MY_RPG.ItemCards.TagsLabel'),
       hasDetails: detailRows.length > 0 || Boolean(detailEffect),
       canRoll: Boolean(displayConfig.canRoll),
-      hasActivationControl: this._hasItemActivationControl(item, displayConfig),
-      hasChatControl: this._hasItemChatControl(item, displayConfig),
-      activationControlTitle: this._getItemActivationControlTitle(item, displayConfig),
+      hasActivationControl: this._hasItemActivationControl(displayItem, displayConfig),
+      hasChatControl: this._hasItemChatControl(displayItem, displayConfig),
+      activationControlTitle: this._getItemActivationControlTitle(displayItem, displayConfig),
       activationControlDefaultTitle: this._getItemActivationControlDefaultTitle(
-        item,
+        displayItem,
         displayConfig
       ),
-      activationControlIcon: this._getItemActivationControlIcon(item, displayConfig),
-      activationControlDefaultIcon: this._getItemActivationControlDefaultIcon(item, displayConfig)
+      activationControlIcon: this._getItemActivationControlIcon(displayItem, displayConfig),
+      activationControlDefaultIcon: this._getItemActivationControlDefaultIcon(
+        displayItem,
+        displayConfig
+      )
     };
   }
 
@@ -2388,8 +2410,9 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
 
   async _rollItem(item, _itemId = null, { includeItemContent = false, displayConfig = null } = {}) {
     if (!item) return false;
-    const typeConfig = getItemTypeConfig(item.type);
-    const system = item.system ?? {};
+    const displayItem = this._getRankScaledItem(item);
+    const typeConfig = getItemTypeConfig(displayItem.type);
+    const system = displayItem.system ?? {};
     const skillKey = system.skill || '';
     const canRoll = this._isSkillRollItem(item, typeConfig) || item.type === 'weapon';
     if (!canRoll) return false;
@@ -2423,12 +2446,12 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       ? normalizeStepEffects(system.stepEffects)
       : [];
     const itemContent = includeItemContent
-      ? this._buildItemChatContent(item, displayConfig, { includeName: false })
+      ? this._buildItemChatContent(displayItem, displayConfig, { includeName: false })
       : '';
     const rollNote =
       item.type === 'weapon'
         ? this._weaponRollNoteHtml(item)
-        : itemContent || this._getTraitRollNote(item, typeConfig);
+        : itemContent || this._getTraitRollNote(displayItem, typeConfig);
     const flavor = this._buildSkillCheckFlavor(flavorLabel, parts, skillData.rank, outcomeKey, {
       total: roll.total,
       damageProfile,
@@ -2484,8 +2507,9 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
   }
 
   _buildItemChatContent(item, config, { includeName = true } = {}) {
-    const displayConfig = this._getItemDisplayConfig(item, config);
-    const system = item.system ?? {};
+    const displayItem = this._getRankScaledItem(item);
+    const displayConfig = this._getItemDisplayConfig(displayItem, config);
+    const system = displayItem.system ?? {};
     const lines = [];
     const name = this._escapeHTML(item.name || game.i18n.localize(`TYPES.Item.${item.type}`));
     if (includeName) lines.push(`<strong>${name}</strong>`);
@@ -2494,7 +2518,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       const quantity = Math.max(Number(system.quantity) || 0, 0);
       meta.push(`${game.i18n.localize('MY_RPG.Inventory.Quantity')}: ${quantity}`);
     }
-    meta.push(...this._getItemBadges(item, displayConfig));
+    meta.push(...this._getItemBadges(displayItem, displayConfig));
     if (displayConfig.allowEquip && system.equipped) {
       const equipKey =
         config.key === 'armor'
@@ -2503,7 +2527,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       meta.push(game.i18n.localize(equipKey));
     }
     if (meta.length) lines.push(meta.join('<br>'));
-    const summary = this._getItemSummary(item, displayConfig);
+    const summary = this._getItemSummary(displayItem, displayConfig);
     if (summary) lines.push(summary);
     return lines.filter(Boolean).join('<br><br>');
   }

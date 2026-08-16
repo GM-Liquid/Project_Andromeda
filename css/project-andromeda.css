@@ -1102,10 +1102,9 @@ textarea[disabled] {
 
 .project-andromeda .andromeda-hud--gm .andromeda-hud__stats-row {
   grid-template-areas:
-    'stress'
-    'speed'
-    'heat';
-  grid-template-columns: 4.75rem;
+    'stress .'
+    'speed heat';
+  grid-template-columns: 4.75rem 4.75rem;
   justify-content: flex-start;
   justify-items: start;
 }
@@ -1114,8 +1113,7 @@ textarea[disabled] {
 .project-andromeda.elite .andromeda-hud--gm .andromeda-hud__stats-row {
   grid-template-areas:
     'stress glory'
-    'speed glory'
-    'heat glory';
+    'speed heat';
   grid-template-columns: 4.75rem 8rem;
 }
 
@@ -1133,8 +1131,8 @@ textarea[disabled] {
   text-align: center;
 }
 
-/* Opponents spend Heat on their own abilities, so their HUD tracks it too — in the
-   narrow left column, under Speed, instead of the wide player-side card. */
+/* Opponents spend Heat on their own abilities, so keep it beside Speed in the
+   second row instead of letting it extend the HUD to a third row. */
 .project-andromeda .andromeda-hud--gm .andromeda-status-card--heat {
   grid-area: heat;
   justify-self: start;

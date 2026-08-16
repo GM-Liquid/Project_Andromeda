@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { buildGearCatalogRemoteDataFromCatalogs } from './gear-catalog.mjs';
+import {
+  buildGearCatalogRemoteDataFromCatalogs,
+  scaleGearCatalogSystemDataForOwnerRank
+} from './gear-catalog.mjs';
 
 function getSystemData(row) {
   return JSON.parse(row.systemJson);
@@ -94,6 +97,46 @@ test('gear catalog transform maps base Heat and artifact activation metadata', (
   assert.equal(artifactData.area, 'circle 10 m');
   assert.equal(artifactData.defense, 'control');
   assert.equal(artifactData.duration, 'untilStartOfYourNextTurn');
+});
+
+test('owned catalog ability resolves its displayed fields on the owner rank', () => {
+  const remoteData = buildGearCatalogRemoteDataFromCatalogs({
+    abilities: [
+      {
+        id: 'gravity-wave',
+        name: 'Gravity Wave',
+        type: 'ability',
+        rank: 2,
+        skill: 'moshch',
+        description:
+          'Атакуйте каждую цель в круге радиусом 15 м с центром в пределах 30 м. Урон: 2/4/6/9.',
+        mechanics: {
+          effects: [
+            {
+              activation: { type: 'action' },
+              conditions: {
+                range: { type: 'meters', value: 30 },
+                area: { type: 'circle', value: 15 },
+                targets: 'allInArea',
+                check: 'required'
+              },
+              outcomes: [{ key: 'damage', value: '2/4/6/9' }]
+            }
+          ]
+        }
+      }
+    ]
+  });
+  const base = getSystemData(remoteData.sheets.abilities[0]);
+  const scaled = scaleGearCatalogSystemDataForOwnerRank(base, 4);
+
+  assert.equal(base.range, '30 m');
+  assert.equal(scaled.range, '300 m');
+  assert.equal(scaled.area, 'circle 150 m');
+  assert.equal(scaled.skillBonus, '5/8/12/18');
+  assert.match(scaled.description, /радиусом 150 м/u);
+  assert.match(scaled.description, /5\/8\/12\/18/u);
+  assert.equal(scaled.details.gearCatalog.activeOwnerRank, 4);
 });
 
 test('gear catalog transform keeps archetype descriptions separate from signature abilities', () => {

@@ -1,8 +1,13 @@
 const INTRO_HEADINGS = [
   '### Что означают значения навыков',
-  '### Что означают ранг и значение навыка'
+  '### Что означают ранг и значение навыка',
+  '### Что такое ранг и значение навыка?'
 ];
-const SKILLS_LIST_HEADINGS = ['### Список навыков'];
+const SKILLS_LIST_HEADINGS = [
+  '### Список навыков',
+  '### Список навыков: Тело, Разум и Дух',
+  '### Список навыков: Тело, Разум и Дух'
+];
 
 const skillGroupAbilityMap = new Map([
   ['Навыки Тела', 'Тело'],
@@ -35,7 +40,9 @@ function findHeadingIndex(lines, acceptedHeadings, label) {
   const index = lines.findIndex((line) => accepted.has(line.trim()));
 
   if (index === -1) {
-    throw new Error(`Missing required ${label} heading. Accepted headings: ${acceptedHeadings.join(', ')}`);
+    throw new Error(
+      `Missing required ${label} heading. Accepted headings: ${acceptedHeadings.join(', ')}`
+    );
   }
 
   return index;
@@ -57,6 +64,7 @@ function parseSkillsReference(source) {
 
   const summaryLines = trimBlankLines(lines.slice(introIndex, skillsListIndex));
   const skillsLines = lines.slice(skillsListIndex + 1);
+  const listPreambleLines = [];
   const groups = [];
   let currentGroup = null;
 
@@ -79,6 +87,7 @@ function parseSkillsReference(source) {
       currentGroup = {
         title: groupTitle,
         abilityLabel,
+        introLines: [],
         skills: []
       };
       groups.push(currentGroup);
@@ -87,11 +96,19 @@ function parseSkillsReference(source) {
     }
 
     if (!currentGroup) {
-      throw new Error(`Found content before a supported skills group heading: ${trimmed}`);
+      listPreambleLines.push(line);
+      index += 1;
+      continue;
     }
 
     const skillTitle = parseSkillTitle(trimmed);
     if (!skillTitle) {
+      if (currentGroup.skills.length === 0) {
+        currentGroup.introLines.push(line);
+        index += 1;
+        continue;
+      }
+
       throw new Error(`Unsupported content inside skills list: ${trimmed}`);
     }
 
@@ -122,6 +139,7 @@ function parseSkillsReference(source) {
 
   return {
     summaryLines,
+    listPreambleLines: trimBlankLines(listPreambleLines),
     groups
   };
 }
@@ -134,10 +152,10 @@ export function extractSkillTitles(source) {
 
 export function transformSkillsReferenceSource(source) {
   const parsed = parseSkillsReference(source);
-  const output = [':::summary', ...parsed.summaryLines, ':::', ''];
+  const output = [':::summary', ...parsed.summaryLines, ':::', '', ...parsed.listPreambleLines, ''];
 
   for (const group of parsed.groups) {
-    output.push(`### ${group.title}`, '');
+    output.push(`### ${group.title}`, '', ...trimBlankLines(group.introLines), '');
 
     for (const skill of group.skills) {
       output.push(

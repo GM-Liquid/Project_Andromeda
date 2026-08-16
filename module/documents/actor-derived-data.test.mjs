@@ -75,17 +75,17 @@ test('character base defenses remain independent from skill ranks and temporary 
   assert.equal(actor.system.effectiveDefenses.control, 7);
   assert.equal(actor.system.effectiveDefenses.will, 8);
   assert.equal(actor.system.speed.value, 39);
-  assert.equal(actor.system.stress.max, 15);
+  assert.equal(actor.system.stress.max, 17);
   assert.equal(actor.system.forceShield.max, 0);
 });
 
 test('character stress max follows actor type defaults', () => {
   const cases = [
-    ['playerCharacter', 3, 15],
-    ['minion', 3, 9],
-    ['rankAndFile', 3, 21],
-    ['elite', 1, 15],
-    ['elite', 3, 50]
+    ['playerCharacter', 3, 18],
+    ['minion', 3, 0],
+    ['rankAndFile', 3, 30],
+    ['elite', 1, 42],
+    ['elite', 3, 126]
   ];
 
   for (const [type, currentRank, expectedStress] of cases) {
@@ -167,7 +167,7 @@ test('temporary stress and the archetype bonus add to stress max', () => {
 
   actor.prepareDerivedData();
 
-  assert.equal(actor.system.stress.max, 19);
+  assert.equal(actor.system.stress.max, 21);
 });
 
 test('temporary parameters accept penalties', () => {
@@ -201,7 +201,7 @@ test('temporary parameters accept penalties', () => {
   assert.equal(actor.system.tempcontrol, -10);
   assert.equal(actor.system.tempwill, 3);
   assert.equal(actor.system.tempspeed, -35);
-  assert.equal(actor.system.stress.max, 0);
+  assert.equal(actor.system.stress.max, 2);
   assert.equal(actor.system.speed.value, -5);
   assert.equal(actor.system.effectiveDefenses.fortitude, 2);
   assert.equal(actor.system.effectiveDefenses.control, 0);

@@ -121,11 +121,6 @@ const LEGACY_TRAIT_TYPES = new Set(LEGACY_TRAIT_TYPE_LIST);
 const LIBRARY_ITEM_UUID_FLAG = 'libraryItemUuid';
 const LIBRARY_ACTOR_ID_FLAG = 'libraryActorId';
 const LIBRARY_ACTOR_ITEM_ID_FLAG = 'libraryActorItemId';
-// TEMPORARY debug switch: skips the whole `ready` migration/refresh chain so entering
-// a world never rewrites character-sheet items from the gear-library pack. Set back to
-// `false` to restore normal startup behaviour (migration settings keep their stored
-// versions meanwhile, so nothing is marked complete while this is on).
-const DISABLE_STARTUP_WORLD_MIGRATIONS = true;
 
 function getSessionStatsService() {
   return game.projectAndromeda?.sessionStats ?? null;
@@ -1948,9 +1943,7 @@ Hooks.once('ready', async function () {
 
   // World migrations and cleanups run once, on the primary active GM only, so two
   // connected GMs never execute the same document writes concurrently.
-  if (DISABLE_STARTUP_WORLD_MIGRATIONS) {
-    debugLog('Startup world migrations and compendium refresh are temporarily disabled');
-  } else if (isPrimaryActiveGM()) {
+  if (isPrimaryActiveGM()) {
     await runStartupTasks(
       [
         { name: 'legacy equipment migration', run: runLegacyEquipmentTypeMigrationIfNeeded },

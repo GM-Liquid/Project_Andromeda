@@ -9,6 +9,7 @@ import { formatDamageProfile } from './damage-profile.mjs';
 import { deepClone, stableStringify } from './object-utils.mjs';
 import { normalizeStepEffects } from './step-effects.mjs';
 import { buildArchetypeAbilityVersionSystemData } from './archetype.mjs';
+import { scaleAbilityCatalogEntry } from './ability-scaling.mjs';
 
 // Pure JSON -> Item-system transform for the shipped gear catalog. This is the
 // single source of truth used to compile the `gear-library` compendium pack
@@ -245,6 +246,9 @@ function buildGearCatalogDetails(catalogKey, entry) {
     shortDescription: getGearCatalogShortDescription(entry),
     mechanics: deepClone(entry?.mechanics ?? {})
   };
+  if (entry?.descriptionByRank && typeof entry.descriptionByRank === 'object') {
+    gearCatalog.descriptionByRank = deepClone(entry.descriptionByRank);
+  }
   const status = normalizeOptionalString(entry?.status);
   if (status) gearCatalog.status = status;
   if (sourceItemIds.length) gearCatalog.sourceItemIds = sourceItemIds;
@@ -252,6 +256,29 @@ function buildGearCatalogDetails(catalogKey, entry) {
   return {
     gearCatalog
   };
+}
+
+export function scaleGearCatalogSystemDataForOwnerRank(system = {}, ownerRank = 1) {
+  const catalogDetails = system?.details?.gearCatalog;
+  if (catalogDetails?.catalog !== 'abilities' || !catalogDetails.mechanics) return system;
+
+  const scaledEntry = scaleAbilityCatalogEntry(
+    {
+      rank: Number(system.rank) || 1,
+      description: system.description ?? '',
+      descriptionByRank: catalogDetails.descriptionByRank,
+      mechanics: catalogDetails.mechanics
+    },
+    ownerRank
+  );
+  const scaledSystem = deepClone(system);
+  scaledSystem.description = scaledEntry.description;
+  scaledSystem.range = getGearCatalogRange(scaledEntry);
+  scaledSystem.area = getGearCatalogArea(scaledEntry);
+  scaledSystem.skillBonus = getFirstOutcomeDamageProfile(scaledEntry);
+  scaledSystem.details.gearCatalog.activeOwnerRank = scaledEntry.ownerRank;
+  scaledSystem.details.gearCatalog.activeMechanics = scaledEntry.mechanics;
+  return scaledSystem;
 }
 
 function buildGearCatalogSystemData(entry, config) {
