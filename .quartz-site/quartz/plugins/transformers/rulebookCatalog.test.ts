@@ -108,6 +108,14 @@ function extractSerializedEntries(html: string) {
     price: string;
     priceUnit?: string;
     filters: Record<string, string | string[]>;
+    ownerRankScaling?: Record<
+      string,
+      {
+        previewDescription: string;
+        fullDescription: string;
+        detailTags: Array<{ key: string; label: string; value: string }>;
+      }
+    >;
   }>;
 }
 
@@ -141,6 +149,66 @@ test('buildAbilityCatalogHtml renders a defense filter instead of sort controls'
   assert.doesNotMatch(html, /Сортировка/u);
   assert.doesNotMatch(html, /data-sort-option/u);
   assert.equal(entry.filters.defense, 'Стойкость');
+});
+
+test('ability catalogs expose a character-rank selector and serialized scaled values', () => {
+  const scaling = JSON.stringify({
+    1: {
+      previewDescription: 'Радиус 2 м.',
+      fullDescription: 'Радиус 2 м. Наносит 2 / 3 / 5 / 7 урона.',
+      damage: '2 / 3 / 5 / 7',
+      range: '3 м',
+      area: 'Круг 2 м'
+    },
+    4: {
+      previewDescription: 'Радиус 50 м.',
+      fullDescription: 'Радиус 50 м. Наносит 5 / 8 / 12 / 18 урона.',
+      damage: '5 / 8 / 12 / 18',
+      range: '100 м',
+      area: 'Круг 50 м'
+    }
+  });
+  const html = buildAbilityCatalogHtml(
+    [...abilityHeaders, 'Урон', 'Масштаб по рангу персонажа'],
+    [
+      [
+        'Гравитационная волна',
+        '2',
+        'Краткое описание.',
+        'Базовое описание.',
+        '1/сцену',
+        'Резонанс',
+        '1',
+        '10 м',
+        'Все в зоне',
+        'Круг 5 м',
+        'Стойкость',
+        '',
+        '100',
+        '3 / 5 / 7 / 10',
+        scaling
+      ]
+    ]
+  );
+  const [entry] = extractSerializedEntries(html);
+
+  assert.match(html, /data-catalog-character-rank/u);
+  assert.match(html, />Ранг персонажа</u);
+  assert.equal(entry.ownerRankScaling?.['4'].previewDescription, 'Радиус 50 м.');
+  assert.equal(
+    entry.ownerRankScaling?.['4'].fullDescription,
+    'Радиус 50 м. Наносит 5 / 8 / 12 / 18 урона.'
+  );
+  assert.deepEqual(
+    entry.ownerRankScaling?.['4'].detailTags
+      .filter((tag) => ['damage', 'range', 'area'].includes(tag.key))
+      .map((tag) => [tag.key, tag.value]),
+    [
+      ['damage', '5 / 8 / 12 / 18'],
+      ['range', '100 м'],
+      ['area', 'Круг 50 м']
+    ]
+  );
 });
 
 test('artifact catalogs have a dedicated presentation and filters', () => {

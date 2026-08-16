@@ -30,6 +30,7 @@ type CatalogHeaderField =
   | 'defense'
   | 'duration'
   | 'damage'
+  | 'ownerRankScaling'
   | 'shield'
   | 'speed'
   | 'physicalDefense'
@@ -49,11 +50,13 @@ type AbilityCatalogColumns = DescriptionColumns & {
   skill: number;
   credits: number;
   actions: number;
+  damage?: number;
   range?: number;
   targets?: number;
   area?: number;
   defense?: number;
   duration?: number;
+  ownerRankScaling?: number;
 };
 
 type ArtifactCatalogColumns = DescriptionColumns & {
@@ -172,6 +175,14 @@ type RulebookCatalogEntry = {
   detailTags: CatalogDetailTag[];
   filters: Partial<Record<RulebookCatalogFilterField, RulebookCatalogFilterValue>>;
   sortValues: Record<string, number>;
+  ownerRankScaling?: Record<
+    string,
+    {
+      previewDescription: string;
+      fullDescription: string;
+      detailTags: CatalogDetailTag[];
+    }
+  >;
 };
 
 type RulebookCatalogModel = {
@@ -195,6 +206,7 @@ const catalogHeaderAliases: Record<CatalogHeaderField, string[]> = {
   defense: ['защита'],
   duration: ['длительность'],
   damage: ['урон'],
+  ownerRankScaling: ['масштаб по рангу персонажа'],
   shield: ['силовой щит', 'щит'],
   speed: ['скорость'],
   physicalDefense: ['физическая защита', 'физическая', 'фз'],
@@ -405,11 +417,13 @@ function resolveAbilityCatalogColumns(headers: string[]): AbilityCatalogColumns 
     skill: findColumn(headers, catalogHeaderAliases.skill),
     credits: findColumn(headers, catalogHeaderAliases.credits),
     actions: findColumn(headers, catalogHeaderAliases.actions),
+    damage: findColumn(headers, catalogHeaderAliases.damage),
     range: findColumn(headers, catalogHeaderAliases.range),
     targets: findColumn(headers, catalogHeaderAliases.targets),
     area: findColumn(headers, catalogHeaderAliases.area),
     defense: findColumn(headers, catalogHeaderAliases.defense),
     duration: findColumn(headers, catalogHeaderAliases.duration),
+    ownerRankScaling: findColumn(headers, catalogHeaderAliases.ownerRankScaling),
     ...descriptionColumns
   };
 
@@ -903,6 +917,71 @@ function createDetailTag(key: CatalogDetailTagKey, value: string) {
   return value ? { key, label: detailTagLabels[key], value } : null;
 }
 
+function parseOwnerRankScaling(value: string, baseDetailTags: CatalogDetailTag[]) {
+  if (!value) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(value) as Record<
+      string,
+      Partial<
+        Record<'previewDescription' | 'fullDescription' | 'damage' | 'range' | 'area', unknown>
+      >
+    >;
+    const scaling = Object.fromEntries(
+      rankOptions.flatMap((rank) => {
+        const rankValues = parsed?.[rank];
+        if (!rankValues || typeof rankValues !== 'object') {
+          return [];
+        }
+
+        const detailTags = [...baseDetailTags];
+        for (const key of ['damage', 'range', 'area'] as const) {
+          const nextValue = typeof rankValues[key] === 'string' ? rankValues[key].trim() : '';
+          const existingIndex = detailTags.findIndex((tag) => tag.key === key);
+
+          if (nextValue) {
+            const nextTag = createDetailTag(key, nextValue);
+            if (!nextTag) {
+              continue;
+            }
+
+            if (existingIndex >= 0) {
+              detailTags[existingIndex] = nextTag;
+            } else {
+              detailTags.push(nextTag);
+            }
+          } else if (existingIndex >= 0) {
+            detailTags.splice(existingIndex, 1);
+          }
+        }
+
+        return [
+          [
+            rank,
+            {
+              previewDescription:
+                typeof rankValues.previewDescription === 'string'
+                  ? rankValues.previewDescription.trim()
+                  : '',
+              fullDescription:
+                typeof rankValues.fullDescription === 'string'
+                  ? rankValues.fullDescription.trim()
+                  : '',
+              detailTags
+            }
+          ]
+        ];
+      })
+    );
+
+    return Object.keys(scaling).length > 0 ? scaling : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function buildOrderedDetailLine(tags: CatalogDetailTag[], order: CatalogDetailTagKey[]) {
   return order
     .map((key) => tags.find((tag) => tag.key === key))
@@ -979,11 +1058,27 @@ function buildAbilityCatalogModel(headers: string[], rows: string[][]): Rulebook
     const range = readOptionalColumnValue(row, columns.range);
     const targets = readOptionalColumnValue(row, columns.targets);
     const area = readOptionalColumnValue(row, columns.area);
+    const damage = readOptionalColumnValue(row, columns.damage);
     const defense = normalizeDefenseLabel(readOptionalColumnValue(row, columns.defense));
     const duration = readOptionalColumnValue(row, columns.duration);
     const price = (row[columns.credits] ?? '').trim();
     const rank = (row[columns.rank] ?? '').trim();
     const name = (row[columns.name] ?? '').trim();
+    const detailTags = buildDetailTags([
+      createDetailTag('damage', damage),
+      createDetailTag('range', range),
+      createDetailTag('targets', targets),
+      createDetailTag('area', area),
+      createDetailTag('defense', defense),
+      createDetailTag('duration', duration),
+      createDetailTag('actions', actions),
+      createDetailTag('frequency', frequency),
+      createDetailTag('skill', skill)
+    ]);
+    const ownerRankScaling = parseOwnerRankScaling(
+      readOptionalColumnValue(row, columns.ownerRankScaling),
+      detailTags
+    );
 
     return {
       id: `ability-${index + 1}`,
@@ -994,16 +1089,8 @@ function buildAbilityCatalogModel(headers: string[], rows: string[][]): Rulebook
       previewDescription: descriptions.previewDescription,
       fullDescription: descriptions.fullDescription,
       tags: [frequency, skill].filter(Boolean),
-      detailTags: buildDetailTags([
-        createDetailTag('range', range),
-        createDetailTag('targets', targets),
-        createDetailTag('area', area),
-        createDetailTag('defense', defense),
-        createDetailTag('duration', duration),
-        createDetailTag('actions', actions),
-        createDetailTag('frequency', frequency),
-        createDetailTag('skill', skill)
-      ]),
+      detailTags,
+      ownerRankScaling,
       filters: {
         rank,
         frequency,
@@ -1744,10 +1831,25 @@ function renderCatalogToolbar(entriesCount: number) {
   `;
 }
 
-function renderCatalogFiltersPanel(filters: RulebookCatalogFilterDefinition[]) {
+function renderCatalogCharacterRankSelector() {
+  return `
+    <label class="${abilityCatalogClass}__filter-group">
+      <span class="${abilityCatalogClass}__filter-label">Ранг персонажа</span>
+      <select class="${abilityCatalogClass}__rank-select" data-catalog-character-rank>
+        ${rankOptions.map((rank) => `<option value="${rank}">${rank}</option>`).join('')}
+      </select>
+    </label>
+  `;
+}
+
+function renderCatalogFiltersPanel(
+  filters: RulebookCatalogFilterDefinition[],
+  showCharacterRank = false
+) {
   return `
     <div class="${abilityCatalogClass}__filters-panel" data-catalog-filters-panel hidden>
       <div class="${abilityCatalogClass}__filters-grid">
+        ${showCharacterRank ? renderCatalogCharacterRankSelector() : ''}
         ${filters
           .map((filter) =>
             filter.kind === 'multi'
@@ -1846,7 +1948,7 @@ export function buildRulebookCatalogHtml(
     <section class="${abilityCatalogClass}" data-catalog-kind="${kind}">
       <div class="${abilityCatalogClass}__controls">
         ${renderCatalogToolbar(model.entries.length)}
-        ${renderCatalogFiltersPanel(model.filters)}
+        ${renderCatalogFiltersPanel(model.filters, kind === 'abilities')}
       </div>
 
       <div class="${abilityCatalogClass}__table-shell">

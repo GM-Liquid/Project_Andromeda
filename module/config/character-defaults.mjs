@@ -1,27 +1,26 @@
 export const CHARACTER_DEFAULTS = Object.freeze({
   playerCharacter: Object.freeze({
     stress: Object.freeze({
-      perRank: 5,
+      perRank: 6,
       supportsAzureStress: true
     })
   }),
   minion: Object.freeze({
     stress: Object.freeze({
-      perRank: 3,
+      perRank: 0,
       supportsAzureStress: false
     })
   }),
   rankAndFile: Object.freeze({
     stress: Object.freeze({
-      perRank: 7,
+      perRank: 10,
       supportsAzureStress: true
     })
   }),
   elite: Object.freeze({
     stress: Object.freeze({
-      firstRank: 15,
-      rankOffset: 1,
-      perRank: 25,
+      rankOffset: 0,
+      perRank: 42,
       supportsAzureStress: false
     })
   })

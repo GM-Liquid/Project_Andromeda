@@ -9,6 +9,7 @@ import {
 import { prepareGearCatalogSource } from './gear-catalog-source.mjs';
 import { prepareRulebookSource } from './rulebook-source.mjs';
 import { extractSkillTitles, transformSkillsReferenceSource } from './skills-reference-source.mjs';
+import { buildAbilityRankScaling } from '../../module/helpers/ability-scaling.mjs';
 
 export { extractSkillTitles, transformSkillsReferenceSource } from './skills-reference-source.mjs';
 
@@ -834,9 +835,7 @@ function buildArchetypeCatalogAppendix(catalog) {
           '; слабая — ' +
           weakDefense +
           '.',
-        '- **Встроенная защита:** ' +
-          item.stressBonusPerRank +
-          ' временные ячейки стресса за ранг.'
+        '- **Встроенная защита:** ' + item.stressBonusPerRank + ' временные ячейки стресса за ранг.'
       ];
 
       if (trait.name || trait.description) {
@@ -895,7 +894,23 @@ function buildAbilityCatalogTable(catalog) {
     getGearUsageOrQuartzValue(item, 'area'),
     getGearUsageOrQuartzValue(item, 'defense'),
     getGearUsageOrQuartzValue(item, 'duration'),
-    getGearCatalogPrice(item)
+    getGearCatalogPrice(item),
+    JSON.stringify(
+      Object.fromEntries(
+        Object.entries(buildAbilityRankScaling(item)).map(([rank, scaledItem]) => [
+          rank,
+          {
+            previewDescription: getGearShortDescription(scaledItem),
+            fullDescription: getGearDescription(scaledItem),
+            damage:
+              getGearQuartzValue(scaledItem, 'damage') ||
+              getGearPropertyValue(scaledItem, 'damage'),
+            range: getGearUsageOrQuartzValue(scaledItem, 'range'),
+            area: getGearUsageOrQuartzValue(scaledItem, 'area')
+          }
+        ])
+      )
+    )
   ]);
 
   return renderMarkdownTable(
@@ -914,7 +929,8 @@ function buildAbilityCatalogTable(catalog) {
       'Зона',
       'Защита',
       'Длительность',
-      'Цена в очках развития'
+      'Цена в очках развития',
+      'Масштаб по рангу персонажа'
     ],
     rows
   );

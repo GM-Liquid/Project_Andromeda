@@ -10,6 +10,14 @@ type RulebookCatalogEntry = {
   detailTags: Array<{ key: string; label: string; value: string }>
   filters: Record<string, string | string[]>
   sortValues: Record<string, number>
+  ownerRankScaling?: Record<
+    string,
+    {
+      previewDescription: string
+      fullDescription: string
+      detailTags: Array<{ key: string; label: string; value: string }>
+    }
+  >
 }
 
 type RangeControl = {
@@ -199,6 +207,20 @@ function renderRows(entries: RulebookCatalogEntry[], expanded: Set<string>, show
   return entries.map((entry) => renderCard(entry, expanded.has(entry.id), showPrice)).join("")
 }
 
+function applyCharacterRank(entry: RulebookCatalogEntry, rank: string) {
+  const scaled = entry.ownerRankScaling?.[rank]
+  if (!scaled) {
+    return entry
+  }
+
+  return {
+    ...entry,
+    previewDescription: scaled.previewDescription || entry.previewDescription,
+    fullDescription: scaled.fullDescription || entry.fullDescription,
+    detailTags: scaled.detailTags,
+  }
+}
+
 function parseFilterNumber(value: string) {
   const match = value.match(/-?\d+(?:\.\d+)?/)
   return match ? Number.parseFloat(match[0]) : null
@@ -302,6 +324,9 @@ function initAbilityCatalog(catalog: HTMLElement) {
   const searchInput = catalog.querySelector<HTMLInputElement>("[data-catalog-search]")
   const filtersToggle = catalog.querySelector<HTMLButtonElement>("[data-catalog-filters-toggle]")
   const filtersPanel = catalog.querySelector<HTMLElement>("[data-catalog-filters-panel]")
+  const characterRankSelect = catalog.querySelector<HTMLSelectElement>(
+    "[data-catalog-character-rank]",
+  )
   const showPrice = catalog.dataset.catalogKind !== "artifacts"
 
   if (!dataNode || !body || !countNode || !searchInput || !filtersToggle || !filtersPanel) {
@@ -371,7 +396,11 @@ function initAbilityCatalog(catalog: HTMLElement) {
 
     return entries.filter((entry) => {
       if (searchNeedle) {
-        const haystack = `${entry.name} ${entry.previewDescription} ${entry.fullDescription}`.toLowerCase()
+        const scaledDescriptions = Object.values(entry.ownerRankScaling ?? {})
+          .map((scaled) => scaled.fullDescription)
+          .join(" ")
+        const haystack =
+          `${entry.name} ${entry.previewDescription} ${entry.fullDescription} ${scaledDescriptions}`.toLowerCase()
         if (!haystack.includes(searchNeedle)) {
           return false
         }
@@ -416,7 +445,8 @@ function initAbilityCatalog(catalog: HTMLElement) {
   }
 
   function render() {
-    const nextEntries = getFilteredEntries()
+    const selectedRank = characterRankSelect?.value ?? ""
+    const nextEntries = getFilteredEntries().map((entry) => applyCharacterRank(entry, selectedRank))
     catalogBody.innerHTML = renderRows(nextEntries, expandedEntries, showPrice)
     catalogCountNode.textContent = `Показано: ${nextEntries.length}`
     syncDropdownSummaries()
@@ -425,6 +455,10 @@ function initAbilityCatalog(catalog: HTMLElement) {
   function resetFilters() {
     catalogSearchInput.value = ""
     expandedEntries.clear()
+
+    if (characterRankSelect) {
+      characterRankSelect.value = "1"
+    }
 
     catalog.querySelectorAll<HTMLInputElement>("[data-filter-field]").forEach((input) => {
       input.checked = false
@@ -497,6 +531,7 @@ function initAbilityCatalog(catalog: HTMLElement) {
     const target = event.target
     if (
       target === catalogSearchInput ||
+      target === characterRankSelect ||
       (target instanceof HTMLInputElement &&
         (target.hasAttribute("data-filter-field") ||
           target.hasAttribute("data-catalog-range-min") ||

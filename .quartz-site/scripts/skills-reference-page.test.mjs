@@ -75,6 +75,23 @@ test('transformSkillsReferenceSource accepts the revised skills intro heading', 
   assert.match(transformed, /:::accordion "Мощь" \| Тело/);
 });
 
+test('transformSkillsReferenceSource accepts the current canonical headings', () => {
+  const transformed =
+    syncBookModule.transformSkillsReferenceSource(`### Что такое ранг и значение навыка?
+
+Навыки растут от **0** до **4**.
+
+### Список навыков: Тело, Разум и Дух
+#### Навыки Тела
+
+**Мощь**
+Описание мощи.
+`);
+
+  assert.match(transformed, /### Что такое ранг и значение навыка\?/);
+  assert.match(transformed, /:::accordion "Мощь" \| Тело/);
+});
+
 test('extractSkillTitles returns the current public skill list in source order', () => {
   assert.equal(typeof syncBookModule.extractSkillTitles, 'function');
 
