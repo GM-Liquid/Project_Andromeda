@@ -1446,11 +1446,9 @@ async function runCompendiumPackRefreshIfNeeded() {
   return result;
 }
 
-// Repeatable, not a migration: every catalog refresh and one-time migration above
-// rewrites actor items straight from the gear pack, where an archetype signature
-// ability is stored at its rank-1 version. This is the single place that puts the
-// grant back on the character's own rank, so entering the world never shows a
-// rank-II hero holding the rank-I version of their signature ability.
+// Repeatable compatibility pass for worlds that still contain the old versioned
+// signature shape. Current catalog signatures keep one rank-1 mechanics record and
+// are resolved from explicit scaling rows by the actor sheet without document writes.
 async function runArchetypeAbilityRankSync() {
   const summary = await syncArchetypeAbilitiesForActors(game.actors?.contents ?? [], {
     render: false

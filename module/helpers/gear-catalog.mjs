@@ -8,7 +8,6 @@ import {
 import { formatDamageProfile } from './damage-profile.mjs';
 import { deepClone, stableStringify } from './object-utils.mjs';
 import { normalizeStepEffects } from './step-effects.mjs';
-import { buildArchetypeAbilityVersionSystemData } from './archetype.mjs';
 import { scaleAbilityCatalogEntry } from './ability-scaling.mjs';
 
 // Pure JSON -> Item-system transform for the shipped gear catalog. This is the
@@ -243,8 +242,10 @@ function buildGearCatalogDetails(catalogKey, entry) {
     catalog: catalogKey,
     sourceType: normalizeOptionalString(entry?.type),
     price: entry?.price ?? null,
+    description: getGearCatalogDescription(entry),
     shortDescription: getGearCatalogShortDescription(entry),
-    mechanics: deepClone(entry?.mechanics ?? {})
+    mechanics: deepClone(entry?.mechanics ?? {}),
+    scaling: deepClone(entry?.scaling ?? {})
   };
   if (entry?.descriptionByRank && typeof entry.descriptionByRank === 'object') {
     gearCatalog.descriptionByRank = deepClone(entry.descriptionByRank);
@@ -262,12 +263,18 @@ export function scaleGearCatalogSystemDataForOwnerRank(system = {}, ownerRank = 
   const catalogDetails = system?.details?.gearCatalog;
   if (catalogDetails?.catalog !== 'abilities' || !catalogDetails.mechanics) return system;
 
+  // The embedded Item may already contain values materialized for a previous owner
+  // rank. Always scale from the immutable catalog presentation, never from those
+  // current display values, so rank changes cannot compound description rewrites.
+  const catalogDescription = catalogDetails.description ?? system.description ?? '';
+
   const scaledEntry = scaleAbilityCatalogEntry(
     {
       rank: Number(system.rank) || 1,
-      description: system.description ?? '',
+      description: catalogDescription,
       descriptionByRank: catalogDetails.descriptionByRank,
-      mechanics: catalogDetails.mechanics
+      mechanics: catalogDetails.mechanics,
+      scaling: catalogDetails.scaling ?? {}
     },
     ownerRank
   );
@@ -276,9 +283,20 @@ export function scaleGearCatalogSystemDataForOwnerRank(system = {}, ownerRank = 
   scaledSystem.range = getGearCatalogRange(scaledEntry);
   scaledSystem.area = getGearCatalogArea(scaledEntry);
   scaledSystem.skillBonus = getFirstOutcomeDamageProfile(scaledEntry);
+  scaledSystem.details.gearCatalog.description = catalogDescription;
   scaledSystem.details.gearCatalog.activeOwnerRank = scaledEntry.ownerRank;
   scaledSystem.details.gearCatalog.activeMechanics = scaledEntry.mechanics;
   return scaledSystem;
+}
+
+// Materialize a catalog ability for its owner before Foundry creates or refreshes
+// the embedded Item. The ability still has no independent `system.rank`: the active
+// owner rank is derived metadata, while the visible range/area/damage/description
+// are immediately correct even on the very first render after a compendium drop.
+export function applyGearCatalogOwnerRankToItemData(itemData = {}, ownerRank = 1) {
+  const scaledSystem = scaleGearCatalogSystemDataForOwnerRank(itemData.system ?? {}, ownerRank);
+  if (scaledSystem !== itemData.system) itemData.system = scaledSystem;
+  return itemData;
 }
 
 function buildGearCatalogSystemData(entry, config) {
@@ -415,19 +433,19 @@ function buildArchetypeImportRow(entry, config) {
 
 function buildArchetypeAbilityImportRow(entry) {
   const ability = entry?.ability;
-  const versionData = buildArchetypeAbilityVersionSystemData(ability, 1);
-  if (!versionData) return null;
+  if (!ability?.id || !ability?.name) return null;
+  const abilitySystem = buildGearCatalogSystemData(ability, GEAR_ABILITY_CONFIG);
   const systemData = {
-    ...versionData.system,
+    ...abilitySystem,
     details: {
-      ...buildGearCatalogDetails('abilities', ability),
+      ...abilitySystem.details,
       archetypeAbility: deepClone(ability)
     }
   };
   return {
     syncId: buildGearCatalogEntrySyncId('abilities', ability),
     type: GEAR_ABILITY_CONFIG.itemType,
-    name: versionData.name,
+    name: normalizeString(ability.name),
     ownerName: '',
     folderPath: getGearCatalogFolderPath(ability, GEAR_ABILITY_CONFIG),
     [GEAR_CATALOG_SYNC_SYSTEM_JSON_COLUMN]: stableStringify(systemData, 2),

@@ -59,7 +59,12 @@ test('canonical gear catalogs use the 0.5 types and stable unique ids', async ()
           Array.isArray(entry.trait.mechanics?.effects),
           `${entry.id} trait must define mechanics.effects`
         );
-        assert.equal(entry.ability.heatCost, 0, `${entry.id} signature ability must cost 0 Heat`);
+        const expectedHeatCost = entry.id === 'mistik' ? 2 : 0;
+        assert.equal(
+          entry.ability.heatCost,
+          expectedHeatCost,
+          `${entry.id} signature ability has an unexpected Heat cost`
+        );
         assert.equal(entry.ability.mode, undefined, `${entry.id} still uses legacy ability mode`);
       }
 
@@ -108,8 +113,8 @@ test('requested content entities are moved, removed, and rewritten by stable id'
 
   const sniper = abilities.get('snayperskaya-vintovka-igla');
   assert.equal(sniper.name, 'Снайперский выстрел');
-  assert.equal(sniper.rank, 2);
-  assert.equal(sniper.heatCost, 2);
+  assert.equal(sniper.rank, undefined);
+  assert.equal(sniper.heatCost, 3);
   assert.deepEqual(
     sniper.mechanics.effects[0].outcomes.map((outcome) => outcome.key),
     ['armorPiercing', 'stabilization', 'damage']
@@ -142,7 +147,7 @@ test('amplifiers and the Diplomat Heat trigger use their revised passive effects
   assert.equal(pressure.id, 'dozhim');
   assert.equal(
     pressure.mechanics.effects[0].conditions.trigger,
-    'противник впервые за бой перемещается не по своей воле'
+    'противник перемещается не по своей воле'
   );
   assert.match(pressure.description, /противник перемещается не по своей воле/u);
 });

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+  applyGearCatalogOwnerRankToItemData,
   buildGearCatalogRemoteDataFromCatalogs,
   scaleGearCatalogSystemDataForOwnerRank
 } from './gear-catalog.mjs';
@@ -106,7 +107,6 @@ test('owned catalog ability resolves its displayed fields on the owner rank', ()
         id: 'gravity-wave',
         name: 'Gravity Wave',
         type: 'ability',
-        rank: 2,
         skill: 'moshch',
         description:
           'Атакуйте каждую цель в круге радиусом 15 м с центром в пределах 30 м. Урон: 2/4/6/9.',
@@ -116,13 +116,20 @@ test('owned catalog ability resolves its displayed fields on the owner rank', ()
               activation: { type: 'action' },
               conditions: {
                 range: { type: 'meters', value: 30 },
-                area: { type: 'circle', value: 15 },
+                area: { type: 'circle', value: 15, scale: 'area' },
                 targets: 'allInArea',
                 check: 'required'
               },
-              outcomes: [{ key: 'damage', value: '2/4/6/9' }]
+              outcomes: [{ key: 'damage', value: '2/4/6/9', scale: 'damage' }]
             }
           ]
+        },
+        scaling: {
+          area: { parameter: 'Радиус области, м', values: [15, 30, 75, 150] },
+          damage: {
+            parameter: 'Урон',
+            values: ['2/4/6/9', '3/6/8/12', '4/7/10/15', '5/8/12/18']
+          }
         }
       }
     ]
@@ -131,15 +138,65 @@ test('owned catalog ability resolves its displayed fields on the owner rank', ()
   const scaled = scaleGearCatalogSystemDataForOwnerRank(base, 4);
 
   assert.equal(base.range, '30 m');
-  assert.equal(scaled.range, '300 m');
+  assert.equal(scaled.range, '30 m');
   assert.equal(scaled.area, 'circle 150 m');
   assert.equal(scaled.skillBonus, '5/8/12/18');
   assert.match(scaled.description, /радиусом 150 м/u);
   assert.match(scaled.description, /5\/8\/12\/18/u);
+  assert.equal(scaled.details.gearCatalog.description, base.description);
   assert.equal(scaled.details.gearCatalog.activeOwnerRank, 4);
 });
 
-test('gear catalog transform keeps archetype descriptions separate from signature abilities', () => {
+test('compendium drop materializes an ability before creation and can rescale it later', () => {
+  const remoteData = buildGearCatalogRemoteDataFromCatalogs({
+    abilities: [
+      {
+        id: 'gravity-wave',
+        name: 'Gravity Wave',
+        type: 'ability',
+        description: 'Область 15 м. Урон: 2/4/6/9.',
+        mechanics: {
+          effects: [
+            {
+              activation: { type: 'action' },
+              conditions: { area: { type: 'circle', value: 15, scale: 'area' } },
+              outcomes: [{ key: 'damage', value: '2/4/6/9', scale: 'damage' }]
+            }
+          ]
+        },
+        scaling: {
+          area: { parameter: 'Радиус области, м', values: [15, 30, 75, 150] },
+          damage: {
+            parameter: 'Урон',
+            values: ['2/4/6/9', '3/6/8/12', '4/7/10/15', '5/8/12/18']
+          }
+        }
+      }
+    ]
+  });
+  const itemData = {
+    type: 'trait-source-ability',
+    system: getSystemData(remoteData.sheets.abilities[0])
+  };
+
+  const result = applyGearCatalogOwnerRankToItemData(itemData, 3);
+
+  assert.equal(result, itemData);
+  assert.equal(itemData.system.rank, '');
+  assert.equal(itemData.system.area, 'circle 75 m');
+  assert.equal(itemData.system.skillBonus, '4/7/10/15');
+  assert.match(itemData.system.description, /75 м/u);
+  assert.equal(itemData.system.details.gearCatalog.activeOwnerRank, 3);
+
+  applyGearCatalogOwnerRankToItemData(itemData, 2);
+  assert.equal(itemData.system.area, 'circle 30 m');
+  assert.equal(itemData.system.skillBonus, '3/6/8/12');
+  assert.match(itemData.system.description, /30 м/u);
+  assert.doesNotMatch(itemData.system.description, /75 м/u);
+  assert.equal(itemData.system.details.gearCatalog.activeOwnerRank, 2);
+});
+
+test('gear catalog transform keeps archetype descriptions separate and emits scalable signatures', () => {
   const remoteData = buildGearCatalogRemoteDataFromCatalogs({
     armor: [],
     equipment: [],
@@ -159,19 +216,28 @@ test('gear catalog transform keeps archetype descriptions separate from signatur
           name: 'Breach',
           type: 'ability',
           skill: 'blizhniy_boy',
-          defense: 'fortitude',
-          activation: 'action',
-          check: 'required',
           heatCost: 0,
-          versions: [
-            {
-              rank: 1,
-              name: 'Breach',
-              range: { type: 'melee' },
-              damage: '1/2/3/5',
-              description: 'Dash forward and attack.'
+          description: 'Dash forward and attack. Damage: 1/2/3/5.',
+          mechanics: {
+            effects: [
+              {
+                activation: { type: 'action' },
+                conditions: {
+                  range: { type: 'melee' },
+                  targets: 'single',
+                  defense: 'fortitude',
+                  check: 'required'
+                },
+                outcomes: [{ key: 'damage', value: '1/2/3/5', scale: 'damage' }]
+              }
+            ]
+          },
+          scaling: {
+            damage: {
+              parameter: 'Damage',
+              values: ['1/2/3/5', '2/4/6/9', '4/6/9/14', '5/8/12/18']
             }
-          ]
+          }
         }
       }
     ]
@@ -194,10 +260,11 @@ test('gear catalog transform keeps archetype descriptions separate from signatur
   assert.equal(remoteData.sheets.traits[0].type, 'trait');
   assert.equal(remoteData.sheets.traits[0].syncId, 'gear:traits:breach-heat');
   const abilityData = getSystemData(remoteData.sheets.abilities[0]);
-  assert.equal(abilityData.description, 'Dash forward and attack.');
+  assert.equal(abilityData.description, 'Dash forward and attack. Damage: 1/2/3/5.');
   assert.equal(abilityData.skillBonus, '1/2/3/5');
   assert.equal(abilityData.heatCost, 0);
-  assert.equal(abilityData.details.archetypeAbility.versions.length, 1);
+  assert.equal(abilityData.details.gearCatalog.scaling.damage.values[3], '5/8/12/18');
+  assert.equal(abilityData.details.archetypeAbility.mechanics.effects.length, 1);
   const traitData = getSystemData(remoteData.sheets.traits[0]);
   assert.equal(traitData.description, 'Gain Heat.');
   assert.equal(traitData.requiresRoll, false);

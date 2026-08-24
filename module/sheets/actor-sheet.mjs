@@ -5,6 +5,7 @@
 
 import { GM_HERO_POOL_SETTING, MODULE_ID, debugLog } from '../config.mjs';
 import { getFoundryActorSheetClass } from '../helpers/foundry-compat.mjs';
+import { deepClone, mergeDefaults } from '../helpers/object-utils.mjs';
 import {
   isEliteActorType,
   isGmCharacterActorType,
@@ -69,7 +70,10 @@ import { formatDamageProfile, hasDamageProfileValue } from '../helpers/damage-pr
 import { toRoman } from '../helpers/roman.mjs';
 import { hasStepEffects, normalizeStepEffects } from '../helpers/step-effects.mjs';
 import { buildSkillCheckRollFlavor } from '../helpers/roll-card.mjs';
-import { scaleGearCatalogSystemDataForOwnerRank } from '../helpers/gear-catalog.mjs';
+import {
+  applyGearCatalogOwnerRankToItemData,
+  scaleGearCatalogSystemDataForOwnerRank
+} from '../helpers/gear-catalog.mjs';
 
 export const FoundryActorSheet = getFoundryActorSheetClass();
 
@@ -186,13 +190,30 @@ export async function promptForActorTypeSelection(actor, { title } = {}) {
   });
 }
 
+/**
+ * Build the system data to persist alongside an actor type change.
+ *
+ * Foundry v13 wipes `_source.system` whenever the document type changes, so the current
+ * source data has to be resent as part of the same update. Type defaults are merged in
+ * without overwriting anything the actor already stores.
+ */
+export function buildActorSystemForType(actor, actorType) {
+  const currentSystem = actor?.toObject ? actor.toObject()?.system : actor?.system;
+  const typeDefaults = globalThis.game?.model?.Actor?.[actorType];
+  return mergeDefaults(deepClone(currentSystem ?? {}) ?? {}, typeDefaults ?? {});
+}
+
 export async function updateActorDocumentType(actor, nextType) {
   const normalizedType = String(nextType ?? '').trim();
   if (!actor || !SUPPORTED_ACTOR_TYPES.includes(normalizedType) || actor.type === normalizedType) {
     return false;
   }
 
-  await actor.update({ type: normalizedType }, { recursive: false });
+  // Foundry v13 only allows a type change when `system` travels with it (fields.mjs guard).
+  await actor.update(
+    { type: normalizedType, system: buildActorSystemForType(actor, normalizedType) },
+    { recursive: false }
+  );
   return true;
 }
 
@@ -296,6 +317,11 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       setLibraryItemLinkOnData(itemData, sourceUuid);
     }
 
+    // Compendium entries store rank-1 source values plus explicit scaling rows.
+    // Resolve them before creation so the embedded Item and its first sheet render
+    // already contain the current owner's range, area, damage and description.
+    applyGearCatalogOwnerRankToItemData(itemData, this.actor.system?.currentRank);
+
     return this._onDropItemCreate(itemData, event);
   }
 
@@ -335,6 +361,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
         const abilityData = abilitySource.toObject();
         delete abilityData._id;
         applyArchetypeAbilityVersionToItemData(abilityData, this.actor.system?.currentRank);
+        applyGearCatalogOwnerRankToItemData(abilityData, this.actor.system?.currentRank);
         setLibraryItemLinkOnData(abilityData, abilityUuid);
         abilityData.flags = abilityData.flags ?? {};
         abilityData.flags[MODULE_ID] = {
@@ -1551,7 +1578,18 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
 
   _getItemCardTags(item, displayConfig = null, checkSummary = null) {
     const system = item?.system ?? {};
-    const rank = Math.max(0, Math.floor(Number(system.rank) || 0));
+    const ownerRank = Math.max(
+      0,
+      Math.floor(
+        Number(system?.details?.gearCatalog?.activeOwnerRank) ||
+          Number(this.actor.system?.currentRank) ||
+          0
+      )
+    );
+    const rank = Math.max(
+      0,
+      Math.floor(Number(system.rank) || (displayConfig?.key === 'abilities' ? ownerRank : 0))
+    );
     const normalizedRank = Math.min(rank, 5);
     const check = checkSummary ?? this._getItemCheckSummary(item, displayConfig);
     const tags = [];
@@ -1728,6 +1766,7 @@ export class ProjectAndromedaActorSheet extends FoundryActorSheet {
       builder(item, {
         t: game.i18n,
         getRankLabel,
+        ownerRank: this.actor.system?.currentRank,
         skillLabel: this._skillLabel.bind(this),
         formatSkillBonus: this._formatSkillBonus.bind(this),
         formatDamage: this._formatDamage.bind(this)

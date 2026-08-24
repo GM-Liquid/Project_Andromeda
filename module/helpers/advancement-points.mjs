@@ -4,13 +4,12 @@ import { ARCHETYPE_BASELINE_RANK, getSkillAdvancementCost } from './skill-check.
 
 export { getSkillAdvancementCost } from './skill-check.mjs';
 
-// Sum the progression-point cost of every purchasable trait / ability the actor owns
-// (черта = 2 × rank, способность = 3 × rank; see item-config). `items` accepts a
-// Foundry EmbeddedCollection or a plain array; non-purchasable entries cost 0.
-export function getItemsAdvancementSpent(items = []) {
+// Sum the progression-point cost of every purchasable trait / ability the actor owns.
+// Traits use their own rank; every purchased ability uses the actor's current rank.
+export function getItemsAdvancementSpent(items = [], { ownerRank } = {}) {
   let total = 0;
   for (const item of items) {
-    total += getItemAdvancementCost(item);
+    total += getItemAdvancementCost(item, { ownerRank });
   }
   return total;
 }
@@ -20,5 +19,5 @@ export function getTotalAdvancementSpent(system = {}, { archetypeSkillKey = '', 
     const baselineRank = skillKey && skillKey === archetypeSkillKey ? ARCHETYPE_BASELINE_RANK : 1;
     return sum + getSkillAdvancementCost(system?.skills?.[skillKey], { baselineRank });
   }, 0);
-  return skillsSpent + getItemsAdvancementSpent(items);
+  return skillsSpent + getItemsAdvancementSpent(items, { ownerRank: system?.currentRank });
 }
