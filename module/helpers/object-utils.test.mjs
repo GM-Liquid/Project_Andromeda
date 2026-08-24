@@ -4,6 +4,7 @@ import test from 'node:test';
 import {
   areJsonValuesEqual,
   deepClone,
+  mergeDefaults,
   sortObjectKeys,
   stableStringify
 } from './object-utils.mjs';
@@ -33,4 +34,22 @@ test('stable JSON comparison ignores object key order but preserves array order'
   assert.equal(areJsonValuesEqual({ b: 2, a: 1 }, { a: 1, b: 2 }), true);
   assert.equal(areJsonValuesEqual([1, 2], [2, 1]), false);
   assert.equal(stableStringify({ b: 2, a: 1 }, 2), '{\n  "a": 1,\n  "b": 2\n}');
+});
+
+test('mergeDefaults fills missing keys without overwriting stored values', () => {
+  const target = { a: 1, nested: { kept: 'yes' }, scalar: 0 };
+  const result = mergeDefaults(target, {
+    a: 99,
+    nested: { kept: 'no', added: 'default' },
+    scalar: { unexpected: true },
+    fresh: { deep: [1, 2] }
+  });
+
+  assert.equal(result, target);
+  assert.deepEqual(result, {
+    a: 1,
+    nested: { kept: 'yes', added: 'default' },
+    scalar: 0,
+    fresh: { deep: [1, 2] }
+  });
 });

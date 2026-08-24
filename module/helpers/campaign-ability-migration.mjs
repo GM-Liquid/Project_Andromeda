@@ -327,9 +327,8 @@ export async function migrateCampaignAbilitiesToCatalog() {
     if (createData.length) await actor.createEmbeddedDocuments('Item', createData, options);
     if (updates.length) await actor.updateEmbeddedDocuments('Item', updates, options);
     if (deleteIds.length) await actor.deleteEmbeddedDocuments('Item', deleteIds, options);
-    // The pack stores an archetype signature ability at its rank-1 version, so the
-    // refresh above would knock a higher-rank character back a version. Restore the
-    // version that matches the character right after the catalog data lands.
+    // Compatibility for old versioned signature records. Current signatures use one
+    // mechanics record plus explicit scaling and therefore make this pass a no-op.
     const rankUpdates = await syncArchetypeAbilityToRank(actor, { render: false });
     summary.archetypeAbilitiesResynced += rankUpdates;
     if (createData.length || updates.length || deleteIds.length || rankUpdates) {

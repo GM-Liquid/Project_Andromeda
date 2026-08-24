@@ -9,6 +9,7 @@ import {
   applyArchetypeAbilityVersionToItemData
 } from './archetype.mjs';
 import { getItemGroupConfigs } from './item-config.mjs';
+import { applyGearCatalogOwnerRankToItemData } from './gear-catalog.mjs';
 import { areJsonValuesEqual, deepClone, stableStringify } from './object-utils.mjs';
 
 const LIBRARY_SYNC_OPTION_KEY = 'projectAndromedaLibrarySync';
@@ -328,6 +329,10 @@ export function buildActorItemUpdateDataFromLibrary(libraryItem, actorItem) {
       actorItem?.parent?.system?.currentRank
     );
   }
+
+  // A library refresh must leave the embedded document in the same owner-rank
+  // state as a fresh compendium drop, not restore the pack's rank-1 source values.
+  applyGearCatalogOwnerRankToItemData(updateData, actorItem?.parent?.system?.currentRank);
 
   return updateData;
 }

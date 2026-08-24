@@ -38,3 +38,41 @@ export function stableStringify(value, space = 0) {
 export function areJsonValuesEqual(left, right) {
   return stableStringify(left) === stableStringify(right);
 }
+
+/**
+ * Fill in missing keys of a plain data object from a defaults object without overwriting
+ * values that already exist. Mirrors `foundry.utils.mergeObject(..., { overwrite: false })`
+ * and falls back to a pure-JS implementation outside the Foundry runtime.
+ */
+export function mergeDefaults(target, defaults) {
+  const result = target ?? {};
+  const source = defaults ?? {};
+
+  if (globalThis.foundry?.utils?.mergeObject) {
+    return globalThis.foundry.utils.mergeObject(result, deepClone(source), {
+      insertKeys: true,
+      overwrite: false,
+      inplace: true
+    });
+  }
+
+  for (const [key, value] of Object.entries(source)) {
+    const isPlainDefault = value && typeof value === 'object' && value.constructor === Object;
+    if (!(key in result)) {
+      result[key] = deepClone(value);
+      continue;
+    }
+
+    const current = result[key];
+    if (
+      isPlainDefault &&
+      current &&
+      typeof current === 'object' &&
+      current.constructor === Object
+    ) {
+      mergeDefaults(current, value);
+    }
+  }
+
+  return result;
+}

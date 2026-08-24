@@ -209,11 +209,9 @@ export async function syncArchetypeAbilityToRank(actor, { render = false } = {})
 }
 
 /**
- * Reconcile the signature ability of every listed actor with its current rank.
- * Catalog refreshes and one-time migrations rewrite actor items straight from the
- * gear pack, where the archetype ability is stored at its rank-1 version, so the
- * grant can silently fall back a rank. Running this after those tasks restores the
- * matching version; it writes nothing when the data already agrees.
+ * Compatibility pass for legacy versioned signature abilities. Current signatures
+ * have one mechanics record plus explicit scaling rows and are resolved at display
+ * time, so they intentionally produce no document update here.
  */
 export async function syncArchetypeAbilitiesForActors(actors = [], { render = false } = {}) {
   const summary = { actorsUpdated: 0, abilitiesUpdated: 0 };

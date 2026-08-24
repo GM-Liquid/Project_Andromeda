@@ -216,3 +216,55 @@ test('library refresh reapplies the actor-rank version of an archetype ability',
   assert.equal(update.system.range, '300 m');
   assert.equal(update.system.skillBonus, '4/6/9/14');
 });
+
+test('library refresh materializes current catalog scaling for the owning actor', () => {
+  const source = {
+    uuid: 'Compendium.project-andromeda.gear-library.Item.gravity-wave',
+    name: 'Гравитационная волна',
+    type: 'trait-source-ability',
+    img: 'icons/gravity-wave.webp',
+    system: {
+      description: 'Область 15 м. Урон: 2/4/6/9.',
+      rank: '',
+      area: 'circle 15 m',
+      skillBonus: '2/4/6/9',
+      details: {
+        gearCatalog: {
+          id: 'gravity-wave',
+          catalog: 'abilities',
+          description: 'Область 15 м. Урон: 2/4/6/9.',
+          mechanics: {
+            effects: [
+              {
+                conditions: { area: { type: 'circle', value: 15, scale: 'area' } },
+                outcomes: [{ key: 'damage', value: '2/4/6/9', scale: 'damage' }]
+              }
+            ]
+          },
+          scaling: {
+            area: { parameter: 'Радиус области, м', values: [15, 30, 75, 150] },
+            damage: {
+              parameter: 'Урон',
+              values: ['2/4/6/9', '3/6/8/12', '4/7/10/15', '5/8/12/18']
+            }
+          }
+        }
+      }
+    }
+  };
+  const actorItem = {
+    name: source.name,
+    type: source.type,
+    system: structuredClone(source.system),
+    parent: { system: { currentRank: 4 } },
+    getFlag: () => ''
+  };
+
+  const update = buildActorItemUpdateDataFromLibrary(source, actorItem);
+
+  assert.equal(update.system.rank, '');
+  assert.equal(update.system.area, 'circle 150 m');
+  assert.equal(update.system.skillBonus, '5/8/12/18');
+  assert.equal(update.system.details.gearCatalog.activeOwnerRank, 4);
+  assert.match(update.system.description, /150 м/u);
+});

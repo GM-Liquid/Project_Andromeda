@@ -37,14 +37,15 @@ test('archetype skill is measured from its free rank-2 baseline', () => {
   assert.equal(getTotalAdvancementSpent(system, { archetypeSkillKey: 'strelba' }), 0);
 });
 
-test('owned traits and abilities spend progression points based on rank', () => {
+test('traits use their own rank while abilities use the current owner rank', () => {
   const items = [
     { type: 'trait', system: { rank: 2 } },
-    { type: 'trait-source-ability', system: { rank: 3 } }
+    { type: 'trait-source-ability', system: { rank: '' } }
   ];
 
-  assert.equal(getItemsAdvancementSpent(items), 13);
-  assert.equal(getTotalAdvancementSpent({}, { items }), 13);
+  assert.equal(getItemsAdvancementSpent(items, { ownerRank: 3 }), 13);
+  assert.equal(getTotalAdvancementSpent({ currentRank: 3 }, { items }), 13);
+  assert.equal(getTotalAdvancementSpent({ currentRank: 4 }, { items }), 16);
 });
 
 test('free and non-purchasable items do not spend progression points', () => {
@@ -55,12 +56,12 @@ test('free and non-purchasable items do not spend progression points', () => {
     },
     {
       type: 'trait-source-ability',
-      system: { rank: 4 },
+      system: { rank: '' },
       flags: { 'project-andromeda': { grantedByArchetype: true } }
     },
     { type: 'trait-genome', system: { rank: 4 } },
     { type: 'weapon', system: { rank: 4 } }
   ];
 
-  assert.equal(getItemsAdvancementSpent(items), 0);
+  assert.equal(getItemsAdvancementSpent(items, { ownerRank: 4 }), 0);
 });

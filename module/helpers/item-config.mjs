@@ -134,8 +134,8 @@ function isStandardTraitItem(source) {
   return !isPersonalityValueItem(source);
 }
 
-// Черты и способности покупаются из того же пула очков развития, что и навыки
-// (книга правил, глава 4): черта ранга X стоит `2 × X`, способность ранга X — `3 × X`.
+// Черты и способности покупаются из того же пула очков развития, что и навыки:
+// черта ранга X стоит `2 × X`, а способность всегда стоит `3 × текущий ранг владельца`.
 export const TRAIT_ADVANCEMENT_MULTIPLIER = 2;
 export const ABILITY_ADVANCEMENT_MULTIPLIER = 3;
 
@@ -146,21 +146,24 @@ function isArchetypeGrantedItem(source) {
   return Boolean(source?.flags?.[MODULE_ID]?.[ARCHETYPE_GRANT_FLAG]);
 }
 
-// Cost in progression points for a single owned trait / ability item. Returns 0 for
-// anything that is not a purchasable entry: personality complications, the free
-// archetype signature ability, unranked entries, genomes and legacy migration types.
-export function getItemAdvancementCost(source) {
+// Cost in progression points for a single owned trait / ability item. Abilities have
+// no own rank, so their cost follows the current owner rank supplied by actor derived
+// data. The parent fallback keeps direct calls on embedded Foundry Items convenient.
+export function getItemAdvancementCost(source, { ownerRank } = {}) {
   const type = String(source?.type ?? '').trim();
-  const rank = Math.max(0, Math.floor(Number(source?.system?.rank) || 0));
-  if (!rank) return 0;
 
   if (type === 'trait') {
     if (isPersonalityValueItem(source)) return 0;
+    const rank = Math.max(0, Math.floor(Number(source?.system?.rank) || 0));
     return TRAIT_ADVANCEMENT_MULTIPLIER * rank;
   }
 
   if (type === 'trait-source-ability') {
     if (isArchetypeGrantedItem(source)) return 0;
+    const rank = Math.max(
+      0,
+      Math.floor(Number(ownerRank ?? source?.parent?.system?.currentRank) || 0)
+    );
     return ABILITY_ADVANCEMENT_MULTIPLIER * rank;
   }
 
@@ -291,7 +294,7 @@ const TRAIT_EFFECT_FIELDS = [
   buildDamageField()
 ];
 const TRAIT_ITEM_FIELDS = [buildRankField(), ...TRAIT_EFFECT_FIELDS];
-const ABILITY_ITEM_FIELDS = [buildRankField(), buildAbilityHeatCostField(), ...TRAIT_EFFECT_FIELDS];
+const ABILITY_ITEM_FIELDS = [buildAbilityHeatCostField(), ...TRAIT_EFFECT_FIELDS];
 const ARTIFACT_ITEM_FIELDS = [
   buildRankField(),
   buildAbilityHeatCostField(),
@@ -821,12 +824,17 @@ function buildTraitBadges(item, helpers) {
   const t = helpers.t;
   const badges = [];
 
-  const rank = Number(system.rank) || 0;
+  const usesOwnerRank = item.type === 'trait-source-ability';
+  const rank =
+    Number(system.rank) ||
+    (usesOwnerRank
+      ? Number(system?.details?.gearCatalog?.activeOwnerRank ?? helpers.ownerRank) || 0
+      : 0);
   if (rank && typeof helpers.getRankLabel === 'function') {
     badges.push(`${t.localize('MY_RPG.ItemFields.Rank')}: ${helpers.getRankLabel(rank)}`);
   }
 
-  const advancementCost = getItemAdvancementCost(item);
+  const advancementCost = getItemAdvancementCost(item, { ownerRank: helpers.ownerRank });
   if (advancementCost > 0) {
     badges.push(`${t.localize('MY_RPG.ItemFields.AdvancementCost')}: ${advancementCost}`);
   }

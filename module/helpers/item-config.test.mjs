@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { getAbilityHeatCost, getItemTypeConfig, normalizeHeatCost } from './item-config.mjs';
+import {
+  getAbilityHeatCost,
+  getItemAdvancementCost,
+  getItemTypeConfig,
+  normalizeHeatCost
+} from './item-config.mjs';
 
 test('Heat cost stays at its recorded value for every character rank', () => {
   const ability = { system: { heatCost: 2, rank: 2 } };
@@ -22,9 +27,12 @@ test('legacy modes remain readable until the one-time migration runs', () => {
   assert.equal(getAbilityHeatCost({ system: { mode: 'standard' } }), 0);
 });
 
-test('ability editor exposes rank and arbitrary nonnegative Heat cost', () => {
+test('ability editor has no own rank and exposes arbitrary nonnegative Heat cost', () => {
   const ability = getItemTypeConfig('trait-source-ability');
-  assert.ok(ability.fields.some((field) => field.path === 'rank' && field.type === 'rank'));
+  assert.equal(
+    ability.fields.some((field) => field.path === 'rank'),
+    false
+  );
   assert.ok(
     ability.fields.some(
       (field) => field.path === 'heatCost' && field.type === 'number' && field.min === 0
@@ -34,6 +42,18 @@ test('ability editor exposes rank and arbitrary nonnegative Heat cost', () => {
     ability.fields.some((field) => field.path === 'mode'),
     false
   );
+});
+
+test('purchased ability cost follows owner rank and signature abilities stay free', () => {
+  const purchased = { type: 'trait-source-ability', system: { rank: '' } };
+  const signature = {
+    ...purchased,
+    flags: { 'project-andromeda': { grantedByArchetype: 'archetype-id' } }
+  };
+
+  assert.equal(getItemAdvancementCost(purchased, { ownerRank: 1 }), 3);
+  assert.equal(getItemAdvancementCost(purchased, { ownerRank: 4 }), 12);
+  assert.equal(getItemAdvancementCost(signature, { ownerRank: 4 }), 0);
 });
 
 test('trait editor exposes its persisted rank as a select', () => {

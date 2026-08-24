@@ -1,22 +1,11 @@
 const RANKS = Object.freeze([1, 2, 3, 4]);
 
-const METRE_SCALES = Object.freeze({
-  sixth: Object.freeze([2, 5, 15, 50]),
-  quarter: Object.freeze([3, 8, 25, 75]),
-  third: Object.freeze([3, 10, 35, 100]),
-  half: Object.freeze([5, 15, 50, 150]),
-  full: Object.freeze([10, 30, 100, 300])
-});
-
 const DAMAGE_LINES = Object.freeze({
   weak: Object.freeze(['0/1/1/2', '1/1/2/3', '1/2/3/5', '2/3/4/6']),
   medium: Object.freeze(['1/1/2/3', '2/3/4/6', '2/4/6/9', '3/6/8/12']),
   standard: Object.freeze(['1/2/3/5', '2/4/6/9', '4/6/9/14', '5/8/12/18']),
   heavy: Object.freeze(['2/3/4/6', '3/6/8/12', '5/8/12/18', '6/11/16/24'])
 });
-
-const MOVE_OUTCOME_KEYS = new Set(['moveSelf', 'moveTarget', 'teleport']);
-const LINEAR_OUTCOME_KEYS = new Set(['damageBonus', 'damageReduction', 'restoreStress']);
 
 function clone(value) {
   return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
@@ -26,23 +15,6 @@ export function normalizeAbilityScalingRank(rank) {
   return Math.max(1, Math.min(4, Math.trunc(Number(rank) || 1)));
 }
 
-function getExplicitScalingValue(holder, targetRank) {
-  const scaling = holder?.scaling;
-  if (!scaling || typeof scaling !== 'object') return undefined;
-  return scaling[String(targetRank)] ?? scaling.byRank?.[String(targetRank)];
-}
-
-function findMetreScale(value, sourceRank, names) {
-  const sourceIndex = sourceRank - 1;
-  return names.find((name) => METRE_SCALES[name][sourceIndex] === Number(value)) ?? null;
-}
-
-function scaleMetres(value, sourceRank, targetRank, names) {
-  const scaleName = findMetreScale(value, sourceRank, names);
-  if (!scaleName) return Number(value);
-  return METRE_SCALES[scaleName][targetRank - 1];
-}
-
 function parseDamageProfile(value) {
   const parts = String(value ?? '')
     .split('/')
@@ -50,6 +22,9 @@ function parseDamageProfile(value) {
   return parts.length === 4 && parts.every(Number.isFinite) ? parts : null;
 }
 
+// Kept as a small public utility for callers that need an inferred damage line.
+// Catalog abilities themselves never use inference: their explicit `scaling` rows
+// below are authoritative, including deliberately irregular damage profiles.
 export function scaleAbilityDamageProfile(value, sourceRank, targetRank) {
   const normalizedSourceRank = normalizeAbilityScalingRank(sourceRank);
   const normalizedTargetRank = normalizeAbilityScalingRank(targetRank);
@@ -64,162 +39,172 @@ export function scaleAbilityDamageProfile(value, sourceRank, targetRank) {
     .join('/');
 }
 
-function scaleLinearNumber(value, sourceRank, targetRank) {
-  const coefficient = Number(value) / sourceRank;
-  return Number.isInteger(coefficient) && coefficient >= 1 && coefficient <= 3
-    ? coefficient * targetRank
-    : Number(value);
+function getScaledHolderField(holder) {
+  if (Object.hasOwn(holder, 'distance')) return 'distance';
+  if (Object.hasOwn(holder, 'amount')) return 'amount';
+  if (Object.hasOwn(holder, 'value')) return 'value';
+  return '';
 }
 
-function scaleConditionHolder(holder, sourceRank, targetRank, names) {
-  if (!holder || holder.value === undefined) return;
-  const explicit = getExplicitScalingValue(holder, targetRank);
-  holder.value = explicit ?? scaleMetres(holder.value, sourceRank, targetRank, names);
-}
+function applyExplicitScaling(value, scaling, rankIndex, replacements) {
+  if (!value || typeof value !== 'object') return;
 
-function scaleOutcome(outcome, sourceRank, targetRank) {
-  const explicit = getExplicitScalingValue(outcome, targetRank);
-  if (outcome.key === 'damage') {
-    outcome.value = explicit ?? scaleAbilityDamageProfile(outcome.value, sourceRank, targetRank);
-    return;
+  if (!Array.isArray(value)) {
+    const scaleKey = String(value.scale ?? '').trim();
+    const row = scaleKey ? scaling?.[scaleKey] : null;
+    const values = Array.isArray(row?.values) ? row.values : [];
+    const field = getScaledHolderField(value);
+    if (field && values.length === RANKS.length && values[rankIndex] !== undefined) {
+      const source = clone(value[field]);
+      const target = clone(values[rankIndex]);
+      value[field] = target;
+      replacements.push({
+        parameter: String(row.parameter ?? '').trim(),
+        source,
+        target
+      });
+    }
   }
 
-  if (MOVE_OUTCOME_KEYS.has(outcome.key) && outcome.distance !== undefined) {
-    outcome.distance =
-      explicit ??
-      scaleMetres(outcome.distance, sourceRank, targetRank, [
-        'third',
-        'quarter',
-        'sixth',
-        'half',
-        'full'
-      ]);
-    return;
+  for (const child of Array.isArray(value) ? value : Object.values(value)) {
+    applyExplicitScaling(child, scaling, rankIndex, replacements);
   }
-
-  if (!LINEAR_OUTCOME_KEYS.has(outcome.key)) return;
-  if (typeof outcome.amount === 'number') {
-    outcome.amount = explicit ?? scaleLinearNumber(outcome.amount, sourceRank, targetRank);
-  } else if (typeof outcome.value === 'number') {
-    outcome.value = explicit ?? scaleLinearNumber(outcome.value, sourceRank, targetRank);
-  } else if (typeof outcome.value === 'string' && outcome.value.includes('/')) {
-    outcome.value = explicit ?? scaleAbilityDamageProfile(outcome.value, sourceRank, targetRank);
-  }
-}
-
-function scaleDescriptionMetres(text, sourceRank, targetRank) {
-  return text.replace(/(\d+)\s*м/gu, (match, rawValue, offset) => {
-    const value = Number(rawValue);
-    const context = text.slice(Math.max(0, offset - 35), offset).toLowerCase();
-    const areaContext = /(радиус|ширин)/u.test(context);
-    const names = areaContext
-      ? ['sixth', 'quarter', 'half', 'third', 'full']
-      : ['third', 'quarter', 'sixth', 'half', 'full'];
-    const scaled = scaleMetres(value, sourceRank, targetRank, names);
-    return `${scaled} м`;
-  });
 }
 
 function escapeRegExp(value) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-function scaleDescriptionDamageProfiles(text, entry, sourceRank, targetRank) {
-  let result = text;
-  const sourceProfiles = new Set(
-    (entry.mechanics?.effects ?? [])
-      .flatMap((effect) => effect.outcomes ?? [])
-      .filter((outcome) => outcome.key === 'damage')
-      .map((outcome) => String(outcome.value ?? outcome.amount ?? ''))
-      .filter((value) => parseDamageProfile(value))
-  );
-
-  for (const sourceProfile of sourceProfiles) {
-    const targetProfile = scaleAbilityDamageProfile(sourceProfile, sourceRank, targetRank);
-    const pattern = sourceProfile
-      .split('/')
-      .map((part) => escapeRegExp(part))
-      .join('\\s*\\/\\s*');
-    result = result.replace(new RegExp(pattern, 'gu'), targetProfile);
-  }
-
-  return result;
+function replaceOutcomeLine(text, source, target) {
+  if (typeof source !== 'string' || !source.includes('/')) return text;
+  const pattern = source
+    .split('/')
+    .map((part) => escapeRegExp(part))
+    .join('\\s*\\/\\s*');
+  return text.replace(new RegExp(pattern, 'gu'), String(target));
 }
 
-function scaleDescriptionLinearValues(text, sourceRank, targetRank) {
-  let result = text.replace(/\b(\d+)(?=\s+(?:временн\p{L}*\s+)?ячейк)/gu, (value) =>
-    String(scaleLinearNumber(value, sourceRank, targetRank))
+function replaceMetres(text, source, target) {
+  const pattern = new RegExp(
+    `(?<!\\d)${escapeRegExp(source)}(?!\\d)(?=\\s*м(?!\\p{L}))`,
+    'gu'
   );
-  result = result.replace(/\b(\d+)(?=\s+урона(?:\s|[.,:;!?]|$))/gu, (value) =>
-    String(scaleLinearNumber(value, sourceRank, targetRank))
+  return text.replace(pattern, String(target));
+}
+
+function replaceStressValue(text, source, target) {
+  const escaped = escapeRegExp(source);
+  let result = text.replace(
+    new RegExp(
+      `(?<!\\d)${escaped}(?!\\d)(?=\\s+(?:(?:временн\\p{L}*\\s+)?ячейк|стресс))`,
+      'giu'
+    ),
+    String(target)
   );
   result = result.replace(
-    /((?:уменьш|сниж)\p{L}*[^.!?]{0,120}?на\s+)(\d+)(?!\d)/giu,
-    (_match, prefix, value) => `${prefix}${scaleLinearNumber(value, sourceRank, targetRank)}`
+    new RegExp(
+      `((?:максимум\\p{L}*\\s+)?стресс\\p{L}*[^.!?]{0,60}?(?:(?:на|равен\\p{L}*|:)\\s*)?)${escaped}(?!\\d)`,
+      'giu'
+    ),
+    (_match, prefix) => `${prefix}${target}`
   );
   return result;
 }
 
-function scaleDescriptionBareStressSteps(text, entry, sourceRank, targetRank) {
-  let result = text;
-  for (const effect of entry.mechanics?.effects ?? []) {
-    for (const outcome of effect.outcomes ?? []) {
-      if (outcome.key !== 'restoreStress' || typeof outcome.amount !== 'number') continue;
-      const source = outcome.amount;
-      const target = scaleLinearNumber(source, sourceRank, targetRank);
-      result = result.replace(
-        new RegExp(
-          `((?:при|на)[^.!?]{0,50}?успех\\p{L}*[^.!?]{0,20}?[—-]\\s*)${source}(?!\\d)`,
-          'giu'
-        ),
-        (_match, prefix) => `${prefix}${target}`
-      );
+function replaceDamageValue(text, source, target) {
+  const escaped = escapeRegExp(source);
+  let result = text.replace(
+    new RegExp(
+      `(?<!\\d)${escaped}(?!\\d)(?=\\s+урон(?:а|у|ом)?(?!\\p{L}))`,
+      'giu'
+    ),
+    String(target)
+  );
+  result = result.replace(
+    new RegExp(`(урон(?:а|у|ом)?[^.!?]{0,70}?на\\s+)${escaped}(?!\\d)`, 'giu'),
+    (_match, prefix) => `${prefix}${target}`
+  );
+  result = result.replace(
+    new RegExp(
+      `((?:уменьш|сниж|увелич)\\p{L}*[^.!?]{0,90}?на\\s+)${escaped}(?!\\d)`,
+      'giu'
+    ),
+    (_match, prefix) => `${prefix}${target}`
+  );
+  return result;
+}
+
+function scaleDescriptionFromRows(description, replacements) {
+  let result = String(description ?? '');
+  const unique = new Map();
+  for (const replacement of replacements) {
+    const key = JSON.stringify([
+      replacement.parameter,
+      replacement.source,
+      replacement.target
+    ]);
+    unique.set(key, replacement);
+  }
+
+  const ordered = [...unique.values()].sort((left, right) => {
+    const leftIsLine = typeof left.source === 'string' && left.source.includes('/');
+    const rightIsLine = typeof right.source === 'string' && right.source.includes('/');
+    return Number(rightIsLine) - Number(leftIsLine);
+  });
+
+  for (const { parameter, source, target } of ordered) {
+    if (source === target || source == null || target == null) continue;
+    if (typeof source === 'string' && source.includes('/')) {
+      result = replaceOutcomeLine(result, source, target);
+      continue;
+    }
+    if (/[,]\s*м(?:\s*\/|$)/u.test(parameter)) {
+      result = replaceMetres(result, source, target);
+      continue;
+    }
+    if (/стресс|ячейк/iu.test(parameter)) {
+      result = replaceStressValue(result, source, target);
+      continue;
+    }
+    if (/урон/iu.test(parameter)) {
+      result = replaceDamageValue(result, source, target);
     }
   }
   return result;
 }
 
 export function scaleAbilityDescription(description, entry, targetRank) {
-  const sourceRank = normalizeAbilityScalingRank(entry?.rank);
   const normalizedTargetRank = normalizeAbilityScalingRank(targetRank);
   const explicit = entry?.descriptionByRank?.[String(normalizedTargetRank)];
   if (typeof explicit === 'string' && explicit.trim()) return explicit;
 
-  let result = String(description ?? '');
-  result = scaleDescriptionDamageProfiles(result, entry, sourceRank, normalizedTargetRank);
-  result = scaleDescriptionMetres(result, sourceRank, normalizedTargetRank);
-  result = scaleDescriptionLinearValues(result, sourceRank, normalizedTargetRank);
-  return scaleDescriptionBareStressSteps(result, entry, sourceRank, normalizedTargetRank);
+  const mechanics = clone(entry?.mechanics ?? {});
+  const replacements = [];
+  applyExplicitScaling(
+    mechanics,
+    entry?.scaling ?? {},
+    normalizedTargetRank - 1,
+    replacements
+  );
+  return scaleDescriptionFromRows(description, replacements);
 }
 
 export function scaleAbilityCatalogEntry(entry, targetRank) {
   const scaled = clone(entry) ?? {};
-  const sourceRank = normalizeAbilityScalingRank(entry?.rank);
   const normalizedTargetRank = normalizeAbilityScalingRank(targetRank);
+  const replacements = [];
+  applyExplicitScaling(
+    scaled.mechanics,
+    scaled.scaling ?? {},
+    normalizedTargetRank - 1,
+    replacements
+  );
 
-  for (const effect of scaled.mechanics?.effects ?? []) {
-    const conditions = effect.conditions ?? {};
-    if (conditions.range?.type === 'meters') {
-      scaleConditionHolder(conditions.range, sourceRank, normalizedTargetRank, [
-        'third',
-        'half',
-        'full'
-      ]);
-    }
-    if (conditions.area?.value !== undefined) {
-      scaleConditionHolder(
-        conditions.area,
-        sourceRank,
-        normalizedTargetRank,
-        conditions.area.type === 'cone' ? ['third', 'half', 'full'] : ['sixth', 'quarter', 'half']
-      );
-    }
-    for (const outcome of effect.outcomes ?? []) {
-      scaleOutcome(outcome, sourceRank, normalizedTargetRank);
-    }
-  }
-
-  scaled.description = scaleAbilityDescription(entry?.description, entry, normalizedTargetRank);
+  const explicitDescription = entry?.descriptionByRank?.[String(normalizedTargetRank)];
+  scaled.description =
+    typeof explicitDescription === 'string' && explicitDescription.trim()
+      ? explicitDescription
+      : scaleDescriptionFromRows(entry?.description, replacements);
   scaled.ownerRank = normalizedTargetRank;
   return scaled;
 }
